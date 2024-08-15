@@ -1,0 +1,147 @@
+version: '3.3'
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.5.0
+    container_name: elasticsearch
+    restart: always
+    ports:
+      - 9200:9200
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+  skywalking-oap:
+    image: apache/skywalking-oap-server:6.6.0-es7
+    container_name: skywalking-oap
+    depends_on:
+      - elasticsearch
+    links:
+      - elasticsearch
+    restart: always
+    ports:
+      - 11800:11800
+      - 12800:12800
+    environment:
+      - SW_STORAGE=elasticsearch
+      - SW_STORAGE_ES_CLUSTER_NODES=elasticsearch:9200
+  skywalking-ui:
+    image: apache/skywalking-ui:6.6.0
+    container_name: skywalking-ui
+    depends_on:
+      - skywalking-oap
+    links:
+      - skywalking-oap
+    restart: always
+    ports:
+      - 8480:8080
+    environment:
+      - SW_OAP_ADDRESS=skywalking-oap:12800
+  renren-monitor:
+    image: renren_io:2.0
+    container_name: renren-monitor
+    env_file:
+      - common.env
+    volumes:
+      - /data/renren-cloud/renren-monitor.jar:/app/app.jar
+  renren-gateway:
+    image: renren_io:2.0
+    container_name: renren-gateway
+    ports:
+      - "8080:8080"
+    links:
+      - skywalking-oap
+    environment:
+      - SW_AGENT_NAME=renren-gateway
+      - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
+    env_file:
+      - common.env
+    volumes:
+      - /data/renren-cloud/renren-gateway.jar:/app/app.jar
+  renren-admin:
+    image: renren_io:2.0
+    container_name: renren-admin-server
+    links:
+      - skywalking-oap
+    environment:
+      - SW_AGENT_NAME=renren-admin
+      - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
+    env_file:
+      - common.env
+    volumes:
+      - /data/renren-cloud/renren-admin-server.jar:/app/app.jar
+  renren-oss:
+    image: renren_io:2.0
+    container_name: renren-oss-server
+    links:
+      - skywalking-oap
+    environment:
+      - SW_AGENT_NAME=renren-oss-server
+      - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
+    env_file:
+      - common.env
+    volumes:
+      - /data/renren-cloud/renren-oss-server.jar:/app/app.jar
+  renren-job:
+    image: renren_io:2.0
+    container_name: renren-job-server
+    links:
+      - skywalking-oap
+    environment:
+      - SW_AGENT_NAME=renren-job-server
+      - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
+    env_file:
+      - common.env
+    volumes:
+      - /data/renren-cloud/renren-job-server.jar:/app/app.jar
+  renren-message:
+    image: renren_io:2.0
+    container_name: renren-message-server
+    links:
+      - skywalking-oap
+    environment:
+      - SW_AGENT_NAME=renren-message-server
+      - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
+    env_file:
+      - common.env
+    volumes:
+      - /data/renren-cloud/renren-message-server.jar:/app/app.jar
+  renren-activiti:
+    image: renren_io:2.0
+    container_name: renren-flow-server
+    links:
+      - skywalking-oap
+    environment:
+      - SW_AGENT_NAME=renren-flow-server
+      - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
+    env_file:
+      - common.env
+    volumes:
+      - /data/renren-cloud/renren-flow-server.jar:/app/app.jar
+  renren-jmreport:
+    image: renren_io:2.0
+    container_name: renren-jmreport
+    links:
+      - skywalking-oap
+    environment:
+      - SW_AGENT_NAME=renren-jmreport
+      - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
+    env_file:
+      - common.env
+    volumes:
+      - /data/renren-cloud/renren-jmreport.jar:/app/app.jar
+  renren-api:
+    image: renren_io:2.0
+    container_name: renren-api-server
+    links:
+      - skywalking-oap
+    environment:
+      - SW_AGENT_NAME=renren-api-server
+      - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
+    env_file:
+      - common.env
+    volumes:
+      - /data/renren-cloud/renren-api-server.jar:/app/app.jar

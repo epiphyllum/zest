@@ -1,0 +1,44 @@
+server:
+  port: 8086
+  servlet:
+    context-path: /flow
+
+spring:
+  application:
+    name: renren-flow-server
+  #环境 dev|test|prod
+  profiles:
+    active: dev
+  messages:
+    encoding: UTF-8
+    basename: i18n/messages,i18n/messages_common
+  main:
+    allow-bean-definition-overriding: true
+  cloud:
+    nacos:
+      discovery:
+        metadata:
+          management:
+            context-path: ${server.servlet.context-path}/actuator
+        server-addr: ${nacos_host:nacos-host}:${nacos_port:8848}
+        #nacos的命名空间ID，默认是public
+        namespace: ${nacos_namespace:}
+      config:
+        server-addr: ${spring.cloud.nacos.discovery.server-addr}
+        namespace: ${spring.cloud.nacos.discovery.namespace}
+        group: RENREN_CLOUD_GROUP
+        file-extension: yaml
+        #指定共享配置，且支持动态刷新
+        extension-configs:
+          - data-id: datasource.yaml
+            group: ${spring.cloud.nacos.config.group}
+            refresh: true
+          - data-id: common.yaml
+            group: ${spring.cloud.nacos.config.group}
+            refresh: true
+
+flowable:
+  database-schema-update: true
+  db-history-used: true
+  check-process-definitions: false
+  history-level: full

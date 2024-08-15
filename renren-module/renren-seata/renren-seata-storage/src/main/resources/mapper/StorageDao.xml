@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.dao.StorageDao">
+
+    <!-- 减库存，需要保证不会超卖 -->
+    <update id="updateDeduct">
+        update seata_storage set total = total - #{count}
+            where commodity_code = #{commodityCode} and (total - #{count}) >= 0
+    </update>
+</mapper>

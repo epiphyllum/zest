@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.dao.SysUserDao">
+
+    <select id="getList" resultType="io.renren.entity.SysUserEntity">
+        select t1.*, (select t2.name from sys_dept t2 where t2.id=t1.dept_id) deptName
+            from sys_user t1 left join sys_user_post t3 on t1.id = t3.user_id
+        where t1.del_flag = 0 and t1.super_admin = 0
+        <if test="username != null and username.trim() != ''">
+            and t1.username like #{username}
+        </if>
+        <if test="deptId != null and deptId.trim() != ''">
+            and t1.dept_id = #{deptId}
+        </if>
+        <if test="gender != null and gender.trim() != ''">
+            and t1.gender = #{gender}
+        </if>
+        <if test="deptIdList != null">
+            and t1.dept_id in
+            <foreach item="id" collection="deptIdList" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="getById" resultType="io.renren.entity.SysUserEntity">
+        select t1.*, (select t2.name from sys_dept t2 where t2.id=t1.dept_id) deptName from sys_user t1
+          where t1.id = #{value} and t1.del_flag = 0
+    </select>
+
+    <select id="getByUsername" resultType="io.renren.entity.SysUserEntity">
+        select * from sys_user where username = #{value} and del_flag = 0
+    </select>
+
+    <update id="updatePassword">
+        update sys_user set password = #{newPassword} where id = #{id}
+    </update>
+
+    <select id="getCountByDeptId" resultType="int">
+        select count(*) from sys_user where dept_id = #{value} and del_flag = 0
+    </select>
+
+    <select id="getUserIdListByDeptId" resultType="Long">
+        select id from sys_user where dept_id in
+        <foreach item="deptId" collection="list" open="(" separator="," close=")">
+            #{deptId}
+        </foreach>
+    </select>
+
+    <select id="getRealNameList" resultType="String">
+        select real_name from sys_user where del_flag = 0 and id in
+        <foreach item="id" collection="ids"  open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="getUserIdListByRoleIdList" resultType="long">
+        select t1.id from sys_user t1, sys_role_user t2 where t1.id=t2.user_id and t1.del_flag = 0 and t1.status=1 and t2.role_id in
+        <foreach item="id" collection="ids"  open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="getRoleNameList" resultType="String">
+        select name from sys_role where del_flag = 0 and id in
+        <foreach item="id" collection="ids"  open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="getUserIdListByPostIdList" resultType="long">
+        select t1.id from sys_user t1, sys_user_post t2 where t1.id=t2.user_id and t1.status=1 and t2.post_id in
+        <foreach item="id" collection="ids"  open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="getLeaderIdListByDeptIdList" resultType="long">
+        select leader_id from sys_dept where id in
+        <foreach item="id" collection="ids"  open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="getLeaderIdListByUserId" resultType="long">
+        select t2.leader_id from sys_user t1, sys_dept t2 where t1.dept_id=t2.id and t1.id=#{value}
+    </select>
+
+</mapper>

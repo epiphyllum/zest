@@ -1,0 +1,30 @@
+server:
+  port: 8096
+
+spring:
+  application:
+    name: renren-rocketmq-server
+  profiles:
+    active: dev
+  messages:
+    encoding: UTF-8
+    basename: i18n/messages,i18n/messages_common
+  main:
+    allow-bean-definition-overriding: true
+  cloud:
+    nacos:
+      discovery:
+        metadata:
+          management:
+            context-path: ${server.servlet.context-path}/actuator
+        server-addr: ${nacos_host:nacos-host}:${nacos_port:8848}
+        namespace: ${nacos_namespace:}
+      config:
+        server-addr: ${spring.cloud.nacos.discovery.server-addr}
+        namespace: ${spring.cloud.nacos.discovery.namespace}
+        group: RENREN_CLOUD_GROUP
+        file-extension: yaml
+        extension-configs:
+          - data-id: rocketmq.yaml
+            group: ${spring.cloud.nacos.config.group}
+            refresh: true

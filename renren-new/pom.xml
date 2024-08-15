@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>io.renren</groupId>
+		<artifactId>renren-cloud</artifactId>
+		<version>4.3.0</version>
+	</parent>
+
+	<artifactId>renren-new</artifactId>
+	<packaging>pom</packaging>
+	<description>人人微服务平台，新模块开发</description>
+
+	<modules>
+		<module>renren-new-client</module>
+		<module>renren-new-server</module>
+	</modules>
+
+</project>

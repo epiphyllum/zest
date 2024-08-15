@@ -1,0 +1,67 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: renren-gateway-server
+  #环境 dev|test|prod
+  profiles:
+    active: dev
+  messages:
+    encoding: UTF-8
+    basename: i18n/messages_common
+  main:
+    allow-bean-definition-overriding: true
+  cloud:
+    gateway:
+      metrics:
+        enabled: true
+      discovery:
+        locator:
+          enabled: true
+    nacos:
+      discovery:
+        metadata:
+          management:
+            context-path: /actuator
+        server-addr: ${nacos_host:nacos-host}:${nacos_port:8848}
+        #nacos的命名空间ID，默认是public
+        namespace: ${nacos_namespace:}
+      config:
+        server-addr: ${spring.cloud.nacos.discovery.server-addr}
+        namespace: ${spring.cloud.nacos.discovery.namespace}
+        group: RENREN_CLOUD_GROUP
+        file-extension: yaml
+        #指定共享配置，且支持动态刷新
+        extension-configs:
+          - data-id: datasource.yaml
+            group: ${spring.cloud.nacos.config.group}
+            refresh: true
+          - data-id: common.yaml
+            group: ${spring.cloud.nacos.config.group}
+            refresh: true
+
+
+knife4j:
+  gateway:
+    enabled: true
+    strategy: manual
+    routes:
+      - name: Admin服务
+        url: /sys/v3/api-docs/default
+        context-path: /sys
+      - name: OSS服务
+        url: /oss/v3/api-docs/default
+        context-path: /oss
+      - name: 消息服务
+        url: /message/v3/api-docs/default
+        context-path: /message
+      - name: 工作流服务
+        url: /flow/v3/api-docs/default
+        context-path: /flow
+      - name: 代码生成器
+        url: /devtools/v3/api-docs/default
+        context-path: /devtools
+      - name: APP流服务
+        url: /api/v3/api-docs/default
+        context-path: /api

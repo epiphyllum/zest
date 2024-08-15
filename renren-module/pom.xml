@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>io.renren</groupId>
+		<artifactId>renren-cloud</artifactId>
+		<version>4.3.0</version>
+	</parent>
+
+	<groupId>io.renren</groupId>
+	<artifactId>renren-module</artifactId>
+	<packaging>pom</packaging>
+
+	<modules>
+		<module>renren-oss</module>
+		<module>renren-job</module>
+		<module>renren-xxl-job</module>
+		<module>renren-message</module>
+		<module>renren-flow</module>
+		<module>renren-api</module>
+		<module>renren-seata</module>
+		<module>renren-devtools</module>
+		<module>renren-shardingsphere-demo</module>
+		<module>renren-rocketmq-demo</module>
+	</modules>
+
+</project>
