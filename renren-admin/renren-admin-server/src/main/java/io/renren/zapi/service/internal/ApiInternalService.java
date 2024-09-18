@@ -5,8 +5,6 @@ import io.renren.zadmin.dao.JExchangeDao;
 import io.renren.zapi.ApiContext;
 import io.renren.zapi.ApiService;
 import io.renren.zapi.service.internal.dto.*;
-import io.renren.zapi.service.money.dto.I2vReq;
-import io.renren.zapi.service.money.dto.I2vRes;
 import io.renren.zin.service.exchange.ZinExchangeService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;

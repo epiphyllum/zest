@@ -7,7 +7,8 @@ import io.renren.commons.tools.utils.Result;
 import io.renren.zapi.service.card.ApiCardService;
 import io.renren.zapi.service.exchange.ApiExchangeService;
 import io.renren.zapi.service.file.ApiFileService;
-import io.renren.zapi.service.money.ApiMoneyService;
+import io.renren.zapi.service.allocate.ApiAllocateService;
+import io.renren.zapi.service.internal.ApiInternalService;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +28,9 @@ public class ApiController {
     @Resource
     private ApiExchangeService apiExchangeService;
     @Resource
-    private ApiMoneyService apiMoneyService;
+    private ApiAllocateService apiAllocateService;
+    @Resource
+    private ApiInternalService apiInternalService;
     @Resource
     private ApiFileService apiFileService;
 
@@ -35,6 +38,8 @@ public class ApiController {
     public void init() {
         initService(apiCardService);
         initService(apiExchangeService);
+        initService(apiAllocateService);
+        initService(apiInternalService);
     }
 
     private Map<String, Pair<Method, Object>> methodMap = new HashMap<>();

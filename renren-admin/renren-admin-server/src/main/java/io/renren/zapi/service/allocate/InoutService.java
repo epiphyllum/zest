@@ -1,4 +1,4 @@
-package io.renren.zapi.service.money;
+package io.renren.zapi.service.allocate;
 
 import io.renren.zadmin.dao.JInoutDao;
 import io.renren.zadmin.dto.JInoutDTO;

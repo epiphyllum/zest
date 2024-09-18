@@ -1,4 +1,4 @@
-package io.renren.zapi.service.money.dto;
+package io.renren.zapi.service.allocate.dto;
 
 public class M2sQueryRes {
 }

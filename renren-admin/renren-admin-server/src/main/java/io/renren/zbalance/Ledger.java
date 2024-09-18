@@ -56,13 +56,13 @@ public class Ledger {
             throw new RenException("internal error-2");
         }
         if (outBalance == null) {
-            log.error("入金账户{}不能存在");
+            log.error("出金账户{}不能存在");
             throw new RenException("internal error-2");
         }
 
         // 出金账户
         {
-            String factMemo = "exchange(O): " + entity.getAmount() + " " + entity.getPayerccy() + ", to get " + entity.getSettleamount() + " " + entity.getPayeeccy();
+            String factMemo = "exchange(debit): " + entity.getAmount() + " " + entity.getPayerccy() + ", to get " + entity.getSettleamount() + " " + entity.getPayeeccy();
             BigDecimal factAmount = entity.getAmount().negate();
 
             LambdaUpdateWrapper<JBalanceEntity> ledge = ledgerUtil.ledge(outBalance, LedgerConstant.EXCHANGE_OUT, entity.getId(), factMemo, factAmount);
@@ -74,7 +74,7 @@ public class Ledger {
 
         // 入金账户
         {
-            String factMemo = "exchange(I): " + entity.getSettleamount() + " " + entity.getPayeeccy() + ", pay " + entity.getAmount() + " " + entity.getPayerccy();
+            String factMemo = "exchange(credit): " + entity.getSettleamount() + " " + entity.getPayeeccy() + ", pay " + entity.getAmount() + " " + entity.getPayerccy();
             BigDecimal factAmount = entity.getStlamount();
 
             LambdaUpdateWrapper<JBalanceEntity> ledge = ledgerUtil.ledge(inBalance, LedgerConstant.EXCHANGE_IN, entity.getId(), factMemo, factAmount);
