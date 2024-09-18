@@ -13,6 +13,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.ReflectionKit;
 import io.renren.commons.mybatis.service.CrudService;
+import io.renren.commons.tools.constant.Constant;
 import io.renren.commons.tools.page.PageData;
 import io.renren.commons.tools.utils.ConvertUtils;
 import org.springframework.beans.BeanUtils;
@@ -22,21 +23,21 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *  CRUD基础服务类
+ * CRUD基础服务类
  *
  * @author Mark sunlightcs@gmail.com
  */
 public abstract class CrudServiceImpl<M extends BaseMapper<T>, T, D> extends BaseServiceImpl<M, T> implements CrudService<T, D> {
 
     protected Class<D> currentDtoClass() {
-        return (Class<D>)ReflectionKit.getSuperClassGenericType(getClass(), CrudServiceImpl.class, 2);
+        return (Class<D>) ReflectionKit.getSuperClassGenericType(getClass(), CrudServiceImpl.class, 2);
     }
 
     @Override
     public PageData<D> page(Map<String, Object> params) {
         IPage<T> page = baseDao.selectPage(
-            getPage(params, null, false),
-            getWrapper(params)
+                getPage(params, null, false),
+                getWrapper(params)
         );
 
         return getPageData(page, currentDtoClass());
@@ -76,5 +77,13 @@ public abstract class CrudServiceImpl<M extends BaseMapper<T>, T, D> extends Bas
     @Override
     public void delete(Long[] ids) {
         baseDao.deleteBatchIds(Arrays.asList(ids));
+    }
+
+    public QueryWrapper<T> applyFilter(Map<String, Object> params) {
+        QueryWrapper<T> wrapper = getWrapper(params);
+        if (params.get(Constant.SQL_FILTER) != null) {
+            wrapper.apply(params.get(Constant.SQL_FILTER).toString());
+        }
+        return wrapper;
     }
 }

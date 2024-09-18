@@ -38,6 +38,14 @@ public class Result<T> implements Serializable {
     @Schema(description = "响应数据")
     private T data;
 
+    public static Result ok = new Result();
+
+    public static Result<String> fail(int i, String msg) {
+        Result<String> uResult = new Result<>();
+        uResult.setData(msg);
+        return uResult;
+    }
+
     public Result<T> ok(T data) {
         this.setData(data);
         return this;
@@ -93,5 +101,11 @@ public class Result<T> implements Serializable {
 
     public void setData(T data) {
         this.data = data;
+    }
+
+    public static <M>  Result<M> one(M data) {
+        Result<M> result = new Result<>();
+        result.setData(data);
+        return result;
     }
 }
