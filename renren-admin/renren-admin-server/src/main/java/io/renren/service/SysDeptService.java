@@ -33,9 +33,11 @@ public interface SysDeptService extends BaseService<SysDeptEntity> {
 
     void delete(Long id);
 
-    /**
-     * 根据部门ID，获取本部门及子部门ID列表
-     * @param id   部门ID
-     */
+    public String getPidList(Long pid);
+
+        /**
+         * 根据部门ID，获取本部门及子部门ID列表
+         * @param id   部门ID
+         */
     List<Long> getSubDeptIdList(Long id);
 }

@@ -75,7 +75,6 @@ public class SysDeptServiceImpl extends BaseServiceImpl<SysDeptDao, SysDeptEntit
     @Transactional(rollbackFor = Exception.class)
     public void save(SysDeptDTO dto) {
         SysDeptEntity entity = ConvertUtils.sourceToTarget(dto, SysDeptEntity.class);
-
         entity.setPids(getPidList(entity.getPid()));
         insert(entity);
     }
@@ -132,7 +131,7 @@ public class SysDeptServiceImpl extends BaseServiceImpl<SysDeptDao, SysDeptEntit
      *
      * @param pid 上级ID
      */
-    private String getPidList(Long pid) {
+    public String getPidList(Long pid) {
         //顶级部门，无上级部门
         if (Constant.DEPT_ROOT.equals(pid)) {
             return Constant.DEPT_ROOT + "";

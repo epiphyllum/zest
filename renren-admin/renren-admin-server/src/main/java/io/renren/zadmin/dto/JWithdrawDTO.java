@@ -1,0 +1,60 @@
+package io.renren.zadmin.dto;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import io.renren.commons.tools.utils.DateUtils;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.Date;
+
+/**
+* j_withdraw
+*
+* @author epiphyllum epiphyllum.zhou@gmail.com
+* @since 3.0 2024-08-19
+*/
+@Data
+@Schema(description = "j_withdraw")
+public class JWithdrawDTO implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    private Long id;
+
+    @Schema(description = "商户ID")
+    private Long merchantId;
+    @Schema(description = "商户")
+    private String merchantName;
+
+    @Schema(description = "子商户ID")
+    private Long subId;
+    @Schema(description = "子商户")
+    private String subName;
+
+    @Schema(description = "申请单流水")
+    private String meraplid;
+    @Schema(description = "卡号")
+    private String cardno;
+    @Schema(description = "交易对手")
+    private String payeeid;
+    @Schema(description = "缴纳金额")
+    private BigDecimal amount;
+    @Schema(description = "币种")
+    private String currency;
+    @Schema(description = "申请单号")
+    private String applyid;
+    @Schema(description = "status")
+    private Integer status;
+
+    /////////////////
+    @Schema(description = "创建者")
+    private Long creator;
+    @Schema(description = "创建时间")
+    private Date createDate;
+    @Schema(description = "更新者")
+    private Long updater;
+    @Schema(description = "更新时间")
+    private Date updateDate;
+
+}

@@ -16,6 +16,8 @@
 	<modules>
 		<module>renren-admin-client</module>
 		<module>renren-admin-server</module>
+		<module>zclient</module>
+		<module>zclient-sdk</module>
 	</modules>
 
 </project>

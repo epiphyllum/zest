@@ -1,0 +1,19 @@
+server:
+  port: 9999
+
+spring:
+  application:
+    name: zclient
+  #环境 dev|test|prod
+  profiles:
+    active: dev
+  messages:
+    encoding: UTF-8
+    basename: i18n/messages_common
+
+zclient:
+  merchantId: 123123131231313
+  platformKey: asdfadfaf
+  privateKey: MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAIA18aWiDqgnWDf15zvNf1wpN1Br06tHWNbrjdTJ6lNS4wF2zwK41nEpHEtsWL7MlAaQwFJ9x6qF4DFNBBL/W8VoklCAWxFs3R1A131YezbtDjI2T7PKaPKJ4Pz84CCr8RC6pRRGi8secwgPRT7rG9h4e6rNhUimEJp6U4bEJxr3AgMBAAECgYAfkCgrRJgjIXyAWlNQz6hZAfSSIdl8QxZF4ruJ9SNw2+jyxVL1MpfoR9ylXMkEP8z5SM1wAXMUMd0dhf5IxwDKXhaVtNwmBKAdC3YfiY6A/SulKuK1JRtEQ+OAS+BJKnBxpt2pJAmJQqmS17y+rcA/KmYfYRMBN8e1WTNRAvUoIQJBAO1qG7smB5YZXn5txsWdlTwQXTIPpV1TRJegU0A+g4VpS4Z0RZBr6NzebONttnAto+LOZdlI2+XziZW0wWd7fR8CQQCKP1f4769qdCEULGslgkq2iPMXnC4pzTVeoPEV07SncON1ITnRuPsZ1gSqsK8Pp3SM9hI5SJsqSBRmsDCOTM8pAkA7Gk47AdWjpT8j5Do2mes736sDumdlW0RZJt1ywd1GChd2Kl3i/SokSe77kyV2ubXx0YYDWKL9lOosbao0E8brAkAVdAL41GkKQf8oHER8S53AebwPe+MGBZw0lREUbAfqu+/wKznHu8brmXSb8FMaQMgrX7wwO34or4rK7Kh8TJsRAkEAgEAdn8FmRHSkTrjIMYr3eJj00dgVvd9JgVmIH9Gw1PlyXkqOz1Mygxlil7E+cATn3wHUyYKrzRW5zbgpYY7LbQ==
+  baseUrl: http://localhost:8082
+  webhookUrl: http://192.168.0.100:9999/webhook

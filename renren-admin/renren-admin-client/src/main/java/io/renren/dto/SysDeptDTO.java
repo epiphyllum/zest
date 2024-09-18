@@ -65,6 +65,11 @@ public class SysDeptDTO extends TreeNode implements Serializable {
     @Schema(description = "上级部门名称")
     private String parentName;
 
+    // added
+    @Schema(description = "部门类型")
+    private Integer deptType;
+
+
     public void setName(String name) {
         this.name = name;
     }
@@ -131,5 +136,13 @@ public class SysDeptDTO extends TreeNode implements Serializable {
 
     public void setLeaderName(String leaderName) {
         this.leaderName = leaderName;
+    }
+
+    public Integer getDeptType() {
+        return deptType;
+    }
+
+    public void setDeptType(Integer deptType) {
+        this.deptType = deptType;
     }
 }

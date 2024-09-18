@@ -35,3 +35,6 @@ spring:
           - data-id: common.yaml
             group: ${spring.cloud.nacos.config.group}
             refresh: true
+          - data-id: zest.yaml
+            group: ${spring.cloud.nacos.config.group}
+            refresh: true

@@ -2,7 +2,9 @@ package io.renren.service.impl;
 
 import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.utils.ConvertUtils;
+import io.renren.dao.SysDeptDao;
 import io.renren.dao.SysUserDao;
+import io.renren.entity.SysDeptEntity;
 import io.renren.entity.SysUserEntity;
 import io.renren.redis.SysMenuRedis;
 import io.renren.service.SysMenuService;
@@ -21,6 +23,8 @@ import java.util.Set;
  */
 @Service
 public class SysUserDetailServiceImpl implements SysUserDetailService {
+    @Resource
+    private SysDeptDao sysDeptDao;
     @Resource
     private SysUserDao sysUserDao;
     @Resource
@@ -45,6 +49,8 @@ public class SysUserDetailServiceImpl implements SysUserDetailService {
         SysUserEntity user = sysUserDao.getByUsername(username);
 
         UserDetail userDetail = ConvertUtils.sourceToTarget(user, UserDetail.class);
+
+
         initUserData(userDetail);
 
         return userDetail;
@@ -68,5 +74,10 @@ public class SysUserDetailServiceImpl implements SysUserDetailService {
         //获取用户权限标识
         Set<String> authorities = sysMenuService.getUserPermissions(userDetail);
         userDetail.setAuthoritySet(authorities);
+
+        if(userDetail.getDeptId() != null) {
+            SysDeptEntity deptEntity = sysDeptDao.selectById(userDetail.getDeptId());
+            userDetail.setDeptName(deptEntity.getName());
+        }
     }
 }

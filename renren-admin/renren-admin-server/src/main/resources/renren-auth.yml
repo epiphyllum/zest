@@ -11,3 +11,7 @@ ignore_urls:
   - /params/code/**
   - /ureport/**
   - /jmreport/**
+  - /zupload/files/**
+  - /zin/webhook/**
+  - /zapi/**
+  - /health

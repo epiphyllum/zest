@@ -1,0 +1,109 @@
+package io.renren.zadmin.dto;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import io.renren.commons.tools.utils.DateUtils;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.Date;
+
+/**
+* j_card
+*
+* @author epiphyllum epiphyllum.zhou@gmail.com
+* @since 3.0 2024-08-18
+*/
+@Data
+@Schema(description = "j_card")
+public class JCardDTO implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    @Schema(description = "ID")
+    private Long id;
+    @Schema(description = "子商户ID")
+    private Long deptId;
+    @Schema(description = "子商户")
+    private String deptName;
+    @Schema(description = "商户ID")
+    private Long merchantId;
+    @Schema(description = "商户")
+    private String merchantName;
+
+    @Schema(description = "申请单流水")
+    private String meraplid;
+    @Schema(description = "主卡")
+    private String maincardno;
+    @Schema(description = "卡片种类")
+    private String cardtype;
+    @Schema(description = "子商户号")
+    private String cusid;
+    @Schema(description = "持卡人身份")
+    private String cardholdertype;
+    @Schema(description = "国籍")
+    private String nationality;
+    @Schema(description = "公司职位")
+    private String companyposition;
+    @Schema(description = "姓氏")
+    private String surname;
+    @Schema(description = "名字")
+    private String name;
+    @Schema(description = "出生日期")
+    private String birthday;
+    @Schema(description = "证件1类型")
+    private String idtype;
+    @Schema(description = "证件1号码")
+    private String idnumber;
+    @Schema(description = "居住国家/地区")
+    private String country;
+    @Schema(description = "详细地址")
+    private String address;
+    @Schema(description = "邮箱")
+    private String email;
+    @Schema(description = "性别")
+    private String gender;
+    @Schema(description = "手机号码所属地区")
+    private String mobilecountry;
+    @Schema(description = "手机号码")
+    private String mobilenumber;
+    @Schema(description = "正面照片")
+    private String photofront;
+    @Schema(description = "反面照片")
+    private String photoback;
+    @Schema(description = "申请费用扣款账户")
+    private String payerid;
+    @Schema(description = "邮寄国家/地区")
+    private String deliverycountry;
+    @Schema(description = "邮寄省份")
+    private String deliveryprovince;
+    @Schema(description = "邮寄城市")
+    private String deliverycity;
+    @Schema(description = "邮寄城市")
+    private String deliveryaddress;
+
+
+    @Schema(description = "申请ID")
+    private String applyid;
+
+    @Schema(description = "fee")
+    private BigDecimal fee; //              decimal(18, 2) comment '申请费用',       -- fee	Number	18,2	O
+    @Schema(description = "feecurrency")
+    private String feecurrency; //      varchar(3) comment '申请费用币种',       -- 	feecurrency	String	3	O
+    @Schema(description = "cardno")
+    private String cardno; //           varchar(30) comment '卡号',              -- 	cardno	String	30	O	申请成功后返回
+    @Schema(description = "state")
+    private String state; //            varchar(2)  comment '卡申请状态',        --
+
+
+
+    @Schema(description = "创建者")
+    private Long creator;
+    @Schema(description = "创建时间")
+    private Date createDate;
+    @Schema(description = "更新者")
+    private Long updater;
+    @Schema(description = "更新时间")
+    private Date updateDate;
+
+}
