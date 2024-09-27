@@ -1,19 +1,16 @@
 -- 商户/子商户
-drop table if exists j_merchant;
-create table j_merchant
+drop table if exists j_sub;
+create table j_sub
 (
-    id                 bigint        not null comment '商户ID | 子商户ID',
+    id                 bigint      not null comment '商户ID | 子商户ID',
 
-    -- 父商户
-    merchant_id        bigint        not null default 0 comment '父商户ID, 0就是说明是主商户',
-    merchant_name      varchar(50)   null comment '父商户名',
-
-    -- 所属代理
     agent_id           bigint,
     agent_name         varchar(50),
 
+    merchant_id        bigint      not null comment '父商户ID',
+    merchant_name      varchar(50) null comment '父商户名',
+
     -- 入网信息
-    meraplid           varchar(32) comment '跟踪号',                                        --	meraplid	String	32	Y	客户自己生成，保持唯一
     cusname            varchar(30) comment '商户名称',                                      --	cusname	String	30	Y
     flag               varchar(3) comment '商户性质',                                       --	flag	String	3	Y	1: 合资、股份制、民营 2 : 世界500强或国有 : 个体户 : 个人
     buslicensename     varchar(100) comment '营业执照名称',                                 --	buslicensename	String	100	Y
@@ -48,19 +45,11 @@ create table j_merchant
     buslicensefid      varchar(200) comment '营业执照',                                     --	buslicensefid	String	200	C	附件fid
     taxfid             varchar(200) comment '税务登记证及影印件',                           --	taxfid	String	200	C	注册国家/地区areacode为CHN，三证不合一时，填入税务登记证及影印件上传文件fid
     organfid           varchar(200) comment '组织机构代码及影印件',                         --	organfid	String	200	C	注册国家/地区areacode为CHN，三证不合一时，填入组织机构代码及影印件上传文件fid
-    -- 通联应答:response
-    cusid              varchar(15) comment '通联子商户号',                                  --	cusid	String	15	A	状态为审核成功时返回
+
     state              varchar(2) comment '状态',                                           -- state	String	2	Y	04：审核成功; 05：审核失败; 其他情况为空;
     -- extra management:
-    enabled            int           not null default 1 comment '启用',
-    -- 商户接入参数
-    mcc                varchar(6)    not null comment '商户类型',                           -- dict
-    deposit_rate       decimal(10, 3) comment '保证金比例',
-    charge_rate        decimal(10, 3) comment '充值费率',                                   --
-    txn_rate           decimal(10, 3) comment '交易费率',
-    fail_fee           decimal(10, 2) comment '失败费',
-    public_key         varchar(1024) null comment '商户公钥',
-    webhook            varchar(128) comment '商户通知地址',
+    enabled            int         not null default 1 comment '启用',
+
     -- basic
     creator            bigint comment '创建者',
     create_date        datetime comment '创建时间',

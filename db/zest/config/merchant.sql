@@ -1,14 +1,8 @@
-
-
 -- 商户/子商户
 drop table if exists j_merchant;
 create table j_merchant
 (
-    id                 bigint        not null comment '商户ID | 子商户ID',
-
-    -- 父商户
-    parent             bigint        not null default 0 comment '父商户ID, 0就是说明是主商户',
-    parent_name        varchar(50)   null comment '父商户名',
+    id                 bigint        not null comment '商户ID',
 
     -- 所属代理
     agent_id           bigint,
