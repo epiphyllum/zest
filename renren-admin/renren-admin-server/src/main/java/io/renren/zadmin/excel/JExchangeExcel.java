@@ -21,10 +21,16 @@ import java.util.Date;
 public class JExchangeExcel {
     @ExcelProperty(value = "ID", index = 0)
     private Long id;
+
+    @ExcelProperty(value = "代理ID", index = 1)
+    private Long agentId;
+    @ExcelProperty(value = "代理名", index = 2)
+    private String agentName;
     @ExcelProperty(value = "商户ID", index = 1)
     private Long deptId;
     @ExcelProperty(value = "商户名", index = 2)
     private String deptName;
+
     @ExcelProperty(value = "申请单流水", index = 3)
     private String meraplid;
     @ExcelProperty(value = "到账商户", index = 4)

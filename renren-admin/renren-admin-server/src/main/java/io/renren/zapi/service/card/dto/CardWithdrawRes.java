@@ -4,5 +4,5 @@ import lombok.Data;
 
 @Data
 public class CardWithdrawRes {
-    String applyid;  // 申请单号	applyid	String	32	Y
+    String applyid;  // 申请单号
 }

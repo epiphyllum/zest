@@ -24,9 +24,6 @@ public class JMerchantEntity extends BaseEntity {
     private Long agentId;
     private String agentName;
 
-    private Long parent;
-    private String parentName;
-
     private String meraplid;
     private String cusname;
     private String flag;

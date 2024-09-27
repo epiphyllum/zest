@@ -21,12 +21,13 @@ import java.util.Date;
 public class JMerchantExcel {
     @ExcelProperty(value = "ID", index = 0)
     private Long id;
+
     @ExcelProperty(value = "代理ID", index = 1)
-    private Long deptId;
+    private Long agentId;
     @ExcelProperty(value = "代理", index = 2)
-    private String deptName;
-    @ExcelProperty(value = "商户名称", index = 3)
-    private String merchantName;
+    private String agentName;
+
+    // 业务字段
     @ExcelProperty(value = "跟踪号", index = 4)
     private String meraplid;
     @ExcelProperty(value = "商户名称", index = 5)

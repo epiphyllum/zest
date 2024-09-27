@@ -50,7 +50,6 @@ public class JDepositController {
     @PreAuthorize("hasAuthority('zorg:jdeposit:page')")
     public Result<PageData<JDepositDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params){
         PageData<JDepositDTO> page = jDepositService.page(params);
-
         return new Result<PageData<JDepositDTO>>().ok(page);
     }
 
@@ -59,7 +58,6 @@ public class JDepositController {
     @PreAuthorize("hasAuthority('zorg:jdeposit:info')")
     public Result<JDepositDTO> get(@PathVariable("id") Long id){
         JDepositDTO data = jDepositService.get(id);
-
         return new Result<JDepositDTO>().ok(data);
     }
 
@@ -70,9 +68,7 @@ public class JDepositController {
     public Result save(@RequestBody JDepositDTO dto){
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
-
         jDepositService.save(dto);
-
         return new Result();
     }
 
@@ -83,9 +79,7 @@ public class JDepositController {
     public Result update(@RequestBody JDepositDTO dto){
         //效验数据
         ValidatorUtils.validateEntity(dto, UpdateGroup.class, DefaultGroup.class);
-
         jDepositService.update(dto);
-
         return new Result();
     }
 
@@ -96,9 +90,7 @@ public class JDepositController {
     public Result delete(@RequestBody Long[] ids){
         //效验数据
         AssertUtils.isArrayEmpty(ids, "id");
-
         jDepositService.delete(ids);
-
         return new Result();
     }
 
@@ -108,7 +100,6 @@ public class JDepositController {
     @PreAuthorize("hasAuthority('zorg:jdeposit:export')")
     public void export(@Parameter(hidden = true) @RequestParam Map<String, Object> params, HttpServletResponse response) throws Exception {
         List<JDepositDTO> list = jDepositService.list(params);
-
         ExcelUtils.exportExcelToTarget(response, null, "j_deposit", list, JDepositExcel.class);
     }
 

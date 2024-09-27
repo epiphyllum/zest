@@ -29,8 +29,6 @@ public class JBalanceEntity extends BaseEntity {
     // 业务字段
     private Long ownerId;
     private String ownerName;
-
-    //
     private String balanceType;
     private String currency;
     private BigDecimal balance;

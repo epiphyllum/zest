@@ -5,80 +5,84 @@ import com.alibaba.excel.annotation.write.style.ColumnWidth;
 import com.alibaba.excel.annotation.write.style.ContentRowHeight;
 import com.alibaba.excel.annotation.write.style.HeadRowHeight;
 import lombok.Data;
-import java.math.BigDecimal;
+
 import java.util.Date;
 
 /**
- * j_mcard
+ * j_card
  *
  * @author epiphyllum epiphyllum.zhou@gmail.com
- * @since 3.0 2024-08-19
+ * @since 3.0 2024-08-18
  */
 @Data
 @ContentRowHeight(20)
 @HeadRowHeight(20)
 @ColumnWidth(25)
 public class JMcardExcel {
-    @ExcelProperty(value = "商户ID", index = 0)
+    @ExcelProperty(value = "子商户ID", index = 0)
     private Long deptId;
-    @ExcelProperty(value = "商户名", index = 1)
+    @ExcelProperty(value = "子商户", index = 1)
     private String deptName;
-    @ExcelProperty(value = "String", index = 2)
-    private String meraplid;
-    @ExcelProperty(value = "String", index = 3)
+    @ExcelProperty(value = "商户ID", index = 2)
+    private Long merchantId;
+    @ExcelProperty(value = "商户", index = 3)
+    private String merchantName;
+    @ExcelProperty(value = "产品类型", index = 4)
     private String producttype;
-    @ExcelProperty(value = "String", index = 4)
+    @ExcelProperty(value = "卡片种类", index = 5)
     private String cardtype;
-    @ExcelProperty(value = "String", index = 5)
+    @ExcelProperty(value = "持卡人身份", index = 6)
     private String cardholdertype;
-    @ExcelProperty(value = "String", index = 6)
+    @ExcelProperty(value = "国籍", index = 7)
     private String nationality;
-    @ExcelProperty(value = "String", index = 7)
+    @ExcelProperty(value = "公司职位", index = 8)
     private String companyposition;
-    @ExcelProperty(value = "String", index = 8)
+    @ExcelProperty(value = "姓氏", index = 9)
     private String surname;
-    @ExcelProperty(value = "String", index = 9)
+    @ExcelProperty(value = "名字", index = 10)
+    private String name;
+    @ExcelProperty(value = "出生日期", index = 11)
     private String birthday;
-    @ExcelProperty(value = "String", index = 10)
+    @ExcelProperty(value = "证件1类型", index = 12)
     private String idtype;
-    @ExcelProperty(value = "String", index = 11)
+    @ExcelProperty(value = "证件1号码", index = 13)
     private String idnumber;
-    @ExcelProperty(value = "String", index = 12)
+    @ExcelProperty(value = "证件2类型", index = 14)
     private String idtype2;
-    @ExcelProperty(value = "String", index = 13)
+    @ExcelProperty(value = "证件2号码", index = 15)
     private String idnumber2;
-    @ExcelProperty(value = "String", index = 14)
+    @ExcelProperty(value = "居住国家/地区", index = 16)
+    private String country;
+    @ExcelProperty(value = "省份", index = 17)
     private String province;
-    @ExcelProperty(value = "String", index = 15)
+    @ExcelProperty(value = "城市", index = 18)
     private String city;
-    @ExcelProperty(value = "String", index = 16)
+    @ExcelProperty(value = "详细地址", index = 19)
     private String address;
-    @ExcelProperty(value = "String", index = 17)
+    @ExcelProperty(value = "邮箱", index = 20)
     private String email;
-    @ExcelProperty(value = "String", index = 18)
+    @ExcelProperty(value = "性别", index = 21)
     private String gender;
-    @ExcelProperty(value = "String", index = 19)
+    @ExcelProperty(value = "手机号码所属地区", index = 22)
     private String mobilecountry;
-    @ExcelProperty(value = "String", index = 20)
+    @ExcelProperty(value = "手机号码", index = 23)
     private String mobilenumber;
-    @ExcelProperty(value = "String", index = 21)
+    @ExcelProperty(value = "正面照片", index = 24)
     private String photofront;
-    @ExcelProperty(value = "String", index = 22)
+    @ExcelProperty(value = "反面照片", index = 25)
     private String photoback;
-    @ExcelProperty(value = "String", index = 23)
+    @ExcelProperty(value = "申请费用扣款账户", index = 26)
     private String payerid;
-    @ExcelProperty(value = "String", index = 24)
+    @ExcelProperty(value = "邮寄国家/地区", index = 27)
     private String deliverycountry;
-    @ExcelProperty(value = "String", index = 25)
+    @ExcelProperty(value = "邮寄省份", index = 28)
     private String deliveryprovince;
-    @ExcelProperty(value = "String", index = 26)
+    @ExcelProperty(value = "邮寄城市", index = 29)
     private String deliverycity;
-    @ExcelProperty(value = "String", index = 27)
+    @ExcelProperty(value = "邮寄城市", index = 30)
     private String deliveryaddress;
-    @ExcelProperty(value = "申请ID", index = 28)
+    @ExcelProperty(value = "申请ID", index = 31)
     private String applyid;
-    @ExcelProperty(value = "余额", index = 29)
-    private BigDecimal balance;
-    @ExcelProperty(value = "创建时间", index = 30)
+    @ExcelProperty(value = "创建时间", index = 32)
     private Date createDate;
 }

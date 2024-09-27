@@ -22,57 +22,50 @@ public class ZinCardStatusService {
     @Resource
     private ZinRequester requester;
     @Resource
-    private JMerchantDao jMerchantDao;
-    @Resource
-    private JMaccountDao jMaccountDao;
-    @Resource
-    private JMoneyDao jMoneyDao;
-    @Resource
-    private JExchangeDao jExchangeDao;
-    @Resource
-    private TransactionTemplate tx;
-    @Resource
-    private Ledger ledger;
-    @Resource
-    private ZestConfig zestConfig;
+    private CardStatusNotify cardStatusNotify;
 
-    // 卡激活: 3200
+    // 3200-卡激活
     public TCardActivateResponse cardActivate(TCardActivateRequest request) {
         return requester.request(newRequestId(), "/gcpapi/card/active", request, TCardActivateResponse.class);
     }
 
-    // 卡止付: 3201
+    // 3201-卡止付
     public TCardFreezeResponse cardFreeze(TCardFreezeRequest request) {
         return requester.request(newRequestId(), "/gcpapi/card/freeze", request, TCardFreezeResponse.class);
     }
 
-    // 卡解除止付: 3202
+    // 3202-卡解除止付
     public TCardUnfreezeResponse cardUnfreeze(TCardUnfreezeRequest request) {
         return requester.request(newRequestId(), "/gcpapi/card/unfreese", request, TCardUnfreezeResponse.class);
     }
 
-    // 卡挂失: 3203
+    // 3203-卡挂失
     public TCardLossResponse cardLoss(TCardLossRequest request) {
         return requester.request(newRequestId(), "/gcpapi/card/loss", request, TCardLossResponse.class);
     }
 
-    // 卡解除挂失: 3204
+    // 3204-卡解除挂失
     public TCardUnlossResponse cardUnloss(TCardUnlossRequest request) {
         return requester.request(newRequestId(), "/gcpapi/card/unloss", request, TCardUnlossResponse.class);
     }
 
-    // 销卡: 3205
+    // 3205-销卡
     public TCardCancelResponse cardCancel(TCardCancelRequest request) {
         return requester.request(newRequestId(), "/gcpapi/card/cancel", request, TCardCancelResponse.class);
     }
 
-    // 解除销卡: 3206
+    // 3206-解除销卡
     public TCardUncancelResponse cardUncancel(TCardUncancelRequest request) {
         return requester.request(newRequestId(), "/gcpapi/card/uncancel", request, TCardUncancelResponse.class);
     }
 
-    // 卡状态变更通知: 3207
-    // 卡状态变更，主动发起通知合作方，涉及的状态变更的功能接口（卡挂失、解除卡挂失、卡止付、解除卡止付、销卡、解除销卡）。
+    // 3207-卡状态变更通知, 卡状态变更，主动发起通知合作方，涉及的状态变更的功能接口（卡挂失、解除卡挂失、卡止付、解除卡止付、销卡、解除销卡）。
     public void cardStatusChangeNotify(TCardChangeNotify notify) {
+        cardStatusNotify.handle(notify);
+    }
+
+    // 3208-查询卡状态
+    public TCardStatusResponse cardStatusQuery(TCardStatusQuery request) {
+        return requester.request(newRequestId(), "/gcpapi/card/querycardstate", request, TCardStatusResponse.class);
     }
 }

@@ -53,8 +53,20 @@ public class ZinFileService {
      * /gcpapi/file/downdailyreport  方向：合作方->通联
      * 说明： 下载商户当天的对账单信息。
      */
+    public void downloadDailyReport() {
+    }
+
 
     /**
-     * 7004-VPA子卡信息下载
+     * 7004-VPA子卡信息下载(deprecated)
      */
+    public void downloadVpaInfo() {
+
+    }
+
+    /**
+     * 7005-VPA子卡信息下载(加密文件)
+     */
+    public void downloadVapInfoAes() {
+    }
 }

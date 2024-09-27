@@ -21,16 +21,35 @@ import java.util.Map;
 public class JMoneyServiceImpl extends CrudServiceImpl<JMoneyDao, JMoneyEntity, JMoneyDTO> implements JMoneyService {
 
     @Override
-    public QueryWrapper<JMoneyEntity> getWrapper(Map<String, Object> params){
+    public QueryWrapper<JMoneyEntity> getWrapper(Map<String, Object> params) {
         QueryWrapper<JMoneyEntity> wrapper = new QueryWrapper<>();
 
-        String acctno = (String)params.get("acctno");
+        //
+        String agentId = (String) params.get("agentId");
+        if (StringUtils.isNotBlank(agentId)) {
+            wrapper.eq("agent_id", Long.parseLong(agentId));
+        }
+
+        //
+        String merchantId = (String) params.get("merchantId");
+        if (StringUtils.isNotBlank(merchantId)) {
+            wrapper.eq("merchant_id", Long.parseLong(merchantId));
+        }
+
+        //
+        String acctno = (String) params.get("acctno");
         wrapper.like(StringUtils.isNotBlank(acctno), "acctno", acctno);
-        String payeraccountname = (String)params.get("payeraccountname");
+
+        //
+        String payeraccountname = (String) params.get("payeraccountname");
         wrapper.like(StringUtils.isNotBlank(payeraccountname), "payeraccountname", payeraccountname);
-        String payeraccountno = (String)params.get("payeraccountno");
+
+        //
+        String payeraccountno = (String) params.get("payeraccountno");
         wrapper.like(StringUtils.isNotBlank(payeraccountno), "payeraccountno", payeraccountno);
-        String merchantName = (String)params.get("merchantName");
+
+        //
+        String merchantName = (String) params.get("merchantName");
         wrapper.like(StringUtils.isNotBlank(merchantName), "merchant_name", merchantName);
 
         return wrapper;

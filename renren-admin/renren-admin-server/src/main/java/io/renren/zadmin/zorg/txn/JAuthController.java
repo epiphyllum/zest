@@ -50,7 +50,6 @@ public class JAuthController {
     @PreAuthorize("hasAuthority('zorg:jauth:page')")
     public Result<PageData<JAuthDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params){
         PageData<JAuthDTO> page = jAuthService.page(params);
-
         return new Result<PageData<JAuthDTO>>().ok(page);
     }
 
@@ -83,9 +82,7 @@ public class JAuthController {
     public Result update(@RequestBody JAuthDTO dto){
         //效验数据
         ValidatorUtils.validateEntity(dto, UpdateGroup.class, DefaultGroup.class);
-
         jAuthService.update(dto);
-
         return new Result();
     }
 
@@ -96,9 +93,7 @@ public class JAuthController {
     public Result delete(@RequestBody Long[] ids){
         //效验数据
         AssertUtils.isArrayEmpty(ids, "id");
-
         jAuthService.delete(ids);
-
         return new Result();
     }
 
@@ -108,7 +103,6 @@ public class JAuthController {
     @PreAuthorize("hasAuthority('zorg:jauth:export')")
     public void export(@Parameter(hidden = true) @RequestParam Map<String, Object> params, HttpServletResponse response) throws Exception {
         List<JAuthDTO> list = jAuthService.list(params);
-
         ExcelUtils.exportExcelToTarget(response, null, "j_auth", list, JAuthExcel.class);
     }
 

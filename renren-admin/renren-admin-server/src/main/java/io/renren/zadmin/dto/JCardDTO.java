@@ -10,11 +10,11 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 /**
-* j_card
-*
-* @author epiphyllum epiphyllum.zhou@gmail.com
-* @since 3.0 2024-08-18
-*/
+ * j_card
+ *
+ * @author epiphyllum epiphyllum.zhou@gmail.com
+ * @since 3.0 2024-08-18
+ */
 @Data
 @Schema(description = "j_card")
 public class JCardDTO implements Serializable {
@@ -22,22 +22,37 @@ public class JCardDTO implements Serializable {
 
     @Schema(description = "ID")
     private Long id;
+    @Schema(description = "创建者")
+    private Long creator;
+    @Schema(description = "创建时间")
+    private Date createDate;
+    @Schema(description = "更新者")
+    private Long updater;
+    @Schema(description = "更新时间")
+    private Date updateDate;
+
+    // ID相关
+    @Schema(description = "代理ID")
+    private Long agentId;
+    @Schema(description = "代理")
+    private String agentName;
     @Schema(description = "子商户ID")
-    private Long deptId;
+    private Long subId;
     @Schema(description = "子商户")
-    private String deptName;
+    private String subName;
     @Schema(description = "商户ID")
     private Long merchantId;
     @Schema(description = "商户")
     private String merchantName;
 
+    // 业务字段
     @Schema(description = "申请单流水")
     private String meraplid;
     @Schema(description = "主卡")
     private String maincardno;
     @Schema(description = "卡片种类")
     private String cardtype;
-    @Schema(description = "子商户号")
+    @Schema(description = "通联子商户号")
     private String cusid;
     @Schema(description = "持卡人身份")
     private String cardholdertype;
@@ -67,12 +82,19 @@ public class JCardDTO implements Serializable {
     private String mobilecountry;
     @Schema(description = "手机号码")
     private String mobilenumber;
+
     @Schema(description = "正面照片")
     private String photofront;
     @Schema(description = "反面照片")
     private String photoback;
+    @Schema(description = "正面照片2")
+    private String photofront2;
+    @Schema(description = "反面照片2")
+    private String photoback2;
+
     @Schema(description = "申请费用扣款账户")
     private String payerid;
+
     @Schema(description = "邮寄国家/地区")
     private String deliverycountry;
     @Schema(description = "邮寄省份")
@@ -82,10 +104,11 @@ public class JCardDTO implements Serializable {
     @Schema(description = "邮寄城市")
     private String deliveryaddress;
 
-
+    // 通联返回
     @Schema(description = "申请ID")
     private String applyid;
 
+    // 结果
     @Schema(description = "fee")
     private BigDecimal fee; //              decimal(18, 2) comment '申请费用',       -- fee	Number	18,2	O
     @Schema(description = "feecurrency")
@@ -94,16 +117,4 @@ public class JCardDTO implements Serializable {
     private String cardno; //           varchar(30) comment '卡号',              -- 	cardno	String	30	O	申请成功后返回
     @Schema(description = "state")
     private String state; //            varchar(2)  comment '卡申请状态',        --
-
-
-
-    @Schema(description = "创建者")
-    private Long creator;
-    @Schema(description = "创建时间")
-    private Date createDate;
-    @Schema(description = "更新者")
-    private Long updater;
-    @Schema(description = "更新时间")
-    private Date updateDate;
-
 }

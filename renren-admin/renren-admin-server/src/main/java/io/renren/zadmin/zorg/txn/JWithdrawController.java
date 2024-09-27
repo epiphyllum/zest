@@ -50,7 +50,6 @@ public class JWithdrawController {
     @PreAuthorize("hasAuthority('zorg:jwithdraw:page')")
     public Result<PageData<JWithdrawDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params){
         PageData<JWithdrawDTO> page = jWithdrawService.page(params);
-
         return new Result<PageData<JWithdrawDTO>>().ok(page);
     }
 
@@ -59,7 +58,6 @@ public class JWithdrawController {
     @PreAuthorize("hasAuthority('zorg:jwithdraw:info')")
     public Result<JWithdrawDTO> get(@PathVariable("id") Long id){
         JWithdrawDTO data = jWithdrawService.get(id);
-
         return new Result<JWithdrawDTO>().ok(data);
     }
 
@@ -70,9 +68,7 @@ public class JWithdrawController {
     public Result save(@RequestBody JWithdrawDTO dto){
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
-
         jWithdrawService.save(dto);
-
         return new Result();
     }
 
@@ -83,9 +79,7 @@ public class JWithdrawController {
     public Result update(@RequestBody JWithdrawDTO dto){
         //效验数据
         ValidatorUtils.validateEntity(dto, UpdateGroup.class, DefaultGroup.class);
-
         jWithdrawService.update(dto);
-
         return new Result();
     }
 
@@ -96,9 +90,7 @@ public class JWithdrawController {
     public Result delete(@RequestBody Long[] ids){
         //效验数据
         AssertUtils.isArrayEmpty(ids, "id");
-
         jWithdrawService.delete(ids);
-
         return new Result();
     }
 
@@ -108,8 +100,7 @@ public class JWithdrawController {
     @PreAuthorize("hasAuthority('zorg:jwithdraw:export')")
     public void export(@Parameter(hidden = true) @RequestParam Map<String, Object> params, HttpServletResponse response) throws Exception {
         List<JWithdrawDTO> list = jWithdrawService.list(params);
-
-        ExcelUtils.exportExcelToTarget(response, null, "j_withdraw", list, JWithdrawExcel.class);
+        ExcelUtils.exportExcelToTarget(response, null, "提取资金", list, JWithdrawExcel.class);
     }
 
 }

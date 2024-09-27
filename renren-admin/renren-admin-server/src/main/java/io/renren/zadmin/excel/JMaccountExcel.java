@@ -18,10 +18,18 @@ import java.util.Date;
 @HeadRowHeight(20)
 @ColumnWidth(25)
 public class JMaccountExcel {
+
+    // id
+    @ExcelProperty(value = "代理ID", index = 0)
+    private Long agentId;
+    @ExcelProperty(value = "代理名", index = 1)
+    private String agentName;
     @ExcelProperty(value = "商户ID", index = 0)
-    private Long deptId;
+    private Long merchantId;
     @ExcelProperty(value = "商户名", index = 1)
-    private String deptName;
+    private String merchantName;
+
+    // 业务
     @ExcelProperty(value = "打款方姓名", index = 2)
     private String payeraccountname;
     @ExcelProperty(value = "打款方银行账号", index = 3)

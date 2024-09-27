@@ -21,8 +21,8 @@ import java.util.Date;
 public class JVaExcel {
     @ExcelProperty(value = "ID", index = 0)
     private Long id;
-    @ExcelProperty(value = "代理ID/商户ID", index = 1)
-    private Long deptId;
+
+    // 业务字段
     @ExcelProperty(value = "通联虚拟户", index = 2)
     private String accountno;
     @ExcelProperty(value = "币种", index = 3)

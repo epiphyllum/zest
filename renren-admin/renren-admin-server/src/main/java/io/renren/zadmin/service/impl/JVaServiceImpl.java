@@ -26,6 +26,7 @@ public class JVaServiceImpl extends CrudServiceImpl<JVaDao, JVaEntity, JVaDTO> i
 
         String accountno = (String)params.get("accountno");
         wrapper.eq(StringUtils.isNotBlank(accountno), "accountno", accountno);
+
         String currency = (String)params.get("currency");
         wrapper.eq(StringUtils.isNotBlank(currency), "currency", currency);
 

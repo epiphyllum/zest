@@ -20,8 +20,26 @@ public class JMoneyDTO implements Serializable {
 
     @Schema(description = "ID")
     private Long id;
-    @Schema(description = "大吉")
-    private Long deptId;
+    @Schema(description = "创建者")
+    private Long creator;
+    @Schema(description = "创建时间")
+    private Date createDate;
+    @Schema(description = "更新者")
+    private Long updater;
+    @Schema(description = "更新时间")
+    private Date updateDate;
+
+    // id相关
+    @Schema(description = "代理id")
+    private Long agentId;
+    @Schema(description = "代理名称")
+    private String agentName;
+    @Schema(description = "商户id")
+    private Long merchantId;
+    @Schema(description = "商户名")
+    private String merchantName;
+
+    // 业务信息
     @Schema(description = "通知id")
     private String nid;
     @Schema(description = "业务关联id")
@@ -46,22 +64,15 @@ public class JMoneyDTO implements Serializable {
     private String payeraccountcountry;
     @Schema(description = "附言")
     private String ps;
-    @Schema(description = "商户号")
-    private Long merchantId;
-    @Schema(description = "商户名")
-    private String merchantName;
+
+    //
     @Schema(description = "状态")
     private Integer status;
     @Schema(description = "通知状态")
     private Integer notifyStatus;
     @Schema(description = "通知次数")
     private Integer notifyCount;
-    @Schema(description = "创建者")
-    private Long creator;
-    @Schema(description = "创建时间")
-    private Date createDate;
-    @Schema(description = "更新者")
-    private Long updater;
-    @Schema(description = "更新时间")
-    private Date updateDate;
+
+
+
 }

@@ -24,19 +24,27 @@ public class JLogServiceImpl extends CrudServiceImpl<JLogDao, JLogEntity, JLogDT
     public QueryWrapper<JLogEntity> getWrapper(Map<String, Object> params){
         QueryWrapper<JLogEntity> wrapper = new QueryWrapper<>();
 
-        String deptId = (String)params.get("deptId");
-        wrapper.eq(StringUtils.isNotBlank(deptId), "dept_id", deptId);
+        //
+        String ownerId = (String)params.get("ownerId");
+        wrapper.eq(StringUtils.isNotBlank(ownerId), "owner_id", Long.parseLong(ownerId));
+
+        //
         String balanceType = (String)params.get("balanceType");
         wrapper.eq(StringUtils.isNotBlank(balanceType), "balance_type", balanceType);
+
+        //
         String currency = (String)params.get("currency");
         wrapper.eq(StringUtils.isNotBlank(currency), "currency", currency);
+
+        //
         String factType = (String)params.get("factType");
         wrapper.eq(StringUtils.isNotBlank(factType), "fact_type", factType);
+
+        //
         String factId = (String)params.get("factId");
         wrapper.eq(StringUtils.isNotBlank(factId), "fact_id", factId);
 
         return wrapper;
     }
-
 
 }

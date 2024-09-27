@@ -19,15 +19,22 @@ import java.util.Date;
 @HeadRowHeight(20)
 @ColumnWidth(25)
 public class JDepositExcel {
-    @ExcelProperty(value = "子商户ID", index = 0)
-    private Long deptId;
-    @ExcelProperty(value = "子商户", index = 1)
-    private String deptName;
+
+    @ExcelProperty(value = "代理ID", index = 0)
+    private Long agentId;
+    @ExcelProperty(value = "代理名", index = 1)
+    private String agentName;
     @ExcelProperty(value = "商户ID", index = 2)
     private Long merchantId;
     @ExcelProperty(value = "商户", index = 3)
     private String merchantName;
-    @ExcelProperty(value = "申请单", index = 4)
+    @ExcelProperty(value = "子商户ID", index = 4)
+    private Long subId;
+    @ExcelProperty(value = "子商户", index = 5)
+    private String subName;
+    @ExcelProperty(value = "申请单", index = 6)
+
+    // 业务
     private String meraplid;
     @ExcelProperty(value = "卡号", index = 5)
     private String cardno;

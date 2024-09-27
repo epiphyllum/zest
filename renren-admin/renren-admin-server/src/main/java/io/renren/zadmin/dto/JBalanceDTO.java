@@ -22,23 +22,6 @@ public class JBalanceDTO implements Serializable {
 
     @Schema(description = "ID")
     private Long id;
-
-    @Schema(description = "属主ID")
-    private Long ownerId;
-    @Schema(description = "属主名称")
-    private String ownerName;
-
-    @Schema(description = "余额类型")
-    private String balanceType;
-
-    @Schema(description = "币种")
-    private String currency;
-    @Schema(description = "余额")
-    private BigDecimal balance;
-    @Schema(description = "冻结额")
-    private BigDecimal frozen;
-    @Schema(description = "版本号")
-    private Integer version;
     @Schema(description = "创建者")
     private Long creator;
     @Schema(description = "创建时间")
@@ -48,4 +31,19 @@ public class JBalanceDTO implements Serializable {
     @Schema(description = "更新时间")
     private Date updateDate;
 
+    // 业务字段
+    @Schema(description = "属主ID")
+    private Long ownerId;
+    @Schema(description = "属主名称")
+    private String ownerName;
+    @Schema(description = "余额类型")
+    private String balanceType;
+    @Schema(description = "币种")
+    private String currency;
+    @Schema(description = "余额")
+    private BigDecimal balance;
+    @Schema(description = "冻结额")
+    private BigDecimal frozen;
+    @Schema(description = "版本号")
+    private Integer version;
 }

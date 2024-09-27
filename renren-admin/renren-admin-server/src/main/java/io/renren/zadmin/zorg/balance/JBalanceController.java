@@ -50,7 +50,6 @@ public class JBalanceController {
     @PreAuthorize("hasAuthority('zorg:jbalance:page')")
     public Result<PageData<JBalanceDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params){
         PageData<JBalanceDTO> page = jBalanceService.page(params);
-
         return new Result<PageData<JBalanceDTO>>().ok(page);
     }
 
@@ -59,7 +58,6 @@ public class JBalanceController {
     @PreAuthorize("hasAuthority('zorg:jbalance:info')")
     public Result<JBalanceDTO> get(@PathVariable("id") Long id){
         JBalanceDTO data = jBalanceService.get(id);
-
         return new Result<JBalanceDTO>().ok(data);
     }
 
@@ -70,9 +68,7 @@ public class JBalanceController {
     public Result save(@RequestBody JBalanceDTO dto){
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
-
         jBalanceService.save(dto);
-
         return new Result();
     }
 
@@ -83,9 +79,7 @@ public class JBalanceController {
     public Result update(@RequestBody JBalanceDTO dto){
         //效验数据
         ValidatorUtils.validateEntity(dto, UpdateGroup.class, DefaultGroup.class);
-
         jBalanceService.update(dto);
-
         return new Result();
     }
 
@@ -96,9 +90,7 @@ public class JBalanceController {
     public Result delete(@RequestBody Long[] ids){
         //效验数据
         AssertUtils.isArrayEmpty(ids, "id");
-
         jBalanceService.delete(ids);
-
         return new Result();
     }
 
@@ -108,7 +100,6 @@ public class JBalanceController {
     @PreAuthorize("hasAuthority('zorg:jbalance:export')")
     public void export(@Parameter(hidden = true) @RequestParam Map<String, Object> params, HttpServletResponse response) throws Exception {
         List<JBalanceDTO> list = jBalanceService.list(params);
-
         ExcelUtils.exportExcelToTarget(response, null, "j_balance", list, JBalanceExcel.class);
     }
 

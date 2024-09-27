@@ -45,7 +45,7 @@ public class BalanceType {
         return "SUB_SUM_" + currency;
     }
 
-    // 子商户卡开费用
+    // 子商户开卡费用
     public static String getSubFeeAccount(String currency) {
         return "SUB_FEE_" + currency;
     }

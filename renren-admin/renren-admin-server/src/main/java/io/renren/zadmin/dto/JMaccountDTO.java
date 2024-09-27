@@ -19,9 +19,13 @@ import java.util.Date;
 public class JMaccountDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    // id
+    private Long agentId;
+    private String agentName;
     private Long merchantId;
     private String merchantName;
 
+    //
     private String flag;
     private String currency;
     private String country;

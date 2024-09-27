@@ -51,7 +51,6 @@ public class JAgentController {
     @PreAuthorize("hasAuthority('zorg:jagent:page')")
     public Result<PageData<JAgentDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
         PageData<JAgentDTO> page = jAgentService.page(params);
-
         return new Result<PageData<JAgentDTO>>().ok(page);
     }
 
@@ -71,9 +70,7 @@ public class JAgentController {
     public Result save(@RequestBody JAgentDTO dto) {
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
-
         jAgentService.save(dto);
-
         return new Result();
     }
 

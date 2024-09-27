@@ -21,11 +21,18 @@ import java.util.Map;
 public class JExchangeServiceImpl extends CrudServiceImpl<JExchangeDao, JExchangeEntity, JExchangeDTO> implements JExchangeService {
 
     @Override
-    public QueryWrapper<JExchangeEntity> getWrapper(Map<String, Object> params){
+    public QueryWrapper<JExchangeEntity> getWrapper(Map<String, Object> params) {
         QueryWrapper<JExchangeEntity> wrapper = new QueryWrapper<>();
 
-        String deptId = (String)params.get("deptId");
-        wrapper.eq(StringUtils.isNotBlank(deptId), "dept_id", deptId);
+        String agentId = (String) params.get("agentId");
+        if (StringUtils.isNotBlank(agentId)) {
+            wrapper.eq("agent_id", Long.parseLong(agentId));
+        }
+
+        String merchantId = (String) params.get("merchantId");
+        if (StringUtils.isNotBlank(merchantId)) {
+            wrapper.eq("merchant_id", Long.parseLong(merchantId));
+        }
 
         return wrapper;
     }

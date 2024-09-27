@@ -24,10 +24,16 @@ public class JAuthServiceImpl extends CrudServiceImpl<JAuthDao, JAuthEntity, JAu
     public QueryWrapper<JAuthEntity> getWrapper(Map<String, Object> params){
         QueryWrapper<JAuthEntity> wrapper = new QueryWrapper<>();
 
-        String deptId = (String)params.get("deptId");
-        wrapper.eq(StringUtils.isNotBlank(deptId), "dept_id", deptId);
-        String merchantId = (String)params.get("merchantId");
-        wrapper.eq(StringUtils.isNotBlank(merchantId), "merchant_id", merchantId);
+        String agentId = (String) params.get("agentId");
+        if (StringUtils.isNotBlank(agentId)) {
+            wrapper.eq("agent_id", Long.parseLong(agentId));
+        }
+
+        String merchantId = (String) params.get("merchantId");
+        if (StringUtils.isNotBlank(merchantId)) {
+            wrapper.eq("merchant_id", Long.parseLong(merchantId));
+        }
+
         String cardno = (String)params.get("cardno");
         wrapper.eq(StringUtils.isNotBlank(cardno), "cardno", cardno);
         String trxtype = (String)params.get("trxtype");

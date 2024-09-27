@@ -18,15 +18,26 @@ import java.util.Date;
 public class JDepositDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    @Schema(description = "ID")
     private Long id;
+    @Schema(description = "创建者")
+    private Long creator;
+    @Schema(description = "创建时间")
+    private Date createDate;
+    @Schema(description = "更新者")
+    private Long updater;
+    @Schema(description = "更新时间")
+    private Date updateDate;
 
     // 商户ID
+    @Schema(description = "代理ID")
+    private Long agentId;
+    @Schema(description = "代理")
+    private String agentName;
     @Schema(description = "商户ID")
     private Long merchantId;
     @Schema(description = "商户")
     private String merchantName;
-
-    // 子商户ID
     @Schema(description = "商户ID")
     private Long subId;
     @Schema(description = "子商户名称")
@@ -53,15 +64,4 @@ public class JDepositDTO implements Serializable {
     private String applyid;
     @Schema(description = "状态")
     private Integer status;
-
-    // 基本信息
-    @Schema(description = "创建者")
-    private Long creator;
-    @Schema(description = "创建时间")
-    private Date createDate;
-    @Schema(description = "更新者")
-    private Long updater;
-    @Schema(description = "更新时间")
-    private Date updateDate;
-
 }

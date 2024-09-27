@@ -50,7 +50,6 @@ public class JCardController {
     @PreAuthorize("hasAuthority('zorg:jcard:page')")
     public Result<PageData<JCardDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
         PageData<JCardDTO> page = jCardService.page(params);
-
         return new Result<PageData<JCardDTO>>().ok(page);
     }
 
@@ -59,7 +58,6 @@ public class JCardController {
     @PreAuthorize("hasAuthority('zorg:jcard:info')")
     public Result<JCardDTO> get(@PathVariable("id") Long id) {
         JCardDTO data = jCardService.get(id);
-
         return new Result<JCardDTO>().ok(data);
     }
 
@@ -70,9 +68,7 @@ public class JCardController {
     public Result save(@RequestBody JCardDTO dto) {
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
-
         jCardService.save(dto);
-
         return new Result();
     }
 
@@ -83,9 +79,7 @@ public class JCardController {
     public Result update(@RequestBody JCardDTO dto) {
         //效验数据
         ValidatorUtils.validateEntity(dto, UpdateGroup.class, DefaultGroup.class);
-
         jCardService.update(dto);
-
         return new Result();
     }
 
@@ -96,9 +90,7 @@ public class JCardController {
     public Result delete(@RequestBody Long[] ids) {
         //效验数据
         AssertUtils.isArrayEmpty(ids, "id");
-
         jCardService.delete(ids);
-
         return new Result();
     }
 
@@ -108,7 +100,6 @@ public class JCardController {
     @PreAuthorize("hasAuthority('zorg:jcard:export')")
     public void export(@Parameter(hidden = true) @RequestParam Map<String, Object> params, HttpServletResponse response) throws Exception {
         List<JCardDTO> list = jCardService.list(params);
-
         ExcelUtils.exportExcelToTarget(response, null, "j_card", list, JCardExcel.class);
     }
 

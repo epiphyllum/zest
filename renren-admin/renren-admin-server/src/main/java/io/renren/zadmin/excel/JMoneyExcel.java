@@ -18,6 +18,12 @@ import java.util.Date;
 @HeadRowHeight(20)
 @ColumnWidth(25)
 public class JMoneyExcel {
+
+    @ExcelProperty(value = "商户号", index = 11)
+    private Long merchantId;
+    @ExcelProperty(value = "商户名", index = 12)
+    private String merchantName;
+
     @ExcelProperty(value = "通知id", index = 0)
     private String nid;
     @ExcelProperty(value = "业务关联id", index = 1)
@@ -40,10 +46,7 @@ public class JMoneyExcel {
     private String payeraccountcountry;
     @ExcelProperty(value = "附言", index = 10)
     private String ps;
-    @ExcelProperty(value = "商户号", index = 11)
-    private Long merchantId;
-    @ExcelProperty(value = "商户名", index = 12)
-    private String merchantName;
+
     @ExcelProperty(value = "创建时间", index = 13)
     private Date createDate;
 }

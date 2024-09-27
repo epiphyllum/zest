@@ -10,11 +10,11 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 /**
-* j_exchange
-*
-* @author epiphyllum epiphyllum.zhou@gmail.com
-* @since 3.0 2024-08-19
-*/
+ * j_exchange
+ *
+ * @author epiphyllum epiphyllum.zhou@gmail.com
+ * @since 3.0 2024-08-19
+ */
 @Data
 @Schema(description = "j_exchange")
 public class JExchangeDTO implements Serializable {
@@ -22,13 +22,26 @@ public class JExchangeDTO implements Serializable {
 
     @Schema(description = "ID")
     private Long id;
+    @Schema(description = "创建者")
+    private Long creator;
+    @Schema(description = "创建时间")
+    private Date createDate;
+    @Schema(description = "更新者")
+    private Long updater;
+    @Schema(description = "更新时间")
+    private Date updateDate;
 
-    //
+    // id相关
+    @Schema(description = "代理ID")
+    private Long agentId;
+    @Schema(description = "代理名")
+    private String agentName;
     @Schema(description = "商户ID")
     private Long merchantId;
     @Schema(description = "商户名")
     private String merchantName;
 
+    // 业务字段
     @Schema(description = "申请单流水")
     private String meraplid;
     @Schema(description = "到账币种")
@@ -63,13 +76,4 @@ public class JExchangeDTO implements Serializable {
     private BigDecimal exfee;
     @Schema(description = "汇率")
     private BigDecimal exfxrate;
-
-    @Schema(description = "创建者")
-    private Long creator;
-    @Schema(description = "创建时间")
-    private Date createDate;
-    @Schema(description = "更新者")
-    private Long updater;
-    @Schema(description = "更新时间")
-    private Date updateDate;
 }

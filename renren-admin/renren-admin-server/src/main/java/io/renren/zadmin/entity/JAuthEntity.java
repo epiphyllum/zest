@@ -26,14 +26,12 @@ public class JAuthEntity extends BaseEntity {
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date updateDate;
 
-    // 需要分拣到子商户
-    @TableField(fill = FieldFill.INSERT)
-    private Long deptId;
-    private String deptName;
-
-    // 冗余便于查找
+    private Long agentId;
+    private String agentName;
     private Long merchantId;
     private String merchantName;
+    private Long subId;
+    private String subName;
 
     private String cardno;
     private String logkv;

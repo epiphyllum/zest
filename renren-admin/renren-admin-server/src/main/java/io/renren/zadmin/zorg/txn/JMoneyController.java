@@ -13,7 +13,7 @@ import io.renren.commons.tools.validator.group.UpdateGroup;
 import io.renren.zadmin.dto.JMoneyDTO;
 import io.renren.zadmin.excel.JMoneyExcel;
 import io.renren.zadmin.service.JMoneyService;
-import io.renren.zin.service.va.MerchantMoneyInHandler;
+import io.renren.zin.service.accountmanage.AccountManageNotify;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -40,7 +40,7 @@ public class JMoneyController {
     @Resource
     private JMoneyService jMoneyService;
     @Resource
-    private MerchantMoneyInHandler merchantMoneyInHandler;
+    private AccountManageNotify accountManageNotify;
 
     @GetMapping("page")
     @Operation(summary = "分页")
@@ -53,7 +53,6 @@ public class JMoneyController {
     @PreAuthorize("hasAuthority('zorg:jmoney:page')")
     public Result<PageData<JMoneyDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params){
         PageData<JMoneyDTO> page = jMoneyService.page(params);
-
         return new Result<PageData<JMoneyDTO>>().ok(page);
     }
 
@@ -62,7 +61,6 @@ public class JMoneyController {
     @PreAuthorize("hasAuthority('zorg:jmoney:info')")
     public Result<JMoneyDTO> get(@PathVariable("id") Long id){
         JMoneyDTO data = jMoneyService.get(id);
-
         return new Result<JMoneyDTO>().ok(data);
     }
 
@@ -73,9 +71,7 @@ public class JMoneyController {
     public Result save(@RequestBody JMoneyDTO dto){
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
-
         jMoneyService.save(dto);
-
         return new Result();
     }
 
@@ -86,9 +82,7 @@ public class JMoneyController {
     public Result update(@RequestBody JMoneyDTO dto){
         //效验数据
         ValidatorUtils.validateEntity(dto, UpdateGroup.class, DefaultGroup.class);
-
         jMoneyService.update(dto);
-
         return new Result();
     }
 
@@ -109,7 +103,7 @@ public class JMoneyController {
     @PreAuthorize("hasAuthority('zorg:jmoney:export')")
     public void export(@Parameter(hidden = true) @RequestParam Map<String, Object> params, HttpServletResponse response) throws Exception {
         List<JMoneyDTO> list = jMoneyService.list(params);
-        ExcelUtils.exportExcelToTarget(response, null, "j_money", list, JMoneyExcel.class);
+        ExcelUtils.exportExcelToTarget(response, null, "入金流水", list, JMoneyExcel.class);
     }
 
     //////////////////////////////////////////
@@ -123,7 +117,7 @@ public class JMoneyController {
     @LogOperation("匹配来账")
     @PreAuthorize("hasAuthority('zorg:jmoney:update')")
     public Result match(@RequestParam("id") Long id)  {
-        if (merchantMoneyInHandler.match(id)) {
+        if (accountManageNotify.match(id)) {
             return Result.ok;
         } else {
             return Result.fail(9999, "匹配失败");

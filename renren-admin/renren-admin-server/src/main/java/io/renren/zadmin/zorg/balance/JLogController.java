@@ -50,7 +50,6 @@ public class JLogController {
     @PreAuthorize("hasAuthority('zorg:jlog:page')")
     public Result<PageData<JLogDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params){
         PageData<JLogDTO> page = jLogService.page(params);
-
         return new Result<PageData<JLogDTO>>().ok(page);
     }
 
@@ -59,7 +58,6 @@ public class JLogController {
     @PreAuthorize("hasAuthority('zorg:jlog:info')")
     public Result<JLogDTO> get(@PathVariable("id") Long id){
         JLogDTO data = jLogService.get(id);
-
         return new Result<JLogDTO>().ok(data);
     }
 
@@ -70,9 +68,7 @@ public class JLogController {
     public Result save(@RequestBody JLogDTO dto){
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
-
         jLogService.save(dto);
-
         return new Result();
     }
 
@@ -104,7 +100,7 @@ public class JLogController {
     @PreAuthorize("hasAuthority('zorg:jlog:export')")
     public void export(@Parameter(hidden = true) @RequestParam Map<String, Object> params, HttpServletResponse response) throws Exception {
         List<JLogDTO> list = jLogService.list(params);
-        ExcelUtils.exportExcelToTarget(response, null, "j_log", list, JLogExcel.class);
+        ExcelUtils.exportExcelToTarget(response, null, "账变流水", list, JLogExcel.class);
     }
 
 }

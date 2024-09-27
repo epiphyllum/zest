@@ -2,19 +2,20 @@ package io.renren.zin;
 
 import io.renren.commons.tools.exception.RenException;
 import io.renren.zin.config.ZinRequester;
-import io.renren.zin.service.auth.dto.TAuthTxnNotify;
-import io.renren.zin.service.card.ZinCardService;
-import io.renren.zin.service.card.dto.TCardApplyNotify;
-import io.renren.zin.service.cardstatus.dto.TCardChangeNotify;
+import io.renren.zin.service.accountmanage.ZinAccountManageService;
+import io.renren.zin.service.accountmanage.dto.TMoneyInNotify;
+import io.renren.zin.service.cardapply.ZinCardApplyService;
+import io.renren.zin.service.cardapply.dto.TCardApplyNotify;
 import io.renren.zin.service.cardstatus.ZinCardStatusService;
+import io.renren.zin.service.cardstatus.dto.TCardChangeNotify;
+import io.renren.zin.service.cardtxn.ZinCardTxnService;
+import io.renren.zin.service.cardtxn.dto.TAuthTxnNotify;
 import io.renren.zin.service.exchange.ZinExchangeService;
 import io.renren.zin.service.exchange.dto.TExchangeStateNotify;
-import io.renren.zin.service.money.ZinMoneyService;
-import io.renren.zin.service.money.dto.TMoneyAccountNotify;
 import io.renren.zin.service.sub.ZinSubService;
-import io.renren.zin.service.va.ZinVaService;
-import io.renren.zin.service.va.dto.TMoneyInNotify;
 import io.renren.zin.service.sub.dto.TSubStatusNotify;
+import io.renren.zin.service.umbrella.ZinUmbrellaService;
+import io.renren.zin.service.umbrella.dto.TMoneyAccountNotify;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -31,19 +32,29 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class ZinController {
     @Resource
-    private ZinCardService zinCardService;
+    private ZinCardApplyService zinCardApplyService;
     @Resource
     private ZinCardStatusService zinCardStatusService;
+    @Resource
+    private ZinCardTxnService zinCardTxnService;
     @Resource
     private ZinExchangeService zinExchangeService;
     @Resource
     private ZinSubService zinSubService;
     @Resource
-    private ZinVaService zinVaService;
+    private ZinAccountManageService zinAccountManageService;
     @Resource
-    private ZinMoneyService zinMoneyService;
+    private ZinUmbrellaService zinUmbrellaService;
     @Resource
     private ZinRequester requester;
+
+    // 银行账户状态通知
+    @PostMapping("bnfauditrst")
+    public String bnfauditrst(HttpServletRequest request, @RequestBody String body, @RequestHeader("X-AGCP-Auth") String auth, @RequestHeader("X-AGCP-Date") String date) {
+        TMoneyAccountNotify notify = requester.<TMoneyAccountNotify>verify(request, body, auth, date, TMoneyAccountNotify.class);
+        zinUmbrellaService.moneyAccountStatusNotify(notify);
+        return "OK";
+    }
 
     // 换汇申请单状态通知
     @PostMapping("applynotify")
@@ -57,7 +68,7 @@ public class ZinController {
     @PostMapping("vpaauditrst")
     public String vpaauditrst(HttpServletRequest request, @RequestBody String body, @RequestHeader("X-AGCP-Auth") String auth, @RequestHeader("X-AGCP-Date") String date) {
         TCardApplyNotify tCardApplyNotify = requester.<TCardApplyNotify>verify(request, body, auth, date, TCardApplyNotify.class);
-        zinCardService.cardApplyNotify(tCardApplyNotify);
+        zinCardApplyService.cardApplyNotify(tCardApplyNotify);
         return "OK";
     }
 
@@ -74,6 +85,7 @@ public class ZinController {
     public String cardtrxrst(HttpServletRequest request, @RequestBody String body, @RequestHeader("X-AGCP-Auth") String auth, @RequestHeader("X-AGCP-Date") String date) {
         TAuthTxnNotify tAuthTxnNotify = requester.<TAuthTxnNotify>verify(request, body, auth, date, TAuthTxnNotify.class);
         log.info("授权交易通知:{}", body);
+        zinCardTxnService.authTxnNotify(tAuthTxnNotify);
         return "OK";
     }
 
@@ -90,20 +102,7 @@ public class ZinController {
     public String acctbalauditrst(HttpServletRequest request, @RequestBody String body, @RequestHeader("X-AGCP-Auth") String auth, @RequestHeader("X-AGCP-Date") String date) {
         TMoneyInNotify tMoneyInNotify = requester.verify(request, body, auth, date, TMoneyInNotify.class);
         try {
-            zinVaService.moneyInNotify(tMoneyInNotify);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            throw new RenException("process failed");
-        }
-        return "OK";
-    }
-
-    //
-    @PostMapping("bnfauditrst")
-    public String bnfauditrst(HttpServletRequest request, @RequestBody String body, @RequestHeader("X-AGCP-Auth") String auth, @RequestHeader("X-AGCP-Date") String date) {
-        TMoneyAccountNotify notify = requester.verify(request, body, auth, date, TMoneyAccountNotify.class);
-        try {
-            zinMoneyService.moneyAccountStatusHandle(notify);
+            zinAccountManageService.moneyInNotify(tMoneyInNotify);
         } catch (Exception ex) {
             ex.printStackTrace();
             throw new RenException("process failed");

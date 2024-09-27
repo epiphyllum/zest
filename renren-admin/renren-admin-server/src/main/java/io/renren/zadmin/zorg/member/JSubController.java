@@ -12,13 +12,13 @@ import io.renren.commons.tools.validator.ValidatorUtils;
 import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
-import io.renren.zadmin.dao.JMerchantDao;
+import io.renren.zadmin.dao.JSubDao;
 import io.renren.zadmin.dto.JAgentDTO;
-import io.renren.zadmin.dto.JMerchantDTO;
-import io.renren.zadmin.entity.JMerchantEntity;
-import io.renren.zadmin.excel.JMerchantExcel;
+import io.renren.zadmin.dto.JSubDTO;
+import io.renren.zadmin.entity.JSubEntity;
+import io.renren.zadmin.excel.JSubExcel;
 import io.renren.zadmin.service.JAgentService;
-import io.renren.zadmin.service.JMerchantService;
+import io.renren.zadmin.service.JSubService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -43,11 +43,11 @@ import java.util.Map;
 @Tag(name = "j_jsub")
 public class JSubController {
     @Resource
-    private JMerchantService jMerchantService;
+    private JSubService jSubService;
     @Resource
     private JAgentService jAgentService;
     @Resource
-    private JMerchantDao jMerchantDao;
+    private JSubDao jSubDao;
 
     @GetMapping("page")
     @Operation(summary = "分页")
@@ -58,30 +58,30 @@ public class JSubController {
             @Parameter(name = Constant.ORDER, description = "排序方式，可选值(asc、desc)")
     })
     @PreAuthorize("hasAuthority('zorg:jsub:page')")
-    public Result<PageData<JMerchantDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
+    public Result<PageData<JSubDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
         params.put("child", 1L);
-        PageData<JMerchantDTO> page = jMerchantService.page(params);
-        return new Result<PageData<JMerchantDTO>>().ok(page);
+        PageData<JSubDTO> page = jSubService.page(params);
+        return new Result<PageData<JSubDTO>>().ok(page);
     }
 
     @GetMapping("{id}")
     @Operation(summary = "信息")
     @PreAuthorize("hasAuthority('zorg:jsub:info')")
-    public Result<JMerchantDTO> get(@PathVariable("id") Long id) {
-        JMerchantDTO data = jMerchantService.get(id);
+    public Result<JSubDTO> get(@PathVariable("id") Long id) {
+        JSubDTO data = jSubService.get(id);
 
-        return new Result<JMerchantDTO>().ok(data);
+        return new Result<JSubDTO>().ok(data);
     }
 
     @PostMapping
     @Operation(summary = "保存")
     @LogOperation("保存")
     @PreAuthorize("hasAuthority('zorg:jsub:save')")
-    public Result save(@RequestBody JMerchantDTO dto) {
+    public Result save(@RequestBody JSubDTO dto) {
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
 
-        jMerchantService.save(dto);
+        jSubService.save(dto);
 
         return new Result();
     }
@@ -90,10 +90,10 @@ public class JSubController {
     @Operation(summary = "修改")
     @LogOperation("修改")
     @PreAuthorize("hasAuthority('zorg:jsub:update')")
-    public Result update(@RequestBody JMerchantDTO dto) {
+    public Result update(@RequestBody JSubDTO dto) {
         //效验数据
         ValidatorUtils.validateEntity(dto, UpdateGroup.class, DefaultGroup.class);
-        jMerchantService.update(dto);
+        jSubService.update(dto);
         return new Result();
     }
 
@@ -104,7 +104,7 @@ public class JSubController {
     public Result delete(@RequestBody Long[] ids) {
         //效验数据
         AssertUtils.isArrayEmpty(ids, "id");
-        jMerchantService.delete(ids);
+        jSubService.delete(ids);
         return new Result();
     }
 
@@ -113,8 +113,8 @@ public class JSubController {
     @LogOperation("导出")
     @PreAuthorize("hasAuthority('zorg:jsub:export')")
     public void export(@Parameter(hidden = true) @RequestParam Map<String, Object> params, HttpServletResponse response) throws Exception {
-        List<JMerchantDTO> list = jMerchantService.list(params);
-        ExcelUtils.exportExcelToTarget(response, null, "j_merchant", list, JMerchantExcel.class);
+        List<JSubDTO> list = jSubService.list(params);
+        ExcelUtils.exportExcelToTarget(response, null, "j_merchant", list, JSubExcel.class);
     }
 
 
@@ -137,13 +137,11 @@ public class JSubController {
      */
     @GetMapping("merchantList")
     @PreAuthorize("hasAuthority('zorg:jsub:info')")
-    public Result<List<JMerchantDTO>> merchantList() {
-        Result<List<JMerchantDTO>> result = new Result<>();
-        List<JMerchantEntity> jMerchantEntities = jMerchantDao.selectList(Wrappers.<JMerchantEntity>lambdaQuery()
-                .eq(JMerchantEntity::getParent, 0L)
-        );
-        List<JMerchantDTO> jMerchantDTOS = ConvertUtils.sourceToTarget(jMerchantEntities, JMerchantDTO.class);
-        result.setData(jMerchantDTOS);
+    public Result<List<JSubDTO>> merchantList() {
+        Result<List<JSubDTO>> result = new Result<>();
+        List<JSubEntity> jSubEntities = jSubDao.selectList(Wrappers.<JSubEntity>lambdaQuery());
+        List<JSubDTO> jSubDTOS = ConvertUtils.sourceToTarget(jSubEntities, JSubDTO.class);
+        result.setData(jSubDTOS);
         return result;
     }
 

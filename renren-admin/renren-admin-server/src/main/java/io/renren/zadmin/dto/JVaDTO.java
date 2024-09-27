@@ -19,9 +19,19 @@ import java.util.Date;
 @Schema(description = "j_va")
 public class JVaDTO implements Serializable {
     private static final long serialVersionUID = 1L;
+
     @Schema(description = "ID")
     private Long id;
+    @Schema(description = "创建者")
+    private Long creator;
+    @Schema(description = "创建时间")
+    private Date createDate;
+    @Schema(description = "更新者")
+    private Long updater;
+    @Schema(description = "更新时间")
+    private Date updateDate;
 
+    // 业务字段
     @Schema(description = "通联虚拟户")
     private String accountno;
     @Schema(description = "币种")
@@ -31,13 +41,4 @@ public class JVaDTO implements Serializable {
     @Schema(description = "收款账户号")
     private String vaaccountno;
 
-
-    @Schema(description = "创建者")
-    private Long creator;
-    @Schema(description = "创建时间")
-    private Date createDate;
-    @Schema(description = "更新者")
-    private Long updater;
-    @Schema(description = "更新时间")
-    private Date updateDate;
 }

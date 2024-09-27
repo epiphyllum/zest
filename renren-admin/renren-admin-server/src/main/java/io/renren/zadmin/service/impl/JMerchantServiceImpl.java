@@ -3,15 +3,10 @@ package io.renren.zadmin.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.renren.commons.mybatis.annotation.DataFilter;
 import io.renren.commons.mybatis.service.impl.CrudServiceImpl;
 import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.constant.Constant;
-import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.page.PageData;
 import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.dao.SysDeptDao;
@@ -24,14 +19,15 @@ import io.renren.zadmin.entity.JBalanceEntity;
 import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zadmin.service.JMerchantService;
 import io.renren.zbalance.BalanceType;
-import io.renren.zbalance.LedgerConstant;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * j_merchant
@@ -161,8 +157,6 @@ public class JMerchantServiceImpl extends CrudServiceImpl<JMerchantDao, JMerchan
         JMerchantEntity jMerchantEntity = ConvertUtils.sourceToTarget(dto, JMerchantEntity.class);
 
         // 子商户->父商户信息
-        jMerchantEntity.setParent(dto.getParent());
-        jMerchantEntity.setParentName(parentDept.getName());
         jMerchantEntity.setAgentId(agentId);
         jMerchantEntity.setAgentName(dto.getAgentName());
         jMerchantEntity.setId(deptEntity.getId());

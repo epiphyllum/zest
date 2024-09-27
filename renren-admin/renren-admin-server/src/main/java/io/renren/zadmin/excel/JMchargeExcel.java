@@ -21,10 +21,22 @@ import java.util.Date;
 public class JMchargeExcel {
     @ExcelProperty(value = "ID", index = 0)
     private Long id;
-    @ExcelProperty(value = "商户ID", index = 1)
-    private Long deptId;
-    @ExcelProperty(value = "商户名", index = 2)
-    private String deptName;
+
+
+    @ExcelProperty(value = "代理ID", index = 0)
+    private Long agentId;
+    @ExcelProperty(value = "代理名", index = 1)
+    private String agentName;
+    @ExcelProperty(value = "商户ID", index = 4)
+    private Long merchantId;
+    @ExcelProperty(value = "商户", index = 5)
+    private String merchantName;
+    @ExcelProperty(value = "子商户ID", index = 2)
+    private Long subId;
+    @ExcelProperty(value = "子商户", index = 3)
+    private String subName;
+
+
     @ExcelProperty(value = "打款方姓名", index = 3)
     private String payeraccountname;
     @ExcelProperty(value = "打款方银行账号", index = 4)

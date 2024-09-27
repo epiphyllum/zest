@@ -1,12 +1,10 @@
 package io.renren.zadmin.zorg.config;
 
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.log.annotation.LogOperation;
 import io.renren.commons.tools.constant.Constant;
 import io.renren.commons.tools.page.PageData;
-import io.renren.commons.tools.utils.ConvertUtils;
-import io.renren.commons.tools.utils.Result;
 import io.renren.commons.tools.utils.ExcelUtils;
+import io.renren.commons.tools.utils.Result;
 import io.renren.commons.tools.validator.AssertUtils;
 import io.renren.commons.tools.validator.ValidatorUtils;
 import io.renren.commons.tools.validator.group.AddGroup;
@@ -14,19 +12,16 @@ import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
 import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.dto.JMaccountDTO;
-import io.renren.zadmin.dto.JMerchantDTO;
-import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zadmin.excel.JMaccountExcel;
 import io.renren.zadmin.service.JMaccountService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.security.access.prepost.PreAuthorize;
 import jakarta.annotation.Resource;
-import org.springframework.web.bind.annotation.*;
-
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -44,7 +39,6 @@ import java.util.Map;
 public class JMaccountController {
     @Resource
     private JMaccountService jMaccountService;
-
     @Resource
     private JMerchantDao jMerchantDao;
 
@@ -59,7 +53,6 @@ public class JMaccountController {
     @PreAuthorize("hasAuthority('zorg:jmaccount:page')")
     public Result<PageData<JMaccountDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
         PageData<JMaccountDTO> page = jMaccountService.page(params);
-
         return new Result<PageData<JMaccountDTO>>().ok(page);
     }
 
@@ -68,7 +61,6 @@ public class JMaccountController {
     @PreAuthorize("hasAuthority('zorg:jmaccount:info')")
     public Result<JMaccountDTO> get(@PathVariable("id") Long id) {
         JMaccountDTO data = jMaccountService.get(id);
-
         return new Result<JMaccountDTO>().ok(data);
     }
 
@@ -79,9 +71,7 @@ public class JMaccountController {
     public Result save(@RequestBody JMaccountDTO dto) {
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
-
         jMaccountService.save(dto);
-
         return new Result();
     }
 
@@ -92,9 +82,7 @@ public class JMaccountController {
     public Result update(@RequestBody JMaccountDTO dto) {
         //效验数据
         ValidatorUtils.validateEntity(dto, UpdateGroup.class, DefaultGroup.class);
-
         jMaccountService.update(dto);
-
         return new Result();
     }
 
@@ -105,9 +93,7 @@ public class JMaccountController {
     public Result delete(@RequestBody Long[] ids) {
         //效验数据
         AssertUtils.isArrayEmpty(ids, "id");
-
         jMaccountService.delete(ids);
-
         return new Result();
     }
 
@@ -117,21 +103,6 @@ public class JMaccountController {
     @PreAuthorize("hasAuthority('zorg:jmaccount:export')")
     public void export(@Parameter(hidden = true) @RequestParam Map<String, Object> params, HttpServletResponse response) throws Exception {
         List<JMaccountDTO> list = jMaccountService.list(params);
-
         ExcelUtils.exportExcelToTarget(response, null, "j_maccount", list, JMaccountExcel.class);
     }
-
-    ///////////////
-    @GetMapping("merchantList")
-    @PreAuthorize("hasAuthority('zorg:jmaccount:info')")
-    public Result<List<JMerchantDTO>> merchantList() {
-        Result<List<JMerchantDTO>> result = new Result<>();
-        List<JMerchantEntity> jMerchantEntities = jMerchantDao.selectList(Wrappers.<JMerchantEntity>lambdaQuery()
-                .eq(JMerchantEntity::getParent, 0L)
-        );
-        List<JMerchantDTO> jMerchantDTOS = ConvertUtils.sourceToTarget(jMerchantEntities, JMerchantDTO.class);
-        result.setData(jMerchantDTOS);
-        return result;
-    }
-
 }

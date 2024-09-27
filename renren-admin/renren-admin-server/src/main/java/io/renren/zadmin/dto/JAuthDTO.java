@@ -20,7 +20,18 @@ import java.util.Date;
 public class JAuthDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    @Schema(description = "ID")
     private Long id;
+    @Schema(description = "创建者")
+    private Long creator;
+    @Schema(description = "创建时间")
+    private Date createDate;
+    @Schema(description = "更新者")
+    private Long updater;
+    @Schema(description = "更新时间")
+    private Date updateDate;
+
+    // ID相关
     @Schema(description = "子商户ID")
     private Long deptId;
     @Schema(description = "子商户")
@@ -29,6 +40,8 @@ public class JAuthDTO implements Serializable {
     private Long merchantId;
     @Schema(description = "商户")
     private String merchantName;
+
+    // 业务字段
     @Schema(description = "卡号")
     private String cardno;
     @Schema(description = "流水号")
@@ -51,13 +64,5 @@ public class JAuthDTO implements Serializable {
     private String trxaddr;
     @Schema(description = "授权码")
     private String authcode;
-    @Schema(description = "创建者")
-    private Long creator;
-    @Schema(description = "创建时间")
-    private Date createDate;
-    @Schema(description = "更新者")
-    private Long updater;
-    @Schema(description = "更新时间")
-    private Date updateDate;
 
 }

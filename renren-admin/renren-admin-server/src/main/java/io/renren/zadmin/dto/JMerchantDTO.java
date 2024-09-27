@@ -27,12 +27,6 @@ public class JMerchantDTO implements Serializable {
     @Schema(description = "代理")
     private String agentName;
 
-    // 父商户
-    @Schema(description = "父商户ID")
-    private Long parent;
-    @Schema(description = "父商户")
-    private String parentName;
-
     @Schema(description = "跟踪号")
     private String meraplid;
     @Schema(description = "商户名称")

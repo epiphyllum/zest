@@ -87,7 +87,7 @@ public class Ledger {
     }
 
     // 原始凭证(300): 商户入金D账户 ---> 商户VA账户
-    public void ledgeI2v(JMerchantEntity merchant, JInoutEntity entity) {
+    public void ledgeI2v(JMerchantEntity merchant, JAllocateEntity entity) {
         JBalanceEntity inAccount = ledgerUtil.getInAccount(merchant.getId(), entity.getCurrency());
         JBalanceEntity vaAccount = ledgerUtil.getVaAccount(merchant.getId(), entity.getCurrency());
         JBalanceEntity depositAccount = ledgerUtil.getDepositAccount(merchant.getId(), entity.getCurrency());
@@ -133,7 +133,7 @@ public class Ledger {
     }
 
     // 商户va -> 入金账户
-    public void ledgeV2i(JMerchantEntity merchant, JInoutEntity entity) {
+    public void ledgeV2i(JMerchantEntity merchant, JAllocateEntity entity) {
         JBalanceEntity inAccount = ledgerUtil.getInAccount(merchant.getId(), entity.getCurrency());
         JBalanceEntity vaAccount = ledgerUtil.getVaAccount(merchant.getId(), entity.getCurrency());
         JBalanceEntity depositAccount = ledgerUtil.getDepositAccount(merchant.getId(), entity.getCurrency());
@@ -166,7 +166,7 @@ public class Ledger {
     }
 
     // 商户va ---> 子商户va
-    public void ledgeM2s(JMerchantEntity merchant, JInoutEntity entity) {
+    public void ledgeM2s(JMerchantEntity merchant, JAllocateEntity entity) {
         JBalanceEntity mVa = ledgerUtil.getVaAccount(merchant.getId(), entity.getCurrency());
         JBalanceEntity sVa = ledgerUtil.getSubVaAccount(merchant.getId(), entity.getCurrency());
         // 记账1: 商户Va-
@@ -185,7 +185,7 @@ public class Ledger {
     }
 
     // 子商户va -->  商户va
-    public void ledgeS2m(JMerchantEntity merchant, JInoutEntity entity) {
+    public void ledgeS2m(JMerchantEntity merchant, JAllocateEntity entity) {
         JBalanceEntity mVa = ledgerUtil.getVaAccount(merchant.getId(), entity.getCurrency());
         JBalanceEntity sVa = ledgerUtil.getSubVaAccount(merchant.getId(), entity.getCurrency());
         // 记账1: 商户Va+
@@ -228,7 +228,6 @@ public class Ledger {
 
     // 卡资金提取: 将卡资金退回到子商户va
     public void ledgeCardWithdraw(JMerchantEntity sub, JWithdrawEntity entity) {
-
         // 子商户va
         JBalanceEntity sVa = ledgerUtil.getSubVaAccount(sub.getId(), entity.getCurrency());
 

@@ -27,13 +27,14 @@ public class JWithdrawEntity extends BaseEntity {
     private Date updateDate;
 
     /**
-     * 子商户ID
+     *
      */
-    private Long subId;
-    private String subName;
-
+    private Long agentId;
+    private String agentName;
     private Long merchantId;
     private String merchantName;
+    private Long subId;
+    private String subName;
 
     private String meraplid;
     private String cardno;

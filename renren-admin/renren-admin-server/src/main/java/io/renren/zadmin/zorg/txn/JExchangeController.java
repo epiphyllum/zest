@@ -128,9 +128,7 @@ public class JExchangeController {
     @PreAuthorize("hasAuthority('zorg:jexchange:export')")
     public Result<List<JMerchantDTO>> merchantList() {
         Result<List<JMerchantDTO>> result = new Result<>();
-        List<JMerchantEntity> jMerchantEntities = jMerchantDao.selectList(Wrappers.<JMerchantEntity>lambdaQuery()
-                .eq(JMerchantEntity::getParent, 0L)
-        );
+        List<JMerchantEntity> jMerchantEntities = jMerchantDao.selectList(Wrappers.<JMerchantEntity>lambdaQuery());
         List<JMerchantDTO> jMerchantDTOS = ConvertUtils.sourceToTarget(jMerchantEntities, JMerchantDTO.class);
         result.setData(jMerchantDTOS);
         return result;

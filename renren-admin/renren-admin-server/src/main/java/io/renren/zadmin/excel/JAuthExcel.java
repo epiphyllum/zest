@@ -19,10 +19,13 @@ import java.util.Date;
 @HeadRowHeight(20)
 @ColumnWidth(25)
 public class JAuthExcel {
+
     @ExcelProperty(value = "子商户ID", index = 0)
     private Long deptId;
     @ExcelProperty(value = "商户ID", index = 1)
     private Long merchantId;
+
+
     @ExcelProperty(value = "卡号", index = 2)
     private String cardno;
     @ExcelProperty(value = "流水号", index = 3)

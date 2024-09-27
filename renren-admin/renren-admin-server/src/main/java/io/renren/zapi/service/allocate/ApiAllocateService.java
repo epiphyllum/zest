@@ -2,7 +2,7 @@ package io.renren.zapi.service.allocate;
 
 
 import io.renren.commons.tools.utils.Result;
-import io.renren.zadmin.entity.JInoutEntity;
+import io.renren.zadmin.entity.JAllocateEntity;
 import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zapi.ApiContext;
 import io.renren.zapi.ApiService;
@@ -27,7 +27,7 @@ public class ApiAllocateService {
         // 记账
         {
             JMerchantEntity merchant = context.getMerchant();
-            JInoutEntity entity = new JInoutEntity();
+            JAllocateEntity entity = new JAllocateEntity();
             entity.setMerchantId(merchantId);
             entity.setMerchantName(merchant.getCusname());
             entity.setFromId(null);
@@ -49,7 +49,7 @@ public class ApiAllocateService {
         // 记账
         {
             JMerchantEntity merchant = context.getMerchant();
-            JInoutEntity entity = new JInoutEntity();
+            JAllocateEntity entity = new JAllocateEntity();
             entity.setMerchantId(merchantId);
             entity.setMerchantName(merchant.getCusname());
             entity.setFromId(null);
@@ -71,7 +71,7 @@ public class ApiAllocateService {
         // 记账
         {
             JMerchantEntity merchant = context.getMerchant();
-            JInoutEntity entity = new JInoutEntity();
+            JAllocateEntity entity = new JAllocateEntity();
             entity.setMerchantId(merchantId);
             entity.setMerchantName(merchant.getCusname());
             entity.setFromId(null);
@@ -101,7 +101,7 @@ public class ApiAllocateService {
 
         {
             JMerchantEntity merchant = context.getMerchant();
-            JInoutEntity entity = new JInoutEntity();
+            JAllocateEntity entity = new JAllocateEntity();
             entity.setMerchantId(merchantId);
             entity.setMerchantName(merchant.getCusname());
             entity.setFromId(null);

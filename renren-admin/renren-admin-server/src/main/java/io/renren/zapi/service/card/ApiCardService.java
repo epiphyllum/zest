@@ -1,16 +1,18 @@
 package io.renren.zapi.service.card;
 
+import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.commons.tools.utils.Result;
 import io.renren.zapi.ApiContext;
 import io.renren.zapi.ApiService;
 import io.renren.zapi.service.card.dto.*;
-import io.renren.zin.service.card.ZinCardService;
-import io.renren.zin.service.card.dto.*;
+import io.renren.zin.service.TResult;
+import io.renren.zin.service.cardapply.ZinCardApplyService;
+import io.renren.zin.service.cardapply.dto.*;
 import io.renren.zin.service.cardstatus.ZinCardStatusService;
 import io.renren.zin.service.cardstatus.dto.*;
-import io.renren.zin.service.deposit.ZinDepositService;
-import io.renren.zin.service.deposit.dto.*;
+import io.renren.zin.service.cardmoney.ZinCardMoneyService;
+import io.renren.zin.service.cardmoney.dto.*;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
@@ -20,11 +22,11 @@ public class ApiCardService {
     @Resource
     private ApiService apiService;
     @Resource
-    private ZinCardService zinCardService;
+    private ZinCardApplyService zinCardApplyService;
     @Resource
     private ZinCardStatusService zinCardStatusService;
     @Resource
-    private ZinDepositService zinDepositService;
+    private ZinCardMoneyService zinCardMoneyService;
 
     // 开卡
     public Result<NewCardRes> newCard(Long merchantId, String reqId, String name, String body, String sign) {
@@ -32,7 +34,7 @@ public class ApiCardService {
         NewCardReq request = apiService.<NewCardReq>initRequest(NewCardReq.class, context, merchantId, reqId, name, body, sign);
 
         TCardSubApplyRequest tCardSubApplyRequest = ConvertUtils.sourceToTarget(request, TCardSubApplyRequest.class);
-        TCardSubApplyResponse tCardSubApplyResponse = zinCardService.cardSubApply(tCardSubApplyRequest);
+        TCardSubApplyResponse tCardSubApplyResponse = zinCardApplyService.cardSubApply(tCardSubApplyRequest);
         NewCardRes newCardRes = ConvertUtils.sourceToTarget(tCardSubApplyResponse, NewCardRes.class);
 
         Result<NewCardRes> result = new Result<>();
@@ -46,7 +48,7 @@ public class ApiCardService {
         CardApplyQuery request = apiService.<CardApplyQuery>initRequest(CardApplyQuery.class, context, merchantId, reqId, name, body, sign);
 
         TCardApplyQuery tCardApplyQuery = ConvertUtils.sourceToTarget(request, TCardApplyQuery.class);
-        TCardApplyResponse tCardApplyResponse = zinCardService.cardApplyQuery(tCardApplyQuery);
+        TCardApplyResponse tCardApplyResponse = zinCardApplyService.cardApplyQuery(tCardApplyQuery);
         CardApplyQueryRes cardApplyQueryRes = ConvertUtils.sourceToTarget(tCardApplyResponse, CardApplyQueryRes.class);
 
         Result<CardApplyQueryRes> result = new Result<>();
@@ -78,7 +80,7 @@ public class ApiCardService {
         CardPayInfoReq request = apiService.<CardPayInfoReq>initRequest(CardPayInfoReq.class, context, merchantId, reqId, name, body, sign);
 
         TCardPayInfoRequest tCardPayInfoRequest = ConvertUtils.sourceToTarget(request, TCardPayInfoRequest.class);
-        TCardPayInfoResponse tCardPayInfoResponse = zinCardService.cardPayInfo(tCardPayInfoRequest);
+        TCardPayInfoResponse tCardPayInfoResponse = zinCardApplyService.cardPayInfo(tCardPayInfoRequest);
         CardPayInfoRes cardPayInfoRes = ConvertUtils.sourceToTarget(tCardPayInfoResponse, CardPayInfoRes.class);
 
         Result<CardPayInfoRes> result = new Result<>();
@@ -87,40 +89,46 @@ public class ApiCardService {
     }
 
     // 卡状态变更申请
-    public Result<CardChangeRes> cardChange(Long merchantId, String reqId, String name, String body, String sign) {
+    public Result cardChange(Long merchantId, String reqId, String name, String body, String sign) {
         ApiContext context = new ApiContext();
         CardChangeReq request = apiService.<CardChangeReq>initRequest(CardChangeReq.class, context, merchantId, reqId, name, body, sign);
 
+        // 准备应答
+        TResult tResult = null;
+
         switch (request.getChangetype()) {
-            case "loss":
+            case CardConstant.CARD_LOSS:
                 TCardLossRequest tCardLossRequest = ConvertUtils.sourceToTarget(request, TCardLossRequest.class);
-                TCardLossResponse tCardLossResponse = zinCardStatusService.cardLoss(tCardLossRequest);
+                tResult = zinCardStatusService.cardLoss(tCardLossRequest);
                 break;
-            case "lossDrop":
+            case CardConstant.CARD_UNLOSS:
                 TCardUnlossRequest tCardUnlossRequest = ConvertUtils.sourceToTarget(request, TCardUnlossRequest.class);
-                TCardUnlossResponse tCardUnlossResponse = zinCardStatusService.cardUnloss(tCardUnlossRequest);
+                tResult = zinCardStatusService.cardUnloss(tCardUnlossRequest);
                 break;
-            case "cancel":
+            case CardConstant.CARD_CANCEL:
                 TCardCancelRequest tCardCancelRequest = ConvertUtils.sourceToTarget(request, TCardCancelRequest.class);
-                TCardCancelResponse tCardCancelResponse = zinCardStatusService.cardCancel(tCardCancelRequest);
+                tResult = zinCardStatusService.cardCancel(tCardCancelRequest);
                 break;
-            case "cancelDrop":
+            case CardConstant.CARD_UNCANCEL:
                 TCardUncancelRequest tCardUncancelRequest = ConvertUtils.sourceToTarget(request, TCardUncancelRequest.class);
-                TCardUncancelResponse tCardUncancelResponse = zinCardStatusService.cardUncancel(tCardUncancelRequest);
+                tResult = zinCardStatusService.cardUncancel(tCardUncancelRequest);
                 break;
-            case "freeze":
+            case CardConstant.CARD_FREEZE:
                 TCardFreezeRequest tCardFreezeRequest = ConvertUtils.sourceToTarget(request, TCardFreezeRequest.class);
-                TCardFreezeResponse tCardFreezeResponse = zinCardStatusService.cardFreeze(tCardFreezeRequest);
+                tResult = zinCardStatusService.cardFreeze(tCardFreezeRequest);
                 break;
-            case "freezeDrop":
+            case CardConstant.CARD_UNFREEZE:
                 TCardUnfreezeRequest tCardUnfreezeRequest = ConvertUtils.sourceToTarget(request, TCardUnfreezeRequest.class);
-                TCardUnfreezeResponse tCardUnfreezeResponse = zinCardStatusService.cardUnfreeze(tCardUnfreezeRequest);
+                tResult = zinCardStatusService.cardUnfreeze(tCardUnfreezeRequest);
+        }
+        if (tResult == null) {
+            throw new RenException("internal error");
         }
 
-        Result<CardChangeRes> result = new Result<>();
-        CardChangeRes cardChangeRes = new CardChangeRes();
-        result.setData(cardChangeRes);
-        return result;
+        if (tResult.getRspcode().equals("0000")) {
+            return new Result();
+        }
+        return Result.fail(9999, tResult.getRspinfo());
     }
 
     // 卡余额查询
@@ -129,7 +137,7 @@ public class ApiCardService {
         CardBalanceReq request = apiService.<CardBalanceReq>initRequest(CardBalanceReq.class, context, merchantId, reqId, name, body, sign);
         TCardBalanceRequest tCardBalanceRequest = ConvertUtils.sourceToTarget(request, TCardBalanceRequest.class);
 
-        TCardBalanceResponse balance = zinDepositService.balance(tCardBalanceRequest);
+        TCardBalanceResponse balance = zinCardMoneyService.balance(tCardBalanceRequest);
         CardBalanceRes cardBalanceRes = ConvertUtils.sourceToTarget(balance, CardBalanceRes.class);
 
         Result<CardBalanceRes> result = new Result<>();
@@ -147,7 +155,7 @@ public class ApiCardService {
         CardDepositReq request = apiService.<CardDepositReq>initRequest(CardDepositReq.class, context, merchantId, reqId, name, body, sign);
 
         TDepositRequest tDepositRequest = ConvertUtils.sourceToTarget(request, TDepositRequest.class);
-        TDepositResponse deposit = zinDepositService.deposit(tDepositRequest);
+        TDepositResponse deposit = zinCardMoneyService.deposit(tDepositRequest);
         CardDepositRes cardDepositRes = ConvertUtils.sourceToTarget(deposit, CardDepositRes.class);
 
         Result<CardDepositRes> result = new Result<>();
@@ -161,7 +169,7 @@ public class ApiCardService {
         CardWithdrawReq request = apiService.<CardWithdrawReq>initRequest(CardWithdrawReq.class, context, merchantId, reqId, name, body, sign);
 
         TWithdrawRequest tWithdrawRequest = ConvertUtils.sourceToTarget(request, TWithdrawRequest.class);
-        TWithdrawResponse withdraw = zinDepositService.withdraw(tWithdrawRequest);
+        TWithdrawResponse withdraw = zinCardMoneyService.withdraw(tWithdrawRequest);
         CardWithdrawRes cardWithdrawRes = ConvertUtils.sourceToTarget(withdraw, CardWithdrawRes.class);
 
         Result<CardWithdrawRes> result = new Result<>();

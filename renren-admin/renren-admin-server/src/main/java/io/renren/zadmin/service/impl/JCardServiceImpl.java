@@ -21,12 +21,20 @@ import java.util.Map;
 public class JCardServiceImpl extends CrudServiceImpl<JCardDao, JCardEntity, JCardDTO> implements JCardService {
 
     @Override
-    public QueryWrapper<JCardEntity> getWrapper(Map<String, Object> params){
+    public QueryWrapper<JCardEntity> getWrapper(Map<String, Object> params) {
         QueryWrapper<JCardEntity> wrapper = new QueryWrapper<>();
 
+        String agentId = (String) params.get("agentId");
+        if (StringUtils.isNotBlank(agentId)) {
+            wrapper.eq("agent_id", Long.parseLong(agentId));
+        }
+
+        String merchantId = (String) params.get("merchantId");
+        if (StringUtils.isNotBlank(merchantId)) {
+            wrapper.eq("merchant_id", Long.parseLong(merchantId));
+        }
 
         return wrapper;
     }
-
 
 }

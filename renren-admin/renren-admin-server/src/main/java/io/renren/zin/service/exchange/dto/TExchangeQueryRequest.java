@@ -2,6 +2,8 @@ package io.renren.zin.service.exchange.dto;
 
 import lombok.Data;
 
+
+// 2000 - 换汇申请
 @Data
 public class TExchangeQueryRequest {
     private	String meraplid;  // 申请单流水

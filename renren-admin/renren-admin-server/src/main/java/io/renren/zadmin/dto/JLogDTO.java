@@ -10,11 +10,11 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 /**
-* j_log
-*
-* @author epiphyllum epiphyllum.zhou@gmail.com
-* @since 3.0 2024-08-17
-*/
+ * j_log
+ *
+ * @author epiphyllum epiphyllum.zhou@gmail.com
+ * @since 3.0 2024-08-17
+ */
 @Data
 @Schema(description = "j_log")
 public class JLogDTO implements Serializable {
@@ -22,16 +22,28 @@ public class JLogDTO implements Serializable {
 
     @Schema(description = "ID")
     private Long id;
+    @Schema(description = "创建者")
+    private Long creator;
+    @Schema(description = "创建时间")
+    private Date createDate;
+    @Schema(description = "更新者")
+    private Long updater;
+    @Schema(description = "更新时间")
+    private Date updateDate;
+
+    // 业务字段
     @Schema(description = "归属方ID")
-    private Long deptId;
+    private Long ownerId;
     @Schema(description = "归属方")
-    private String deptName;
+    private String ownerName;
+
     @Schema(description = "余额类型")
     private Integer balanceType;
     @Schema(description = "余额名称")
     private String balanceName;
     @Schema(description = "余额ID")
     private Long balanceId;
+
     @Schema(description = "币种")
     private String currency;
     @Schema(description = "凭证类型")
@@ -42,19 +54,12 @@ public class JLogDTO implements Serializable {
     private BigDecimal factAmount;
     @Schema(description = "凭证描述")
     private String factMemo;
+
     @Schema(description = "旧余额")
     private BigDecimal oldBalance;
     @Schema(description = "新余额")
     private BigDecimal newBalance;
+
     @Schema(description = "新version")
     private Long version;
-    @Schema(description = "创建者")
-    private Long creator;
-    @Schema(description = "创建时间")
-    private Date createDate;
-    @Schema(description = "更新者")
-    private Long updater;
-    @Schema(description = "更新时间")
-    private Date updateDate;
-
 }

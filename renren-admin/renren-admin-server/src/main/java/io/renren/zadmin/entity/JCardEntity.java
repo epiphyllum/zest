@@ -10,7 +10,7 @@ import java.util.Date;
 import io.renren.commons.mybatis.entity.BaseEntity;
 
 /**
- * j_card
+ * j_card:  子卡
  *
  * @author epiphyllum epiphyllum.zhou@gmail.com
  * @since 3.0 2024-08-18
@@ -21,16 +21,12 @@ import io.renren.commons.mybatis.entity.BaseEntity;
 public class JCardEntity extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
-    /**
-     *  可能是在子商户， 也有
-     */
-    @TableField(fill = FieldFill.INSERT)
-    private Long deptId;
-    private String deptName;
-
-    //
+    private Long agentId;
+    private String agentName;
     private Long merchantId;
     private String merchantName;
+    private Long subId;
+    private String subName;
 
     /**
      * 申请单流水

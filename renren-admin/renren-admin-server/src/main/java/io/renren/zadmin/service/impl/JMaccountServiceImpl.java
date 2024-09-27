@@ -22,6 +22,17 @@ public class JMaccountServiceImpl extends CrudServiceImpl<JMaccountDao, JMaccoun
     @Override
     public QueryWrapper<JMaccountEntity> getWrapper(Map<String, Object> params){
         QueryWrapper<JMaccountEntity> wrapper = new QueryWrapper<>();
+
+        String agentId = (String) params.get("agentId");
+        if (StringUtils.isNotBlank(agentId)) {
+            wrapper.eq("agent_id", Long.parseLong(agentId));
+        }
+
+        String merchantId = (String) params.get("merchantId");
+        if (StringUtils.isNotBlank(merchantId)) {
+            wrapper.eq("merchant_id", Long.parseLong(merchantId));
+        }
+
         return wrapper;
     }
 }

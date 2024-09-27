@@ -20,18 +20,28 @@ import java.util.Date;
 public class JWithdrawDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    @Schema(description = "ID")
     private Long id;
+    @Schema(description = "创建者")
+    private Long creator;
+    @Schema(description = "创建时间")
+    private Date createDate;
+    @Schema(description = "更新者")
+    private Long updater;
+    @Schema(description = "更新时间")
+    private Date updateDate;
 
+    // ID相关
     @Schema(description = "商户ID")
     private Long merchantId;
     @Schema(description = "商户")
     private String merchantName;
-
     @Schema(description = "子商户ID")
     private Long subId;
     @Schema(description = "子商户")
     private String subName;
 
+    // 业务字段
     @Schema(description = "申请单流水")
     private String meraplid;
     @Schema(description = "卡号")
@@ -46,15 +56,5 @@ public class JWithdrawDTO implements Serializable {
     private String applyid;
     @Schema(description = "status")
     private Integer status;
-
-    /////////////////
-    @Schema(description = "创建者")
-    private Long creator;
-    @Schema(description = "创建时间")
-    private Date createDate;
-    @Schema(description = "更新者")
-    private Long updater;
-    @Schema(description = "更新时间")
-    private Date updateDate;
 
 }

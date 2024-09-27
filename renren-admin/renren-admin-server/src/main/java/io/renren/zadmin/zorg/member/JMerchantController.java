@@ -1,8 +1,10 @@
 package io.renren.zadmin.zorg.member;
 
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.log.annotation.LogOperation;
 import io.renren.commons.tools.constant.Constant;
+import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.page.PageData;
 import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.commons.tools.utils.Result;
@@ -21,6 +23,10 @@ import io.renren.zadmin.service.JAgentService;
 import io.renren.zadmin.service.JMerchantService;
 import io.renren.zin.service.file.ZinFileService;
 import io.renren.zin.service.sub.ZinSubService;
+import io.renren.zin.service.sub.dto.TSubCreateRequest;
+import io.renren.zin.service.sub.dto.TSubCreateResponse;
+import io.renren.zin.service.sub.dto.TSubQuery;
+import io.renren.zin.service.sub.dto.TSubQueryResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -35,10 +41,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+
+import static io.renren.zin.config.CommonUtils.newRequestId;
 
 
 /**
  * 商户管理
+ *
  * @author epiphyllum epiphyllum.zhou@gmail.com
  * @since 3.0 2024-08-18
  */
@@ -68,7 +78,6 @@ public class JMerchantController {
     })
     @PreAuthorize("hasAuthority('zorg:jmerchant:page')")
     public Result<PageData<JMerchantDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
-        params.put("parent", 0L);
         PageData<JMerchantDTO> page = jMerchantService.page(params);
         return new Result<PageData<JMerchantDTO>>().ok(page);
     }
@@ -78,26 +87,9 @@ public class JMerchantController {
     @PreAuthorize("hasAuthority('zorg:jmerchant:page')")
     public Result<List<JMerchantDTO>> list() {
         Map<String, Object> params = new HashMap<>();
-        params.put("parent", 0L);
         List<JMerchantDTO> list = jMerchantService.list(params);
         return new Result<List<JMerchantDTO>>().ok(list);
     }
-
-    /**
-     * 子商户列表
-     * @param merchantId
-     * @return
-     */
-    @GetMapping("subList")
-    @Operation(summary = "分页")
-    @PreAuthorize("hasAuthority('zorg:jmerchant:page')")
-    public Result<List<JMerchantDTO>> subList(@RequestParam("merchantId") Long merchantId) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("parent", merchantId);
-        List<JMerchantDTO> list = jMerchantService.list(params);
-        return new Result<List<JMerchantDTO>>().ok(list);
-    }
-
 
     @GetMapping("{id}")
     @Operation(summary = "信息")
@@ -150,23 +142,8 @@ public class JMerchantController {
     }
 
     /**
-     * 获取商户列表
-     * @return
-     */
-    @GetMapping("merchantList")
-    @PreAuthorize("hasAuthority('zorg:jsub:info')")
-    public Result<List<JMerchantDTO>> merchantList() {
-        Result<List<JMerchantDTO>> result = new Result<>();
-        List<JMerchantEntity> jMerchantEntities = jMerchantDao.selectList(Wrappers.<JMerchantEntity>lambdaQuery()
-                .eq(JMerchantEntity::getParent, 0L)
-        );
-        List<JMerchantDTO> jMerchantDTOS = ConvertUtils.sourceToTarget(jMerchantEntities, JMerchantDTO.class);
-        result.setData(jMerchantDTOS);
-        return result;
-    }
-
-    /**
      * 获取代理列表
+     *
      * @return
      */
     @GetMapping("agentList")
@@ -181,8 +158,58 @@ public class JMerchantController {
     @GetMapping("createAllinpay")
     @PreAuthorize("hasAuthority('zorg:jmerchant:update')")
     public Result createAllinpay(@RequestParam("id") Long id) {
-        zinSubService.create(id);
+        JMerchantEntity jMerchantEntity = jMerchantDao.selectById(id);
+
+        // 上传文件
+        this.uploadFiles(jMerchantEntity);
+
+        // 准备请求
+        TSubCreateRequest tSubCreateRequest = ConvertUtils.sourceToTarget(jMerchantEntity, TSubCreateRequest.class);
+        tSubCreateRequest.setMeraplid(id.toString());
+
+        // 调用通联
+        TSubCreateResponse response = zinSubService.create(tSubCreateRequest);
+
+        // 更新应答
+        String cusid = response.getCusid();
+        jMerchantDao.update(null, Wrappers.<JMerchantEntity>lambdaUpdate()
+                .eq(JMerchantEntity::getId, id)
+                .set(JMerchantEntity::getCusid, cusid)
+                .set(JMerchantEntity::getMeraplid, tSubCreateRequest.getMeraplid())
+        );
         return new Result();
+    }
+
+    private void uploadFiles(JMerchantEntity jMerchantEntity) {
+        // 拿到所有文件fid
+        String agreementfid = jMerchantEntity.getAgreementfid();
+        String buslicensefid = jMerchantEntity.getBuslicensefid();
+        String creditfid = jMerchantEntity.getCreditfid();
+        String legalphotobackfid = jMerchantEntity.getLegalphotobackfid();
+        String legalphotofrontfid = jMerchantEntity.getLegalphotofrontfid();
+        String taxfid = jMerchantEntity.getTaxfid();
+        String organfid = jMerchantEntity.getOrganfid();
+
+        List<String> fids = List.of(agreementfid, buslicensefid, creditfid, legalphotobackfid, legalphotofrontfid, taxfid, organfid);
+        Map<String, CompletableFuture<String>> jobs = new HashMap<>();
+        for (String fid : fids) {
+            if (StringUtils.isBlank(fid)) {
+                continue;
+            }
+            jobs.put(fid, CompletableFuture.supplyAsync(() -> {
+                return zinFileService.upload(fid);
+            }));
+        }
+        jobs.forEach((j, f) -> {
+            log.info("wait {}...", j);
+            try {
+                f.get();
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new RenException("can not upload file:" + j);
+            }
+        });
+        log.info("文件上传完毕, 开始请求创建商户...");
     }
 
     /**
@@ -191,7 +218,15 @@ public class JMerchantController {
     @GetMapping("queryAllinpay")
     @PreAuthorize("hasAuthority('zorg:jmerchant:update')")
     public Result queryAllinpay(@RequestParam("id") Long id) {
-        zinSubService.query(id);
+        JMerchantEntity jMerchantEntity = jMerchantDao.selectById(id);
+        TSubQuery tSubQuery = ConvertUtils.sourceToTarget(jMerchantEntity, TSubQuery.class);
+
+        TSubQueryResponse response = zinSubService.query(tSubQuery);
+        jMerchantDao.update(null, Wrappers.<JMerchantEntity>lambdaUpdate()
+                .eq(JMerchantEntity::getId, jMerchantEntity.getId())
+                .set(JMerchantEntity::getState, response.getState())
+        );
         return new Result();
     }
+
 }

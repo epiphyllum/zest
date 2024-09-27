@@ -10,9 +10,9 @@ import io.renren.commons.tools.validator.ValidatorUtils;
 import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
-import io.renren.zadmin.dto.JCardDTO;
+import io.renren.zadmin.dto.JMcardDTO;
 import io.renren.zadmin.excel.JCardExcel;
-import io.renren.zadmin.service.JCardService;
+import io.renren.zadmin.service.JMcardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -37,7 +37,7 @@ import java.util.Map;
 @Tag(name = "j_mcard")
 public class JMcardController {
     @Resource
-    private JCardService jCardService;
+    private JMcardService jmcardService;
 
     @GetMapping("page")
     @Operation(summary = "分页")
@@ -48,29 +48,27 @@ public class JMcardController {
             @Parameter(name = Constant.ORDER, description = "排序方式，可选值(asc、desc)")
     })
     @PreAuthorize("hasAuthority('zorg:jmcard:page')")
-    public Result<PageData<JCardDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
-        PageData<JCardDTO> page = jCardService.page(params);
-        return new Result<PageData<JCardDTO>>().ok(page);
+    public Result<PageData<JMcardDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
+        PageData<JMcardDTO> page = jmcardService.page(params);
+        return new Result<PageData<JMcardDTO>>().ok(page);
     }
 
     @GetMapping("{id}")
     @Operation(summary = "信息")
     @PreAuthorize("hasAuthority('zorg:jmcard:info')")
-    public Result<JCardDTO> get(@PathVariable("id") Long id) {
-        JCardDTO data = jCardService.get(id);
-
-        return new Result<JCardDTO>().ok(data);
+    public Result<JMcardDTO> get(@PathVariable("id") Long id) {
+        JMcardDTO data = jmcardService.get(id);
+        return new Result<JMcardDTO>().ok(data);
     }
 
     @PostMapping
     @Operation(summary = "保存")
     @LogOperation("保存")
     @PreAuthorize("hasAuthority('zorg:jmcard:save')")
-    public Result save(@RequestBody JCardDTO dto) {
+    public Result save(@RequestBody JMcardDTO dto) {
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
-
-        jCardService.save(dto);
+        jmcardService.save(dto);
 
         return new Result();
     }
@@ -79,12 +77,10 @@ public class JMcardController {
     @Operation(summary = "修改")
     @LogOperation("修改")
     @PreAuthorize("hasAuthority('zorg:jmcard:update')")
-    public Result update(@RequestBody JCardDTO dto) {
+    public Result update(@RequestBody JMcardDTO dto) {
         //效验数据
         ValidatorUtils.validateEntity(dto, UpdateGroup.class, DefaultGroup.class);
-
-        jCardService.update(dto);
-
+        jmcardService.update(dto);
         return new Result();
     }
 
@@ -95,9 +91,7 @@ public class JMcardController {
     public Result delete(@RequestBody Long[] ids) {
         //效验数据
         AssertUtils.isArrayEmpty(ids, "id");
-
-        jCardService.delete(ids);
-
+        jmcardService.delete(ids);
         return new Result();
     }
 
@@ -106,9 +100,8 @@ public class JMcardController {
     @LogOperation("导出")
     @PreAuthorize("hasAuthority('zorg:jmcard:export')")
     public void export(@Parameter(hidden = true) @RequestParam Map<String, Object> params, HttpServletResponse response) throws Exception {
-        List<JCardDTO> list = jCardService.list(params);
-
-        ExcelUtils.exportExcelToTarget(response, null, "j_card", list, JCardExcel.class);
+        List<JMcardDTO> list = jmcardService.list(params);
+        ExcelUtils.exportExcelToTarget(response, null, "主卡列表", list, JCardExcel.class);
     }
 
 }

@@ -17,8 +17,9 @@ import io.renren.zadmin.dto.JVaDTO;
 import io.renren.zadmin.entity.JVaEntity;
 import io.renren.zadmin.excel.JVaExcel;
 import io.renren.zadmin.service.JVaService;
-import io.renren.zin.service.va.dto.TVaListResponse;
-import io.renren.zin.service.va.ZinVaService;
+import io.renren.zin.service.accountmanage.dto.TVaListRequest;
+import io.renren.zin.service.accountmanage.dto.TVaListResponse;
+import io.renren.zin.service.accountmanage.ZinAccountManageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -48,7 +49,7 @@ public class JVaController {
     @Resource
     private JVaService jVaService;
     @Resource
-    private ZinVaService zinVaService;
+    private ZinAccountManageService zinAccountManageService;
     @Resource
     private JVaDao jVaDao;
 
@@ -84,7 +85,7 @@ public class JVaController {
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
 
-        TVaListResponse tVaListResponse = zinVaService.vaList();
+        TVaListResponse tVaListResponse = zinAccountManageService.vaList(new TVaListRequest());
         Long aLong = jVaDao.selectCount(Wrappers.emptyWrapper());
         List<JVaEntity> jVaEntities = ConvertUtils.sourceToTarget(tVaListResponse.getAccts(), JVaEntity.class);
         if (aLong > 0) {

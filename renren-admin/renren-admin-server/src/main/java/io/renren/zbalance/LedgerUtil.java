@@ -118,7 +118,7 @@ public class LedgerUtil {
         );
     }
 
-    // 子商户卡汇总金额
+    // 子商户卡汇总金额账户
     public JBalanceEntity getSubSumAccount(Long ownerId, String currency) {
         return jBalanceDao.selectOne(Wrappers.<JBalanceEntity>lambdaQuery()
                 .eq(JBalanceEntity::getOwnerId, ownerId)
@@ -126,7 +126,7 @@ public class LedgerUtil {
         );
     }
 
-    // 子商户开卡费
+    // 子商户开卡费账户
     public JBalanceEntity getSubFeeAccount(Long ownerId, String currency) {
         return jBalanceDao.selectOne(Wrappers.<JBalanceEntity>lambdaQuery()
                 .eq(JBalanceEntity::getOwnerId, ownerId)

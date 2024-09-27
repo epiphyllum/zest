@@ -24,9 +24,22 @@ public class JDepositServiceImpl extends CrudServiceImpl<JDepositDao, JDepositEn
     public QueryWrapper<JDepositEntity> getWrapper(Map<String, Object> params){
         QueryWrapper<JDepositEntity> wrapper = new QueryWrapper<>();
 
+        String agentId = (String) params.get("agentId");
+        if (StringUtils.isNotBlank(agentId)) {
+            wrapper.eq("agent_id", Long.parseLong(agentId));
+        }
+
+        String merchantId = (String) params.get("merchantId");
+        if (StringUtils.isNotBlank(merchantId)) {
+            wrapper.eq("merchant_id", Long.parseLong(merchantId));
+        }
+
+        String subId = (String) params.get("subId");
+        if (StringUtils.isNotBlank(subId)) {
+            wrapper.eq("sub_id", Long.parseLong(merchantId));
+        }
 
         return wrapper;
     }
-
 
 }

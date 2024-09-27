@@ -4,6 +4,7 @@ package io.renren.zapi;
 import cn.hutool.core.lang.Pair;
 import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.Result;
+import io.renren.zapi.service.accountmanage.ApiAccountManageService;
 import io.renren.zapi.service.card.ApiCardService;
 import io.renren.zapi.service.exchange.ApiExchangeService;
 import io.renren.zapi.service.file.ApiFileService;
@@ -23,19 +24,24 @@ import java.util.Map;
 @RequestMapping("zapi")
 @Slf4j
 public class ApiController {
+
+    @Resource
+    private ApiAccountManageService apiAccountManageService;
+    @Resource
+    private ApiAllocateService apiAllocateService;
     @Resource
     private ApiCardService apiCardService;
     @Resource
     private ApiExchangeService apiExchangeService;
     @Resource
-    private ApiAllocateService apiAllocateService;
-    @Resource
     private ApiInternalService apiInternalService;
+    // 单独处理
     @Resource
     private ApiFileService apiFileService;
 
     @PostConstruct()
     public void init() {
+        initService(apiAccountManageService);
         initService(apiCardService);
         initService(apiExchangeService);
         initService(apiAllocateService);

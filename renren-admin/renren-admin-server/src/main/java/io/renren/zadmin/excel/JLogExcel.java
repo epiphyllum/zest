@@ -5,6 +5,7 @@ import com.alibaba.excel.annotation.write.style.ColumnWidth;
 import com.alibaba.excel.annotation.write.style.ContentRowHeight;
 import com.alibaba.excel.annotation.write.style.HeadRowHeight;
 import lombok.Data;
+
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -20,9 +21,10 @@ import java.util.Date;
 @ColumnWidth(25)
 public class JLogExcel {
     @ExcelProperty(value = "归属方ID", index = 0)
-    private Long deptId;
+    private Long ownerId;
     @ExcelProperty(value = "归属方", index = 1)
-    private String deptName;
+    private String ownerName;
+
     @ExcelProperty(value = "余额类型", index = 2)
     private String balanceType;
     @ExcelProperty(value = "余额名称", index = 3)
