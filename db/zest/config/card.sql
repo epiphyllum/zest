@@ -14,11 +14,16 @@ create table j_card
     -- request
     meraplid         varchar(32) comment '申请单流水',             -- 	meraplid	String	32	Y	客户自己生成，保持唯一
     cardtype         varchar(2) comment '卡片种类',                --	cardtype	String	2	Y	1：虚拟卡，（产品类型为：通华金服VISA虚拟卡、通华VPA电子卡）4：虚实同发，（产品类型为：通华金服VISA公务卡、万商义乌VISA商务卡）
-
     cardholdertype   varchar(3) comment '持卡人身份',              -- 1：法人持有 0：其他管理员
+    belongtype       varchar(2) comment '主体类型',                --	belongtype	String	2	Y	1：员工 2：合作企业
+    maincardno       varchar(30) comment '主卡',                   --
+    cusid            varchar(30) comment '子商id',                 --   主体类型为合作企业时必填，【子商户创建】结果返回的cusid
+
+    -- 2
     nationality      varchar(3) comment '国籍',                    --	nationality	String	3	Y	见附录【国别信息】中的CODE,如中国：CHN
     companyposition  varchar(50) comment '公司职位',               --	companyposition	String	50	Y	1：法人代表2：董事3：高级管理员4：经理5：职员
 
+    -- 3
     surname          varchar(20) comment '姓氏',                   --	surname	String	20	Y
     `name`           varchar(30) comment '名字',                   --	name	String	30	Y
     birthday         varchar(10) comment '出生日期',               --	birthday	String	10	Y	YYYYMMDD
@@ -38,7 +43,7 @@ create table j_card
 
     mobilecountry    varchar(10) comment '手机号码所属地区',       --	mobilecountry	String	10	Y	见附录【国别信息】中的CODE
     mobilenumber     varchar(20) comment '手机号码',               --	mobilenumber	String	20	Y
-
+    deliverypostcode varchar(20) comment '邮政编码',               --
 
     photofront       varchar(100) comment '正面照片',              --	photofront	String	100	Y
     photoback        varchar(100) comment '反面照片',              --	photoback	String	100	Y
@@ -47,16 +52,10 @@ create table j_card
 
     payerid          varchar(15) comment '申请费用扣款账户',       --	payerid	String	15	Y	【VA账户列表查询】响应报文中的账户唯一标识id
 
-    deliverypostcode varchar(20) comment '邮政编码',               --
     deliverycountry  varchar(10) comment '邮寄国家/地区',          -- 	deliverycountry	String	10	C	卡片类型为虚实同发时必填，见附录【国别信息】中的CODE
     deliveryprovince varchar(6) comment '邮寄省份',                -- 	deliveryprovince	String	6	C	邮寄国家/地区为CHN时必填，见附件【地区代码】
     deliverycity     varchar(6) comment '邮寄城市',                -- 	deliverycity	String	6	C	邮寄国家/地区为CHN时必填，见附件【地区代码】
     deliveryaddress  varchar(200) comment '邮寄城市',              -- 	deliveryaddress	String	200	C	卡片类型为虚实同发时必填
-
-    -- 子卡(额外三个字段)
-    belongtype       varchar(2) comment '主体类型',                --	belongtype	String	2	Y	1：员工 2：合作企业
-    maincardno       varchar(30) comment '主卡',                   --
-    cusid            varchar(30) comment '子商id',                 --   主体类型为合作企业时必填，【子商户创建】结果返回的cusid
 
     -- response
     applyid          varchar(32) comment '申请ID',                 --
@@ -77,5 +76,5 @@ create table j_card
   collate utf8mb4_bin
   DEFAULT CHARACTER SET utf8mb4 COMMENT ='j_card';
 create index idx_j_card_1 on j_card (merchant_id, create_date);
-create index idx_j_card_1 on j_card (sub_id, create_date);
-create index idx_j_card_1 on j_card (agent_id, create_date);
+create index idx_j_card_2 on j_card (sub_id, create_date);
+create index idx_j_card_3 on j_card (agent_id, create_date);

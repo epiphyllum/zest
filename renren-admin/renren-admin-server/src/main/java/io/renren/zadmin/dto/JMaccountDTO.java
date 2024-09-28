@@ -19,13 +19,24 @@ import java.util.Date;
 public class JMaccountDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    // id
+    // 5
+    @Schema(description = "ID")
+    private Long id;
+    private Long creator;
+    @Schema(description = "创建时间")
+    private Date createDate;
+    @Schema(description = "更新者")
+    private Long updater;
+    @Schema(description = "更新时间")
+    private Date updateDate;
+
+    // id(4)
     private Long agentId;
     private String agentName;
     private Long merchantId;
     private String merchantName;
 
-    //
+    // 17
     private String flag;
     private String currency;
     private String country;
@@ -44,12 +55,7 @@ public class JMaccountDTO implements Serializable {
     private String biccode;
     private String branchcode;
 
-    private Long creator;
-    @Schema(description = "创建时间")
-    private Date createDate;
-    @Schema(description = "更新者")
-    private Long updater;
-    @Schema(description = "更新时间")
-    private Date updateDate;
-
+    // 2
+    private String state;
+    private String stateexplain;
 }

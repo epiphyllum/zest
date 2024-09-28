@@ -21,14 +21,16 @@ import io.renren.commons.mybatis.entity.BaseEntity;
 public class JBalanceEntity extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
+    // 3+2
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updater;
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date updateDate;
 
-    // 业务字段
+    // 业务字段(7)
     private Long ownerId;
     private String ownerName;
+    private String ownerType;
     private String balanceType;
     private String currency;
     private BigDecimal balance;

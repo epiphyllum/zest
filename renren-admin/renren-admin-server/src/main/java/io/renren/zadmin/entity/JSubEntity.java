@@ -7,7 +7,6 @@ import io.renren.commons.mybatis.entity.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -18,34 +17,47 @@ import java.util.Date;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-@TableName("j_merchant")
+@TableName("j_sub")
 public class JSubEntity extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
-    /**
-     * id related
-     */
+    // (3+2) 通用
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private Long updater;
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private Date updateDate;
+
+    // (4) ID
     private Long agentId;
     private String agentName;
     private Long merchantId;
     private String merchantName;
 
+    // 4
     private String meraplid;
     private String cusname;
     private String flag;
     private String buslicensename;
+
+    // 4
     private String areacode;
     private String province;
     private String city;
     private String address;
+
+    // 2
     private String cusengname;
     private String tel;
+
+    // 6
     private String legalemail;
     private String legal;
     private String legalarea;
     private String legalidtype;
     private String legalidno;
     private String legaladdress;
+
+    // 12
     private String threcertflag;
     private String buslicense;
     private String buslicenseexpire;
@@ -58,6 +70,8 @@ public class JSubEntity extends BaseEntity {
     private String holdername;
     private String holderidno;
     private String holderexpire;
+
+    // 7
     private String legalphotofrontfid;
     private String legalphotobackfid;
     private String agreementfid;
@@ -65,22 +79,9 @@ public class JSubEntity extends BaseEntity {
     private String buslicensefid;
     private String taxfid;
     private String organfid;
-    // 通联返回
-    private String cusid;
-    private String state;
-    // 管理
-    private Integer enabled;
-    // 商户接入参数, 只有商户有， 子商户没有
-    private BigDecimal depositRate;
-    private BigDecimal chargeRate;
-    private BigDecimal failFee;
-    private String mcc;
-    private String publicKey;
-    private String webhook;
 
-    // 基本
-    @TableField(fill = FieldFill.INSERT_UPDATE)
-    private Long updater;
-    @TableField(fill = FieldFill.INSERT_UPDATE)
-    private Date updateDate;
+    // (3) 审核 + enable + mcc
+    private String state;
+    private Integer enabled;
+    private String mcc;
 }

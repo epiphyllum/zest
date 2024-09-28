@@ -21,11 +21,13 @@ import io.renren.commons.mybatis.entity.BaseEntity;
 public class JVaEntity extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
+    // (3+2) 通用
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updater;
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date updateDate;
 
+    // (4) 业务字段
     private String accountno;
     private String currency;
     private BigDecimal amount;

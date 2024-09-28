@@ -56,5 +56,4 @@ public class JWithdrawDTO implements Serializable {
     private String applyid;
     @Schema(description = "status")
     private Integer status;
-
 }

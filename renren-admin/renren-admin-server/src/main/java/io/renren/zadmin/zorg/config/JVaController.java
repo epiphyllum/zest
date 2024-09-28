@@ -2,6 +2,8 @@ package io.renren.zadmin.zorg.config;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.log.annotation.LogOperation;
+import io.renren.commons.security.user.SecurityUser;
+import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.constant.Constant;
 import io.renren.commons.tools.page.PageData;
 import io.renren.commons.tools.utils.ConvertUtils;
@@ -64,7 +66,6 @@ public class JVaController {
     @PreAuthorize("hasAuthority('zorg:jva:page')")
     public Result<PageData<JVaDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
         PageData<JVaDTO> page = jVaService.page(params);
-
         return new Result<PageData<JVaDTO>>().ok(page);
     }
 
@@ -73,7 +74,6 @@ public class JVaController {
     @PreAuthorize("hasAuthority('zorg:jva:info')")
     public Result<JVaDTO> get(@PathVariable("id") Long id) {
         JVaDTO data = jVaService.get(id);
-
         return new Result<JVaDTO>().ok(data);
     }
 
@@ -82,9 +82,12 @@ public class JVaController {
     @LogOperation("保存")
     @PreAuthorize("hasAuthority('zorg:jva:save')")
     public Result save(@RequestBody JVaDTO dto) {
+        UserDetail user = SecurityUser.getUser();
+        if (!user.getUserType().equals("operation") ) {
+            return Result.fail(9999, "not authorized");
+        }
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
-
         TVaListResponse tVaListResponse = zinAccountManageService.vaList(new TVaListRequest());
         Long aLong = jVaDao.selectCount(Wrappers.emptyWrapper());
         List<JVaEntity> jVaEntities = ConvertUtils.sourceToTarget(tVaListResponse.getAccts(), JVaEntity.class);
@@ -108,11 +111,13 @@ public class JVaController {
     @LogOperation("修改")
     @PreAuthorize("hasAuthority('zorg:jva:update')")
     public Result update(@RequestBody JVaDTO dto) {
+        UserDetail user = SecurityUser.getUser();
+        if (!user.getUserType().equals("operation") ) {
+            return Result.fail(9999, "not authorized");
+        }
         //效验数据
         ValidatorUtils.validateEntity(dto, UpdateGroup.class, DefaultGroup.class);
-
         jVaService.update(dto);
-
         return new Result();
     }
 
@@ -121,11 +126,13 @@ public class JVaController {
     @LogOperation("删除")
     @PreAuthorize("hasAuthority('zorg:jva:delete')")
     public Result delete(@RequestBody Long[] ids) {
+        UserDetail user = SecurityUser.getUser();
+        if (!user.getUserType().equals("operation") ) {
+            return Result.fail(9999, "not authorized");
+        }
         //效验数据
         AssertUtils.isArrayEmpty(ids, "id");
-
         jVaService.delete(ids);
-
         return new Result();
     }
 
@@ -135,7 +142,6 @@ public class JVaController {
     @PreAuthorize("hasAuthority('zorg:jva:export')")
     public void export(@Parameter(hidden = true) @RequestParam Map<String, Object> params, HttpServletResponse response) throws Exception {
         List<JVaDTO> list = jVaService.list(params);
-
         ExcelUtils.exportExcelToTarget(response, null, "j_va", list, JVaExcel.class);
     }
 

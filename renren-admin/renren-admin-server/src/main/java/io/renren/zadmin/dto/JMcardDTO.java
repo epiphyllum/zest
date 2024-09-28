@@ -42,14 +42,18 @@ public class JMcardDTO implements Serializable {
     // 业务字段
     @Schema(description = "申请单流水")
     private String meraplid;
-    @Schema(description = "主卡")
-    private String maincardno;
+
+    //
+    @Schema(description = "产品类型")
+    private String producttype;
     @Schema(description = "卡片种类")
     private String cardtype;
-    @Schema(description = "通联子商户号")
-    private String cusid;
     @Schema(description = "持卡人身份")
     private String cardholdertype;
+
+    @Schema(description = "通联子商户号")
+    private String cusid;
+
     @Schema(description = "国籍")
     private String nationality;
     @Schema(description = "公司职位")

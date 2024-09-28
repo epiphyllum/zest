@@ -21,34 +21,39 @@ import io.renren.commons.mybatis.entity.BaseEntity;
 public class JExchangeEntity extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
+    // 3+2
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updater;
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date updateDate;
 
-    // 属于商户
+    // 属于商户(2)
+    private Long agentId;
+    private String agentName;
     private Long merchantId;
     private String merchantName;
 
+    // 请求字段(5)
     private String meraplid;
     private String payeeccy;
     private String payerccy;
+    private String lockamountflag;
     private BigDecimal amount;
-    private String applyid;
 
-    // 锁汇情况
+    // 通联返回(2)
+    private String applyid;
+    private String state;
+
+    // 锁汇情况(5)
     private String feecurrency;
     private BigDecimal settleamount;
     private String settlecurrency;
     private BigDecimal fxrate;
     private BigDecimal fee;
-    private String extype;
 
-    // 执行情况
+    // 执行情况(4)
+    private String extype;
     private BigDecimal stlamount;
     private BigDecimal exfee;
     private BigDecimal exfxrate;
-
-    // 状态
-    private String state;
 }

@@ -20,6 +20,7 @@ import java.util.Date;
 public class JVaDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    // 5
     @Schema(description = "ID")
     private Long id;
     @Schema(description = "创建者")
@@ -31,7 +32,7 @@ public class JVaDTO implements Serializable {
     @Schema(description = "更新时间")
     private Date updateDate;
 
-    // 业务字段
+    // 业务字段(4)
     @Schema(description = "通联虚拟户")
     private String accountno;
     @Schema(description = "币种")

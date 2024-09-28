@@ -33,6 +33,8 @@ create table j_withdraw
 ) ENGINE = InnoDB
   collate utf8mb4_bin
   DEFAULT CHARACTER SET utf8mb4 COMMENT ='j_withdraw';
-create index idx_j_withdraw on j_withdraw (dept_id, create_date);
+create index idx_j_withdraw_1 on j_withdraw (agent_id, create_date);
+create index idx_j_withdraw_2 on j_withdraw (merchant_id, create_date);
+create index idx_j_withdraw_3 on j_withdraw (sub_id, create_date);
 
 

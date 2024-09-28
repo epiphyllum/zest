@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.zadmin.dao.JCardDao">
+
+    <resultMap type="io.renren.zadmin.entity.JCardEntity" id="jCardMap">
+        <result property="id" column="id"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="deptName" column="dept_name"/>
+        <result property="merchantId" column="merchant_id"/>
+        <result property="merchantName" column="merchant_name"/>
+        <result property="meraplid" column="meraplid"/>
+        <result property="producttype" column="producttype"/>
+        <result property="cardtype" column="cardtype"/>
+        <result property="cardholdertype" column="cardholdertype"/>
+        <result property="nationality" column="nationality"/>
+        <result property="companyposition" column="companyposition"/>
+        <result property="surname" column="surname"/>
+        <result property="name" column="name"/>
+        <result property="birthday" column="birthday"/>
+        <result property="idtype" column="idtype"/>
+        <result property="idnumber" column="idnumber"/>
+        <result property="idtype2" column="idtype2"/>
+        <result property="idnumber2" column="idnumber2"/>
+        <result property="country" column="country"/>
+        <result property="province" column="province"/>
+        <result property="city" column="city"/>
+        <result property="address" column="address"/>
+        <result property="email" column="email"/>
+        <result property="gender" column="gender"/>
+        <result property="mobilecountry" column="mobilecountry"/>
+        <result property="mobilenumber" column="mobilenumber"/>
+        <result property="photofront" column="photofront"/>
+        <result property="photoback" column="photoback"/>
+        <result property="payerid" column="payerid"/>
+        <result property="deliverycountry" column="deliverycountry"/>
+        <result property="deliveryprovince" column="deliveryprovince"/>
+        <result property="deliverycity" column="deliverycity"/>
+        <result property="deliveryaddress" column="deliveryaddress"/>
+        <result property="applyid" column="applyid"/>
+        <result property="balance" column="balance"/>
+        <result property="creator" column="creator"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updater" column="updater"/>
+        <result property="updateDate" column="update_date"/>
+    </resultMap>
+
+</mapper>

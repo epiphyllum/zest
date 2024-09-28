@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.renren.commons.mybatis.service.impl.CrudServiceImpl;
 import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
+import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.entity.SysDeptEntity;
 import io.renren.service.SysDeptService;
@@ -33,7 +34,7 @@ public class JAgentServiceImpl extends CrudServiceImpl<JAgentDao, JAgentEntity, 
     private SysDeptService sysDeptService;
 
     @Override
-    public QueryWrapper<JAgentEntity> getWrapper(Map<String, Object> params){
+    public QueryWrapper<JAgentEntity> getWrapper(Map<String, Object> params) {
         QueryWrapper<JAgentEntity> wrapper = new QueryWrapper<>();
         return wrapper;
     }
@@ -42,6 +43,10 @@ public class JAgentServiceImpl extends CrudServiceImpl<JAgentDao, JAgentEntity, 
     @Override
     public void save(JAgentDTO dto) {
         UserDetail user = SecurityUser.getUser();
+
+        if ("operation".equals(user.getUserType())) {
+            throw new RenException("only operation can add agent");
+        }
 
         // 插入系统sys_dept
         SysDeptEntity deptEntity = new SysDeptEntity();

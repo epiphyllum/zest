@@ -7,3 +7,8 @@ renren-cloud【微服务】版权声明
 律师声明函：
 ![律师声明函](https://www.renren.io/res/images/lawyer_letter-1.jpg "在这里输入图片标题")
 ![律师声明函](https://www.renren.io/res/images/lawyer_letter-2.jpg "在这里输入图片标题")
+
+
+
+amount30000callbackUrlhttp://124.221.1.74deptId1710169284135714818merchantNo22000023notifyUrlhttp://124.221.1.74:9502/Order/lqpayNotifyorderId20240821112753057096payerInfobevrhzproductType4
+amount30000callbackUrlhttp://124.221.1.74deptId1710169284135714818merchantNo22000023notifyUrlhttp://124.221.1.74:9502/Order/lqpayNotifyorderId20240821115142057916payerInfobevrhzproductType40

@@ -21,18 +21,19 @@ import io.renren.commons.mybatis.entity.BaseEntity;
 public class JMoneyEntity extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
+    // (3+2) 通用字段
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updater;
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date updateDate;
 
-    // id
+    // (4) ID
     private Long agentId;
     private String agentName;
     private Long merchantId;
     private String merchantName;
 
-    // 入账通知信息
+    // 入账通知信息(12)
     private String nid;
     private String bid;
     private String acctno;
@@ -46,7 +47,7 @@ public class JMoneyEntity extends BaseEntity {
     private String payeraccountcountry;
     private String ps;
 
-    // 转而通知下游商户
+    // 转而通知下游商户(3)
     private Integer status;
     private Integer notifyStatus;
     private Integer notifyCount;

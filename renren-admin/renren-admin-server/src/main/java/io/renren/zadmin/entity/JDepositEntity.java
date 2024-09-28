@@ -26,23 +26,28 @@ public class JDepositEntity extends BaseEntity {
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date updateDate;
 
-    // 子商户ID + 子商户名
-    private Long subId;
-    private String subName;
-
-    // 商户ID
+    // ID(6)
+    private Long agentId;
+    private String agentName;
     private Long merchantId;
     private String merchantName;
+    private Long subId;
+    private String subName;
 
     // 卡充值信息
     private String meraplid;
     private String cardno;
     private String payerid;
     private BigDecimal amount;
-    private String currency;
     private String payeeaccount;
     private String procurecontent;
     private String agmfid;
+
+    // 冗余添加的
+    private String currency;
+
+    // 记录返回
     private String applyid;
-    private Integer status;
+    private Integer state;
+
 }

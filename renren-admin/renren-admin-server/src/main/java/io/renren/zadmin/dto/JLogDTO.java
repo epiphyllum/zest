@@ -31,12 +31,15 @@ public class JLogDTO implements Serializable {
     @Schema(description = "更新时间")
     private Date updateDate;
 
-    // 业务字段
+    // 业务字段(3)
     @Schema(description = "归属方ID")
     private Long ownerId;
     @Schema(description = "归属方")
     private String ownerName;
+    @Schema(description = "属主类型")
+    private String ownerType;
 
+    // 3
     @Schema(description = "余额类型")
     private Integer balanceType;
     @Schema(description = "余额名称")
@@ -44,6 +47,7 @@ public class JLogDTO implements Serializable {
     @Schema(description = "余额ID")
     private Long balanceId;
 
+    // 5
     @Schema(description = "币种")
     private String currency;
     @Schema(description = "凭证类型")
@@ -55,11 +59,11 @@ public class JLogDTO implements Serializable {
     @Schema(description = "凭证描述")
     private String factMemo;
 
+    // 3
     @Schema(description = "旧余额")
     private BigDecimal oldBalance;
     @Schema(description = "新余额")
     private BigDecimal newBalance;
-
     @Schema(description = "新version")
     private Long version;
 }

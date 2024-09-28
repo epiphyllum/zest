@@ -22,16 +22,17 @@ import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.util.List;
 import java.util.Map;
 
 
 /**
-* j_inout
-*
-* @author epiphyllum epiphyllum.zhou@gmail.com
-* @since 3.0 2024-09-01
-*/
+ * j_inout
+ *
+ * @author epiphyllum epiphyllum.zhou@gmail.com
+ * @since 3.0 2024-09-01
+ */
 @RestController
 @RequestMapping("zorg/jinout")
 @Tag(name = "j_inout")
@@ -48,18 +49,16 @@ public class JAllocateController {
             @Parameter(name = Constant.ORDER, description = "排序方式，可选值(asc、desc)")
     })
     @PreAuthorize("hasAuthority('zorg:jinout:page')")
-    public Result<PageData<JAllocateDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params){
+    public Result<PageData<JAllocateDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
         PageData<JAllocateDTO> page = jAllocateService.page(params);
-
         return new Result<PageData<JAllocateDTO>>().ok(page);
     }
 
     @GetMapping("{id}")
     @Operation(summary = "信息")
     @PreAuthorize("hasAuthority('zorg:jinout:info')")
-    public Result<JAllocateDTO> get(@PathVariable("id") Long id){
+    public Result<JAllocateDTO> get(@PathVariable("id") Long id) {
         JAllocateDTO data = jAllocateService.get(id);
-
         return new Result<JAllocateDTO>().ok(data);
     }
 
@@ -67,12 +66,10 @@ public class JAllocateController {
     @Operation(summary = "保存")
     @LogOperation("保存")
     @PreAuthorize("hasAuthority('zorg:jinout:save')")
-    public Result save(@RequestBody JAllocateDTO dto){
+    public Result save(@RequestBody JAllocateDTO dto) {
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
-
         jAllocateService.save(dto);
-
         return new Result();
     }
 
@@ -80,12 +77,10 @@ public class JAllocateController {
     @Operation(summary = "修改")
     @LogOperation("修改")
     @PreAuthorize("hasAuthority('zorg:jinout:update')")
-    public Result update(@RequestBody JAllocateDTO dto){
+    public Result update(@RequestBody JAllocateDTO dto) {
         //效验数据
         ValidatorUtils.validateEntity(dto, UpdateGroup.class, DefaultGroup.class);
-
         jAllocateService.update(dto);
-
         return new Result();
     }
 
@@ -93,12 +88,10 @@ public class JAllocateController {
     @Operation(summary = "删除")
     @LogOperation("删除")
     @PreAuthorize("hasAuthority('zorg:jinout:delete')")
-    public Result delete(@RequestBody Long[] ids){
+    public Result delete(@RequestBody Long[] ids) {
         //效验数据
         AssertUtils.isArrayEmpty(ids, "id");
-
         jAllocateService.delete(ids);
-
         return new Result();
     }
 
@@ -108,7 +101,6 @@ public class JAllocateController {
     @PreAuthorize("hasAuthority('zorg:jinout:export')")
     public void export(@Parameter(hidden = true) @RequestParam Map<String, Object> params, HttpServletResponse response) throws Exception {
         List<JAllocateDTO> list = jAllocateService.list(params);
-
         ExcelUtils.exportExcelToTarget(response, null, "j_inout", list, JAllocateExcel.class);
     }
 

@@ -57,6 +57,7 @@ create table j_merchant
     fail_fee           decimal(10, 2) comment '失败费',
     public_key         varchar(1024) null comment '商户公钥',
     webhook            varchar(128) comment '商户通知地址',
+
     -- basic
     creator            bigint comment '创建者',
     create_date        datetime comment '创建时间',
@@ -67,4 +68,5 @@ create table j_merchant
   collate utf8mb4_bin
   DEFAULT CHARACTER SET utf8mb4 COMMENT ='j_merchant';
 create index idx_j_merchant_1 on j_merchant (create_date);
+create index idx_j_merchant_2 on j_merchant (agent_id, create_date);
 

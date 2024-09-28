@@ -3,9 +3,11 @@ drop table if exists j_allocate;
 create table j_allocate
 (
     id            bigint         not null comment 'ID',
+
+    agent_id      bigint         not null comment '代理ID',
+    agent_name    varchar(50)    not null comment '代理名称',
     merchant_id   bigint         not null comment '商户ID',
     merchant_name varchar(50)    not null comment '商户名称',
-
     sub_id        bigint         null comment '子商户ID: m2s,s2m 存在子商户id',
     sub_name      varchar(50)    null comment '子商户名称',
 
@@ -27,5 +29,6 @@ create table j_allocate
 ) ENGINE = InnoDB
   collate utf8mb4_bin
   DEFAULT CHARACTER SET utf8mb4 COMMENT ='j_allocate';
-create index idx_j_allocate on j_allocate (merchant_id, create_date);
-create index idx_j_allocate on j_allocate (sub_id, create_date);
+create index idx_j_allocate_1 on j_allocate (merchant_id, create_date);
+create index idx_j_allocate_2 on j_allocate (sub_id, create_date);
+create index idx_j_allocate_3 on j_allocate (agent_id, create_date);

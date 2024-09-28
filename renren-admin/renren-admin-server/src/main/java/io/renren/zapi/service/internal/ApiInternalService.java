@@ -11,13 +11,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ApiInternalService {
-
     @Resource
     private ApiService apiService;
-    @Resource
-    private ZinExchangeService zinExchangeService;
-    @Resource
-    private JExchangeDao jExchangeDao;
 
     // 入金账户查询
     public Result<InMoneyAccountRes> inMoneyAccount(Long merchantId, String reqId, String name, String body, String sign) {

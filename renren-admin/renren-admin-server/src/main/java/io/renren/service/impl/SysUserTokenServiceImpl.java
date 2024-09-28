@@ -11,8 +11,10 @@ import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.security.utils.TokenUtils;
 import io.renren.commons.tools.exception.ErrorCode;
 import io.renren.commons.tools.exception.RenException;
+import io.renren.dao.SysDeptDao;
 import io.renren.dao.SysUserTokenDao;
 import io.renren.dto.UserTokenDTO;
+import io.renren.entity.SysDeptEntity;
 import io.renren.entity.SysUserTokenEntity;
 import io.renren.service.SysUserDetailService;
 import io.renren.service.SysUserTokenService;
@@ -34,6 +36,8 @@ public class SysUserTokenServiceImpl extends BaseServiceImpl<SysUserTokenDao, Sy
     private final TokenStoreCache tokenStoreCache;
     private final SecurityProperties securityProperties;
     private final SysUserDetailService sysUserDetailService;
+
+    private final SysDeptDao sysDeptDao;
 
     @Override
     public UserTokenDTO createToken(Long userId) {
@@ -89,6 +93,9 @@ public class SysUserTokenServiceImpl extends BaseServiceImpl<SysUserTokenDao, Sy
         // 用户权限
         UserDetail userDetail = sysUserDetailService.getUserDetailById(entity.getUserId());
 
+        // 依据用户部门pids确定用户的类型
+        setUserType(userDetail);
+
         // 保存用户信息到缓存
         tokenStoreCache.saveUser(accessToken, userDetail);
 
@@ -142,8 +149,28 @@ public class SysUserTokenServiceImpl extends BaseServiceImpl<SysUserTokenDao, Sy
 
         // 用户权限
         user = sysUserDetailService.getUserDetailById(user.getId());
+        setUserType(user);
 
         // 更新缓存
         tokenStoreCache.saveUser(accessToken, user, expire);
     }
+
+    private void setUserType(UserDetail userDetail) {
+        SysDeptEntity deptEntity = sysDeptDao.selectById(userDetail.getDeptId());
+        String[] split = deptEntity.getPids().split(",");
+        if (split.length == 2) {
+            userDetail.setUserType("merchant");
+        } else if (split.length == 3) {
+            userDetail.setUserType("sub");
+        } else if (split.length == 1) {
+            if (split[0].equals("0")) {
+                userDetail.setUserType("operation");
+            } else {
+                userDetail.setUserType("agent");
+            }
+        } else {
+            throw new RenException("internal error");
+        }
+    }
+
 }

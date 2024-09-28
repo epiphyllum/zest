@@ -35,7 +35,6 @@ public class ApiController {
     private ApiExchangeService apiExchangeService;
     @Resource
     private ApiInternalService apiInternalService;
-    // 单独处理
     @Resource
     private ApiFileService apiFileService;
 

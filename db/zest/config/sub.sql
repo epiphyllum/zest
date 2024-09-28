@@ -6,7 +6,6 @@ create table j_sub
 
     agent_id           bigint,
     agent_name         varchar(50),
-
     merchant_id        bigint      not null comment '父商户ID',
     merchant_name      varchar(50) null comment '父商户名',
 
@@ -46,9 +45,10 @@ create table j_sub
     taxfid             varchar(200) comment '税务登记证及影印件',                           --	taxfid	String	200	C	注册国家/地区areacode为CHN，三证不合一时，填入税务登记证及影印件上传文件fid
     organfid           varchar(200) comment '组织机构代码及影印件',                         --	organfid	String	200	C	注册国家/地区areacode为CHN，三证不合一时，填入组织机构代码及影印件上传文件fid
 
-    state              varchar(2) comment '状态',                                           -- state	String	2	Y	04：审核成功; 05：审核失败; 其他情况为空;
     -- extra management:
+    state              varchar(2) comment '状态',                                           -- state	String	2	Y	04：审核成功; 05：审核失败; 其他情况为空;
     enabled            int         not null default 1 comment '启用',
+    mcc                varchar(16) comment 'mcc',
 
     -- basic
     creator            bigint comment '创建者',
@@ -58,6 +58,8 @@ create table j_sub
     primary key (id)
 ) ENGINE = InnoDB
   collate utf8mb4_bin
-  DEFAULT CHARACTER SET utf8mb4 COMMENT ='j_merchant';
-create index idx_j_merchant_1 on j_merchant (create_date);
+  DEFAULT CHARACTER SET utf8mb4 COMMENT ='j_sub';
+create index idx_j_sub_1 on j_sub (create_date);
+create index idx_j_sub_2 on j_sub (agent_id, create_date);
+create index idx_j_sub_3 on j_sub (merchant_id, create_date);
 

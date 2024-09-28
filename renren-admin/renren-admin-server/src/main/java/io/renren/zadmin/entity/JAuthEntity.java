@@ -21,11 +21,13 @@ import io.renren.commons.mybatis.entity.BaseEntity;
 public class JAuthEntity extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
+    // 3+2
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updater;
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date updateDate;
 
+    // ID(6)
     private Long agentId;
     private String agentName;
     private Long merchantId;
@@ -33,17 +35,18 @@ public class JAuthEntity extends BaseEntity {
     private Long subId;
     private String subName;
 
-    private String cardno;
+    // 业务字段
     private String logkv;
-    private String trxtype;
-    private String trxdir;
+    private String trxcode;
+    private String cardno;
     private String state;
+    private String stateexplain;
     private BigDecimal amount;
     private String currency;
     private String trxtime;
-    private String mcc;
+    private String trxdir;
     private String trxaddr;
     private String authcode;
-
-
+    private String mcc;
+    private String time;
 }

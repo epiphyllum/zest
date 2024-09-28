@@ -1,6 +1,8 @@
 package io.renren.zadmin.zorg.member;
 
 import io.renren.commons.log.annotation.LogOperation;
+import io.renren.commons.security.user.SecurityUser;
+import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.constant.Constant;
 import io.renren.commons.tools.page.PageData;
 import io.renren.commons.tools.utils.Result;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletResponse;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -54,12 +57,20 @@ public class JAgentController {
         return new Result<PageData<JAgentDTO>>().ok(page);
     }
 
+    /**
+     * 获取代理列表
+     */
+    @GetMapping("agentList")
+    public Result<List<JAgentDTO>> agentList() {
+        List<JAgentDTO> list = jAgentService.list(new HashMap<>());
+        return Result.one(list);
+    }
+
     @GetMapping("{id}")
     @Operation(summary = "信息")
     @PreAuthorize("hasAuthority('zorg:jagent:info')")
     public Result<JAgentDTO> get(@PathVariable("id") Long id) {
         JAgentDTO data = jAgentService.get(id);
-
         return new Result<JAgentDTO>().ok(data);
     }
 
@@ -68,6 +79,12 @@ public class JAgentController {
     @LogOperation("保存")
     @PreAuthorize("hasAuthority('zorg:jagent:save')")
     public Result save(@RequestBody JAgentDTO dto) {
+
+        UserDetail user = SecurityUser.getUser();
+        if (!user.getUserType().equals("operation")) {
+            return Result.fail(9999, "not authorized");
+        }
+
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
         jAgentService.save(dto);
@@ -79,6 +96,10 @@ public class JAgentController {
     @LogOperation("修改")
     @PreAuthorize("hasAuthority('zorg:jagent:update')")
     public Result update(@RequestBody JAgentDTO dto) {
+        UserDetail user = SecurityUser.getUser();
+        if (!user.getUserType().equals("operation")) {
+            return Result.fail(9999, "not authorized");
+        }
         //效验数据
         ValidatorUtils.validateEntity(dto, UpdateGroup.class, DefaultGroup.class);
         jAgentService.update(dto);
@@ -90,6 +111,10 @@ public class JAgentController {
     @LogOperation("删除")
     @PreAuthorize("hasAuthority('zorg:jagent:delete')")
     public Result delete(@RequestBody Long[] ids) {
+        UserDetail user = SecurityUser.getUser();
+        if (!user.getUserType().equals("operation")) {
+            return Result.fail(9999, "not authorized");
+        }
         //效验数据
         AssertUtils.isArrayEmpty(ids, "id");
         jAgentService.delete(ids);

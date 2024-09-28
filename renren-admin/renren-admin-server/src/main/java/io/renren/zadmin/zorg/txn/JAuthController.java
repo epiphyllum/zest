@@ -58,7 +58,6 @@ public class JAuthController {
     @PreAuthorize("hasAuthority('zorg:jauth:info')")
     public Result<JAuthDTO> get(@PathVariable("id") Long id){
         JAuthDTO data = jAuthService.get(id);
-
         return new Result<JAuthDTO>().ok(data);
     }
 
@@ -69,9 +68,7 @@ public class JAuthController {
     public Result save(@RequestBody JAuthDTO dto){
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
-
         jAuthService.save(dto);
-
         return new Result();
     }
 

@@ -36,6 +36,6 @@ create table j_money
 ) ENGINE = InnoDB
   collate utf8mb4_bin
   DEFAULT CHARACTER SET utf8mb4 COMMENT ='j_money';
-create index idx_j_money on j_money (merchant_id, create_date);
-create index idx_j_money on j_money (agent_id, create_date);
+create index idx_j_money_1 on j_money (agent_id, create_date);
+create index idx_j_money_2 on j_money (merchant_id, create_date);
 create unique index uidx_j_money_1 on j_money (nid);

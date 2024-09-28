@@ -41,6 +41,8 @@ public class UserDetail implements UserDetails {
     private Integer superAdmin;
     private String deptName;
 
+    private String userType;
+
     /**
      * 部门数据权限
      */

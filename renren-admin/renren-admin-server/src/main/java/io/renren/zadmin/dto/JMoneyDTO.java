@@ -18,6 +18,7 @@ import java.util.Date;
 public class JMoneyDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    // 通用(5)
     @Schema(description = "ID")
     private Long id;
     @Schema(description = "创建者")
@@ -29,7 +30,7 @@ public class JMoneyDTO implements Serializable {
     @Schema(description = "更新时间")
     private Date updateDate;
 
-    // id相关
+    // id相关(4)
     @Schema(description = "代理id")
     private Long agentId;
     @Schema(description = "代理名称")
@@ -65,14 +66,13 @@ public class JMoneyDTO implements Serializable {
     @Schema(description = "附言")
     private String ps;
 
-    //
+    // 匹配状态(1)
     @Schema(description = "状态")
     private Integer status;
+
+    // 通知下游(3)
     @Schema(description = "通知状态")
     private Integer notifyStatus;
     @Schema(description = "通知次数")
     private Integer notifyCount;
-
-
-
 }

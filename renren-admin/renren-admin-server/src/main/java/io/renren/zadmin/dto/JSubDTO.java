@@ -18,6 +18,7 @@ import java.util.Date;
 public class JSubDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    // 5
     @Schema(description = "ID")
     private Long id;
     @Schema(description = "创建者")
@@ -29,7 +30,7 @@ public class JSubDTO implements Serializable {
     @Schema(description = "更新时间")
     private Date updateDate;
 
-    // ID相关
+    // ID相关(4)
     @Schema(description = "代理ID")
     private Long agentId;
     @Schema(description = "代理")

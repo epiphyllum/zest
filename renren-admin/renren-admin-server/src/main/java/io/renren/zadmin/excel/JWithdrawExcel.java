@@ -21,7 +21,7 @@ import java.util.Date;
 @ColumnWidth(25)
 public class JWithdrawExcel {
 
-    // id
+    // (6) id
     @ExcelProperty(value = "代理ID", index = 0)
     private Long agentId;
     @ExcelProperty(value = "代理名", index = 1)
@@ -50,6 +50,7 @@ public class JWithdrawExcel {
     private Integer status;
 
 
+    // (2)
     @ExcelProperty(value = "创建时间", index = 10)
     private Date createDate;
     @ExcelProperty(value = "更新者", index = 11)

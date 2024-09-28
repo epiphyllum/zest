@@ -2,6 +2,8 @@ package io.renren.zadmin.zorg.member;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.log.annotation.LogOperation;
+import io.renren.commons.security.user.SecurityUser;
+import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.constant.Constant;
 import io.renren.commons.tools.page.PageData;
 import io.renren.commons.tools.utils.ConvertUtils;
@@ -35,6 +37,7 @@ import java.util.Map;
 
 /**
  * 子商户管理
+ *
  * @author epiphyllum epiphyllum.zhou@gmail.com
  * @since 3.0 2024-08-18
  */
@@ -64,6 +67,24 @@ public class JSubController {
         return new Result<PageData<JSubDTO>>().ok(page);
     }
 
+    /**
+     * @return
+     */
+    @GetMapping("list")
+    public Result<List<JSubDTO>> list(
+            @RequestParam(value = "merchantId", required = false) Long merchantId,
+            @RequestParam(value = "agentId", required = false) Long agentId
+    ) {
+        Result<List<JSubDTO>> result = new Result<>();
+        List<JSubEntity> jSubEntities = jSubDao.selectList(Wrappers.<JSubEntity>lambdaQuery()
+                .eq(merchantId != null, JSubEntity::getMerchantId, merchantId)
+                .eq(agentId != null, JSubEntity::getAgentId, agentId)
+        );
+        List<JSubDTO> jSubDTOS = ConvertUtils.sourceToTarget(jSubEntities, JSubDTO.class);
+        result.setData(jSubDTOS);
+        return result;
+    }
+
     @GetMapping("{id}")
     @Operation(summary = "信息")
     @PreAuthorize("hasAuthority('zorg:jsub:info')")
@@ -78,6 +99,10 @@ public class JSubController {
     @LogOperation("保存")
     @PreAuthorize("hasAuthority('zorg:jsub:save')")
     public Result save(@RequestBody JSubDTO dto) {
+        UserDetail user = SecurityUser.getUser();
+        if (!user.getUserType().equals("operation") && !user.getUserType().equals("agent") && !user.getUserType().equals("merchant")) {
+            return Result.fail(9999, "not authorized");
+        }
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
 
@@ -91,6 +116,10 @@ public class JSubController {
     @LogOperation("修改")
     @PreAuthorize("hasAuthority('zorg:jsub:update')")
     public Result update(@RequestBody JSubDTO dto) {
+        UserDetail user = SecurityUser.getUser();
+        if (!user.getUserType().equals("operation") && !user.getUserType().equals("agent") && !user.getUserType().equals("merchant")) {
+            return Result.fail(9999, "not authorized");
+        }
         //效验数据
         ValidatorUtils.validateEntity(dto, UpdateGroup.class, DefaultGroup.class);
         jSubService.update(dto);
@@ -102,6 +131,10 @@ public class JSubController {
     @LogOperation("删除")
     @PreAuthorize("hasAuthority('zorg:jsub:delete')")
     public Result delete(@RequestBody Long[] ids) {
+        UserDetail user = SecurityUser.getUser();
+        if (!user.getUserType().equals("operation") && !user.getUserType().equals("agent") && !user.getUserType().equals("merchant")) {
+            return Result.fail(9999, "not authorized");
+        }
         //效验数据
         AssertUtils.isArrayEmpty(ids, "id");
         jSubService.delete(ids);
@@ -117,32 +150,5 @@ public class JSubController {
         ExcelUtils.exportExcelToTarget(response, null, "j_merchant", list, JSubExcel.class);
     }
 
-
-    /**
-     * 获取代理列表
-     *
-     * @return
-     */
-    @GetMapping("agentList")
-    @PreAuthorize("hasAuthority('zorg:jsub:info')")
-    public Result<List<JAgentDTO>> agentList() {
-        List<JAgentDTO> list = jAgentService.list(new HashMap<>());
-        return Result.one(list);
-    }
-
-
-    /**
-     *
-     * @return
-     */
-    @GetMapping("merchantList")
-    @PreAuthorize("hasAuthority('zorg:jsub:info')")
-    public Result<List<JSubDTO>> merchantList() {
-        Result<List<JSubDTO>> result = new Result<>();
-        List<JSubEntity> jSubEntities = jSubDao.selectList(Wrappers.<JSubEntity>lambdaQuery());
-        List<JSubDTO> jSubDTOS = ConvertUtils.sourceToTarget(jSubEntities, JSubDTO.class);
-        result.setData(jSubDTOS);
-        return result;
-    }
 
 }

@@ -45,43 +45,61 @@ public class JCardDTO implements Serializable {
     @Schema(description = "商户")
     private String merchantName;
 
-    // 业务字段
+    // 业务字段(6)
     @Schema(description = "申请单流水")
     private String meraplid;
     @Schema(description = "主卡")
     private String maincardno;
     @Schema(description = "卡片种类")
     private String cardtype;
+    @Schema(description = "持卡人身份")
+    private String belongtype;
     @Schema(description = "通联子商户号")
     private String cusid;
     @Schema(description = "持卡人身份")
     private String cardholdertype;
+
+    // 2
     @Schema(description = "国籍")
     private String nationality;
     @Schema(description = "公司职位")
     private String companyposition;
+
+    // 3
     @Schema(description = "姓氏")
     private String surname;
     @Schema(description = "名字")
     private String name;
     @Schema(description = "出生日期")
     private String birthday;
+
+    // 4
     @Schema(description = "证件1类型")
     private String idtype;
     @Schema(description = "证件1号码")
     private String idnumber;
+    @Schema(description = "证件2类型")
+    private String idtype2;
+    @Schema(description = "证件2号码")
+    private String idnumber2;
+
+    //  4
+    @Schema(description = "性别")
+    private String gender;
+    @Schema(description = "邮箱")
+    private String email;
     @Schema(description = "居住国家/地区")
     private String country;
     @Schema(description = "详细地址")
     private String address;
-    @Schema(description = "邮箱")
-    private String email;
-    @Schema(description = "性别")
-    private String gender;
+
+
     @Schema(description = "手机号码所属地区")
     private String mobilecountry;
     @Schema(description = "手机号码")
     private String mobilenumber;
+    @Schema(description = "邮政编码")
+    private String deliverypostcode;
 
     @Schema(description = "正面照片")
     private String photofront;

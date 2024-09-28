@@ -21,6 +21,13 @@ import io.renren.commons.mybatis.entity.BaseEntity;
 public class JAllocateEntity extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
+    // 3+2
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private Long updater;
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private Date updateDate;
+
+    // ID(6)
     private Long agentId;
     private String agentName;
     private Long merchantId;
@@ -28,19 +35,16 @@ public class JAllocateEntity extends BaseEntity {
     private Long subId;
     private String subName;
 
-    // 调拨类型:  i2v,  v2i, s2m, m2s
+    // 调拨类型(3):  i2v,  v2i, s2m, m2s
     private String type;
     private BigDecimal amount;
     private String currency;
 
-    // 商户ID/子商户ID,
+    // 商户ID/子商户ID(4)
     private Long fromId;
     private Long toId;
     private Long fromName;
     private Long toName;
 
-    @TableField(fill = FieldFill.INSERT_UPDATE)
-    private Long updater;
-    @TableField(fill = FieldFill.INSERT_UPDATE)
-    private Date updateDate;
+
 }

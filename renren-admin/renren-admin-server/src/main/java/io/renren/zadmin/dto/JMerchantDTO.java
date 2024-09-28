@@ -108,14 +108,16 @@ public class JMerchantDTO implements Serializable {
     private Integer enabled;
 
     // 接入参数
+    @Schema(description = "商户类型")
+    private String mcc;
     @Schema(description = "保证金比例")
     private BigDecimal depositRate;
     @Schema(description = "充值费率")
     private BigDecimal chargeRate;
+    @Schema(description = "交易费率")
+    private BigDecimal txnRate;
     @Schema(description = "失败费")
     private BigDecimal failFee;
-    @Schema(description = "商户类型")
-    private String mcc;
     @Schema(description = "商户公钥")
     private String publicKey;
     @Schema(description = "webhook")
@@ -130,6 +132,4 @@ public class JMerchantDTO implements Serializable {
     private Long updater;
     @Schema(description = "更新时间")
     private Date updateDate;
-
-
 }

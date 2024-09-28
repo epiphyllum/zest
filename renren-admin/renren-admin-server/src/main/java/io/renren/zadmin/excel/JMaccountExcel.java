@@ -38,6 +38,8 @@ public class JMaccountExcel {
     private String payeraccountbank;
     @ExcelProperty(value = "打款方国家", index = 5)
     private String payeraccountcountry;
+
+    // 通用字段
     @ExcelProperty(value = "创建时间", index = 6)
     private Date createDate;
 }

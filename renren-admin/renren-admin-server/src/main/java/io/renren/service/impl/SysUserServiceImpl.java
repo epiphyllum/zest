@@ -13,10 +13,13 @@ import io.renren.commons.mybatis.service.impl.BaseServiceImpl;
 import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.enums.SuperAdminEnum;
+import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.page.PageData;
 import io.renren.commons.tools.utils.ConvertUtils;
+import io.renren.dao.SysDeptDao;
 import io.renren.dao.SysUserDao;
 import io.renren.dto.SysUserDTO;
+import io.renren.entity.SysDeptEntity;
 import io.renren.entity.SysUserEntity;
 import io.renren.service.*;
 import jakarta.annotation.Resource;
@@ -46,6 +49,8 @@ public class SysUserServiceImpl extends BaseServiceImpl<SysUserDao, SysUserEntit
     private SysUserPostService sysUserPostService;
     @Resource
     private SysUserTokenService sysUserTokenService;
+    @Resource
+    private SysDeptDao sysDeptDao;
 
     @Override
     public PageData<SysUserDTO> page(Map<String, Object> params) {
@@ -84,7 +89,27 @@ public class SysUserServiceImpl extends BaseServiceImpl<SysUserDao, SysUserEntit
     public SysUserDTO get(Long id) {
         SysUserEntity entity = baseDao.getById(id);
 
-        return ConvertUtils.sourceToTarget(entity, SysUserDTO.class);
+        SysUserDTO sysUserDTO = ConvertUtils.sourceToTarget(entity, SysUserDTO.class);
+
+        // 确定用户类型
+        SysDeptEntity deptEntity = sysDeptDao.selectById(entity.getDeptId());
+        String[] split = deptEntity.getPids().split(",");
+        if (split.length == 3) {
+            sysUserDTO.setUserType("sub");
+        } else if (split.length == 2) {
+            sysUserDTO.setUserType("merchant");
+        } else if (split.length == 1) {
+            if (split[0].equals("0")) {
+                sysUserDTO.setUserType("operation");
+            } else {
+                sysUserDTO.setUserType("agent");
+            }
+        } else {
+            throw new RenException("internal error");
+        }
+
+        // 返回
+        return sysUserDTO;
     }
 
     @Override

@@ -20,9 +20,19 @@ import io.renren.commons.mybatis.entity.BaseEntity;
 public class JMaccountEntity extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
+    // 3 + 2
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private Long updater;
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private Date updateDate;
+
+    // id(4)
+    private Long agentId;
+    private String agentName;
     private Long merchantId;
     private String merchantName;
 
+    // 17
     private String flag;
     private String currency;
     private String country;
@@ -41,14 +51,7 @@ public class JMaccountEntity extends BaseEntity {
     private String biccode;
     private String branchcode;
 
-    /**
-     * 更新者
-     */
-    @TableField(fill = FieldFill.INSERT_UPDATE)
-    private Long updater;
-    /**
-     * 更新时间
-     */
-    @TableField(fill = FieldFill.INSERT_UPDATE)
-    private Date updateDate;
+    // 2
+    private String state;
+    private String stateexplain;
 }

@@ -2,6 +2,8 @@ package io.renren.zadmin.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.renren.commons.mybatis.service.impl.CrudServiceImpl;
+import io.renren.commons.security.user.SecurityUser;
+import io.renren.commons.security.user.UserDetail;
 import io.renren.zadmin.dao.JDepositDao;
 import io.renren.zadmin.dto.JDepositDTO;
 import io.renren.zadmin.entity.JDepositEntity;
@@ -37,6 +39,18 @@ public class JDepositServiceImpl extends CrudServiceImpl<JDepositDao, JDepositEn
         String subId = (String) params.get("subId");
         if (StringUtils.isNotBlank(subId)) {
             wrapper.eq("sub_id", Long.parseLong(merchantId));
+        }
+
+
+        UserDetail user = SecurityUser.getUser();
+        if(agentId == null && "agent".equals(user.getUserType())) {
+            wrapper.eq("agent_id", user.getDeptId());
+        }
+        else if(merchantId == null && "merchant".equals(user.getUserType())) {
+            wrapper.eq("merchant_id", user.getDeptId());
+        }
+        else if(subId == null && "sub".equals(user.getUserType())) {
+            wrapper.eq("sub_id", user.getDeptId());
         }
 
         return wrapper;

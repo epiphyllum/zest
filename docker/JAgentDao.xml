@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.zadmin.dao.JAgentDao">
+
+    <resultMap type="io.renren.zadmin.entity.JAgentEntity" id="jAgentMap">
+        <result property="id" column="id"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="deptName" column="dept_name"/>
+        <result property="agentName" column="agent_name"/>
+        <result property="chargeRate" column="charge_rate"/>
+        <result property="accountNo" column="account_no"/>
+        <result property="accountUser" column="account_user"/>
+        <result property="accountBank" column="account_bank"/>
+        <result property="firstLimit" column="first_limit"/>
+        <result property="firstRate" column="first_rate"/>
+        <result property="secondLimit" column="second_limit"/>
+        <result property="secondRate" column="second_rate"/>
+        <result property="thirdLimit" column="third_limit"/>
+        <result property="thirdRate" column="third_rate"/>
+        <result property="creator" column="creator"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updater" column="updater"/>
+        <result property="updateDate" column="update_date"/>
+    </resultMap>
+
+</mapper>

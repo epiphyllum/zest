@@ -20,7 +20,7 @@ import java.util.Date;
 public class JAgentDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    // 通用
+    // 通用(5)
     @Schema(description = "ID")
     private Long id;
     @Schema(description = "创建者")
@@ -32,11 +32,11 @@ public class JAgentDTO implements Serializable {
     @Schema(description = "更新时间")
     private Date updateDate;
 
-    // 代理名
+    // 代理名(1)
     @Schema(description = "代理名称")
     private String agentName;
 
-    // 业务字段
+    // 业务字段(4)
     @Schema(description = "充值费率")
     private BigDecimal chargeRate;
     @Schema(description = "账号")
@@ -45,6 +45,8 @@ public class JAgentDTO implements Serializable {
     private String accountUser;
     @Schema(description = "银行名")
     private String accountBank;
+
+    // 返佣配置(6)
     @Schema(description = "一档金额")
     private BigDecimal firstLimit;
     @Schema(description = "一档费率")

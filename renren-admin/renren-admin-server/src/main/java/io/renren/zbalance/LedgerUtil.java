@@ -26,6 +26,7 @@ public class LedgerUtil {
         JLogEntity entity = new JLogEntity();
         entity.setOwnerId(balance.getOwnerId());
         entity.setOwnerName(balance.getOwnerName());
+        entity.setOwnerType(balance.getOwnerType());
         entity.setBalanceId(balance.getId());
         entity.setFactAmount(factAmount);
         entity.setCurrency(balance.getCurrency());

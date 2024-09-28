@@ -29,7 +29,7 @@ public class JDepositDTO implements Serializable {
     @Schema(description = "更新时间")
     private Date updateDate;
 
-    // 商户ID
+    // 商户ID(6)
     @Schema(description = "代理ID")
     private Long agentId;
     @Schema(description = "代理")
@@ -50,8 +50,6 @@ public class JDepositDTO implements Serializable {
     private String cardno;
     @Schema(description = "付款id")
     private String payerid;
-    @Schema(description = "币种")
-    private String currency;
     @Schema(description = "金额")
     private BigDecimal amount;
     @Schema(description = "交易对上")
@@ -60,8 +58,14 @@ public class JDepositDTO implements Serializable {
     private String procurecontent;
     @Schema(description = "合同文件")
     private String agmfid;
+
+    // 冗余增加的
+    @Schema(description = "币种")
+    private String currency;
+
+    // 通联返回
     @Schema(description = "申请单号")
     private String applyid;
     @Schema(description = "状态")
-    private Integer status;
+    private Integer state;
 }

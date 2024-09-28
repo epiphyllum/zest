@@ -1,6 +1,8 @@
 package io.renren.zadmin.zorg.config;
 
 import io.renren.commons.log.annotation.LogOperation;
+import io.renren.commons.security.user.SecurityUser;
+import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.constant.Constant;
 import io.renren.commons.tools.page.PageData;
 import io.renren.commons.tools.utils.ExcelUtils;
@@ -66,6 +68,10 @@ public class JMcardController {
     @LogOperation("保存")
     @PreAuthorize("hasAuthority('zorg:jmcard:save')")
     public Result save(@RequestBody JMcardDTO dto) {
+        UserDetail user = SecurityUser.getUser();
+        if (!user.getUserType().equals("operation") && !user.getUserType().equals("agent")) {
+            return Result.fail(9999, "not authorized");
+        }
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
         jmcardService.save(dto);
@@ -78,6 +84,10 @@ public class JMcardController {
     @LogOperation("修改")
     @PreAuthorize("hasAuthority('zorg:jmcard:update')")
     public Result update(@RequestBody JMcardDTO dto) {
+        UserDetail user = SecurityUser.getUser();
+        if (!user.getUserType().equals("operation") && !user.getUserType().equals("agent")) {
+            return Result.fail(9999, "not authorized");
+        }
         //效验数据
         ValidatorUtils.validateEntity(dto, UpdateGroup.class, DefaultGroup.class);
         jmcardService.update(dto);
@@ -89,6 +99,10 @@ public class JMcardController {
     @LogOperation("删除")
     @PreAuthorize("hasAuthority('zorg:jmcard:delete')")
     public Result delete(@RequestBody Long[] ids) {
+        UserDetail user = SecurityUser.getUser();
+        if (!user.getUserType().equals("operation") && !user.getUserType().equals("agent")) {
+            return Result.fail(9999, "not authorized");
+        }
         //效验数据
         AssertUtils.isArrayEmpty(ids, "id");
         jmcardService.delete(ids);

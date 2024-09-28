@@ -58,7 +58,6 @@ public class JExchangeController {
     @PreAuthorize("hasAuthority('zorg:jexchange:page')")
     public Result<PageData<JExchangeDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params){
         PageData<JExchangeDTO> page = jExchangeService.page(params);
-
         return new Result<PageData<JExchangeDTO>>().ok(page);
     }
 
@@ -67,7 +66,6 @@ public class JExchangeController {
     @PreAuthorize("hasAuthority('zorg:jexchange:info')")
     public Result<JExchangeDTO> get(@PathVariable("id") Long id){
         JExchangeDTO data = jExchangeService.get(id);
-
         return new Result<JExchangeDTO>().ok(data);
     }
 
@@ -78,9 +76,7 @@ public class JExchangeController {
     public Result save(@RequestBody JExchangeDTO dto){
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
-
         jExchangeService.save(dto);
-
         return new Result();
     }
 
@@ -91,9 +87,7 @@ public class JExchangeController {
     public Result update(@RequestBody JExchangeDTO dto){
         //效验数据
         ValidatorUtils.validateEntity(dto, UpdateGroup.class, DefaultGroup.class);
-
         jExchangeService.update(dto);
-
         return new Result();
     }
 
@@ -104,9 +98,7 @@ public class JExchangeController {
     public Result delete(@RequestBody Long[] ids){
         //效验数据
         AssertUtils.isArrayEmpty(ids, "id");
-
         jExchangeService.delete(ids);
-
         return new Result();
     }
 
@@ -117,21 +109,6 @@ public class JExchangeController {
     public void export(@Parameter(hidden = true) @RequestParam Map<String, Object> params, HttpServletResponse response) throws Exception {
         List<JExchangeDTO> list = jExchangeService.list(params);
         ExcelUtils.exportExcelToTarget(response, null, "j_exchange", list, JExchangeExcel.class);
-    }
-
-    /////////////////////////////////////////////////////////////////////////////////////////
-    //
-    /////////////////////////////////////////////////////////////////////////////////////////
-    @GetMapping("merchantList")
-    @Operation(summary = "商户列表")
-    @LogOperation("商户列表")
-    @PreAuthorize("hasAuthority('zorg:jexchange:export')")
-    public Result<List<JMerchantDTO>> merchantList() {
-        Result<List<JMerchantDTO>> result = new Result<>();
-        List<JMerchantEntity> jMerchantEntities = jMerchantDao.selectList(Wrappers.<JMerchantEntity>lambdaQuery());
-        List<JMerchantDTO> jMerchantDTOS = ConvertUtils.sourceToTarget(jMerchantEntities, JMerchantDTO.class);
-        result.setData(jMerchantDTOS);
-        return result;
     }
 
 }

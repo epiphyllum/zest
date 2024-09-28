@@ -18,7 +18,7 @@ import java.util.Date;
 public class JAllocateDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    // 通用
+    // 通用(5)
     @Schema(description = "ID")
     private Long id;
     @Schema(description = "创建者")
@@ -30,7 +30,7 @@ public class JAllocateDTO implements Serializable {
     @Schema(description = "更新时间")
     private Date updateDate;
 
-    // id
+    // ID(6)
     @Schema(description = "代理id")
     private Long agentId;
     @Schema(description = "代理名称")
@@ -59,5 +59,4 @@ public class JAllocateDTO implements Serializable {
     private Long fromName;
     @Schema(description = "入金账户")
     private Long toName;
-
 }

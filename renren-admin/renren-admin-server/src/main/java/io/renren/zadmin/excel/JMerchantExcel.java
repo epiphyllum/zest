@@ -22,6 +22,7 @@ public class JMerchantExcel {
     @ExcelProperty(value = "ID", index = 0)
     private Long id;
 
+    // (2) ID
     @ExcelProperty(value = "代理ID", index = 1)
     private Long agentId;
     @ExcelProperty(value = "代理", index = 2)
@@ -56,6 +57,8 @@ public class JMerchantExcel {
     private String mcc;
     @ExcelProperty(value = "启用", index = 17)
     private Integer enabled;
+
+    // 通用
     @ExcelProperty(value = "创建时间", index = 18)
     private Date createDate;
 }

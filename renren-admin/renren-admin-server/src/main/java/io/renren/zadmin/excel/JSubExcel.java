@@ -22,21 +22,27 @@ import java.util.Date;
 public class JSubExcel {
     @ExcelProperty(value = "ID", index = 0)
     private Long id;
+
+    // (4) ID
     @ExcelProperty(value = "代理ID", index = 1)
     private Long agentId;
     @ExcelProperty(value = "代理", index = 2)
     private String agentName;
-    @ExcelProperty(value = "商户名称", index = 3)
+    @ExcelProperty(value = "商户ID", index = 3)
+    private Long merchantId;
+    @ExcelProperty(value = "商户名称", index = 4)
     private String merchantName;
-    @ExcelProperty(value = "跟踪号", index = 4)
+
+    // (5) todo
+    @ExcelProperty(value = "跟踪号", index = 5)
     private String meraplid;
-    @ExcelProperty(value = "商户名称", index = 5)
+    @ExcelProperty(value = "商户名称", index = 6)
     private String cusname;
-    @ExcelProperty(value = "商户性质", index = 6)
+    @ExcelProperty(value = "商户性质", index = 7)
     private String flag;
-    @ExcelProperty(value = "营业执照名称", index = 7)
+    @ExcelProperty(value = "营业执照名称", index = 8)
     private String buslicensename;
-    @ExcelProperty(value = "注册地", index = 8)
+    @ExcelProperty(value = "注册地", index = 9)
     private String areacode;
     @ExcelProperty(value = "客户英文名称", index = 9)
     private String cusengname;
@@ -56,6 +62,8 @@ public class JSubExcel {
     private String mcc;
     @ExcelProperty(value = "启用", index = 17)
     private Integer enabled;
+
+    //
     @ExcelProperty(value = "创建时间", index = 18)
     private Date createDate;
 }

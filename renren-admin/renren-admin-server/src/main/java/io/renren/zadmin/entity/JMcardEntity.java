@@ -22,61 +22,79 @@ import java.util.Date;
 public class JMcardEntity extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
+    // 2 + 3
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private Long updater;
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private Date updateDate;
+
+    // 4
     private Long agentId;
     private String agentName;
     private Long merchantId;
     private String merchantName;
 
-    /**
-     * 申请单流水
-     */
+    // 申请单流水(1)
     private String meraplid;
-    private String maincardno;
-    private String cusid;
+
+    // 3
     private String producttype;
     private String cardtype;
-    private String belongtype;
     private String cardholdertype;
+
+    // 2
     private String nationality;
     private String companyposition;
+
+    // 3
     private String surname;
     private String name;
     private String birthday;
+
+    // 4
     private String idtype;
     private String idnumber;
     private String idtype2;
     private String idnumber2;
+
+    // 4
     private String province;
     private String city;
     private String country;
     private String address;
+
+    // 2
     private String email;
     private String gender;
+
+    // 2
     private String mobilecountry;
     private String mobilenumber;
+
     private String photofront;
     private String photoback;
+    private String photofront2;
+    private String photoback2;
+
     private String payerid;
+
+    //  4
     private String deliverycountry;
     private String deliveryprovince;
     private String deliverycity;
     private String deliveryaddress;
-    // resp
+
+    // 2
+    private String payeeaccount;
+    private String procureconent;
+    private String agmfid;
+
+    // resp(1)
     private String applyid;
-    // notify
+
+    // notify(4)
     private BigDecimal fee; //              decimal(18, 2) comment '申请费用',       -- fee	Number	18,2	O
     private String feecurrency; //      varchar(3) comment '申请费用币种',       -- 	feecurrency	String	3	O
     private String cardno; //           varchar(30) comment '卡号',              -- 	cardno	String	30	O	申请成功后返回
     private String state; //            varchar(2)  comment '卡申请状态',        --
-
-    /**
-     * 更新者
-     */
-    @TableField(fill = FieldFill.INSERT_UPDATE)
-    private Long updater;
-    /**
-     * 更新时间
-     */
-    @TableField(fill = FieldFill.INSERT_UPDATE)
-    private Date updateDate;
 }

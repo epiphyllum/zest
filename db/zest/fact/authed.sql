@@ -8,8 +8,8 @@ create table j_authed
     agent_name    varchar(50),
     merchant_id   bigint         not null comment '商户ID',
     merchant_name varchar(50)    not null comment '商户名称',
-    sub_id     bigint,
-    sub_name   varchar(50),
+    sub_id        bigint,
+    sub_name      varchar(50),
 
     -- info
     cardno        varchar(16)    not null, -- 卡号	cardno	String	16	Y
@@ -38,4 +38,6 @@ create table j_authed
 ) ENGINE = InnoDB
   collate utf8mb4_bin
   DEFAULT CHARACTER SET utf8mb4 COMMENT ='j_authed';
-create index idx_j_authed_1 on j_authed (dept_id, create_date);
+create index idx_j_authed_1 on j_authed (agent_id, create_date);
+create index idx_j_auth_2 on j_authed (merchant_id, create_date);
+create index idx_j_auth_3 on j_authed (sub_id, create_date);

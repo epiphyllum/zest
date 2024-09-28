@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.zadmin.dao.JMerchantDao">
+
+    <resultMap type="io.renren.zadmin.entity.JMerchantEntity" id="jMerchantMap">
+        <result property="id" column="id"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="deptName" column="dept_name"/>
+        <result property="merchantName" column="merchant_name"/>
+        <result property="parent" column="parent"/>
+        <result property="meraplid" column="meraplid"/>
+        <result property="cusname" column="cusname"/>
+        <result property="flag" column="flag"/>
+        <result property="buslicensename" column="buslicensename"/>
+        <result property="areacode" column="areacode"/>
+        <result property="province" column="province"/>
+        <result property="city" column="city"/>
+        <result property="address" column="address"/>
+        <result property="cusengname" column="cusengname"/>
+        <result property="tel" column="tel"/>
+        <result property="legalemail" column="legalemail"/>
+        <result property="legal" column="legal"/>
+        <result property="legalarea" column="legalarea"/>
+        <result property="legalidtype" column="legalidtype"/>
+        <result property="legalidno" column="legalidno"/>
+        <result property="legaladdress" column="legaladdress"/>
+        <result property="threcertflag" column="threcertflag"/>
+        <result property="buslicense" column="buslicense"/>
+        <result property="buslicenseexpire" column="buslicenseexpire"/>
+        <result property="creditcode" column="creditcode"/>
+        <result property="creditcodeexpire" column="creditcodeexpire"/>
+        <result property="organcode" column="organcode"/>
+        <result property="organcodeexpire" column="organcodeexpire"/>
+        <result property="legaloccop" column="legaloccop"/>
+        <result property="legaltel" column="legaltel"/>
+        <result property="holdername" column="holdername"/>
+        <result property="holderidno" column="holderidno"/>
+        <result property="holderexpire" column="holderexpire"/>
+        <result property="legalphotofrontfid" column="legalphotofrontfid"/>
+        <result property="legalphotobackfid" column="legalphotobackfid"/>
+        <result property="agreementfid" column="agreementfid"/>
+        <result property="creditfid" column="creditfid"/>
+        <result property="buslicensefid" column="buslicensefid"/>
+        <result property="taxfid" column="taxfid"/>
+        <result property="organfid" column="organfid"/>
+        <result property="cusid" column="cusid"/>
+        <result property="state" column="state"/>
+        <result property="verify" column="verify"/>
+        <result property="chargeRate" column="charge_rate"/>
+        <result property="failFee" column="fail_fee"/>
+        <result property="mcc" column="mcc"/>
+        <result property="enabled" column="enabled"/>
+        <result property="publicKey" column="public_key"/>
+        <result property="creator" column="creator"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updater" column="updater"/>
+        <result property="updateDate" column="update_date"/>
+    </resultMap>
+
+</mapper>

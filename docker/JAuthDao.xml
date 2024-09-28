@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.zadmin.dao.JAuthDao">
+
+    <resultMap type="io.renren.zadmin.entity.JAuthEntity" id="jAuthMap">
+        <result property="id" column="id"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="deptName" column="dept_name"/>
+        <result property="merchantId" column="merchant_id"/>
+        <result property="merchantName" column="merchant_name"/>
+        <result property="cardno" column="cardno"/>
+        <result property="logkv" column="logkv"/>
+        <result property="trxtype" column="trxtype"/>
+        <result property="trxdir" column="trxdir"/>
+        <result property="state" column="state"/>
+        <result property="amount" column="amount"/>
+        <result property="currency" column="currency"/>
+        <result property="trxtime" column="trxtime"/>
+        <result property="mcc" column="mcc"/>
+        <result property="trxaddr" column="trxaddr"/>
+        <result property="authcode" column="authcode"/>
+        <result property="creator" column="creator"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updater" column="updater"/>
+        <result property="updateDate" column="update_date"/>
+    </resultMap>
+
+</mapper>

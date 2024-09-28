@@ -32,4 +32,6 @@ create table j_auth
 ) ENGINE = InnoDB
   collate utf8mb4_bin
   DEFAULT CHARACTER SET utf8mb4 COMMENT ='j_auth';
-create index idx_j_auth_1 on j_auth (dept_id, create_date);
+create index idx_j_auth_1 on j_auth (agent_id, create_date);
+create index idx_j_auth_2 on j_auth (merchant_id, create_date);
+create index idx_j_auth_3 on j_auth (sub_id, create_date);

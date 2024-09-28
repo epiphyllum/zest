@@ -21,14 +21,13 @@ import io.renren.commons.mybatis.entity.BaseEntity;
 public class JWithdrawEntity extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
+    // (3+2)
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updater;
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date updateDate;
 
-    /**
-     *
-     */
+    // (6) ID相关
     private Long agentId;
     private String agentName;
     private Long merchantId;
@@ -36,6 +35,7 @@ public class JWithdrawEntity extends BaseEntity {
     private Long subId;
     private String subName;
 
+    // (8) 业务字段
     private String meraplid;
     private String cardno;
     private String payeeid;
@@ -44,6 +44,4 @@ public class JWithdrawEntity extends BaseEntity {
     private String applyid;
     private Integer status;
     private Integer version;
-
-
 }

@@ -7,6 +7,7 @@ import io.renren.commons.mybatis.service.impl.CrudServiceImpl;
 import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.constant.Constant;
+import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.page.PageData;
 import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.dao.SysDeptDao;
@@ -58,22 +59,21 @@ public class JSubServiceImpl extends CrudServiceImpl<JSubDao, JSubEntity, JSubDT
     public QueryWrapper<JSubEntity> getWrapper(Map<String, Object> params) {
         QueryWrapper<JSubEntity> wrapper = new QueryWrapper<>();
 
-        // 选父商户
-        Long parent = (Long) params.get("parent");
-        if (parent != null) {
-            wrapper.eq("parent", parent);
-        }
-
-        // 选子商户
-        Long child = (Long) params.get("child");
-        if (child != null) {
-            wrapper.ne("parent", 0L);
-        }
-
-        //
         String id = (String) params.get("id");
         if (StringUtils.isNotBlank(id)) {
             wrapper.eq("id", Long.parseLong(id));
+        }
+
+        String agentId = (String) params.get("agentId");
+        if (StringUtils.isNotBlank(agentId)) {
+            wrapper.eq("agent_id", Long.parseLong(agentId));
+        }
+
+        UserDetail user = SecurityUser.getUser();
+
+        // 代理访问的话
+        if (agentId == null && "agent".equals(user.getUserType())) {
+            wrapper.eq("agent_id", user.getDeptId());
         }
 
         return wrapper;
@@ -82,35 +82,64 @@ public class JSubServiceImpl extends CrudServiceImpl<JSubDao, JSubEntity, JSubDT
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void save(JSubDTO dto) {
-        // 创建大吉商户下的子商户
-        log.info("子商户创建...");
         saveSub(dto);
     }
 
-
-
     public void saveSub(JSubDTO dto) {
         UserDetail user = SecurityUser.getUser();
+
+        Long djId = null;
+
+        if (user.getUserType().equals("operation")) {
+            // 机构操作
+            djId = user.getDeptId();
+            if (dto.getAgentId()==null || dto.getMerchantId() == null) {
+                throw new RenException("invalid request");
+            }
+        }
+        else if (user.getUserType().equals("agent")) {
+            // 代理操作
+            if (dto.getMerchantId() == null) {
+                throw new RenException("invalid request");
+            }
+            SysDeptEntity agentDept = sysDeptDao.getById(user.getDeptId());
+            djId = agentDept.getPid();
+            // 设置agent
+            dto.setAgentId(agentDept.getId());
+            dto.setAgentName(agentDept.getName());
+        }
+        else if (user.getUserType().equals("merchant")) {
+            // 商户操作
+            SysDeptEntity merchantDept = sysDeptDao.getById(user.getDeptId());
+            String[] split = merchantDept.getPids().split(",");
+            djId = Long.parseLong(split[0]);
+            Long agentId = Long.parseLong(split[1]);
+            SysDeptEntity agentDept = sysDeptDao.selectById(agentId);
+
+            // 设置agent
+            dto.setAgentId(agentId);
+            dto.setAgentName(agentDept.getName());
+
+            // 设置merchant
+            dto.setMerchantName(user.getDeptName());
+            dto.setMerchantId(user.getDeptId());
+        } else {
+            throw new RenException("internal error");
+        }
+
         // 自商户部门id是三级别:  大吉Id, agentId, merchantId
-        Long djId = user.getDeptId();
-        Long agentId = dto.getAgentId();
+        String pids = djId + "," + dto.getAgentId() + "," + dto.getMerchantId();
 
-        String pids = djId + "," + agentId + ",";  // todo: + merchantId;
-
-        // 商户部门
+        // 子商户部门
         SysDeptEntity deptEntity = new SysDeptEntity();
         deptEntity.setPids(pids);
         deptEntity.setName(dto.getCusname());
         sysDeptService.insert(deptEntity);
 
-        // 父商户
-
         // 属性copy
         JSubEntity jSubEntity = ConvertUtils.sourceToTarget(dto, JSubEntity.class);
 
-        // 子商户->父商户信息
-        jSubEntity.setAgentId(agentId);
-        jSubEntity.setAgentName(dto.getAgentName());
+        // 子商户的ID 就是子商户的部门ID
         jSubEntity.setId(deptEntity.getId());
 
         // 创建管理账户 - 按币种来: 15 * 3
@@ -130,12 +159,11 @@ public class JSubServiceImpl extends CrudServiceImpl<JSubDao, JSubEntity, JSubDT
      */
     private void newBalance(SysDeptEntity deptEntity, String type, String currency) {
         JBalanceEntity jBalanceEntity = new JBalanceEntity();
-
         jBalanceEntity.setOwnerId(deptEntity.getId());
         jBalanceEntity.setOwnerName(deptEntity.getName());
+        jBalanceEntity.setOwnerType("sub");
         jBalanceEntity.setBalanceType(type);
         jBalanceEntity.setCurrency(currency);
-
         jBalanceDao.insert(jBalanceEntity);
     }
 

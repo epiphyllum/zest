@@ -22,14 +22,15 @@ public class JExchangeExcel {
     @ExcelProperty(value = "ID", index = 0)
     private Long id;
 
+    // (4) ID
     @ExcelProperty(value = "代理ID", index = 1)
     private Long agentId;
     @ExcelProperty(value = "代理名", index = 2)
     private String agentName;
     @ExcelProperty(value = "商户ID", index = 1)
-    private Long deptId;
+    private Long merchantId;
     @ExcelProperty(value = "商户名", index = 2)
-    private String deptName;
+    private String merchantName;
 
     @ExcelProperty(value = "申请单流水", index = 3)
     private String meraplid;
@@ -53,8 +54,6 @@ public class JExchangeExcel {
     private BigDecimal fee;
     @ExcelProperty(value = "锁汇方式", index = 13)
     private String extype;
-    @ExcelProperty(value = "版本号", index = 14)
-    private Integer version;
     @ExcelProperty(value = "创建时间", index = 15)
     private Date createDate;
 }

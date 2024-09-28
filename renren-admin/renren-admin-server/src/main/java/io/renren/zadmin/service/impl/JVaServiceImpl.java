@@ -32,6 +32,4 @@ public class JVaServiceImpl extends CrudServiceImpl<JVaDao, JVaEntity, JVaDTO> i
 
         return wrapper;
     }
-
-
 }

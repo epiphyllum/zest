@@ -19,14 +19,22 @@ import java.util.Date;
 @HeadRowHeight(20)
 @ColumnWidth(25)
 public class JCardExcel {
-    @ExcelProperty(value = "子商户ID", index = 0)
-    private Long deptId;
-    @ExcelProperty(value = "子商户", index = 1)
-    private String deptName;
+
+    // (6) ID
+    @ExcelProperty(value = "代理ID", index = 2)
+    private Long agentId;
+    @ExcelProperty(value = "代理", index = 3)
+    private String agentName;
     @ExcelProperty(value = "商户ID", index = 2)
     private Long merchantId;
     @ExcelProperty(value = "商户", index = 3)
     private String merchantName;
+    @ExcelProperty(value = "子商户ID", index = 0)
+    private Long subId;
+    @ExcelProperty(value = "子商户", index = 1)
+    private String subName;
+
+    //
     @ExcelProperty(value = "产品类型", index = 4)
     private String producttype;
     @ExcelProperty(value = "卡片种类", index = 5)

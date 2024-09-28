@@ -100,4 +100,7 @@ public class SysUserDTO implements Serializable {
     @Schema(description = "部门名称")
     private String deptName;
 
+    @Schema(description = "userType")
+    private String userType;
+
 }

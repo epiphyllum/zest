@@ -15,9 +15,12 @@ import io.renren.service.SysDeptService;
 import io.renren.zadmin.dao.JBalanceDao;
 import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.dto.JMerchantDTO;
+import io.renren.zadmin.dto.JSubDTO;
 import io.renren.zadmin.entity.JBalanceEntity;
 import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zadmin.service.JMerchantService;
+import io.renren.zadmin.service.JSubService;
+import io.renren.zadmin.zorg.member.JMerchantController;
 import io.renren.zbalance.BalanceType;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -39,11 +42,11 @@ import java.util.Map;
 @Slf4j
 public class JMerchantServiceImpl extends CrudServiceImpl<JMerchantDao, JMerchantEntity, JMerchantDTO> implements JMerchantService {
     @Resource
-    private SysDeptService sysDeptService;
-    @Resource
     private SysDeptDao sysDeptDao;
     @Resource
     private JBalanceDao jBalanceDao;
+    @Resource
+    private JSubService jSubService;
 
     @Override
     public PageData<JMerchantDTO> page(Map<String, Object> params) {
@@ -57,23 +60,16 @@ public class JMerchantServiceImpl extends CrudServiceImpl<JMerchantDao, JMerchan
     @Override
     public QueryWrapper<JMerchantEntity> getWrapper(Map<String, Object> params) {
         QueryWrapper<JMerchantEntity> wrapper = new QueryWrapper<>();
-
-        // 选父商户
-        Long parent = (Long) params.get("parent");
-        if (parent != null) {
-            wrapper.eq("parent", parent);
-        }
-
-        // 选子商户
-        Long child = (Long) params.get("child");
-        if (child != null) {
-            wrapper.ne("parent", 0L);
-        }
-
-        //
         String id = (String) params.get("id");
         if (StringUtils.isNotBlank(id)) {
             wrapper.eq("id", Long.parseLong(id));
+        }
+
+        UserDetail user = SecurityUser.getUser();
+
+        // 代理访问的话
+        if("agent".equals(user.getUserType())) {
+            wrapper.eq("agent_id", user.getDeptId());
         }
 
         return wrapper;
@@ -82,28 +78,27 @@ public class JMerchantServiceImpl extends CrudServiceImpl<JMerchantDao, JMerchan
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void save(JMerchantDTO dto) {
-        // 创建通联子商户
-        if (dto.getParent() == null) {
-            log.info("商户创建...");
-            Long master = saveMaster(dto);
-            dto.setParent(master);
-            saveSub(dto);
-            return;
-        }
-        // 创建大吉商户下的子商户
-        log.info("子商户创建...");
-        saveSub(dto);
+        JMerchantEntity merchant = saveMaster(dto);
+
+        JSubDTO jSubDTO = ConvertUtils.sourceToTarget(merchant, JSubDTO.class);
+        jSubDTO.setMerchantId(merchant.getId());
+        jSubDTO.setMerchantName(merchant.getCusname());
+
+        jSubService.save(jSubDTO);
     }
 
 
     // 创建大吉商户 | 通联子商户
-    public Long saveMaster(JMerchantDTO dto) {
+    public JMerchantEntity saveMaster(JMerchantDTO dto) {
+
+        // 拿到用户
         UserDetail user = SecurityUser.getUser();
 
+        // 商户所属代理
         Long agentId = dto.getAgentId();
         SysDeptEntity agentDept = sysDeptDao.selectById(agentId);
         String agentName = agentDept.getName();
-        String pids = user.getDeptId() + "," + agentId;   // todo: check
+        String pids = user.getDeptId() + "," + agentId;
 
         // 创建商户部门
         SysDeptEntity deptEntity = new SysDeptEntity();
@@ -119,7 +114,7 @@ public class JMerchantServiceImpl extends CrudServiceImpl<JMerchantDao, JMerchan
         jMerchantEntity.setAgentName(agentName);
         jMerchantEntity.setId(deptEntity.getId());  // 商户ID
 
-        // 15 * 5个账户
+        // 15 * 5 = 75个账户
         for (String currency : BalanceType.CURRENCY_LIST) {
             newBalance(deptEntity, BalanceType.getInAccount(currency), "HKD");
             newBalance(deptEntity, BalanceType.getDepositAccount(currency), currency);  //  预收保证金
@@ -129,61 +124,20 @@ public class JMerchantServiceImpl extends CrudServiceImpl<JMerchantDao, JMerchan
         }
 
         insert(jMerchantEntity);
-        return deptEntity.getId();
+
+        return jMerchantEntity;
     }
-
-    public void saveSub(JMerchantDTO dto) {
-        UserDetail user = SecurityUser.getUser();
-
-        // 自商户部门id是三级别:  大吉Id, agentId, merchantId
-        Long djId = user.getDeptId();
-        Long agentId = dto.getAgentId();
-        Long merchantId = dto.getParent();
-
-        String pids = djId + "," + agentId + "," + merchantId;
-
-        // 商户部门
-        SysDeptEntity deptEntity = new SysDeptEntity();
-        deptEntity.setPids(pids);
-        deptEntity.setName(dto.getCusname());
-        deptEntity.setPid(dto.getParent());  // 子商户的parent是商户
-        deptEntity.setParentName(sysDeptDao.selectById(dto.getParent()).getName());
-        sysDeptService.insert(deptEntity);
-
-        // 父商户
-        SysDeptEntity parentDept = sysDeptDao.selectById(dto.getParent());
-
-        // 属性copy
-        JMerchantEntity jMerchantEntity = ConvertUtils.sourceToTarget(dto, JMerchantEntity.class);
-
-        // 子商户->父商户信息
-        jMerchantEntity.setAgentId(agentId);
-        jMerchantEntity.setAgentName(dto.getAgentName());
-        jMerchantEntity.setId(deptEntity.getId());
-
-        // 创建管理账户 - 按币种来: 15 * 3
-        for (String currency : BalanceType.CURRENCY_LIST) {
-            newBalance(deptEntity, BalanceType.getSubSumAccount(currency), currency);
-            newBalance(deptEntity, BalanceType.getSubFeeAccount(currency), currency);
-            newBalance(deptEntity, BalanceType.getSubVaAccount(currency), currency);
-        }
-
-        // 创建子商户
-        insert(jMerchantEntity);
-    }
-
 
     /**
      *
      */
     private void newBalance(SysDeptEntity deptEntity, String type, String currency) {
         JBalanceEntity jBalanceEntity = new JBalanceEntity();
-
         jBalanceEntity.setOwnerId(deptEntity.getId());
         jBalanceEntity.setOwnerName(deptEntity.getName());
+        jBalanceEntity.setOwnerType("merchant");
         jBalanceEntity.setBalanceType(type);
         jBalanceEntity.setCurrency(currency);
-
         jBalanceDao.insert(jBalanceEntity);
     }
 

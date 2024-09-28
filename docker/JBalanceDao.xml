@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.zadmin.dao.JBalanceDao">
+
+    <resultMap type="io.renren.zadmin.entity.JBalanceEntity" id="jBalanceMap">
+        <result property="id" column="id"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="deptName" column="dept_name"/>
+        <result property="balanceType" column="balance_type"/>
+        <result property="balanceName" column="balance_name"/>
+        <result property="currency" column="currency"/>
+        <result property="balance" column="balance"/>
+        <result property="frozen" column="frozen"/>
+        <result property="version" column="version"/>
+        <result property="creator" column="creator"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updater" column="updater"/>
+        <result property="updateDate" column="update_date"/>
+    </resultMap>
+
+</mapper>

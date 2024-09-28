@@ -22,7 +22,7 @@ public class JVaExcel {
     @ExcelProperty(value = "ID", index = 0)
     private Long id;
 
-    // 业务字段
+    // (4) 业务字段
     @ExcelProperty(value = "通联虚拟户", index = 2)
     private String accountno;
     @ExcelProperty(value = "币种", index = 3)
@@ -31,6 +31,8 @@ public class JVaExcel {
     private BigDecimal amount;
     @ExcelProperty(value = "收款账户号", index = 5)
     private String vaaccountno;
+
+    // (2)
     @ExcelProperty(value = "创建时间", index = 6)
     private Date createDate;
     @ExcelProperty(value = "更新时间", index = 7)

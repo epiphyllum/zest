@@ -2,6 +2,8 @@ package io.renren.zadmin.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.renren.commons.mybatis.service.impl.CrudServiceImpl;
+import io.renren.commons.security.user.SecurityUser;
+import io.renren.commons.security.user.UserDetail;
 import io.renren.zadmin.dao.JMoneyDao;
 import io.renren.zadmin.dto.JMoneyDTO;
 import io.renren.zadmin.entity.JMoneyEntity;
@@ -24,7 +26,6 @@ public class JMoneyServiceImpl extends CrudServiceImpl<JMoneyDao, JMoneyEntity, 
     public QueryWrapper<JMoneyEntity> getWrapper(Map<String, Object> params) {
         QueryWrapper<JMoneyEntity> wrapper = new QueryWrapper<>();
 
-        //
         String agentId = (String) params.get("agentId");
         if (StringUtils.isNotBlank(agentId)) {
             wrapper.eq("agent_id", Long.parseLong(agentId));
@@ -35,6 +36,14 @@ public class JMoneyServiceImpl extends CrudServiceImpl<JMoneyDao, JMoneyEntity, 
         if (StringUtils.isNotBlank(merchantId)) {
             wrapper.eq("merchant_id", Long.parseLong(merchantId));
         }
+
+        UserDetail user = SecurityUser.getUser();
+        if (agentId == null && "agent".equals(user.getUserType())) {
+            wrapper.eq("agent_id", user.getDeptId());
+        } else if (merchantId != null && "merchant".equals(user.getUserType())) {
+            wrapper.eq("merchant_id", user.getDeptId());
+        }
+
 
         //
         String acctno = (String) params.get("acctno");

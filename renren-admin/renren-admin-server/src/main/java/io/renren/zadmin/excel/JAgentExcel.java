@@ -19,7 +19,7 @@ import java.util.Date;
 @HeadRowHeight(20)
 @ColumnWidth(25)
 public class JAgentExcel {
-    @ExcelProperty(value = "代理名称: sys_dept.name", index = 0)
+    @ExcelProperty(value = "代理名称", index = 0)
     private String agentName;
     @ExcelProperty(value = "充值费率", index = 1)
     private BigDecimal chargeRate;

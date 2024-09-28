@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.renren.commons.mybatis.annotation.DataFilter;
 import io.renren.commons.mybatis.service.impl.CrudServiceImpl;
+import io.renren.commons.security.user.SecurityUser;
+import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.constant.Constant;
 import io.renren.commons.tools.page.PageData;
 import io.renren.service.impl.SysDeptServiceImpl;
@@ -44,6 +46,11 @@ public class JBalanceServiceImpl extends CrudServiceImpl<JBalanceDao, JBalanceEn
         QueryWrapper<JBalanceEntity> wrapper = new QueryWrapper<>();
 
         String ownerId = (String) params.get("ownerId");
+        if( ownerId == null) {
+            UserDetail user = SecurityUser.getUser();
+            ownerId = user.getDeptId().toString();
+        }
+
         if (StringUtils.isNotBlank(ownerId)) {
             List<Long> subDeptIdList = sysDeptService.getSubDeptIdList(Long.parseLong(ownerId));
             System.out.println("子部门id列表:");
@@ -52,6 +59,7 @@ public class JBalanceServiceImpl extends CrudServiceImpl<JBalanceDao, JBalanceEn
             }
             wrapper.in("owner_id", subDeptIdList);
         }
+
 
         String balanceType = (String) params.get("balanceType");
         wrapper.likeRight(StringUtils.isNotBlank(balanceType), "balance_type", balanceType);

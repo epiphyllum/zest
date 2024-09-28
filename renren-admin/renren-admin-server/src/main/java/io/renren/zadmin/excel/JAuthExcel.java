@@ -20,12 +20,21 @@ import java.util.Date;
 @ColumnWidth(25)
 public class JAuthExcel {
 
-    @ExcelProperty(value = "子商户ID", index = 0)
-    private Long deptId;
-    @ExcelProperty(value = "商户ID", index = 1)
+    // (6) ID
+    @ExcelProperty(value = "代理ID", index = 0)
+    private Long agentId;
+    @ExcelProperty(value = "代理", index = 1)
+    private Long agentName;
+    @ExcelProperty(value = "商户ID", index = 2)
     private Long merchantId;
+    @ExcelProperty(value = "商户", index = 3)
+    private Long merchantName;
+    @ExcelProperty(value = "子商户ID", index = 4)
+    private Long subId;
+    @ExcelProperty(value = "子商户", index = 5)
+    private Long subName;
 
-
+    // todo
     @ExcelProperty(value = "卡号", index = 2)
     private String cardno;
     @ExcelProperty(value = "流水号", index = 3)

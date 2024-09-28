@@ -20,6 +20,7 @@ import java.util.Date;
 @ColumnWidth(25)
 public class JDepositExcel {
 
+    // (6) ID
     @ExcelProperty(value = "代理ID", index = 0)
     private Long agentId;
     @ExcelProperty(value = "代理名", index = 1)
@@ -42,7 +43,7 @@ public class JDepositExcel {
     private String payerid;
     @ExcelProperty(value = "金额", index = 7)
     private BigDecimal amount;
-    @ExcelProperty(value = "交易对上", index = 8)
+    @ExcelProperty(value = "交易对手", index = 8)
     private String payeeaccount;
     @ExcelProperty(value = "采购内容", index = 9)
     private String procurecontent;

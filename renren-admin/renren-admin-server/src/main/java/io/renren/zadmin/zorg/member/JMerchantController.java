@@ -3,19 +3,20 @@ package io.renren.zadmin.zorg.member;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.log.annotation.LogOperation;
+import io.renren.commons.security.user.SecurityUser;
+import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.constant.Constant;
 import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.page.PageData;
 import io.renren.commons.tools.utils.ConvertUtils;
-import io.renren.commons.tools.utils.Result;
 import io.renren.commons.tools.utils.ExcelUtils;
+import io.renren.commons.tools.utils.Result;
 import io.renren.commons.tools.validator.AssertUtils;
 import io.renren.commons.tools.validator.ValidatorUtils;
 import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
 import io.renren.zadmin.dao.JMerchantDao;
-import io.renren.zadmin.dto.JAgentDTO;
 import io.renren.zadmin.dto.JMerchantDTO;
 import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zadmin.excel.JMerchantExcel;
@@ -31,19 +32,16 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
-import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
-
-import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-
-import static io.renren.zin.config.CommonUtils.newRequestId;
 
 
 /**
@@ -82,13 +80,18 @@ public class JMerchantController {
         return new Result<PageData<JMerchantDTO>>().ok(page);
     }
 
+    /**
+     * 商户列表
+     */
     @GetMapping("list")
-    @Operation(summary = "分页")
-    @PreAuthorize("hasAuthority('zorg:jmerchant:page')")
-    public Result<List<JMerchantDTO>> list() {
-        Map<String, Object> params = new HashMap<>();
-        List<JMerchantDTO> list = jMerchantService.list(params);
-        return new Result<List<JMerchantDTO>>().ok(list);
+    public Result<List<JMerchantDTO>> merchantList(@RequestParam(value = "agentId", required = false) Long agentId) {
+        Result<List<JMerchantDTO>> result = new Result<>();
+        List<JMerchantEntity> jMerchantEntities = jMerchantDao.selectList(Wrappers.<JMerchantEntity>lambdaQuery()
+                .eq(agentId != null, JMerchantEntity::getAgentId, agentId)
+        );
+        List<JMerchantDTO> dtos = ConvertUtils.sourceToTarget(jMerchantEntities, JMerchantDTO.class);
+        result.setData(dtos);
+        return result;
     }
 
     @GetMapping("{id}")
@@ -104,6 +107,10 @@ public class JMerchantController {
     @LogOperation("保存")
     @PreAuthorize("hasAuthority('zorg:jmerchant:save')")
     public Result save(@RequestBody JMerchantDTO dto) {
+        UserDetail user = SecurityUser.getUser();
+        if (!user.getUserType().equals("operation") && !user.getUserType().equals("agent")) {
+            return Result.fail(9999, "not authorized");
+        }
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
         jMerchantService.save(dto);
@@ -115,6 +122,10 @@ public class JMerchantController {
     @LogOperation("修改")
     @PreAuthorize("hasAuthority('zorg:jmerchant:update')")
     public Result update(@RequestBody JMerchantDTO dto) {
+        UserDetail user = SecurityUser.getUser();
+        if (!user.getUserType().equals("operation") && !user.getUserType().equals("agent")) {
+            return Result.fail(9999, "not authorized");
+        }
         //效验数据
         ValidatorUtils.validateEntity(dto, UpdateGroup.class, DefaultGroup.class);
         jMerchantService.update(dto);
@@ -126,6 +137,10 @@ public class JMerchantController {
     @LogOperation("删除")
     @PreAuthorize("hasAuthority('zorg:jmerchant:delete')")
     public Result delete(@RequestBody Long[] ids) {
+        UserDetail user = SecurityUser.getUser();
+        if (!user.getUserType().equals("operation") && !user.getUserType().equals("agent")) {
+            return Result.fail(9999, "not authorized");
+        }
         //效验数据
         AssertUtils.isArrayEmpty(ids, "id");
         jMerchantService.delete(ids);
@@ -141,16 +156,6 @@ public class JMerchantController {
         ExcelUtils.exportExcelToTarget(response, null, "j_merchant", list, JMerchantExcel.class);
     }
 
-    /**
-     * 获取代理列表
-     *
-     * @return
-     */
-    @GetMapping("agentList")
-    public Result<List<JAgentDTO>> agentList() {
-        List<JAgentDTO> list = jAgentService.list(new HashMap<>());
-        return Result.one(list);
-    }
 
     /**
      * 发起到通联创建子商户
@@ -158,6 +163,11 @@ public class JMerchantController {
     @GetMapping("createAllinpay")
     @PreAuthorize("hasAuthority('zorg:jmerchant:update')")
     public Result createAllinpay(@RequestParam("id") Long id) {
+        UserDetail user = SecurityUser.getUser();
+        if (!user.getUserType().equals("operation") && !user.getUserType().equals("agent")) {
+            return Result.fail(9999, "not authorized");
+        }
+
         JMerchantEntity jMerchantEntity = jMerchantDao.selectById(id);
 
         // 上传文件
