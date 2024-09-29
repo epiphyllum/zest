@@ -13,6 +13,7 @@ import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.dao.SysDeptDao;
 import io.renren.entity.SysDeptEntity;
 import io.renren.service.SysDeptService;
+import io.renren.zadmin.ZestConstant;
 import io.renren.zadmin.dao.JBalanceDao;
 import io.renren.zadmin.dao.JSubDao;
 import io.renren.zadmin.dto.JSubDTO;
@@ -64,17 +65,24 @@ public class JSubServiceImpl extends CrudServiceImpl<JSubDao, JSubEntity, JSubDT
             wrapper.eq("id", Long.parseLong(id));
         }
 
-        String agentId = (String) params.get("agentId");
-        if (StringUtils.isNotBlank(agentId)) {
-            wrapper.eq("agent_id", Long.parseLong(agentId));
-        }
+        CommonFilter.setFilterMerchant(wrapper, params);
 
-        UserDetail user = SecurityUser.getUser();
-
-        // 代理访问的话
-        if (agentId == null && "agent".equals(user.getUserType())) {
-            wrapper.eq("agent_id", user.getDeptId());
-        }
+//        String agentId = (String) params.get("agentId");
+//        if (StringUtils.isNotBlank(agentId)) {
+//            wrapper.eq("agent_id", Long.parseLong(agentId));
+//        }
+//        String merchantId = (String) params.get("merchantId");
+//        if (StringUtils.isNotBlank(merchantId)) {
+//            wrapper.eq("merchant_id", Long.parseLong(merchantId));
+//        }
+//        UserDetail user = SecurityUser.getUser();
+//        if (agentId != null && ZestConstant.USER_TYPE_AGENT.equals(user.getUserType())) {
+//            // 代理访问
+//            wrapper.eq("agent_id", user.getDeptId());
+//        } else if (merchantId == null && ZestConstant.USER_TYPE_MERCHANT.equals(user.getUserType())) {
+//            // 商户访问
+//            wrapper.eq("merchant_id", user.getDeptId());
+//        }
 
         return wrapper;
     }
@@ -88,16 +96,19 @@ public class JSubServiceImpl extends CrudServiceImpl<JSubDao, JSubEntity, JSubDT
     public void saveSub(JSubDTO dto) {
         UserDetail user = SecurityUser.getUser();
 
+        if (user.getUserType() == null) {
+            throw new RenException("invalid request user");
+        }
+
         Long djId = null;
 
-        if (user.getUserType().equals("operation")) {
+        if (user.getUserType().equals(ZestConstant.USER_TYPE_OPERATION)) {
             // 机构操作
             djId = user.getDeptId();
-            if (dto.getAgentId()==null || dto.getMerchantId() == null) {
+            if (dto.getAgentId() == null || dto.getMerchantId() == null) {
                 throw new RenException("invalid request");
             }
-        }
-        else if (user.getUserType().equals("agent")) {
+        } else if (user.getUserType().equals(ZestConstant.USER_TYPE_AGENT)) {
             // 代理操作
             if (dto.getMerchantId() == null) {
                 throw new RenException("invalid request");
@@ -107,8 +118,7 @@ public class JSubServiceImpl extends CrudServiceImpl<JSubDao, JSubEntity, JSubDT
             // 设置agent
             dto.setAgentId(agentDept.getId());
             dto.setAgentName(agentDept.getName());
-        }
-        else if (user.getUserType().equals("merchant")) {
+        } else if (user.getUserType().equals(ZestConstant.USER_TYPE_MERCHANT)) {
             // 商户操作
             SysDeptEntity merchantDept = sysDeptDao.getById(user.getDeptId());
             String[] split = merchantDept.getPids().split(",");

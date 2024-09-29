@@ -1,6 +1,8 @@
 package io.renren.zadmin.zorg.txn;
 
 import io.renren.commons.log.annotation.LogOperation;
+import io.renren.commons.security.user.SecurityUser;
+import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.constant.Constant;
 import io.renren.commons.tools.page.PageData;
 import io.renren.commons.tools.utils.Result;
@@ -66,6 +68,11 @@ public class JWithdrawController {
     @LogOperation("保存")
     @PreAuthorize("hasAuthority('zorg:jwithdraw:save')")
     public Result save(@RequestBody JWithdrawDTO dto){
+        UserDetail user = SecurityUser.getUser();
+        if (!user.getUserType().equals("operation") && !user.getUserType().equals("agent") && !user.getUserType().equals("merchant")) {
+            return Result.fail(9999, "not authorized, you are " + user.getUserType());
+        }
+
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
         jWithdrawService.save(dto);

@@ -81,6 +81,7 @@ public class JAgentController {
     public Result save(@RequestBody JAgentDTO dto) {
 
         UserDetail user = SecurityUser.getUser();
+
         if (!user.getUserType().equals("operation")) {
             return Result.fail(9999, "not authorized");
         }

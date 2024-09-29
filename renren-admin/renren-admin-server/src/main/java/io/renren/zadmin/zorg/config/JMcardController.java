@@ -70,7 +70,7 @@ public class JMcardController {
     public Result save(@RequestBody JMcardDTO dto) {
         UserDetail user = SecurityUser.getUser();
         if (!user.getUserType().equals("operation") && !user.getUserType().equals("agent")) {
-            return Result.fail(9999, "not authorized");
+            return Result.fail(9999, "not authorized, you are " + user.getUserType());
         }
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);

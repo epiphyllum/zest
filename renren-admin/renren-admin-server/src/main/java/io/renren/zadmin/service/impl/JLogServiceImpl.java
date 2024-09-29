@@ -32,9 +32,9 @@ public class JLogServiceImpl extends CrudServiceImpl<JLogDao, JLogEntity, JLogDT
     public QueryWrapper<JLogEntity> getWrapper(Map<String, Object> params) {
         QueryWrapper<JLogEntity> wrapper = new QueryWrapper<>();
 
-        //
+        // 用户可以看自己下面所有子部门的数据
         String ownerId = (String) params.get("ownerId");
-        if( ownerId == null) {
+        if (ownerId == null) {
             UserDetail user = SecurityUser.getUser();
             ownerId = user.getDeptId().toString();
         }

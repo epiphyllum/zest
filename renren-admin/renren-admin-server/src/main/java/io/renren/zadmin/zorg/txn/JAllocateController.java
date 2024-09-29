@@ -1,6 +1,8 @@
 package io.renren.zadmin.zorg.txn;
 
 import io.renren.commons.log.annotation.LogOperation;
+import io.renren.commons.security.user.SecurityUser;
+import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.constant.Constant;
 import io.renren.commons.tools.page.PageData;
 import io.renren.commons.tools.utils.Result;
@@ -67,6 +69,11 @@ public class JAllocateController {
     @LogOperation("保存")
     @PreAuthorize("hasAuthority('zorg:jinout:save')")
     public Result save(@RequestBody JAllocateDTO dto) {
+        // 商户才能调拨资金
+        UserDetail user = SecurityUser.getUser();
+        if (!user.getUserType().equals("merchant")) {
+            return Result.fail(9999, "not authorized, you are " + user.getUserType());
+        }
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
         jAllocateService.save(dto);

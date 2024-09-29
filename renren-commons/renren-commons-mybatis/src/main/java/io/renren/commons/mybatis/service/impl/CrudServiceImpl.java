@@ -13,6 +13,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.ReflectionKit;
 import io.renren.commons.mybatis.service.CrudService;
+import io.renren.commons.security.user.SecurityUser;
+import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.constant.Constant;
 import io.renren.commons.tools.page.PageData;
 import io.renren.commons.tools.utils.ConvertUtils;
@@ -86,4 +88,6 @@ public abstract class CrudServiceImpl<M extends BaseMapper<T>, T, D> extends Bas
         }
         return wrapper;
     }
+
+
 }

@@ -2,6 +2,8 @@ package io.renren.zadmin.zorg.txn;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.log.annotation.LogOperation;
+import io.renren.commons.security.user.SecurityUser;
+import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.constant.Constant;
 import io.renren.commons.tools.page.PageData;
 import io.renren.commons.tools.utils.ConvertUtils;
@@ -28,16 +30,17 @@ import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.util.List;
 import java.util.Map;
 
 
 /**
-* j_exchange
-*
-* @author epiphyllum epiphyllum.zhou@gmail.com
-* @since 3.0 2024-08-19
-*/
+ * j_exchange
+ *
+ * @author epiphyllum epiphyllum.zhou@gmail.com
+ * @since 3.0 2024-08-19
+ */
 @RestController
 @RequestMapping("zorg/jexchange")
 @Tag(name = "j_exchange")
@@ -56,7 +59,7 @@ public class JExchangeController {
             @Parameter(name = Constant.ORDER, description = "排序方式，可选值(asc、desc)")
     })
     @PreAuthorize("hasAuthority('zorg:jexchange:page')")
-    public Result<PageData<JExchangeDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params){
+    public Result<PageData<JExchangeDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
         PageData<JExchangeDTO> page = jExchangeService.page(params);
         return new Result<PageData<JExchangeDTO>>().ok(page);
     }
@@ -64,7 +67,7 @@ public class JExchangeController {
     @GetMapping("{id}")
     @Operation(summary = "信息")
     @PreAuthorize("hasAuthority('zorg:jexchange:info')")
-    public Result<JExchangeDTO> get(@PathVariable("id") Long id){
+    public Result<JExchangeDTO> get(@PathVariable("id") Long id) {
         JExchangeDTO data = jExchangeService.get(id);
         return new Result<JExchangeDTO>().ok(data);
     }
@@ -73,7 +76,13 @@ public class JExchangeController {
     @Operation(summary = "保存")
     @LogOperation("保存")
     @PreAuthorize("hasAuthority('zorg:jexchange:save')")
-    public Result save(@RequestBody JExchangeDTO dto){
+    public Result save(@RequestBody JExchangeDTO dto) {
+        // 商户才能发起换汇
+        UserDetail user = SecurityUser.getUser();
+        if (!user.getUserType().equals("merchant")) {
+            return Result.fail(9999, "not authorized, you are " + user.getUserType());
+        }
+
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
         jExchangeService.save(dto);
@@ -84,7 +93,7 @@ public class JExchangeController {
     @Operation(summary = "修改")
     @LogOperation("修改")
     @PreAuthorize("hasAuthority('zorg:jexchange:update')")
-    public Result update(@RequestBody JExchangeDTO dto){
+    public Result update(@RequestBody JExchangeDTO dto) {
         //效验数据
         ValidatorUtils.validateEntity(dto, UpdateGroup.class, DefaultGroup.class);
         jExchangeService.update(dto);
@@ -95,7 +104,7 @@ public class JExchangeController {
     @Operation(summary = "删除")
     @LogOperation("删除")
     @PreAuthorize("hasAuthority('zorg:jexchange:delete')")
-    public Result delete(@RequestBody Long[] ids){
+    public Result delete(@RequestBody Long[] ids) {
         //效验数据
         AssertUtils.isArrayEmpty(ids, "id");
         jExchangeService.delete(ids);

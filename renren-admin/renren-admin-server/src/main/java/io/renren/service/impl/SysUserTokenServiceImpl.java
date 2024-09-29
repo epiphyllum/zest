@@ -18,6 +18,7 @@ import io.renren.entity.SysDeptEntity;
 import io.renren.entity.SysUserTokenEntity;
 import io.renren.service.SysUserDetailService;
 import io.renren.service.SysUserTokenService;
+import io.renren.zadmin.ZestConstant;
 import lombok.AllArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -86,15 +87,11 @@ public class SysUserTokenServiceImpl extends BaseServiceImpl<SysUserTokenDao, Sy
         String accessToken = TokenUtils.generator();
         entity.setAccessToken(accessToken);
         entity.setAccessTokenExpire(DateUtil.offsetSecond(new Date(), securityProperties.getAccessTokenExpire()));
-
         // 更新
         baseDao.updateById(entity);
 
         // 用户权限
         UserDetail userDetail = sysUserDetailService.getUserDetailById(entity.getUserId());
-
-        // 依据用户部门pids确定用户的类型
-        setUserType(userDetail);
 
         // 保存用户信息到缓存
         tokenStoreCache.saveUser(accessToken, userDetail);
@@ -149,28 +146,8 @@ public class SysUserTokenServiceImpl extends BaseServiceImpl<SysUserTokenDao, Sy
 
         // 用户权限
         user = sysUserDetailService.getUserDetailById(user.getId());
-        setUserType(user);
 
         // 更新缓存
         tokenStoreCache.saveUser(accessToken, user, expire);
     }
-
-    private void setUserType(UserDetail userDetail) {
-        SysDeptEntity deptEntity = sysDeptDao.selectById(userDetail.getDeptId());
-        String[] split = deptEntity.getPids().split(",");
-        if (split.length == 2) {
-            userDetail.setUserType("merchant");
-        } else if (split.length == 3) {
-            userDetail.setUserType("sub");
-        } else if (split.length == 1) {
-            if (split[0].equals("0")) {
-                userDetail.setUserType("operation");
-            } else {
-                userDetail.setUserType("agent");
-            }
-        } else {
-            throw new RenException("internal error");
-        }
-    }
-
 }

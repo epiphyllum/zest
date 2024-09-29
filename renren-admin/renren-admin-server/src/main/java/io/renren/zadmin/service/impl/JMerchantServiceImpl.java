@@ -12,6 +12,7 @@ import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.dao.SysDeptDao;
 import io.renren.entity.SysDeptEntity;
 import io.renren.service.SysDeptService;
+import io.renren.zadmin.ZestConstant;
 import io.renren.zadmin.dao.JBalanceDao;
 import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.dto.JMerchantDTO;
@@ -60,17 +61,22 @@ public class JMerchantServiceImpl extends CrudServiceImpl<JMerchantDao, JMerchan
     @Override
     public QueryWrapper<JMerchantEntity> getWrapper(Map<String, Object> params) {
         QueryWrapper<JMerchantEntity> wrapper = new QueryWrapper<>();
+
         String id = (String) params.get("id");
         if (StringUtils.isNotBlank(id)) {
             wrapper.eq("id", Long.parseLong(id));
         }
 
-        UserDetail user = SecurityUser.getUser();
+//        String agentId = (String) params.get("agentId");
+//        if (StringUtils.isNotBlank(agentId)) {
+//            wrapper.eq("agent_id", Long.parseLong(agentId));
+//        }
+//        UserDetail user = SecurityUser.getUser();
+//        if (agentId != null && ZestConstant.USER_TYPE_AGENT.equals(user.getUserType())) {
+//            wrapper.eq("agent_id", user.getDeptId());
+//        }
 
-        // 代理访问的话
-        if("agent".equals(user.getUserType())) {
-            wrapper.eq("agent_id", user.getDeptId());
-        }
+        CommonFilter.setFilterAgent(wrapper, params);
 
         return wrapper;
     }
@@ -88,7 +94,7 @@ public class JMerchantServiceImpl extends CrudServiceImpl<JMerchantDao, JMerchan
     }
 
 
-    // 创建大吉商户 | 通联子商户
+    // 创建大吉商户
     public JMerchantEntity saveMaster(JMerchantDTO dto) {
 
         // 拿到用户

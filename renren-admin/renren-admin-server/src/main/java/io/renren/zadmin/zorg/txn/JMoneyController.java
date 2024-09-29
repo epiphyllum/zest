@@ -1,6 +1,8 @@
 package io.renren.zadmin.zorg.txn;
 
 import io.renren.commons.log.annotation.LogOperation;
+import io.renren.commons.security.user.SecurityUser;
+import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.constant.Constant;
 import io.renren.commons.tools.page.PageData;
 import io.renren.commons.tools.utils.Result;
@@ -117,6 +119,12 @@ public class JMoneyController {
     @LogOperation("匹配来账")
     @PreAuthorize("hasAuthority('zorg:jmoney:update')")
     public Result match(@RequestParam("id") Long id)  {
+
+        UserDetail user = SecurityUser.getUser();
+        if (!user.getUserType().equals("operation") && !user.getUserType().equals("agent") && !user.getUserType().equals("merchant")) {
+            return Result.fail(9999, "not authorized, you are " + user.getUserType());
+        }
+
         if (accountManageNotify.match(id)) {
             return Result.ok;
         } else {

@@ -8,6 +8,7 @@ import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.entity.SysDeptEntity;
 import io.renren.service.SysDeptService;
+import io.renren.zadmin.ZestConstant;
 import io.renren.zadmin.dao.JAgentDao;
 import io.renren.zadmin.dto.JAgentDTO;
 import io.renren.zadmin.entity.JAgentEntity;
@@ -43,10 +44,6 @@ public class JAgentServiceImpl extends CrudServiceImpl<JAgentDao, JAgentEntity, 
     @Override
     public void save(JAgentDTO dto) {
         UserDetail user = SecurityUser.getUser();
-
-        if ("operation".equals(user.getUserType())) {
-            throw new RenException("only operation can add agent");
-        }
 
         // 插入系统sys_dept
         SysDeptEntity deptEntity = new SysDeptEntity();

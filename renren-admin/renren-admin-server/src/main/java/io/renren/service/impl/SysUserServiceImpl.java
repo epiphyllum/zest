@@ -22,6 +22,7 @@ import io.renren.dto.SysUserDTO;
 import io.renren.entity.SysDeptEntity;
 import io.renren.entity.SysUserEntity;
 import io.renren.service.*;
+import io.renren.zadmin.ZestConstant;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -91,18 +92,27 @@ public class SysUserServiceImpl extends BaseServiceImpl<SysUserDao, SysUserEntit
 
         SysUserDTO sysUserDTO = ConvertUtils.sourceToTarget(entity, SysUserDTO.class);
 
+        // 超级管理员
+        if (sysUserDTO.getSuperAdmin().equals(1)) {
+            return sysUserDTO;
+        }
+
         // 确定用户类型
         SysDeptEntity deptEntity = sysDeptDao.selectById(entity.getDeptId());
+        if (deptEntity == null) {
+            return sysUserDTO;
+        }
+
         String[] split = deptEntity.getPids().split(",");
         if (split.length == 3) {
-            sysUserDTO.setUserType("sub");
+            sysUserDTO.setUserType(ZestConstant.USER_TYPE_SUB);
         } else if (split.length == 2) {
-            sysUserDTO.setUserType("merchant");
+            sysUserDTO.setUserType(ZestConstant.USER_TYPE_MERCHANT);
         } else if (split.length == 1) {
             if (split[0].equals("0")) {
-                sysUserDTO.setUserType("operation");
+                sysUserDTO.setUserType(ZestConstant.USER_TYPE_OPERATION);
             } else {
-                sysUserDTO.setUserType("agent");
+                sysUserDTO.setUserType(ZestConstant.USER_TYPE_AGENT);
             }
         } else {
             throw new RenException("internal error");

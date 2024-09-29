@@ -5,6 +5,7 @@ import io.renren.commons.mybatis.service.impl.CrudServiceImpl;
 import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.exception.RenException;
+import io.renren.zadmin.ZestConstant;
 import io.renren.zadmin.dao.JAllocateDao;
 import io.renren.zadmin.dto.JAllocateDTO;
 import io.renren.zadmin.entity.JAllocateEntity;
@@ -27,33 +28,36 @@ public class JAllocateServiceImpl extends CrudServiceImpl<JAllocateDao, JAllocat
     public QueryWrapper<JAllocateEntity> getWrapper(Map<String, Object> params) {
         QueryWrapper<JAllocateEntity> wrapper = new QueryWrapper<>();
 
-        String agentId = (String) params.get("agentId");
-        if (StringUtils.isNotBlank(agentId)) {
-            wrapper.eq(StringUtils.isNotBlank(agentId), "agent_id", Long.parseLong(agentId));
-        }
 
-        String merchantId = (String) params.get("merchantId");
-        if (StringUtils.isNotBlank(merchantId)) {
-            wrapper.eq(StringUtils.isNotBlank(merchantId), "merchant_id", Long.parseLong(merchantId));
-        }
+//        // 按操作用的类型过滤
+//        UserDetail user = SecurityUser.getUser();
+//        if (agentId != null && ZestConstant.USER_TYPE_AGENT.equals(user.getUserType())) {
+//            // 代理访问
+//            wrapper.eq("agent_id", user.getDeptId());
+//        } else if (merchantId == null && ZestConstant.USER_TYPE_MERCHANT.equals(user.getUserType())) {
+//            // 商户访问
+//            wrapper.eq("merchant_id", user.getDeptId());
+//        } else if (subId == null && ZestConstant.USER_TYPE_SUB.equals(user.getUserType())) {
+//            // 子商户访问
+//            wrapper.eq("sub_id", user.getDeptId());
+//        }
 
-        String subId = (String) params.get("subId");
-        if (StringUtils.isNotBlank(subId)) {
-            wrapper.eq(StringUtils.isNotBlank(subId), "sub_id", Long.parseLong(subId));
-        }
 
-        UserDetail user = SecurityUser.getUser();
+//        // 查询条件
+//        String agentId = (String) params.get("agentId");
+//        if (StringUtils.isNotBlank(agentId)) {
+//            wrapper.eq(StringUtils.isNotBlank(agentId), "agent_id", Long.parseLong(agentId));
+//        }
+//        String merchantId = (String) params.get("merchantId");
+//        if (StringUtils.isNotBlank(merchantId)) {
+//            wrapper.eq(StringUtils.isNotBlank(merchantId), "merchant_id", Long.parseLong(merchantId));
+//        }
+//        String subId = (String) params.get("subId");
+//        if (StringUtils.isNotBlank(subId)) {
+//            wrapper.eq(StringUtils.isNotBlank(subId), "sub_id", Long.parseLong(subId));
+//        }
 
-        if (agentId != null && "agent".equals(user.getUserType())) {
-            // 代理访问
-            wrapper.eq("agent_id", user.getDeptId());
-        } else if (merchantId == null && "merchant".equals(user.getUserType())) {
-            // 商户访问
-            wrapper.eq("merchant_id", user.getDeptId());
-        } else if (subId == null && "sub".equals(user.getUserType())) {
-            // 子商户访问
-            wrapper.eq("sub_id", user.getDeptId());
-        }
+        CommonFilter.setFilterAll(wrapper, params);
 
         String type = (String) params.get("type");
         if (StringUtils.isNotBlank(type)) {
