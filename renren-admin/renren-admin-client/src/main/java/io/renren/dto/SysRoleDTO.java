@@ -52,6 +52,9 @@ public class SysRoleDTO implements Serializable {
     @JsonFormat(pattern = DateUtils.DATE_TIME_PATTERN)
     private Date createDate;
 
+    @Schema(description = "部门")
+    private String deptName;
+
     @Schema(description = "菜单ID列表")
     private List<Long> menuIdList;
 

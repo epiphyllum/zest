@@ -27,16 +27,20 @@ public class LedgerUtil {
         entity.setOwnerId(balance.getOwnerId());
         entity.setOwnerName(balance.getOwnerName());
         entity.setOwnerType(balance.getOwnerType());
+
         entity.setBalanceId(balance.getId());
-        entity.setFactAmount(factAmount);
+        entity.setBalanceType(balance.getBalanceType());
         entity.setCurrency(balance.getCurrency());
+
+        entity.setFactAmount(factAmount);
         entity.setFactMemo(factMemo);
         entity.setFactId(factId);
         entity.setFactType(factType);
-        entity.setBalanceType(balance.getBalanceType());
+
         entity.setOldBalance(balance.getBalance());
         entity.setNewBalance(balance.getBalance().add(factAmount));
         entity.setVersion(balance.getVersion() + 1L);
+
         return entity;
     }
 

@@ -32,6 +32,18 @@ public class JMoneyEntity extends BaseEntity {
     private String agentName;
     private Long merchantId;
     private String merchantName;
+    private Integer api;
+
+    //
+    private String referencecode;
+    private String applyid;
+    private String cardno;
+    private String cardname;
+
+    // 确认时用
+    private BigDecimal applyAmount;
+    private String transferfid;
+    private String otherfid;
 
     // 入账通知信息(12)
     private String nid;

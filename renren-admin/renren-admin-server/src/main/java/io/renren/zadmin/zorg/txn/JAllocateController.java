@@ -36,8 +36,8 @@ import java.util.Map;
  * @since 3.0 2024-09-01
  */
 @RestController
-@RequestMapping("zorg/jinout")
-@Tag(name = "j_inout")
+@RequestMapping("zorg/jallocate")
+@Tag(name = "j_allocate")
 public class JAllocateController {
     @Resource
     private JAllocateService jAllocateService;
@@ -50,7 +50,7 @@ public class JAllocateController {
             @Parameter(name = Constant.ORDER_FIELD, description = "排序字段"),
             @Parameter(name = Constant.ORDER, description = "排序方式，可选值(asc、desc)")
     })
-    @PreAuthorize("hasAuthority('zorg:jinout:page')")
+    @PreAuthorize("hasAuthority('zorg:jallocate:page')")
     public Result<PageData<JAllocateDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
         PageData<JAllocateDTO> page = jAllocateService.page(params);
         return new Result<PageData<JAllocateDTO>>().ok(page);
@@ -58,7 +58,7 @@ public class JAllocateController {
 
     @GetMapping("{id}")
     @Operation(summary = "信息")
-    @PreAuthorize("hasAuthority('zorg:jinout:info')")
+    @PreAuthorize("hasAuthority('zorg:jallocate:info')")
     public Result<JAllocateDTO> get(@PathVariable("id") Long id) {
         JAllocateDTO data = jAllocateService.get(id);
         return new Result<JAllocateDTO>().ok(data);
@@ -67,7 +67,7 @@ public class JAllocateController {
     @PostMapping
     @Operation(summary = "保存")
     @LogOperation("保存")
-    @PreAuthorize("hasAuthority('zorg:jinout:save')")
+    @PreAuthorize("hasAuthority('zorg:jallocate:save')")
     public Result save(@RequestBody JAllocateDTO dto) {
         // 商户才能调拨资金
         UserDetail user = SecurityUser.getUser();
@@ -83,7 +83,7 @@ public class JAllocateController {
     @PutMapping
     @Operation(summary = "修改")
     @LogOperation("修改")
-    @PreAuthorize("hasAuthority('zorg:jinout:update')")
+    @PreAuthorize("hasAuthority('zorg:jallocate:update')")
     public Result update(@RequestBody JAllocateDTO dto) {
         //效验数据
         ValidatorUtils.validateEntity(dto, UpdateGroup.class, DefaultGroup.class);
@@ -94,7 +94,7 @@ public class JAllocateController {
     @DeleteMapping
     @Operation(summary = "删除")
     @LogOperation("删除")
-    @PreAuthorize("hasAuthority('zorg:jinout:delete')")
+    @PreAuthorize("hasAuthority('zorg:jallocate:delete')")
     public Result delete(@RequestBody Long[] ids) {
         //效验数据
         AssertUtils.isArrayEmpty(ids, "id");
@@ -105,10 +105,10 @@ public class JAllocateController {
     @GetMapping("export")
     @Operation(summary = "导出")
     @LogOperation("导出")
-    @PreAuthorize("hasAuthority('zorg:jinout:export')")
+    @PreAuthorize("hasAuthority('zorg:jallocate:export')")
     public void export(@Parameter(hidden = true) @RequestParam Map<String, Object> params, HttpServletResponse response) throws Exception {
         List<JAllocateDTO> list = jAllocateService.list(params);
-        ExcelUtils.exportExcelToTarget(response, null, "j_inout", list, JAllocateExcel.class);
+        ExcelUtils.exportExcelToTarget(response, null, "j_allocate", list, JAllocateExcel.class);
     }
 
 }

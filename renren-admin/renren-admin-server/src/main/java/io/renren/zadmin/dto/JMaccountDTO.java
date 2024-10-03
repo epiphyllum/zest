@@ -36,6 +36,9 @@ public class JMaccountDTO implements Serializable {
     private Long merchantId;
     private String merchantName;
 
+    // api
+    private Integer api;
+
     // 17
     private String flag;
     private String currency;
@@ -58,4 +61,5 @@ public class JMaccountDTO implements Serializable {
     // 2
     private String state;
     private String stateexplain;
+    private String cardId;
 }

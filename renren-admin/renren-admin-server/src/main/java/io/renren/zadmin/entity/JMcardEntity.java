@@ -33,6 +33,7 @@ public class JMcardEntity extends BaseEntity {
     private String agentName;
     private Long merchantId;
     private String merchantName;
+    private Integer api;
 
     // 申请单流水(1)
     private String meraplid;
@@ -78,16 +79,20 @@ public class JMcardEntity extends BaseEntity {
 
     private String payerid;
 
-    //  4
+    //  5
     private String deliverycountry;
+    private String deliverypostcode;
+    private String deliveryaddress;
     private String deliveryprovince;
     private String deliverycity;
-    private String deliveryaddress;
 
     // 2
     private String payeeaccount;
-    private String procureconent;
+    private String procurecontent;
     private String agmfid;
+
+    // 大吉设计
+    private String currency;
 
     // resp(1)
     private String applyid;

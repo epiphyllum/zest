@@ -60,7 +60,7 @@ public class JAgentController {
     /**
      * 获取代理列表
      */
-    @GetMapping("agentList")
+    @GetMapping("list")
     public Result<List<JAgentDTO>> agentList() {
         List<JAgentDTO> list = jAgentService.list(new HashMap<>());
         return Result.one(list);
@@ -81,7 +81,6 @@ public class JAgentController {
     public Result save(@RequestBody JAgentDTO dto) {
 
         UserDetail user = SecurityUser.getUser();
-
         if (!user.getUserType().equals("operation")) {
             return Result.fail(9999, "not authorized");
         }

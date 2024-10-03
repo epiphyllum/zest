@@ -84,11 +84,15 @@ public class JMerchantController {
      * 商户列表
      */
     @GetMapping("list")
-    public Result<List<JMerchantDTO>> merchantList(@RequestParam(value = "agentId", required = false) Long agentId) {
-        Result<List<JMerchantDTO>> result = new Result<>();
+    public Result<List<JMerchantDTO>> list(@RequestParam(value = "agentId", required = false) Long agentId) {
+        UserDetail user = SecurityUser.getUser();
+        System.out.println("userType = " + user.getUserType());
         List<JMerchantEntity> jMerchantEntities = jMerchantDao.selectList(Wrappers.<JMerchantEntity>lambdaQuery()
                 .eq(agentId != null, JMerchantEntity::getAgentId, agentId)
+                .eq(user.getUserType().equals("agent"), JMerchantEntity::getAgentId, user.getDeptId())
         );
+
+        Result<List<JMerchantDTO>> result = new Result<>();
         List<JMerchantDTO> dtos = ConvertUtils.sourceToTarget(jMerchantEntities, JMerchantDTO.class);
         result.setData(dtos);
         return result;

@@ -44,12 +44,15 @@ public class JCardDTO implements Serializable {
     private Long merchantId;
     @Schema(description = "商户")
     private String merchantName;
+    private Integer api;
 
-    // 业务字段(6)
+    // 业务字段(7)
     @Schema(description = "申请单流水")
     private String meraplid;
     @Schema(description = "主卡")
     private String maincardno;
+    @Schema(description = "卡产品")
+    private String producttype;
     @Schema(description = "卡片种类")
     private String cardtype;
     @Schema(description = "持卡人身份")
@@ -90,6 +93,10 @@ public class JCardDTO implements Serializable {
     private String email;
     @Schema(description = "居住国家/地区")
     private String country;
+    @Schema(description = "省份")
+    private String province;
+    @Schema(description = "城市")
+    private String city;
     @Schema(description = "详细地址")
     private String address;
 
@@ -121,6 +128,16 @@ public class JCardDTO implements Serializable {
     private String deliverycity;
     @Schema(description = "邮寄城市")
     private String deliveryaddress;
+
+    // 大吉设计
+    @Schema(description = "币种ID")
+    private String currency;
+    @Schema(description = "商户费用")
+    private BigDecimal merchantFee;
+    @Schema(description = "通知次数")
+    private Integer notifyCount;
+    @Schema(description = "通知状态")
+    private Integer notifyStatus;
 
     // 通联返回
     @Schema(description = "申请ID")

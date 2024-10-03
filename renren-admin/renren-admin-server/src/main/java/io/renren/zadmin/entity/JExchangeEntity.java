@@ -32,6 +32,7 @@ public class JExchangeEntity extends BaseEntity {
     private String agentName;
     private Long merchantId;
     private String merchantName;
+    private Integer api;
 
     // 请求字段(5)
     private String meraplid;

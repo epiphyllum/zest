@@ -8,7 +8,8 @@ import java.math.BigDecimal;
 // 入账通知
 @Data
 public class TMoneyInNotify {
-    private String nid;                 //	通知id	相同id表示同一个通知
+    private String applyid;             // 申请单ID
+    private String nid;                 //	通知id相同id表示同一个通知
     private String bid;                 //	业务关联id	业务关联id
     private String acctno;              //	账号	通联内部虚拟账号
     private BigDecimal amount;          //	变动金额	变动金额

@@ -61,6 +61,7 @@ public class ApiService {
 
     /**
      * 解析并验证商户请求
+     *
      * @return
      */
     public <T> T initRequest(Class<T> clazz, ApiContext context, Long merchantId, String reqId, String name, String body, String sign) {
@@ -96,7 +97,7 @@ public class ApiService {
     }
 
     // 通知商户: OK| FAIL
-    public String notifyMerchant(Object object, JMerchantEntity merchant, String name) {
+    public String notifyMerchant(Object object, JMerchantEntity merchant, String apiName) {
         String body = null;
         try {
             body = this.objectMapper.writeValueAsString(object);
@@ -112,6 +113,17 @@ public class ApiService {
                 ((StringHttpMessageConverter) messageConverter).setDefaultCharset(Charset.forName("UTF8"));
             }
         }
+
+        String reqId = CommonUtils.newRequestId();
+        String bodyDigest = DigestUtil.sha256Hex(body);
+        String toSign = bodyDigest + reqId + merchant.getId().toString();
+        String sign = this.signer.signHex(toSign);
+
+        headers.add("x-api-name", apiName);
+        headers.add("x-merchant-id", merchant.getId().toString());
+        headers.add("x-req-id", CommonUtils.newRequestId());
+        headers.add("x-sign", sign);
+
         headers.setContentType(MediaType.APPLICATION_JSON);
         RequestEntity requestEntity = RequestEntity.post("")
                 .contentType(MediaType.APPLICATION_JSON)

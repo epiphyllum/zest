@@ -34,6 +34,7 @@ public class JAllocateEntity extends BaseEntity {
     private String merchantName;
     private Long subId;
     private String subName;
+    private Integer api;
 
     // 调拨类型(3):  i2v,  v2i, s2m, m2s
     private String type;

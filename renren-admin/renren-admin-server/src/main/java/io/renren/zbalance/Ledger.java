@@ -5,13 +5,13 @@ import io.renren.commons.tools.exception.RenException;
 import io.renren.zadmin.dao.JBalanceDao;
 import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.entity.*;
+import io.renren.zin.config.CardProductConfig;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-
 
 @Service
 @Slf4j
@@ -32,7 +32,7 @@ public class Ledger {
         // 拿到入金账户的余额记录
         JBalanceEntity balanceEntity = ledgerUtil.getInAccount(jMerchantEntity.getId(), currency);
 
-        String factMemo = entity.getAmount() + "|" + entity.getPayeraccountname() + "|" + entity.getPayeraccountno();
+        String factMemo = "入金账户收到: " + entity.getAmount() + entity.getPayeraccountno() + ", 来账账户:" + entity.getPayeraccountno();
         BigDecimal factAmount = entity.getAmount();
 
         LambdaUpdateWrapper<JBalanceEntity> ledge = ledgerUtil.ledge(
@@ -46,23 +46,23 @@ public class Ledger {
     // 原始凭证(200): 换汇
     public void ledgeExchange(JExchangeEntity entity) {
         Long merchantId = entity.getMerchantId();
-        JMerchantEntity jMerchantEntity = jMerchantDao.selectById(merchantId);
-
+        // 换汇出金账户
         JBalanceEntity outBalance = ledgerUtil.getInAccount(merchantId, entity.getPayerccy());
-        JBalanceEntity inBalance = ledgerUtil.getInAccount(merchantId, entity.getPayeeccy());
-
-        if (inBalance == null) {
-            log.error("入金账户{}不能存在");
-            throw new RenException("internal error-2");
-        }
         if (outBalance == null) {
-            log.error("出金账户{}不能存在");
-            throw new RenException("internal error-2");
+            log.error("出金账户{}不存在");
+            throw new RenException("换汇错误: 出金账户不存在");
+        }
+
+        // 换汇入金账户
+        JBalanceEntity inBalance = ledgerUtil.getInAccount(merchantId, entity.getPayeeccy());
+        if (inBalance == null) {
+            log.error("入金账户{}不存在");
+            throw new RenException("换汇错误: 入金账户不存在");
         }
 
         // 出金账户
         {
-            String factMemo = "exchange(debit): " + entity.getAmount() + " " + entity.getPayerccy() + ", to get " + entity.getSettleamount() + " " + entity.getPayeeccy();
+            String factMemo = "换汇出金:" + entity.getAmount() + " " + entity.getPayerccy();
             BigDecimal factAmount = entity.getAmount().negate();
 
             LambdaUpdateWrapper<JBalanceEntity> ledge = ledgerUtil.ledge(outBalance, LedgerConstant.EXCHANGE_OUT, entity.getId(), factMemo, factAmount);
@@ -74,9 +74,8 @@ public class Ledger {
 
         // 入金账户
         {
-            String factMemo = "exchange(credit): " + entity.getSettleamount() + " " + entity.getPayeeccy() + ", pay " + entity.getAmount() + " " + entity.getPayerccy();
+            String factMemo = "换汇入金: " + entity.getSettleamount() + " " + entity.getPayeeccy();
             BigDecimal factAmount = entity.getStlamount();
-
             LambdaUpdateWrapper<JBalanceEntity> ledge = ledgerUtil.ledge(inBalance, LedgerConstant.EXCHANGE_IN, entity.getId(), factMemo, factAmount);
             int update = jBalanceDao.update(null, ledge);
             if (update != 1) {
@@ -171,13 +170,13 @@ public class Ledger {
         JBalanceEntity sVa = ledgerUtil.getSubVaAccount(merchant.getId(), entity.getCurrency());
         // 记账1: 商户Va-
         {
-            String factMemo = null;
+            String factMemo = "商户va转子商户va:" + entity.getAmount() + entity.getCurrency();
             BigDecimal factAmount = entity.getAmount().negate();
             ledgerUtil.update(mVa, LedgerConstant.M2S_OUT, entity.getId(), factMemo, factAmount);
         }
         // 记账2: 子商户Va+
         {
-            String factMemo = null;
+            String factMemo = "商户va转子商户va:" + entity.getAmount() + entity.getCurrency();
             BigDecimal factAmount = entity.getAmount().negate();
             ledgerUtil.update(sVa, LedgerConstant.M2S_IN, entity.getId(), factMemo, factAmount);
         }
@@ -190,13 +189,13 @@ public class Ledger {
         JBalanceEntity sVa = ledgerUtil.getSubVaAccount(merchant.getId(), entity.getCurrency());
         // 记账1: 商户Va+
         {
-            String factMemo = null;
+            String factMemo = "子商户va转商户va:" + entity.getAmount() + entity.getCurrency();
             BigDecimal factAmount = entity.getAmount();
             ledgerUtil.update(mVa, LedgerConstant.S2M_IN, entity.getId(), factMemo, factAmount);
         }
         // 记账2: 子商户Va-
         {
-            String factMemo = null;
+            String factMemo = "子商户va转商户va:" + entity.getAmount() + entity.getCurrency();
             BigDecimal factAmount = entity.getAmount().negate();
             ledgerUtil.update(sVa, LedgerConstant.S2M_OUT, entity.getId(), factMemo, factAmount);
         }
@@ -204,23 +203,62 @@ public class Ledger {
 
     // 原始凭证: 开卡费用
     public void ledgeOpenCard(JCardEntity entity) {
+        // 子商户va
+        JBalanceEntity subVa = ledgerUtil.getSubVaAccount(entity.getSubId(), entity.getCurrency());
+        // 开卡费用账户
+        JBalanceEntity feeAccount = ledgerUtil.getSubFeeAccount(entity.getSubId(), entity.getCurrency());
+
+        // 子商户va扣除费用
+        {
+            String factMemo = "扣减开卡费用:" + entity.getMerchantFee() + entity.getCurrency();
+            BigDecimal factAmount = entity.getMerchantFee().negate();
+            ledgerUtil.update(subVa, LedgerConstant.CARD_OPEN_FEE_OUT, entity.getId(), factMemo, factAmount);
+        }
+
+        // 子商户开卡费用账户
+        {
+            String factMemo = "开卡费用:" + entity.getMerchantFee() + entity.getCurrency();
+            BigDecimal factAmount = entity.getMerchantFee();
+            ledgerUtil.update(feeAccount, LedgerConstant.CARD_OPEN_FEE_IN, entity.getId(), factMemo, factAmount);
+        }
+    }
+
+    public void ledgeOpenCardFail(JCardEntity entity) {
+        // 子商户va
+        JBalanceEntity subVa = ledgerUtil.getSubVaAccount(entity.getSubId(), entity.getCurrency());
+        // 开卡费用账户
+        JBalanceEntity feeAccount = ledgerUtil.getSubFeeAccount(entity.getSubId(), entity.getCurrency());
+
+        // 子商户va扣除费用
+        {
+            String factMemo = "开卡失败, 返还开卡费:" + entity.getMerchantFee() + entity.getCurrency();
+            BigDecimal factAmount = entity.getMerchantFee();
+            ledgerUtil.update(subVa, LedgerConstant.CARD_OPEN_FAIL_FEE_IN, entity.getId(), factMemo, factAmount);
+        }
+
+        // 子商户开卡费用账户
+        {
+            String factMemo = "开卡失败, 开卡费用退回:" + entity.getFee() + entity.getCurrency();
+            BigDecimal factAmount = entity.getMerchantFee().negate();
+            ledgerUtil.update(feeAccount, LedgerConstant.CARD_OPEN_FAIL_FEE_OUT, entity.getId(), factMemo, factAmount);
+        }
     }
 
     // 卡充值
     public void ledgeCardCharge(JMerchantEntity sub, JDepositEntity entity) {
-        JBalanceEntity sVa = ledgerUtil.getSubVaAccount(sub.getId(), entity.getCurrency());
+        JBalanceEntity subVa = ledgerUtil.getSubVaAccount(sub.getId(), entity.getCurrency());
         JBalanceEntity sSum = ledgerUtil.getSubSumAccount(sub.getId(), entity.getCurrency());
 
         // 记账1: 子商户Va-
         {
-            String factMemo = null;
+            String factMemo = "卡充值扣减:" + entity.getAmount() + entity.getCurrency();
             BigDecimal factAmount = entity.getAmount().negate();
-            ledgerUtil.update(sVa, LedgerConstant.CARD_CHARGE_OUT, entity.getId(), factMemo, factAmount);
+            ledgerUtil.update(subVa, LedgerConstant.CARD_CHARGE_OUT, entity.getId(), factMemo, factAmount);
         }
 
         // 记账2: 子商户sub_sum+
         {
-            String factMemo = null;
+            String factMemo = "卡充值:" + entity.getAmount() + entity.getCurrency();
             BigDecimal factAmount = entity.getAmount();
             ledgerUtil.update(sSum, LedgerConstant.S2M_IN, entity.getId(), factMemo, factAmount);
         }
@@ -229,23 +267,24 @@ public class Ledger {
     // 卡资金提取: 将卡资金退回到子商户va
     public void ledgeCardWithdraw(JMerchantEntity sub, JWithdrawEntity entity) {
         // 子商户va
-        JBalanceEntity sVa = ledgerUtil.getSubVaAccount(sub.getId(), entity.getCurrency());
+        JBalanceEntity subVa = ledgerUtil.getSubVaAccount(sub.getId(), entity.getCurrency());
 
         // 卡汇总充值资金账号
-        JBalanceEntity sSum = ledgerUtil.getSubSumAccount(sub.getId(), entity.getCurrency());
+        JBalanceEntity subSum = ledgerUtil.getSubSumAccount(sub.getId(), entity.getCurrency());
 
         // 记账1: 子商户Va+
         {
-            String factMemo = null;
+            String factMemo = "卡资金退回:" + entity.getAmount() + entity.getCurrency();
             BigDecimal factAmount = entity.getAmount();
-            ledgerUtil.update(sVa, LedgerConstant.CARD_WITHDRAW_IN, entity.getId(), factMemo, factAmount);
+            ledgerUtil.update(subVa, LedgerConstant.CARD_WITHDRAW_IN, entity.getId(), factMemo, factAmount);
         }
         // 记账2: 子商户Va-
         {
-            String factMemo = null;
+            String factMemo = "卡资金退回:" + entity.getAmount() + entity.getCurrency();
             BigDecimal factAmount = entity.getAmount().negate();
-            ledgerUtil.update(sSum, LedgerConstant.CARD_WITHDRAW_OUT, entity.getId(), factMemo, factAmount);
+            ledgerUtil.update(subSum, LedgerConstant.CARD_WITHDRAW_OUT, entity.getId(), factMemo, factAmount);
         }
     }
+
 
 }

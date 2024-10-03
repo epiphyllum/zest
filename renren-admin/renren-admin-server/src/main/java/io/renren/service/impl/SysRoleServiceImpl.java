@@ -95,6 +95,8 @@ public class SysRoleServiceImpl extends BaseServiceImpl<SysRoleDao, SysRoleEntit
     @Transactional(rollbackFor = Exception.class)
     public void save(SysRoleDTO dto) {
         SysRoleEntity entity = ConvertUtils.sourceToTarget(dto, SysRoleEntity.class);
+        UserDetail user = SecurityUser.getUser();
+        entity.setDeptName(SecurityUser.getUser().getDeptName());
 
         //保存角色
         insert(entity);

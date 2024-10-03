@@ -6,12 +6,11 @@ import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zapi.ApiContext;
 import io.renren.zapi.ApiService;
 import io.renren.zapi.service.accountmanage.dto.*;
+import io.renren.zapi.service.allocate.dto.*;
 import io.renren.zin.service.umbrella.ZinUmbrellaService;
 import io.renren.zin.service.umbrella.dto.*;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
-
-import static io.renren.zin.config.CommonUtils.newRequestId;
 
 @Service
 public class ApiAccountManageService {
@@ -129,7 +128,7 @@ public class ApiAccountManageService {
      */
     public void moneyAccountNotify(TMoneyAccountNotify notify, JMerchantEntity merchant) {
         MoneyAccountNotify moneyAccountNotify = ConvertUtils.sourceToTarget(notify, MoneyAccountNotify.class);
-        apiService.notifyMerchant(moneyAccountNotify, merchant, "name");
+        apiService.notifyMerchant(moneyAccountNotify, merchant, "moneyIn");
     }
 
 }

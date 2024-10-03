@@ -14,6 +14,8 @@ import io.renren.commons.tools.validator.ValidatorUtils;
 import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
+import io.renren.dao.SysDeptDao;
+import io.renren.entity.SysDeptEntity;
 import io.renren.zadmin.dao.JExchangeDao;
 import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.dto.JExchangeDTO;
@@ -21,6 +23,7 @@ import io.renren.zadmin.dto.JMerchantDTO;
 import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zadmin.excel.JExchangeExcel;
 import io.renren.zadmin.service.JExchangeService;
+import io.renren.zin.config.CommonUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -49,6 +52,8 @@ public class JExchangeController {
     private JExchangeService jExchangeService;
     @Resource
     private JMerchantDao jMerchantDao;
+    @Resource
+    private SysDeptDao sysDeptDao;
 
     @GetMapping("page")
     @Operation(summary = "分页")
@@ -82,6 +87,15 @@ public class JExchangeController {
         if (!user.getUserType().equals("merchant")) {
             return Result.fail(9999, "not authorized, you are " + user.getUserType());
         }
+
+        SysDeptEntity merchantDept = sysDeptDao.selectById(user.getDeptId());
+        SysDeptEntity agentDept = sysDeptDao.selectById(merchantDept.getPid());
+
+        dto.setAgentId(agentDept.getId());
+        dto.setAgentName(agentDept.getName());
+        dto.setMerchantId(user.getDeptId());
+        dto.setMerchantName(user.getDeptName());
+        dto.setMeraplid(CommonUtils.newRequestId());
 
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
@@ -118,6 +132,27 @@ public class JExchangeController {
     public void export(@Parameter(hidden = true) @RequestParam Map<String, Object> params, HttpServletResponse response) throws Exception {
         List<JExchangeDTO> list = jExchangeService.list(params);
         ExcelUtils.exportExcelToTarget(response, null, "j_exchange", list, JExchangeExcel.class);
+    }
+
+    // 提交通联
+    @GetMapping("submit")
+    @PreAuthorize("hasAuthority('zorg:jexchange:update')")
+    public Result submit(@RequestParam("id") Long id) throws Exception {
+        return new Result();
+    }
+
+    // 查询通联
+    @GetMapping("query")
+    @PreAuthorize("hasAuthority('zorg:jexchange:update')")
+    public Result query(@RequestParam("id") Long id) throws Exception {
+        return new Result();
+    }
+
+    // 锁汇
+    @GetMapping("lock")
+    @PreAuthorize("hasAuthority('zorg:jexchange:update')")
+    public Result lock(@RequestParam("id") Long id) throws Exception {
+        return new Result();
     }
 
 }

@@ -8,11 +8,11 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 /**
-* j_card
-*
-* @author epiphyllum epiphyllum.zhou@gmail.com
-* @since 3.0 2024-08-18
-*/
+ * j_card
+ *
+ * @author epiphyllum epiphyllum.zhou@gmail.com
+ * @since 3.0 2024-08-18
+ */
 @Data
 @Schema(description = "j_card")
 public class JMcardDTO implements Serializable {
@@ -38,6 +38,7 @@ public class JMcardDTO implements Serializable {
     private Long merchantId;
     @Schema(description = "商户")
     private String merchantName;
+    private Integer api;
 
     // 业务字段
     @Schema(description = "申请单流水")
@@ -68,10 +69,17 @@ public class JMcardDTO implements Serializable {
     private String idtype;
     @Schema(description = "证件1号码")
     private String idnumber;
+
     @Schema(description = "居住国家/地区")
     private String country;
     @Schema(description = "详细地址")
     private String address;
+    @Schema(description = "省份")
+    private String province;
+    @Schema(description = "城市")
+    private String city;
+
+
     @Schema(description = "邮箱")
     private String email;
     @Schema(description = "性别")
@@ -95,13 +103,25 @@ public class JMcardDTO implements Serializable {
 
     @Schema(description = "邮寄国家/地区")
     private String deliverycountry;
+    @Schema(description = "邮政编码")
+    private String deliverypostcode;
+    @Schema(description = "邮寄地址")
+    private String deliveryaddress;
     @Schema(description = "邮寄省份")
     private String deliveryprovince;
     @Schema(description = "邮寄城市")
     private String deliverycity;
-    @Schema(description = "邮寄城市")
-    private String deliveryaddress;
 
+    @Schema(description = "交易对手")
+    private String payeeaccount;
+    @Schema(description = "采购内容")
+    private String procurecontent;
+    @Schema(description = "保证金协议")
+    private String agmfid;
+
+    // 大吉设计
+    @Schema(description = "币种ID")
+    private String currency;
 
     // 通联返回
     @Schema(description = "申请ID")

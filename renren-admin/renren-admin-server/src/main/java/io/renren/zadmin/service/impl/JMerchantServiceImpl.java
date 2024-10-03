@@ -1,5 +1,6 @@
 package io.renren.zadmin.service.impl;
 
+import com.alibaba.cloud.sentinel.datasource.factorybean.ZookeeperDataSourceFactoryBean;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -7,6 +8,7 @@ import io.renren.commons.mybatis.service.impl.CrudServiceImpl;
 import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.constant.Constant;
+import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.page.PageData;
 import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.dao.SysDeptDao;
@@ -102,9 +104,18 @@ public class JMerchantServiceImpl extends CrudServiceImpl<JMerchantDao, JMerchan
 
         // 商户所属代理
         Long agentId = dto.getAgentId();
+        if (user.getUserType().equals(ZestConstant.USER_TYPE_OPERATION)) {
+            if (agentId == null) {
+                throw new RenException("agentId is not provided");
+            }
+        }
+        if (user.getUserType().equals(ZestConstant.USER_TYPE_AGENT)) {
+            agentId = user.getDeptId();
+        }
+
         SysDeptEntity agentDept = sysDeptDao.selectById(agentId);
         String agentName = agentDept.getName();
-        String pids = user.getDeptId() + "," + agentId;
+        String pids = agentDept.getPid() + "," + agentId;
 
         // 创建商户部门
         SysDeptEntity deptEntity = new SysDeptEntity();

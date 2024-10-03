@@ -28,6 +28,7 @@ public class JVaEntity extends BaseEntity {
     private Date updateDate;
 
     // (4) 业务字段
+    private String tid;
     private String accountno;
     private String currency;
     private BigDecimal amount;

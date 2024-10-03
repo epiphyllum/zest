@@ -49,6 +49,8 @@ public class JLogController {
     })
     @PreAuthorize("hasAuthority('zorg:jlog:page')")
     public Result<PageData<JLogDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params){
+        params.put(Constant.ORDER_FIELD, "version");
+        params.put(Constant.ORDER, "desc");
         PageData<JLogDTO> page = jLogService.page(params);
         return new Result<PageData<JLogDTO>>().ok(page);
     }

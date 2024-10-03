@@ -27,44 +27,25 @@ public class JMoneyServiceImpl extends CrudServiceImpl<JMoneyDao, JMoneyEntity, 
     public QueryWrapper<JMoneyEntity> getWrapper(Map<String, Object> params) {
         QueryWrapper<JMoneyEntity> wrapper = new QueryWrapper<>();
 
-//        String agentId = (String) params.get("agentId");
-//        if (StringUtils.isNotBlank(agentId)) {
-//            wrapper.eq("agent_id", Long.parseLong(agentId));
-//        }
-//        String merchantId = (String) params.get("merchantId");
-//        if (StringUtils.isNotBlank(merchantId)) {
-//            wrapper.eq("merchant_id", Long.parseLong(merchantId));
-//        }
-//        UserDetail user = SecurityUser.getUser();
-//        if (agentId != null && ZestConstant.USER_TYPE_AGENT.equals(user.getUserType())) {
-//            // 代理访问
-//            wrapper.eq("agent_id", user.getDeptId());
-//        } else if (merchantId == null && ZestConstant.USER_TYPE_MERCHANT.equals(user.getUserType())) {
-//            // 商户访问
-//            wrapper.eq("merchant_id", user.getDeptId());
-//        }
-
         CommonFilter.setFilterMerchant(wrapper, params);
 
-
-        //
+        // 通联账号
         String acctno = (String) params.get("acctno");
         wrapper.like(StringUtils.isNotBlank(acctno), "acctno", acctno);
 
-        //
+        // 来账账号名称
         String payeraccountname = (String) params.get("payeraccountname");
         wrapper.like(StringUtils.isNotBlank(payeraccountname), "payeraccountname", payeraccountname);
 
-        //
+        // 来账账号
         String payeraccountno = (String) params.get("payeraccountno");
         wrapper.like(StringUtils.isNotBlank(payeraccountno), "payeraccountno", payeraccountno);
-
-        //
-        String merchantName = (String) params.get("merchantName");
-        wrapper.like(StringUtils.isNotBlank(merchantName), "merchant_name", merchantName);
 
         return wrapper;
     }
 
+//    @Override
+//    public void save(JMoneyDTO dto) {
+//    }
 
 }

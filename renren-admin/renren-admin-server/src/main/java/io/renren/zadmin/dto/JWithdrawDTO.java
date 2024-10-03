@@ -40,6 +40,7 @@ public class JWithdrawDTO implements Serializable {
     private Long subId;
     @Schema(description = "子商户")
     private String subName;
+    private Integer api;
 
     // 业务字段
     @Schema(description = "申请单流水")

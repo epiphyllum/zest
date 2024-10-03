@@ -1,4 +1,4 @@
-package io.renren.zapi.service.accountmanage.dto;
+package io.renren.zapi.service.allocate.dto;
 
 import lombok.Data;
 

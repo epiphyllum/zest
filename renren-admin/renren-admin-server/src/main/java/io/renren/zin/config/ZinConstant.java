@@ -8,15 +8,13 @@ public class ZinConstant {
     // 卡申请单状态
     public static final String CARD_APPLY_NEW = "00";
     public static final String CARD_APPLY_TO_VERIFY = "01";
-    public static final String CARD_APPLY_PROCESSING = "02";
-    public static final String CARD_APPLY_SUCCESS = "03";
-    public static final String CARD_APPLY_APPLY_FAIL = "04";
-    public static final String CARD_APPLY_CANCELLED = "05";
-    public static final String CARD_APPLY_FREEZE = "06";
-    public static final String CARD_APPLY_FREEZE_OP = "07";
-    public static final String CARD_APPLY_CANCEL_PROCESSING = "08";
-    public static final String CARD_APPLY_LOSS = "09";
-    public static final String CARD_APPLY_EXPIRE = "10";
+    public static final String CARD_APPLY_VERIFY_FAIL = "02";
+    public static final String CARD_APPLY_PROCESSING = "03";
+    public static final String CARD_APPLY_SUCCESS = "04";
+    public static final String CARD_APPLY_FAIL = "05";
+    public static final String CARD_APPLY_REFUND = "06";
+    public static final String CARD_APPLY_CLOSE = "07";
+    public static final String CARD_APPLY_TO_VERIFY_AGAIN = "08";
 
     // 卡状态
     public static final String CARD_STATE_TO_VERIFY = "01"; // 待审核

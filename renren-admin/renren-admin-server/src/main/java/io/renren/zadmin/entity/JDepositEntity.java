@@ -33,6 +33,7 @@ public class JDepositEntity extends BaseEntity {
     private String merchantName;
     private Long subId;
     private String subName;
+    private Integer api;
 
     // 卡充值信息
     private String meraplid;

@@ -5,6 +5,7 @@ import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.commons.tools.utils.Result;
 import io.renren.zapi.ApiContext;
 import io.renren.zapi.ApiService;
+import io.renren.zapi.notifyevent.CardApplyNotifyEvent;
 import io.renren.zapi.service.card.dto.*;
 import io.renren.zin.service.TResult;
 import io.renren.zin.service.cardapply.ZinCardApplyService;
@@ -14,6 +15,9 @@ import io.renren.zin.service.cardstatus.dto.*;
 import io.renren.zin.service.cardmoney.ZinCardMoneyService;
 import io.renren.zin.service.cardmoney.dto.*;
 import jakarta.annotation.Resource;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -58,6 +62,13 @@ public class ApiCardService {
 
     // 开卡申请单通知
     public void cardApplyNotify(Long id) {
+    }
+
+    @Async
+    @EventListener
+    public void cardApplyNotifyListener(CardApplyNotifyEvent event) {
+        Long cardId = event.getCardId();
+        this.cardApplyNotify(cardId);
     }
 
     // 卡激活

@@ -34,7 +34,6 @@ public class JLogEntity extends BaseEntity {
 
     // 对哪个账户的记账(4)
     private String balanceType;
-    private String balanceName;
     private Long balanceId;
     private String currency;
 

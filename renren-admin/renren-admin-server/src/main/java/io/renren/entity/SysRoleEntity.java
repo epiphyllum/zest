@@ -58,4 +58,7 @@ public class SysRoleEntity extends BaseEntity {
 	@TableField(fill = FieldFill.INSERT_UPDATE)
 	private Date updateDate;
 
+	// added by me
+	private String deptName;
+
 }

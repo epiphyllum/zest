@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletResponse;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -69,6 +70,20 @@ public class JVaController {
         return new Result<PageData<JVaDTO>>().ok(page);
     }
 
+    @GetMapping("list")
+    @Operation(summary = "list")
+    @Parameters({
+            @Parameter(name = Constant.PAGE, description = "当前页码，从1开始", required = true),
+            @Parameter(name = Constant.LIMIT, description = "每页显示记录数", required = true),
+            @Parameter(name = Constant.ORDER_FIELD, description = "排序字段"),
+            @Parameter(name = Constant.ORDER, description = "排序方式，可选值(asc、desc)")
+    })
+    @PreAuthorize("hasAuthority('zorg:jva:page')")
+    public Result<List<JVaDTO>> list(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
+        List<JVaDTO> list = ConvertUtils.sourceToTarget(jVaService.list(params), JVaDTO.class);
+        return new Result<List<JVaDTO>>().ok(list);
+    }
+
     @GetMapping("{id}")
     @Operation(summary = "信息")
     @PreAuthorize("hasAuthority('zorg:jva:info')")
@@ -83,19 +98,25 @@ public class JVaController {
     @PreAuthorize("hasAuthority('zorg:jva:save')")
     public Result save(@RequestBody JVaDTO dto) {
         UserDetail user = SecurityUser.getUser();
-        if (!user.getUserType().equals("operation") ) {
+        if (!user.getUserType().equals("operation")) {
             return Result.fail(9999, "not authorized");
         }
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
         TVaListResponse tVaListResponse = zinAccountManageService.vaList(new TVaListRequest());
         Long aLong = jVaDao.selectCount(Wrappers.emptyWrapper());
-        List<JVaEntity> jVaEntities = ConvertUtils.sourceToTarget(tVaListResponse.getAccts(), JVaEntity.class);
+        List<JVaEntity> jVaEntities = new ArrayList<>(tVaListResponse.getAccts().size());
+        for (TVaListResponse.VaItem acct : tVaListResponse.getAccts()) {
+            JVaEntity jVaEntity = ConvertUtils.sourceToTarget(acct, JVaEntity.class);
+            jVaEntity.setTid(acct.getId());
+            jVaEntities.add(jVaEntity);
+        }
         if (aLong > 0) {
             for (JVaEntity jVaEntity : jVaEntities) {
                 jVaDao.update(null, Wrappers.<JVaEntity>lambdaUpdate()
                         .eq(JVaEntity::getAccountno, jVaEntity.getAccountno())
                         .set(JVaEntity::getAmount, jVaEntity.getAmount())
+                        .set(JVaEntity::getTid, jVaEntity.getId())
                 );
             }
         } else {
@@ -112,7 +133,7 @@ public class JVaController {
     @PreAuthorize("hasAuthority('zorg:jva:update')")
     public Result update(@RequestBody JVaDTO dto) {
         UserDetail user = SecurityUser.getUser();
-        if (!user.getUserType().equals("operation") ) {
+        if (!user.getUserType().equals("operation")) {
             return Result.fail(9999, "not authorized");
         }
         //效验数据
@@ -127,7 +148,7 @@ public class JVaController {
     @PreAuthorize("hasAuthority('zorg:jva:delete')")
     public Result delete(@RequestBody Long[] ids) {
         UserDetail user = SecurityUser.getUser();
-        if (!user.getUserType().equals("operation") ) {
+        if (!user.getUserType().equals("operation")) {
             return Result.fail(9999, "not authorized");
         }
         //效验数据

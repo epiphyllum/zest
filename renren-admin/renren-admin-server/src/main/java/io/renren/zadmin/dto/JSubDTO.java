@@ -39,6 +39,7 @@ public class JSubDTO implements Serializable {
     private Long merchantId;
     @Schema(description = "商户")
     private String merchantName;
+    private Integer api;
 
     // 业务字段
     @Schema(description = "跟踪号")

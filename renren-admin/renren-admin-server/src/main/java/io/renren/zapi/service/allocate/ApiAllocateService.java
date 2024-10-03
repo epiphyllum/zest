@@ -1,14 +1,21 @@
 package io.renren.zapi.service.allocate;
 
 
+import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.commons.tools.utils.Result;
+import io.renren.zadmin.dao.JMerchantDao;
+import io.renren.zadmin.dao.JMoneyDao;
 import io.renren.zadmin.entity.JAllocateEntity;
 import io.renren.zadmin.entity.JMerchantEntity;
+import io.renren.zadmin.entity.JMoneyEntity;
 import io.renren.zapi.ApiContext;
 import io.renren.zapi.ApiService;
+import io.renren.zapi.ZapiConstant;
+import io.renren.zapi.notifyevent.VaDepositNotifyEvent;
 import io.renren.zapi.service.allocate.dto.*;
 import io.renren.zbalance.Ledger;
 import jakarta.annotation.Resource;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,6 +25,10 @@ public class ApiAllocateService {
     private ApiService apiService;
     @Resource
     private Ledger ledger;
+    @Resource
+    private JMoneyDao jMoneyDao;
+    @Resource
+    private JMerchantDao jMerchantDao;
 
     // 商户入金转入va
     public Result<I2vRes> i2v(Long merchantId, String reqId, String name, String body, String sign) {
@@ -125,7 +136,16 @@ public class ApiAllocateService {
 
     // 通知入账
     public void notifyMoneyIn(MoneyInNotify notify, JMerchantEntity merchant) {
-        apiService.notifyMerchant(notify, merchant, "notify");
+        apiService.notifyMerchant(notify, merchant, ZapiConstant.API_MONEY_IN_NOTIFY);
     }
 
+    // 事件通知
+    @EventListener
+    public void handle(VaDepositNotifyEvent event) {
+        Long moneyId = event.getMoneyId();
+        JMoneyEntity jMoneyEntity = jMoneyDao.selectById(moneyId);
+        JMerchantEntity merchant = jMerchantDao.selectById(jMoneyEntity.getMerchantId());
+        MoneyInNotify moneyInNotify = ConvertUtils.sourceToTarget(jMoneyEntity, MoneyInNotify.class);
+        this.notifyMoneyIn(moneyInNotify, merchant);
+    }
 }

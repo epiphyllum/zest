@@ -60,6 +60,9 @@ public class JBalanceServiceImpl extends CrudServiceImpl<JBalanceDao, JBalanceEn
             wrapper.in("owner_id", subDeptIdList);
         }
 
+        String ownerType = (String) params.get("ownerType");
+        wrapper.eq(StringUtils.isNotBlank(ownerType), "owner_type", ownerType);
+
         String balanceType = (String) params.get("balanceType");
         wrapper.likeRight(StringUtils.isNotBlank(balanceType), "balance_type", balanceType);
 

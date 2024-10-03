@@ -1,10 +1,14 @@
 package io.renren.zadmin.zorg.config;
 
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.log.annotation.LogOperation;
 import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.constant.Constant;
+import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.page.PageData;
+import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.commons.tools.utils.Result;
 import io.renren.commons.tools.utils.ExcelUtils;
 import io.renren.commons.tools.validator.AssertUtils;
@@ -12,34 +16,66 @@ import io.renren.commons.tools.validator.ValidatorUtils;
 import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
+import io.renren.zadmin.dao.JCardDao;
 import io.renren.zadmin.dto.JCardDTO;
+import io.renren.zadmin.entity.JBalanceEntity;
+import io.renren.zadmin.entity.JCardEntity;
+import io.renren.zadmin.entity.JMcardEntity;
 import io.renren.zadmin.excel.JCardExcel;
 import io.renren.zadmin.service.JCardService;
+import io.renren.zapi.notifyevent.CardApplyNotifyEvent;
+import io.renren.zbalance.Ledger;
+import io.renren.zbalance.LedgerUtil;
+import io.renren.zin.config.CardProductConfig;
+import io.renren.zin.config.ZestConfig;
+import io.renren.zin.config.ZinConstant;
+import io.renren.zin.service.cardapply.ZinCardApplyService;
+import io.renren.zin.service.cardapply.dto.*;
+import io.renren.zin.service.file.ZinFileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.prepost.PreAuthorize;
 import jakarta.annotation.Resource;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletResponse;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 
 /**
  * 子卡管理
+ *
  * @author epiphyllum epiphyllum.zhou@gmail.com
  * @since 3.0 2024-08-18
  */
 @RestController
 @RequestMapping("zorg/jscard")
 @Tag(name = "j_scard")
+@Slf4j
 public class JCardController {
     @Resource
     private JCardService jCardService;
+    @Resource
+    private ZinFileService zinFileService;
+    @Resource
+    private ZinCardApplyService zinCardApplyService;
+    @Resource
+    private JCardDao jCardDao;
+    @Resource
+    private Ledger ledger;
+    @Resource
+    private TransactionTemplate tx;
+    @Resource
+    private ApplicationEventPublisher publisher;
 
     @GetMapping("page")
     @Operation(summary = "分页")
@@ -74,7 +110,11 @@ public class JCardController {
         }
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
-        jCardService.save(dto);
+        dto.setApi(0);
+
+        tx.executeWithoutResult(status -> {
+            jCardService.save(dto);
+        });
         return new Result();
     }
 
@@ -115,6 +155,108 @@ public class JCardController {
     public void export(@Parameter(hidden = true) @RequestParam Map<String, Object> params, HttpServletResponse response) throws Exception {
         List<JCardDTO> list = jCardService.list(params);
         ExcelUtils.exportExcelToTarget(response, null, "j_card", list, JCardExcel.class);
+    }
+
+    @GetMapping("submit")
+    @Operation(summary = "提交通联")
+    @LogOperation("提交通联")
+    @PreAuthorize("hasAuthority('zorg:jcard:update')")
+    public Result submit(@RequestParam("id") Long id) {
+        JCardEntity jCardEntity = jCardDao.selectById(id);
+
+        this.uploadFiles(jCardEntity);
+        TCardSubApplyRequest request = ConvertUtils.sourceToTarget(jCardEntity, TCardSubApplyRequest.class);
+        request.setMeraplid(jCardEntity.getId().toString());
+        TCardSubApplyResponse response = zinCardApplyService.cardSubApply(request);
+
+        // 更新applyid
+        JCardEntity update = new JCardEntity();
+        update.setId(jCardEntity.getId());
+        update.setApplyid(response.getApplyid());
+        jCardDao.updateById(update);
+        return Result.ok;
+    }
+
+    @GetMapping("query")
+    @Operation(summary = "查询通联")
+    @LogOperation("查询通联")
+    @PreAuthorize("hasAuthority('zorg:jcard:update')")
+    public Result query(@RequestParam("id") Long id) {
+        JCardEntity jCardEntity = jCardDao.selectById(id);
+        TCardApplyQuery query = new TCardApplyQuery();
+        query.setMeraplid(jCardEntity.getId().toString());
+        TCardApplyResponse response = zinCardApplyService.cardApplyQuery(query);
+
+        // 准备待更新字段
+        JCardEntity update = new JCardEntity();
+        update.setId(jCardEntity.getId());
+        update.setState(response.getState());
+        update.setFeecurrency(response.getFeecurrency());
+        update.setFee(response.getFee());
+        update.setCardno(response.getCardno());
+
+        // 开卡成功了
+        if (response.getState().equals(ZinConstant.CARD_APPLY_SUCCESS)) {
+            jCardDao.updateById(update);
+            if (jCardEntity.getApi().equals(1)) {
+                publisher.publishEvent(new CardApplyNotifyEvent(this, jCardEntity.getId()));
+            }
+            return Result.ok;
+        }
+
+
+        // 从非失败  -> 失败,  处理退款
+        String prevState = jCardEntity.getState();
+        String nextState = response.getState();
+        if (!(prevState.equals(ZinConstant.CARD_APPLY_VERIFY_FAIL) ||
+                prevState.equals(ZinConstant.CARD_APPLY_FAIL) ||
+                prevState.equals(ZinConstant.CARD_APPLY_CLOSE)
+        ) && (nextState.equals(ZinConstant.CARD_APPLY_VERIFY_FAIL) ||
+                prevState.equals(ZinConstant.CARD_APPLY_FAIL) ||
+                prevState.equals(ZinConstant.CARD_APPLY_CLOSE))
+        ) {
+            tx.executeWithoutResult(status -> {
+                jCardDao.updateById(update);
+                ledger.ledgeOpenCardFail(jCardEntity);
+            });
+            // 通知商户
+            if (jCardEntity.getApi().equals(1)) {
+                publisher.publishEvent(new CardApplyNotifyEvent(this, jCardEntity.getId()));
+            }
+        } else {
+            jCardDao.updateById(update);
+        }
+
+        return Result.ok;
+    }
+
+    private void uploadFiles(JCardEntity cardEntity) {
+        // 拿到所有文件fid
+        String photofront = cardEntity.getPhotofront();
+        String photoback = cardEntity.getPhotoback();
+        String photofront2 = cardEntity.getPhotofront2();
+        String photoback2 = cardEntity.getPhotoback2();
+
+        List<String> fids = List.of(photofront, photoback, photofront2, photoback2);
+        Map<String, CompletableFuture<String>> jobs = new HashMap<>();
+        for (String fid : fids) {
+            if (StringUtils.isBlank(fid)) {
+                continue;
+            }
+            jobs.put(fid, CompletableFuture.supplyAsync(() -> {
+                return zinFileService.upload(fid);
+            }));
+        }
+        jobs.forEach((j, f) -> {
+            log.info("wait {}...", j);
+            try {
+                f.get();
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new RenException("can not upload file:" + j);
+            }
+        });
+        log.info("文件上传完毕, 开始请求创建商户...");
     }
 
 }

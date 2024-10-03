@@ -29,6 +29,11 @@ public class LedgerConstant {
     public static final int CARD_WITHDRAW_OUT = 50101;   // 1. 子商户卡资金账户 -100HKD
     public static final int CARD_WITHDRAW_IN = 50102;    // 2. 子商户VA       +100HKD
 
-    // 原始凭证(600): 交易手续费()
-    // 原始凭证
+    // 原始凭证(601): 开卡
+    public static final int CARD_OPEN_FEE_OUT = 60101;   // 1. 子商户VA户 -100HKD
+    public static final int CARD_OPEN_FEE_IN = 60102;    // 2. 子商户费用账户  +100HKD
+
+    // 原始凭证(602): 开卡失败
+    public static final int CARD_OPEN_FAIL_FEE_IN = 60201; //
+    public static final int CARD_OPEN_FAIL_FEE_OUT = 60202; //
 }

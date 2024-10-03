@@ -39,11 +39,9 @@ public class JLogDTO implements Serializable {
     @Schema(description = "属主类型")
     private String ownerType;
 
-    // 3
+    // 2
     @Schema(description = "余额类型")
-    private Integer balanceType;
-    @Schema(description = "余额名称")
-    private String balanceName;
+    private String balanceType;
     @Schema(description = "余额ID")
     private Long balanceId;
 

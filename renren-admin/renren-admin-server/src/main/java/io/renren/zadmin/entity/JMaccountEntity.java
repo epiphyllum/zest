@@ -26,11 +26,14 @@ public class JMaccountEntity extends BaseEntity {
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date updateDate;
 
-    // id(4)
+    // (4) ID
     private Long agentId;
     private String agentName;
     private Long merchantId;
     private String merchantName;
+
+    // (1) API
+    private Integer api;
 
     // 17
     private String flag;
@@ -54,4 +57,5 @@ public class JMaccountEntity extends BaseEntity {
     // 2
     private String state;
     private String stateexplain;
+    private String cardId;  // id
 }

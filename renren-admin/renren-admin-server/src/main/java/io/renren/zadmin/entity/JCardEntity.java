@@ -34,11 +34,13 @@ public class JCardEntity extends BaseEntity {
     private String merchantName;
     private Long subId;
     private String subName;
+    private Integer api;
 
     // 请求数据(6)
     private String meraplid;
     private String maincardno;
     private String cusid;
+    private String producttype;
     private String cardtype;
     private String belongtype;
     private String cardholdertype;
@@ -85,6 +87,12 @@ public class JCardEntity extends BaseEntity {
     private String deliveryprovince;
     private String deliverycity;
     private String deliveryaddress;
+
+    // 大吉设计
+    private String currency;
+    private BigDecimal merchantFee;
+    private Integer notifyStatus;
+    private Integer notifyCount;
 
     // resp
     private String applyid;

@@ -1,75 +1,89 @@
 package io.renren.zin.service.exchange;
 
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.tools.exception.RenException;
-import io.renren.commons.tools.utils.ConvertUtils;
-import io.renren.zadmin.dao.JExchangeDao;
-import io.renren.zadmin.dao.JMerchantDao;
-import io.renren.zadmin.entity.JExchangeEntity;
-import io.renren.zadmin.entity.JMerchantEntity;
-import io.renren.zapi.ApiService;
-import io.renren.zapi.service.exchange.dto.ExchangeStateNotify;
-import io.renren.zbalance.Ledger;
 import io.renren.zin.service.exchange.dto.TExchangeStateNotify;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionTemplate;
+
+// CP201  汇款充值外部资金汇入
+// CP213  伞形账户入账
+// CP109  离岸下发资金提现
+// CP110  离岸换汇
+// CP462  释放担保金
 
 @Service
+@Slf4j
 public class ExchangeNotify {
+
+
     @Resource
-    private ApiService apiService;
+    private CP109 cp109;
     @Resource
-    private JExchangeDao jExchangeDao;
+    private CP110 cp110;
     @Resource
-    private Ledger ledger;
+    private CP201 cp201;
     @Resource
-    private JMerchantDao jMerchantDao;
+    private CP213 cp213;
     @Resource
-    private TransactionTemplate tx;
+    private CP462 cp462;
+
 
     // 换汇通知
     public void exchangeStateNotify(TExchangeStateNotify notify) {
-        JExchangeEntity jExchangeEntity = jExchangeDao.selectById(Long.parseLong(notify.getMeraplid()));
-        if (jExchangeEntity == null) {
-            throw new RenException("invalid meraplid");
+        String state = notify.getState();
+
+        int status = 0;
+
+        // 支付类申请单中间态
+        if (state.equals("01") ||
+                state.equals("05") ||
+                state.equals("16") ||
+                state.equals("23") ||
+                state.equals("38")
+        ) {
+            status = 0;
         }
 
-        // 已经是终态了: 只需要通知商户
-        if (jExchangeEntity.getState().equals("06") || jExchangeEntity.getState().equals("07")) {
-            notifyMerchant(notify, jExchangeEntity);
+        // 支付类申请单: 终态-成功
+        else if (state.equals("06")) {
+            status = 1;
+        }
+
+        // 支付类申请单: 终态-失败
+        else if (state.equals("02") ||
+                state.equals("07") ||
+                state.equals("11")
+        ) {
+            status = 2;
+        } else {
+            throw new RenException("状态不在通联列表内");
+        }
+
+        // 汇款充值外部资金汇入
+        if (notify.getTrxcode().equals("CP201")) {
+            cp201.handle(notify, status);
             return;
         }
-
-        // 准备待更新内容
-        JExchangeEntity updateEntity = ConvertUtils.sourceToTarget(notify, JExchangeEntity.class);
-        updateEntity.setMeraplid(null);
-        updateEntity.setId(jExchangeEntity.getId());
-
-        // 只有换汇成功， 且换汇成功
-        if (notify.getState().equals("06") && !jExchangeEntity.getState().equals("06")) {
-            tx.executeWithoutResult(status -> {
-                jExchangeDao.update(updateEntity, Wrappers.<JExchangeEntity>lambdaUpdate()
-                        .set(JExchangeEntity::getState, "06")
-                        .ne(JExchangeEntity::getState, "06")
-                        .eq(JExchangeEntity::getId, jExchangeEntity.getId())
-                );
-                ledger.ledgeExchange(jExchangeEntity);
-            });
-        } else {
-            jExchangeDao.updateById(updateEntity);
+        // 伞形入账通知
+        if (notify.getTrxcode().equals("CP213")) {
+            cp213.handle(notify, status);
+            return;
         }
-        notifyMerchant(notify, jExchangeEntity);
-    }
-
-    private void notifyMerchant(TExchangeStateNotify notify, JExchangeEntity jExchangeEntity) {
-        // 通知商户
-        JMerchantEntity merchant = jMerchantDao.selectById(jExchangeEntity.getMerchantId());
-        ExchangeStateNotify exchangeStateNotify = ConvertUtils.sourceToTarget(notify, ExchangeStateNotify.class);
-        exchangeStateNotify.setMeraplid(jExchangeEntity.getMeraplid());  // 换下meraplid
-        String ok = apiService.notifyMerchant(exchangeStateNotify, merchant, "exchangeNotify");
-        if (!ok.equals("OK")) {
-            throw new RenException("process not completed");
+        // 离岸下发资金提现
+        if (notify.getTrxcode().equals("CP109")) {
+            cp109.handle(notify, status);
+            return;
+        }
+        // 离岸换汇
+        if (notify.getTrxcode().equals("CP110")) {
+            cp110.handle(notify, status);
+            return;
+        }
+        // 释放担保金
+        if (notify.getTrxcode().equals("CP462")) {
+            cp462.handle(notify, status);
+            return;
         }
     }
 }

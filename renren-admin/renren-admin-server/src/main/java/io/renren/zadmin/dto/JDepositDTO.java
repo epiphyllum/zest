@@ -42,6 +42,7 @@ public class JDepositDTO implements Serializable {
     private Long subId;
     @Schema(description = "子商户名称")
     private String subName;
+    private Integer api;
 
     // fact
     @Schema(description = "申请单")

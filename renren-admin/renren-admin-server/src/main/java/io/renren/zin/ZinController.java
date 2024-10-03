@@ -56,7 +56,7 @@ public class ZinController {
         return "OK";
     }
 
-    // 换汇申请单状态通知
+    // 换汇申请单状态通知:  这个是支付类申请单的通知
     @PostMapping("applynotify")
     public String auditrst(HttpServletRequest request, @RequestBody String body, @RequestHeader("X-AGCP-Auth") String auth, @RequestHeader("X-AGCP-Date") String date) {
         TExchangeStateNotify tExchangeStateNotify = requester.<TExchangeStateNotify>verify(request, body, auth, date, TExchangeStateNotify.class);
@@ -84,7 +84,6 @@ public class ZinController {
     @PostMapping("cardtrxrst")
     public String cardtrxrst(HttpServletRequest request, @RequestBody String body, @RequestHeader("X-AGCP-Auth") String auth, @RequestHeader("X-AGCP-Date") String date) {
         TAuthTxnNotify tAuthTxnNotify = requester.<TAuthTxnNotify>verify(request, body, auth, date, TAuthTxnNotify.class);
-        log.info("授权交易通知:{}", body);
         zinCardTxnService.authTxnNotify(tAuthTxnNotify);
         return "OK";
     }

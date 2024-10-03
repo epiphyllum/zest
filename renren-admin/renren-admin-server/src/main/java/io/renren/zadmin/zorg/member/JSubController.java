@@ -62,7 +62,6 @@ public class JSubController {
     })
     @PreAuthorize("hasAuthority('zorg:jsub:page')")
     public Result<PageData<JSubDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
-        params.put("child", 1L);
         PageData<JSubDTO> page = jSubService.page(params);
         return new Result<PageData<JSubDTO>>().ok(page);
     }
@@ -150,5 +149,17 @@ public class JSubController {
         ExcelUtils.exportExcelToTarget(response, null, "j_merchant", list, JSubExcel.class);
     }
 
+    // 审核
+    @GetMapping("verify")
+    @Operation(summary = "导出")
+    @LogOperation("导出")
+    @PreAuthorize("hasAuthority('zorg:jsub:update')")
+    public Result verify(@RequestParam("id") Long id) throws Exception {
+        JSubEntity update = new JSubEntity();
+        update.setId(id);
+        update.setState("04");
+        jSubService.updateById(update);
+        return new Result();
+    }
 
 }

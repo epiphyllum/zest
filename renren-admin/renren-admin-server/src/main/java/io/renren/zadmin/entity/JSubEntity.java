@@ -32,6 +32,7 @@ public class JSubEntity extends BaseEntity {
     private String agentName;
     private Long merchantId;
     private String merchantName;
+    private Integer api;
 
     // 4
     private String meraplid;

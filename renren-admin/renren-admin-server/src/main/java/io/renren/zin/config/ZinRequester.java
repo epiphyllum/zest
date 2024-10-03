@@ -202,7 +202,7 @@ public class ZinRequester {
 
     // 验证通联回调
     public <T> T verify(HttpServletRequest request, String body, String auth, String date, Class<T> clazz) {
-        log.info("recv notification\nbody:[{}]\nauth:[{}]\ndate:[{}]", body, auth, date);
+        log.info("recv notification[{}]\nbody:[{}]\nauth:[{}]\ndate:[{}]", request.getRequestURI(), body, auth, date);
         String uri = request.getRequestURI();
         String params = request.getQueryString();
         StringBuilder sb = new StringBuilder();

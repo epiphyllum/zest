@@ -10,11 +10,11 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 /**
-* j_va
-*
-* @author epiphyllum epiphyllum.zhou@gmail.com
-* @since 3.0 2024-09-01
-*/
+ * j_va
+ *
+ * @author epiphyllum epiphyllum.zhou@gmail.com
+ * @since 3.0 2024-09-01
+ */
 @Data
 @Schema(description = "j_va")
 public class JVaDTO implements Serializable {
@@ -33,6 +33,8 @@ public class JVaDTO implements Serializable {
     private Date updateDate;
 
     // 业务字段(4)
+    @Schema(description = "通联ID")
+    private String tid;
     @Schema(description = "通联虚拟户")
     private String accountno;
     @Schema(description = "币种")

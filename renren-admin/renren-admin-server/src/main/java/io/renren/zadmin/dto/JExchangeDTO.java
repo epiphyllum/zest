@@ -41,6 +41,7 @@ public class JExchangeDTO implements Serializable {
     private Long merchantId;
     @Schema(description = "商户名")
     private String merchantName;
+    private Integer api;
 
     // 业务字段 5
     @Schema(description = "申请单流水")

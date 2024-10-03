@@ -100,16 +100,22 @@ public class JSubServiceImpl extends CrudServiceImpl<JSubDao, JSubEntity, JSubDT
             throw new RenException("invalid request user");
         }
 
+        // 属性copy
+        JSubEntity jSubEntity = ConvertUtils.sourceToTarget(dto, JSubEntity.class);
         Long djId = null;
 
         if (user.getUserType().equals(ZestConstant.USER_TYPE_OPERATION)) {
-            // 机构操作
-            djId = user.getDeptId();
-            if (dto.getAgentId() == null || dto.getMerchantId() == null) {
-                throw new RenException("invalid request");
+            // 机构操作: 必须填填agentId + merchantId
+            if (dto.getMerchantId() == null) {
+                throw new RenException("invalid request: need merchantId");
             }
+            SysDeptEntity merchantDept = sysDeptDao.selectById(dto.getMerchantId());
+            SysDeptEntity agentDept = sysDeptDao.selectById(merchantDept.getPid());
+            dto.setAgentId(agentDept.getId());
+            dto.setAgentName(agentDept.getName());
+            dto.setMerchantName(merchantDept.getName());
         } else if (user.getUserType().equals(ZestConstant.USER_TYPE_AGENT)) {
-            // 代理操作
+            // 代理操作: 必须填merchantId
             if (dto.getMerchantId() == null) {
                 throw new RenException("invalid request");
             }
@@ -118,6 +124,8 @@ public class JSubServiceImpl extends CrudServiceImpl<JSubDao, JSubEntity, JSubDT
             // 设置agent
             dto.setAgentId(agentDept.getId());
             dto.setAgentName(agentDept.getName());
+            SysDeptEntity merchantDept = sysDeptDao.selectById(dto.getMerchantId());
+            dto.setMerchantName(merchantDept.getName());
         } else if (user.getUserType().equals(ZestConstant.USER_TYPE_MERCHANT)) {
             // 商户操作
             SysDeptEntity merchantDept = sysDeptDao.getById(user.getDeptId());
@@ -144,10 +152,8 @@ public class JSubServiceImpl extends CrudServiceImpl<JSubDao, JSubEntity, JSubDT
         SysDeptEntity deptEntity = new SysDeptEntity();
         deptEntity.setPids(pids);
         deptEntity.setName(dto.getCusname());
+        deptEntity.setPid(dto.getMerchantId());
         sysDeptService.insert(deptEntity);
-
-        // 属性copy
-        JSubEntity jSubEntity = ConvertUtils.sourceToTarget(dto, JSubEntity.class);
 
         // 子商户的ID 就是子商户的部门ID
         jSubEntity.setId(deptEntity.getId());
@@ -171,7 +177,7 @@ public class JSubServiceImpl extends CrudServiceImpl<JSubDao, JSubEntity, JSubDT
         JBalanceEntity jBalanceEntity = new JBalanceEntity();
         jBalanceEntity.setOwnerId(deptEntity.getId());
         jBalanceEntity.setOwnerName(deptEntity.getName());
-        jBalanceEntity.setOwnerType("sub");
+        jBalanceEntity.setOwnerType("sub");  // attention
         jBalanceEntity.setBalanceType(type);
         jBalanceEntity.setCurrency(currency);
         jBalanceDao.insert(jBalanceEntity);

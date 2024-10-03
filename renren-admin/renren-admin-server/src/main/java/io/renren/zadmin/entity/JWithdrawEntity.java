@@ -34,6 +34,7 @@ public class JWithdrawEntity extends BaseEntity {
     private String merchantName;
     private Long subId;
     private String subName;
+    private Integer api;
 
     // (8) 业务字段
     private String meraplid;

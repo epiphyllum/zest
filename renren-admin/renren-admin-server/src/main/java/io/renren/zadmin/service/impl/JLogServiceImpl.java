@@ -47,6 +47,9 @@ public class JLogServiceImpl extends CrudServiceImpl<JLogDao, JLogEntity, JLogDT
             wrapper.in("owner_id", subDeptIdList);
         }
 
+        String ownerType = (String) params.get("ownerType");
+        wrapper.eq(StringUtils.isNotBlank(ownerType), "owner_type", ownerType);
+
         //
         String balanceType = (String) params.get("balanceType");
         wrapper.eq(StringUtils.isNotBlank(balanceType), "balance_type", balanceType);

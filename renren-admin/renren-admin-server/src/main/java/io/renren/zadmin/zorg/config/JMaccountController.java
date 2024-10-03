@@ -1,10 +1,12 @@
 package io.renren.zadmin.zorg.config;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.log.annotation.LogOperation;
 import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.constant.Constant;
 import io.renren.commons.tools.page.PageData;
+import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.commons.tools.utils.ExcelUtils;
 import io.renren.commons.tools.utils.Result;
 import io.renren.commons.tools.validator.AssertUtils;
@@ -12,10 +14,22 @@ import io.renren.commons.tools.validator.ValidatorUtils;
 import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
+import io.renren.dao.SysDeptDao;
+import io.renren.entity.SysDeptEntity;
+import io.renren.zadmin.dao.JMaccountDao;
 import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.dto.JMaccountDTO;
+import io.renren.zadmin.dto.JSubDTO;
+import io.renren.zadmin.entity.JMaccountEntity;
+import io.renren.zadmin.entity.JSubEntity;
 import io.renren.zadmin.excel.JMaccountExcel;
 import io.renren.zadmin.service.JMaccountService;
+import io.renren.zin.service.accountmanage.ZinAccountManageService;
+import io.renren.zin.service.umbrella.ZinUmbrellaService;
+import io.renren.zin.service.umbrella.dto.TMoneyAccountAdd;
+import io.renren.zin.service.umbrella.dto.TMoneyAccountAddResponse;
+import io.renren.zin.service.umbrella.dto.TMoneyAccountQuery;
+import io.renren.zin.service.umbrella.dto.TMoneyAccountQueryResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -43,6 +57,14 @@ public class JMaccountController {
     private JMaccountService jMaccountService;
     @Resource
     private JMerchantDao jMerchantDao;
+    @Resource
+    private SysDeptDao sysDeptDao;
+    @Resource
+    private ZinAccountManageService zinAccountManageService;
+    @Resource
+    private ZinUmbrellaService zinUmbrellaService;
+    @Resource
+    private JMaccountDao jMaccountDao;
 
     @GetMapping("page")
     @Operation(summary = "分页")
@@ -56,6 +78,19 @@ public class JMaccountController {
     public Result<PageData<JMaccountDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
         PageData<JMaccountDTO> page = jMaccountService.page(params);
         return new Result<PageData<JMaccountDTO>>().ok(page);
+    }
+
+    @GetMapping("list")
+    @Operation(summary = "list")
+//    @PreAuthorize("hasAuthority('zorg:jmaccount:page')")
+    public Result<List<JMaccountDTO>> list(@RequestParam(value = "merchantId", required = false) Long merchantId) {
+        Result<List<JMaccountDTO>> result = new Result<>();
+        List<JMaccountEntity> entities = jMaccountDao.selectList(Wrappers.<JMaccountEntity>lambdaQuery()
+                .eq(merchantId != null, JMaccountEntity::getMerchantId, merchantId)
+        );
+        List<JMaccountDTO> dtos = ConvertUtils.sourceToTarget(entities, JMaccountDTO.class);
+        result.setData(dtos);
+        return result;
     }
 
     @GetMapping("{id}")
@@ -73,11 +108,29 @@ public class JMaccountController {
     public Result save(@RequestBody JMaccountDTO dto) {
 
         UserDetail user = SecurityUser.getUser();
-        if (!user.getUserType().equals("operation") && !user.getUserType().equals("agent")) {
+        if (!user.getUserType().equals("operation") &&
+                !user.getUserType().equals("agent") &&
+                !user.getUserType().equals("merchant")
+        ) {
             return Result.fail(9999, "not authorized, you are " + user.getUserType());
         }
+
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
+
+        if (user.getUserType().equals("merchant")) {
+            SysDeptEntity merchantDept = sysDeptDao.selectById(user.getDeptId());
+            SysDeptEntity agentDept = sysDeptDao.selectById(merchantDept.getPid());
+            dto.setAgentId(agentDept.getId());
+            dto.setAgentName(agentDept.getName());
+            dto.setMerchantId(merchantDept.getId());
+            dto.setMerchantName(merchantDept.getName());
+        } else if (user.getUserType().equals("agent")) {
+            SysDeptEntity agentDept = sysDeptDao.selectById(user.getDeptId());
+            dto.setAgentId(agentDept.getId());
+            dto.setAgentName(agentDept.getName());
+        } else if (user.getUserType().equals("operation")) {
+        }
         jMaccountService.save(dto);
         return new Result();
     }
@@ -119,5 +172,38 @@ public class JMaccountController {
     public void export(@Parameter(hidden = true) @RequestParam Map<String, Object> params, HttpServletResponse response) throws Exception {
         List<JMaccountDTO> list = jMaccountService.list(params);
         ExcelUtils.exportExcelToTarget(response, null, "j_maccount", list, JMaccountExcel.class);
+    }
+
+    // 提交通联
+    @GetMapping("submit")
+    @PreAuthorize("hasAuthority('zorg:jmaccount:update')")
+    public Result submit(@RequestParam("id") Long id) throws Exception {
+
+        JMaccountEntity jMaccountEntity = jMaccountDao.selectById(id);
+        TMoneyAccountAdd tMoneyAccountAdd = ConvertUtils.sourceToTarget(jMaccountEntity, TMoneyAccountAdd.class);
+        TMoneyAccountAddResponse response = zinUmbrellaService.addMoneyAccount(tMoneyAccountAdd);
+        String cardId = response.getId();
+        JMaccountEntity update = new JMaccountEntity();
+        update.setId(id);
+        update.setCardId(cardId);
+        jMaccountDao.updateById(update);
+
+        return new Result();
+    }
+
+    // 查询通联
+    @GetMapping("query")
+    @PreAuthorize("hasAuthority('zorg:jmaccount:update')")
+    public Result query(@RequestParam("id") Long id) throws Exception {
+        JMaccountEntity jMaccountEntity = jMaccountDao.selectById(id);
+        TMoneyAccountQuery query = ConvertUtils.sourceToTarget(jMaccountEntity, TMoneyAccountQuery.class);
+        query.setId(jMaccountEntity.getCardId());
+        query.setCurrency(null);
+        TMoneyAccountQueryResponse response = zinUmbrellaService.queryMoneyAccount(query);
+        JMaccountEntity update = new JMaccountEntity();
+        update.setId(id);
+        update.setState(response.getState());
+        jMaccountDao.updateById(update);
+        return new Result();
     }
 }
