@@ -27,27 +27,101 @@ public class LedgerUtil {
         entity.setOwnerId(balance.getOwnerId());
         entity.setOwnerName(balance.getOwnerName());
         entity.setOwnerType(balance.getOwnerType());
-
         entity.setBalanceId(balance.getId());
         entity.setBalanceType(balance.getBalanceType());
         entity.setCurrency(balance.getCurrency());
-
         entity.setFactAmount(factAmount);
         entity.setFactMemo(factMemo);
         entity.setFactId(factId);
         entity.setFactType(factType);
-
         entity.setOldBalance(balance.getBalance());
         entity.setNewBalance(balance.getBalance().add(factAmount));
         entity.setVersion(balance.getVersion() + 1L);
-
         return entity;
     }
+
+    /**
+     * 冻结confirm流水
+     */
+    private JLogEntity getFreezeConfirmLogEntity(JBalanceEntity balance, int factType, Long factId, String factMemo, BigDecimal factAmount) {
+        JLogEntity entity = new JLogEntity();
+        entity.setOwnerId(balance.getOwnerId());
+        entity.setOwnerName(balance.getOwnerName());
+        entity.setOwnerType(balance.getOwnerType());
+        entity.setBalanceId(balance.getId());
+        entity.setBalanceType(balance.getBalanceType());
+        entity.setCurrency(balance.getCurrency());
+        entity.setFactAmount(factAmount);
+
+        entity.setFactMemo(factMemo + "|冻结户:" + balance.getFrozen() + " - " + factAmount + " = " + balance.getFrozen().subtract(factAmount));
+
+        entity.setFactId(factId);
+        entity.setFactType(factType);
+
+        entity.setOldBalance(balance.getBalance());
+        entity.setNewBalance(balance.getBalance());
+        entity.setVersion(balance.getVersion() + 1L);
+        return entity;
+    }
+
+    /**
+     * 冻结
+     *
+     * @return
+     */
+    public void freeze(JBalanceEntity balance, int factType, Long factId, String factMemo, BigDecimal factAmount) {
+        JLogEntity logEntity = getLogEntity(balance, factType, factId, factMemo, factAmount);
+        jLogDao.insert(logEntity);
+        LambdaUpdateWrapper<JBalanceEntity> wrapper = Wrappers.<JBalanceEntity>lambdaUpdate()
+                .eq(JBalanceEntity::getId, balance.getId())
+                .eq(JBalanceEntity::getVersion, balance.getVersion())
+                .set(JBalanceEntity::getVersion, balance.getVersion() + 1)
+                .set(JBalanceEntity::getBalance, logEntity.getNewBalance())
+                .set(JBalanceEntity::getFrozen, balance.getFrozen().add(factAmount)
+                );
+        int update = jBalanceDao.update(null, wrapper);
+        if (update != 1) {
+            throw new RenException("冻结失败");
+        }
+    }
+
+    /**
+     * 冻结确认
+     */
+    public LambdaUpdateWrapper<JBalanceEntity> confirm(JBalanceEntity balance, int factType, Long factId, String factMemo, BigDecimal factAmount) {
+        JLogEntity logEntity = getFreezeConfirmLogEntity(balance, factType, factId, factMemo, factAmount);
+        jLogDao.insert(logEntity);
+        LambdaUpdateWrapper<JBalanceEntity> wrapper = Wrappers.<JBalanceEntity>lambdaUpdate()
+                .eq(JBalanceEntity::getId, balance.getId())
+                .eq(JBalanceEntity::getVersion, balance.getVersion())
+                .set(JBalanceEntity::getVersion, balance.getVersion() + 1)
+                .set(JBalanceEntity::getBalance, logEntity.getNewBalance())
+                .set(JBalanceEntity::getFrozen, balance.getFrozen().add(factAmount)
+                );
+        return wrapper;
+    }
+
+    /**
+     * 解冻
+     */
+    public LambdaUpdateWrapper<JBalanceEntity> unFreeze(JBalanceEntity balance, int factType, Long factId, String factMemo, BigDecimal factAmount) {
+        JLogEntity logEntity = getLogEntity(balance, factType, factId, factMemo, factAmount);
+        jLogDao.insert(logEntity);
+        LambdaUpdateWrapper<JBalanceEntity> wrapper = Wrappers.<JBalanceEntity>lambdaUpdate()
+                .eq(JBalanceEntity::getId, balance.getId())
+                .eq(JBalanceEntity::getVersion, balance.getVersion())
+                .set(JBalanceEntity::getVersion, balance.getVersion() + 1)
+                .set(JBalanceEntity::getBalance, logEntity.getNewBalance())
+                .set(JBalanceEntity::getFrozen, balance.getFrozen().subtract(factAmount));
+        return wrapper;
+    }
+
 
     /**
      * 记账更新条件
      */
     public LambdaUpdateWrapper<JBalanceEntity> ledge(JBalanceEntity balance, int factType, Long factId, String factMemo, BigDecimal factAmount) {
+
         JLogEntity logEntity = getLogEntity(balance, factType, factId, factMemo, factAmount);
         jLogDao.insert(logEntity);
         LambdaUpdateWrapper<JBalanceEntity> wrapper = Wrappers.<JBalanceEntity>lambdaUpdate()
@@ -56,6 +130,7 @@ public class LedgerUtil {
                 .set(JBalanceEntity::getVersion, balance.getVersion() + 1)
                 .set(JBalanceEntity::getBalance, logEntity.getNewBalance());
         return wrapper;
+
     }
 
     /**

@@ -4,6 +4,8 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 
+
+// 开卡收费标准
 @Data
 public class CardProductConfig {
     private String producttype;

@@ -68,30 +68,21 @@ public class JMerchantServiceImpl extends CrudServiceImpl<JMerchantDao, JMerchan
         if (StringUtils.isNotBlank(id)) {
             wrapper.eq("id", Long.parseLong(id));
         }
-
-//        String agentId = (String) params.get("agentId");
-//        if (StringUtils.isNotBlank(agentId)) {
-//            wrapper.eq("agent_id", Long.parseLong(agentId));
-//        }
-//        UserDetail user = SecurityUser.getUser();
-//        if (agentId != null && ZestConstant.USER_TYPE_AGENT.equals(user.getUserType())) {
-//            wrapper.eq("agent_id", user.getDeptId());
-//        }
-
         CommonFilter.setFilterAgent(wrapper, params);
-
         return wrapper;
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void save(JMerchantDTO dto) {
+        // 先创建商户
         JMerchantEntity merchant = saveMaster(dto);
 
+        // 再创建子商户
         JSubDTO jSubDTO = ConvertUtils.sourceToTarget(merchant, JSubDTO.class);
         jSubDTO.setMerchantId(merchant.getId());
         jSubDTO.setMerchantName(merchant.getCusname());
-
+        jSubDTO.setApi(0);
         jSubService.save(jSubDTO);
     }
 
@@ -101,7 +92,6 @@ public class JMerchantServiceImpl extends CrudServiceImpl<JMerchantDao, JMerchan
 
         // 拿到用户
         UserDetail user = SecurityUser.getUser();
-
         // 商户所属代理
         Long agentId = dto.getAgentId();
         if (user.getUserType().equals(ZestConstant.USER_TYPE_OPERATION)) {
@@ -133,7 +123,7 @@ public class JMerchantServiceImpl extends CrudServiceImpl<JMerchantDao, JMerchan
 
         // 15 * 5 = 75个账户
         for (String currency : BalanceType.CURRENCY_LIST) {
-            newBalance(deptEntity, BalanceType.getInAccount(currency), "HKD");
+            newBalance(deptEntity, BalanceType.getInAccount(currency), currency);
             newBalance(deptEntity, BalanceType.getDepositAccount(currency), currency);  //  预收保证金
             newBalance(deptEntity, BalanceType.getChargeFeeAccount(currency), currency); // 充值到卡手续费
             newBalance(deptEntity, BalanceType.getTxnFeeAccount(currency), currency);  // 预收交易手续费

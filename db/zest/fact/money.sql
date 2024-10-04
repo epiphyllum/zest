@@ -8,6 +8,20 @@ create table j_money
     agent_name          varchar(50) not null comment '代理名称',
     merchant_id         bigint      not null comment '商户ID',
     merchant_name       varchar(50) not null comment '商户名',
+    api                 int         not null default 1,
+
+    -- 通联返回
+    applyid             varchar(20),
+    referencecode       varchar(20),
+
+    -- 要求的来账信息
+    cardno              varchar(30),                          -- 账户号码
+    cardname            varchar(16),                          -- 账户名称
+
+    -- 确认时提供: 申请金额, 转账凭证
+    apply_amount        decimal(18, 2),
+    transferfid         varchar(200),
+    otherfid            varchar(200),
 
     -- 通知过来的内容
     nid                 varchar(32) comment '通知id',         -- 	相同id表示同一个通知
@@ -24,7 +38,7 @@ create table j_money
     ps                  varchar(200) comment '附言',          --
 
     -- 匹配情况
-    `status`            int         not null default 1 comment '1: 匹配成功, 0: 待匹配',
+    `status`            int         not null default 0 comment '2: 匹配失败, 1: 匹配成功, 0: 待匹配',
     notify_status       int         not null default 0 comment '',
     notify_count        int         not null default 0,
 

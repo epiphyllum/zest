@@ -42,6 +42,7 @@ public class Result<T> implements Serializable {
 
     public static Result<String> fail(int i, String msg) {
         Result<String> uResult = new Result<>();
+        uResult.setCode(i);
         uResult.setData(msg);
         return uResult;
     }

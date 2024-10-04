@@ -6,12 +6,11 @@ create table j_withdraw
 
     agent_id      bigint         not null comment '代理ID',
     agent_name    varchar(32)    not null comment '代理名',
-
     merchant_id   bigint         not null comment '商户ID',
     merchant_name varchar(32)    not null comment '商户名',
-
     sub_id        bigint         not null comment '子商户ID',
     sub_name      varchar(32)    not null comment '子商户',
+    api            int not null default 1,
 
     meraplid      varchar(32)    not null comment '申请单流水',
     cardno        varchar(30)    not null comment '卡号',

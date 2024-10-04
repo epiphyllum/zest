@@ -39,6 +39,7 @@ public class ExchangeNotify {
         if (state.equals("01") ||
                 state.equals("05") ||
                 state.equals("16") ||
+                state.equals("12") ||
                 state.equals("23") ||
                 state.equals("38")
         ) {
@@ -67,6 +68,7 @@ public class ExchangeNotify {
         }
         // 伞形入账通知
         if (notify.getTrxcode().equals("CP213")) {
+            log.info("伞形入账通知处理...");
             cp213.handle(notify, status);
             return;
         }

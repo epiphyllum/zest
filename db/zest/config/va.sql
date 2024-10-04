@@ -4,6 +4,7 @@ create table j_va
 (
     id          bigint not null comment 'ID', -- 这个就是商户ID/子商户ID,  同时也是商户/子商户的VA
     -- 账户信息
+    tid         varchar(18),                  -- 通联id
     accountno   varchar(120),                 -- 	通联虚拟户String	120	Y
     currency    varchar(3),                   --	String	3	Y
     amount      decimal(18, 2),               --	Number	18,2	Y

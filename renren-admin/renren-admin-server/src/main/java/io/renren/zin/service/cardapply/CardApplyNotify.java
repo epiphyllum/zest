@@ -108,7 +108,7 @@ public class CardApplyNotify {
         ) {
             tx.executeWithoutResult(status -> {
                 jCardDao.updateById(update);
-                ledger.ledgeOpenCardFail(jCardEntity);
+                ledger.ledgeOpenCardUnFreeze(jCardEntity);
             });
         } else {
             // 其他情况， 只需要更新状态

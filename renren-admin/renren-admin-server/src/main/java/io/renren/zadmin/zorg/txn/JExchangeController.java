@@ -16,10 +16,12 @@ import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
 import io.renren.dao.SysDeptDao;
 import io.renren.entity.SysDeptEntity;
+import io.renren.manager.JExchangeManager;
 import io.renren.zadmin.dao.JExchangeDao;
 import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.dto.JExchangeDTO;
 import io.renren.zadmin.dto.JMerchantDTO;
+import io.renren.zadmin.entity.JExchangeEntity;
 import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zadmin.excel.JExchangeExcel;
 import io.renren.zadmin.service.JExchangeService;
@@ -53,7 +55,9 @@ public class JExchangeController {
     @Resource
     private JMerchantDao jMerchantDao;
     @Resource
-    private SysDeptDao sysDeptDao;
+    private JExchangeDao jExchangeDao;
+    @Resource
+    private JExchangeManager jExchangeManager;
 
     @GetMapping("page")
     @Operation(summary = "分页")
@@ -88,11 +92,9 @@ public class JExchangeController {
             return Result.fail(9999, "not authorized, you are " + user.getUserType());
         }
 
-        SysDeptEntity merchantDept = sysDeptDao.selectById(user.getDeptId());
-        SysDeptEntity agentDept = sysDeptDao.selectById(merchantDept.getPid());
-
-        dto.setAgentId(agentDept.getId());
-        dto.setAgentName(agentDept.getName());
+        JMerchantEntity merchant = jMerchantDao.selectById(user.getDeptId());
+        dto.setAgentId(merchant.getAgentId());
+        dto.setAgentName(merchant.getAgentName());
         dto.setMerchantId(user.getDeptId());
         dto.setMerchantName(user.getDeptName());
         dto.setMeraplid(CommonUtils.newRequestId());
@@ -138,6 +140,8 @@ public class JExchangeController {
     @GetMapping("submit")
     @PreAuthorize("hasAuthority('zorg:jexchange:update')")
     public Result submit(@RequestParam("id") Long id) throws Exception {
+        JExchangeEntity jExchangeEntity = jExchangeDao.selectById(id);
+        jExchangeManager.submit(jExchangeEntity);
         return new Result();
     }
 
@@ -145,6 +149,8 @@ public class JExchangeController {
     @GetMapping("query")
     @PreAuthorize("hasAuthority('zorg:jexchange:update')")
     public Result query(@RequestParam("id") Long id) throws Exception {
+        JExchangeEntity jExchangeEntity = jExchangeDao.selectById(id);
+        jExchangeManager.query(jExchangeEntity);
         return new Result();
     }
 
@@ -152,6 +158,8 @@ public class JExchangeController {
     @GetMapping("lock")
     @PreAuthorize("hasAuthority('zorg:jexchange:update')")
     public Result lock(@RequestParam("id") Long id) throws Exception {
+        JExchangeEntity jExchangeEntity = jExchangeDao.selectById(id);
+        jExchangeManager.lock(jExchangeEntity);
         return new Result();
     }
 

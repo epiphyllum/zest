@@ -41,11 +41,7 @@ public class ApiAllocateService {
             JAllocateEntity entity = new JAllocateEntity();
             entity.setMerchantId(merchantId);
             entity.setMerchantName(merchant.getCusname());
-            entity.setFromId(null);
-            entity.setToId(null);
-            entity.setFromName(null);
-            entity.setToName(null);
-            ledger.ledgeI2v(merchant, entity);
+            ledger.ledgeI2v(entity, merchant);
         }
 
         Result<I2vRes> result = new Result<>();
@@ -63,11 +59,7 @@ public class ApiAllocateService {
             JAllocateEntity entity = new JAllocateEntity();
             entity.setMerchantId(merchantId);
             entity.setMerchantName(merchant.getCusname());
-            entity.setFromId(null);
-            entity.setToId(null);
-            entity.setFromName(null);
-            entity.setToName(null);
-            ledger.ledgeV2i(merchant, entity);
+            ledger.ledgeV2i(entity, merchant);
         }
 
         Result<I2vRes> result = new Result<>();
@@ -85,11 +77,7 @@ public class ApiAllocateService {
             JAllocateEntity entity = new JAllocateEntity();
             entity.setMerchantId(merchantId);
             entity.setMerchantName(merchant.getCusname());
-            entity.setFromId(null);
-            entity.setToId(null);
-            entity.setFromName(null);
-            entity.setToName(null);
-            ledger.ledgeM2s(merchant, entity);
+            ledger.ledgeM2s(entity);
         }
 
         Result<M2sRes> result = new Result<>();
@@ -115,11 +103,7 @@ public class ApiAllocateService {
             JAllocateEntity entity = new JAllocateEntity();
             entity.setMerchantId(merchantId);
             entity.setMerchantName(merchant.getCusname());
-            entity.setFromId(null);
-            entity.setToId(null);
-            entity.setFromName(null);
-            entity.setToName(null);
-            ledger.ledgeS2m(merchant, entity);
+            ledger.ledgeS2m(entity);
         }
 
         Result<S2mRes> result = new Result<>();

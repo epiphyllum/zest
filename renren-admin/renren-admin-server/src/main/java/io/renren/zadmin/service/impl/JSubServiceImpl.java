@@ -15,9 +15,11 @@ import io.renren.entity.SysDeptEntity;
 import io.renren.service.SysDeptService;
 import io.renren.zadmin.ZestConstant;
 import io.renren.zadmin.dao.JBalanceDao;
+import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.dao.JSubDao;
 import io.renren.zadmin.dto.JSubDTO;
 import io.renren.zadmin.entity.JBalanceEntity;
+import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zadmin.entity.JSubEntity;
 import io.renren.zadmin.service.JSubService;
 import io.renren.zbalance.BalanceType;
@@ -46,6 +48,8 @@ public class JSubServiceImpl extends CrudServiceImpl<JSubDao, JSubEntity, JSubDT
     private SysDeptDao sysDeptDao;
     @Resource
     private JBalanceDao jBalanceDao;
+    @Resource
+    private JMerchantDao jMerchantDao;
 
     @Override
     public PageData<JSubDTO> page(Map<String, Object> params) {
@@ -66,24 +70,6 @@ public class JSubServiceImpl extends CrudServiceImpl<JSubDao, JSubEntity, JSubDT
         }
 
         CommonFilter.setFilterMerchant(wrapper, params);
-
-//        String agentId = (String) params.get("agentId");
-//        if (StringUtils.isNotBlank(agentId)) {
-//            wrapper.eq("agent_id", Long.parseLong(agentId));
-//        }
-//        String merchantId = (String) params.get("merchantId");
-//        if (StringUtils.isNotBlank(merchantId)) {
-//            wrapper.eq("merchant_id", Long.parseLong(merchantId));
-//        }
-//        UserDetail user = SecurityUser.getUser();
-//        if (agentId != null && ZestConstant.USER_TYPE_AGENT.equals(user.getUserType())) {
-//            // 代理访问
-//            wrapper.eq("agent_id", user.getDeptId());
-//        } else if (merchantId == null && ZestConstant.USER_TYPE_MERCHANT.equals(user.getUserType())) {
-//            // 商户访问
-//            wrapper.eq("merchant_id", user.getDeptId());
-//        }
-
         return wrapper;
     }
 
@@ -104,28 +90,24 @@ public class JSubServiceImpl extends CrudServiceImpl<JSubDao, JSubEntity, JSubDT
         JSubEntity jSubEntity = ConvertUtils.sourceToTarget(dto, JSubEntity.class);
         Long djId = null;
 
-        if (user.getUserType().equals(ZestConstant.USER_TYPE_OPERATION)) {
-            // 机构操作: 必须填填agentId + merchantId
+        if (ZestConstant.USER_TYPE_OPERATION.equals(user.getUserType()) ||
+                ZestConstant.USER_TYPE_AGENT.equals(user.getUserType())
+        ) {
             if (dto.getMerchantId() == null) {
                 throw new RenException("invalid request: need merchantId");
             }
-            SysDeptEntity merchantDept = sysDeptDao.selectById(dto.getMerchantId());
-            SysDeptEntity agentDept = sysDeptDao.selectById(merchantDept.getPid());
-            dto.setAgentId(agentDept.getId());
-            dto.setAgentName(agentDept.getName());
-            dto.setMerchantName(merchantDept.getName());
-        } else if (user.getUserType().equals(ZestConstant.USER_TYPE_AGENT)) {
-            // 代理操作: 必须填merchantId
-            if (dto.getMerchantId() == null) {
-                throw new RenException("invalid request");
+            JMerchantEntity merchant = jMerchantDao.selectById(dto.getMerchantId());
+            dto.setAgentId(merchant.getAgentId());
+            dto.setAgentName(merchant.getAgentName());
+            dto.setMerchantName(merchant.getCusname());
+
+            if (ZestConstant.USER_TYPE_OPERATION.equals(user.getUserType())) {
+                djId = user.getDeptId();
+            } else {
+                SysDeptEntity merchantDept = sysDeptDao.getById(merchant.getId());
+                String[] split = merchantDept.getPids().split(",");
+                djId = Long.parseLong(split[0]);
             }
-            SysDeptEntity agentDept = sysDeptDao.getById(user.getDeptId());
-            djId = agentDept.getPid();
-            // 设置agent
-            dto.setAgentId(agentDept.getId());
-            dto.setAgentName(agentDept.getName());
-            SysDeptEntity merchantDept = sysDeptDao.selectById(dto.getMerchantId());
-            dto.setMerchantName(merchantDept.getName());
         } else if (user.getUserType().equals(ZestConstant.USER_TYPE_MERCHANT)) {
             // 商户操作
             SysDeptEntity merchantDept = sysDeptDao.getById(user.getDeptId());
@@ -168,7 +150,6 @@ public class JSubServiceImpl extends CrudServiceImpl<JSubDao, JSubEntity, JSubDT
         // 创建子商户
         insert(jSubEntity);
     }
-
 
     /**
      *

@@ -40,14 +40,13 @@ create table j_log
     -- 余额基本信息
     balance_id   bigint         not null comment '余额ID',
     balance_type varchar(16)    not null comment '余额类型',
-    balance_name varchar(32)    not null comment '余额名称',
     currency     varchar(3)     not null comment '币种',
 
     -- fact info
     fact_type    int            not null comment '凭证类型',
     fact_id      bigint         not null comment '凭证ID',
     fact_amount  decimal(18, 6) not null comment '凭证金额',
-    fact_memo    varchar(100)   not null comment '凭证描述',
+    fact_memo    varchar(200)   not null comment '凭证描述',
     old_balance  decimal(18, 6) not null comment '旧余额',
     new_balance  decimal(18, 6) not null comment '新余额',
     version      bigint         not null comment '新version',

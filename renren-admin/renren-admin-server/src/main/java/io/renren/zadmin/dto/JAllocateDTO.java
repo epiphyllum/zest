@@ -52,12 +52,5 @@ public class JAllocateDTO implements Serializable {
     private String type;
     @Schema(description = "币种")
     private String currency;
-    @Schema(description = "出金账户")
-    private Long fromId;
-    @Schema(description = "入金账户")
-    private Long toId;
-    @Schema(description = "出金账户")
-    private Long fromName;
-    @Schema(description = "入金账户")
-    private Long toName;
+
 }

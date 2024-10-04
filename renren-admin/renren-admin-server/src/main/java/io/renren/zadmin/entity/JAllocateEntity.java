@@ -41,11 +41,7 @@ public class JAllocateEntity extends BaseEntity {
     private BigDecimal amount;
     private String currency;
 
-    // 商户ID/子商户ID(4)
-    private Long fromId;
-    private Long toId;
-    private Long fromName;
-    private Long toName;
+
 
 
 }

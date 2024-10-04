@@ -10,6 +10,9 @@ create table j_maccount
     merchant_id    bigint      not null comment '商户ID', --
     merchant_name  varchar(50) not null comment '商户名', --
 
+    -- mode
+    api            int         not null default 1,
+
     -- 17
     flag           varchar(1),                            -- 账户类型  0:个人，1：企业
     currency       varchar(32),                           -- 币种: 多币种逗号（,）隔开
@@ -31,6 +34,7 @@ create table j_maccount
 
     state          varchar(2),
     stateexplain   varchar(100),
+    card_id        varchar(15),
 
 
     -- basic

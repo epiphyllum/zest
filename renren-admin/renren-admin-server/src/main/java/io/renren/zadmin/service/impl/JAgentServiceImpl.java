@@ -44,18 +44,17 @@ public class JAgentServiceImpl extends CrudServiceImpl<JAgentDao, JAgentEntity, 
     @Override
     public void save(JAgentDTO dto) {
         UserDetail user = SecurityUser.getUser();
-
         // 插入系统sys_dept
         SysDeptEntity deptEntity = new SysDeptEntity();
         deptEntity.setPid(user.getDeptId());
         deptEntity.setName(dto.getAgentName());
         deptEntity.setPids(user.getDeptId().toString());
+
         sysDeptService.insert(deptEntity);
 
         // 插入j_agent
         JAgentEntity jAgentEntity = ConvertUtils.sourceToTarget(dto, JAgentEntity.class);
         jAgentEntity.setId(deptEntity.getId());
-
         insert(jAgentEntity);
     }
 

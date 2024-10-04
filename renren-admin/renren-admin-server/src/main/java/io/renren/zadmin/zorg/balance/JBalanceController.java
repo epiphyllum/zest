@@ -53,6 +53,22 @@ public class JBalanceController {
         return new Result<PageData<JBalanceDTO>>().ok(page);
     }
 
+    @GetMapping("list")
+    @Operation(summary = "list")
+    @Parameters({
+            @Parameter(name = Constant.PAGE, description = "当前页码，从1开始", required = true),
+            @Parameter(name = Constant.LIMIT, description = "每页显示记录数", required = true),
+            @Parameter(name = Constant.ORDER_FIELD, description = "排序字段"),
+            @Parameter(name = Constant.ORDER, description = "排序方式，可选值(asc、desc)")
+    })
+    @PreAuthorize("hasAuthority('zorg:jbalance:list')")
+    public Result<List<JBalanceDTO>> list(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
+        params.put(Constant.PAGE, "1");
+        params.put(Constant.LIMIT, "1000");
+        List<JBalanceDTO> list = jBalanceService.list(params);
+        return new Result<List<JBalanceDTO>>().ok(list);
+    }
+
     @GetMapping("{id}")
     @Operation(summary = "信息")
     @PreAuthorize("hasAuthority('zorg:jbalance:info')")

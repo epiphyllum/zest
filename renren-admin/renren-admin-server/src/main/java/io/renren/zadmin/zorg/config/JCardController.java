@@ -217,7 +217,7 @@ public class JCardController {
         ) {
             tx.executeWithoutResult(status -> {
                 jCardDao.updateById(update);
-                ledger.ledgeOpenCardFail(jCardEntity);
+                ledger.ledgeOpenCardUnFreeze(jCardEntity);
             });
             // 通知商户
             if (jCardEntity.getApi().equals(1)) {

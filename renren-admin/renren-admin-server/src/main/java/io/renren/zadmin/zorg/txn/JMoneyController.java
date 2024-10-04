@@ -17,6 +17,7 @@ import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
 import io.renren.dao.SysDeptDao;
 import io.renren.entity.SysDeptEntity;
+import io.renren.manager.JMoneyManager;
 import io.renren.zadmin.ZestConstant;
 import io.renren.zadmin.dao.JMaccountDao;
 import io.renren.zadmin.dao.JMerchantDao;
@@ -76,6 +77,8 @@ public class JMoneyController {
     private ZinUmbrellaService zinUmbrellaService;
     @Resource
     private ZinFileService zinFileService;
+    @Resource
+    private JMoneyManager jMoneyManager;
 
     @GetMapping("page")
     @Operation(summary = "分页")
@@ -174,40 +177,17 @@ public class JMoneyController {
             @RequestParam("otherfid") String otherfid,
             @RequestParam("applyAmount") String applyAmount
     ) {
-
-        // 更新
-        JMoneyEntity updateEntity = new JMoneyEntity();
-        updateEntity.setId(id);
-        updateEntity.setTransferfid(transferfid);
-        updateEntity.setOtherfid(otherfid);
-        updateEntity.setApplyAmount(new BigDecimal(applyAmount));
-        jMoneyDao.updateById(updateEntity);
-
         // 查询出来
         JMoneyEntity jMoneyEntity = jMoneyDao.selectById(id);
-
-        this.uploadFiles(jMoneyEntity);
-
-        // 提交通联
-        TVaDepositConfirm confirm = new TVaDepositConfirm();
-        confirm.setApplyid(jMoneyEntity.getApplyid());
-        confirm.setAmount(jMoneyEntity.getApplyAmount());
-        confirm.setOtherfid(jMoneyEntity.getOtherfid());
-        confirm.setTransferfid(jMoneyEntity.getTransferfid());
-        TVaDepositConfirmResponse response = zinUmbrellaService.depositConfirm(confirm);
-
-        // 更新为待匹配
-        jMoneyDao.update(null, Wrappers.<JMoneyEntity>lambdaUpdate()
-                .eq(JMoneyEntity::getId, id)
-                .set(JMoneyEntity::getStatus, 1)
-        );
-
+        jMoneyEntity.setTransferfid(transferfid);
+        jMoneyEntity.setOtherfid(otherfid);
+        jMoneyEntity.setApplyAmount(new BigDecimal(applyAmount));
+        jMoneyManager.confirm(jMoneyEntity);
         return new Result();
     }
 
     /**
      * 匹配来账
-     *
      * @param id
      * @return
      */
@@ -216,7 +196,6 @@ public class JMoneyController {
     @LogOperation("匹配来账")
     @PreAuthorize("hasAuthority('zorg:jmoney:update')")
     public Result match(@RequestParam("id") Long id) {
-
         UserDetail user = SecurityUser.getUser();
         if (!user.getUserType().equals("operation") && !user.getUserType().equals("agent") && !user.getUserType().equals("merchant")) {
             return Result.fail(9999, "not authorized, you are " + user.getUserType());
@@ -227,31 +206,5 @@ public class JMoneyController {
         } else {
             return Result.fail(9999, "匹配失败");
         }
-    }
-
-    private void uploadFiles(JMoneyEntity jMoneyEntity) {
-        // 拿到所有文件fid
-        String transferfid = jMoneyEntity.getTransferfid();
-        String otherfid = jMoneyEntity.getOtherfid();
-
-        List<String> fids = List.of(transferfid, otherfid);
-        Map<String, CompletableFuture<String>> jobs = new HashMap<>();
-        for (String fid : fids) {
-            if (StringUtils.isBlank(fid)) {
-                continue;
-            }
-            jobs.put(fid, CompletableFuture.supplyAsync(() -> {
-                return zinFileService.upload(fid);
-            }));
-        }
-        jobs.forEach((j, f) -> {
-            log.info("wait {}...", j);
-            try {
-                f.get();
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new RenException("can not upload file:" + j);
-            }
-        });
     }
 }

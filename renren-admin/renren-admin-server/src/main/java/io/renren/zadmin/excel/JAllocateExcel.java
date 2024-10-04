@@ -44,16 +44,6 @@ public class JAllocateExcel {
     @ExcelProperty(value = "币种", index = 0)
     private String currency;
 
-    // (4)商户ID/子商户ID
-    @ExcelProperty(value = "出金ID", index = 0)
-    private Long fromId;
-    @ExcelProperty(value = "入金ID", index = 0)
-    private Long toId;
-    @ExcelProperty(value = "出金账户", index = 0)
-    private Long fromName;
-    @ExcelProperty(value = "入金账户", index = 0)
-    private Long toName;
-
     //(2)
     @ExcelProperty(value = "操作员", index = 0)
     private Long updater;

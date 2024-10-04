@@ -5,6 +5,7 @@ import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.constant.Constant;
 import io.renren.commons.tools.page.PageData;
+import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.commons.tools.utils.Result;
 import io.renren.commons.tools.utils.ExcelUtils;
 import io.renren.commons.tools.validator.AssertUtils;
@@ -12,7 +13,13 @@ import io.renren.commons.tools.validator.ValidatorUtils;
 import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
+import io.renren.manager.JAllocateManager;
+import io.renren.zadmin.dao.JMerchantDao;
+import io.renren.zadmin.dao.JSubDao;
 import io.renren.zadmin.dto.JAllocateDTO;
+import io.renren.zadmin.entity.JAllocateEntity;
+import io.renren.zadmin.entity.JMerchantEntity;
+import io.renren.zadmin.entity.JSubEntity;
 import io.renren.zadmin.excel.JAllocateExcel;
 import io.renren.zadmin.service.JAllocateService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,6 +48,12 @@ import java.util.Map;
 public class JAllocateController {
     @Resource
     private JAllocateService jAllocateService;
+    @Resource
+    private JMerchantDao jMerchantDao;
+    @Resource
+    private JSubDao jSubDao;
+    @Resource
+    private JAllocateManager jAllocateManager;
 
     @GetMapping("page")
     @Operation(summary = "分页")
@@ -71,14 +84,34 @@ public class JAllocateController {
     public Result save(@RequestBody JAllocateDTO dto) {
         // 商户才能调拨资金
         UserDetail user = SecurityUser.getUser();
-        if (!user.getUserType().equals("merchant")) {
+        if (!"merchant".equals(user.getUserType()) && !"operation".equals(user.getUserType())) {
             return Result.fail(9999, "not authorized, you are " + user.getUserType());
         }
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
-        jAllocateService.save(dto);
+
+        // 填充代理 + 商户名
+        JMerchantEntity merchant = jMerchantDao.selectById(dto.getMerchantId());
+        dto.setAgentId(merchant.getAgentId());
+        dto.setAgentName(merchant.getAgentName());
+        dto.setMerchantName(merchant.getCusname());
+
+        // 非api操作
+        dto.setApi(0);
+
+        // 子商户-商户资金调度， 需要子商户信息
+        String type = dto.getType();
+        if (type.equals("s2m") || type.equals("m2s")) {
+            JSubEntity subEntity = jSubDao.selectById(dto.getSubId());
+            dto.setSubName(subEntity.getCusname());
+        }
+        JAllocateEntity jAllocateEntity = ConvertUtils.sourceToTarget(dto, JAllocateEntity.class);
+
+        // 资金调度统一入口
+        jAllocateManager.handleAllocation(jAllocateEntity, merchant);
         return new Result();
     }
+
 
     @PutMapping
     @Operation(summary = "修改")

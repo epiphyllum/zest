@@ -12,6 +12,7 @@ public class SubNotify {
     @Resource
     private JMerchantDao jMerchantDao;
 
+    // {"ctid":"1842166361762832385","cusid":"665000000008412","cusname":"测试商户","meraplid":"1842166361762832385","state":"04","stateexplain":"正常"}
     public void handle(TSubStatusNotify notify) {
         if (notify.getState().equals("04") || notify.getState().equals("05")) {
             JMerchantEntity jMerchantEntity = jMerchantDao.selectOne(Wrappers.<JMerchantEntity>lambdaQuery()

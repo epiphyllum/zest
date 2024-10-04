@@ -16,6 +16,7 @@ import io.renren.commons.tools.validator.ValidatorUtils;
 import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
+import io.renren.manager.JMerchantManager;
 import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.dto.JMerchantDTO;
 import io.renren.zadmin.entity.JMerchantEntity;
@@ -55,14 +56,11 @@ import java.util.concurrent.CompletableFuture;
 @Tag(name = "j_merchant")
 @Slf4j
 public class JMerchantController {
+
+    @Resource
+    private JMerchantManager jMerchantManager;
     @Resource
     private JMerchantService jMerchantService;
-    @Resource
-    private ZinSubService zinSubService;
-    @Resource
-    private ZinFileService zinFileService;
-    @Resource
-    private JAgentService jAgentService;
     @Resource
     private JMerchantDao jMerchantDao;
 
@@ -84,12 +82,17 @@ public class JMerchantController {
      * 商户列表
      */
     @GetMapping("list")
-    public Result<List<JMerchantDTO>> list(@RequestParam(value = "agentId", required = false) Long agentId) {
+    public Result<List<JMerchantDTO>> list(
+            @RequestParam(value = "agentId", required = false) Long agentId,
+            @RequestParam(value = "merchantId", required = false) Long merchantId
+    ) {
         UserDetail user = SecurityUser.getUser();
         System.out.println("userType = " + user.getUserType());
         List<JMerchantEntity> jMerchantEntities = jMerchantDao.selectList(Wrappers.<JMerchantEntity>lambdaQuery()
                 .eq(agentId != null, JMerchantEntity::getAgentId, agentId)
-                .eq(user.getUserType().equals("agent"), JMerchantEntity::getAgentId, user.getDeptId())
+                .eq(merchantId != null, JMerchantEntity::getId, merchantId)
+                .eq("agent".equals(user.getUserType()), JMerchantEntity::getAgentId, user.getDeptId())
+                .eq("merchant".equals(user.getUserType()), JMerchantEntity::getId, user.getDeptId())
         );
 
         Result<List<JMerchantDTO>> result = new Result<>();
@@ -160,7 +163,6 @@ public class JMerchantController {
         ExcelUtils.exportExcelToTarget(response, null, "j_merchant", list, JMerchantExcel.class);
     }
 
-
     /**
      * 发起到通联创建子商户
      */
@@ -171,59 +173,9 @@ public class JMerchantController {
         if (!user.getUserType().equals("operation") && !user.getUserType().equals("agent")) {
             return Result.fail(9999, "not authorized");
         }
-
         JMerchantEntity jMerchantEntity = jMerchantDao.selectById(id);
-
-        // 上传文件
-        this.uploadFiles(jMerchantEntity);
-
-        // 准备请求
-        TSubCreateRequest tSubCreateRequest = ConvertUtils.sourceToTarget(jMerchantEntity, TSubCreateRequest.class);
-        tSubCreateRequest.setMeraplid(id.toString());
-
-        // 调用通联
-        TSubCreateResponse response = zinSubService.create(tSubCreateRequest);
-
-        // 更新应答
-        String cusid = response.getCusid();
-        jMerchantDao.update(null, Wrappers.<JMerchantEntity>lambdaUpdate()
-                .eq(JMerchantEntity::getId, id)
-                .set(JMerchantEntity::getCusid, cusid)
-                .set(JMerchantEntity::getMeraplid, tSubCreateRequest.getMeraplid())
-        );
+        jMerchantManager.submit(jMerchantEntity);
         return new Result();
-    }
-
-    private void uploadFiles(JMerchantEntity jMerchantEntity) {
-        // 拿到所有文件fid
-        String agreementfid = jMerchantEntity.getAgreementfid();
-        String buslicensefid = jMerchantEntity.getBuslicensefid();
-        String creditfid = jMerchantEntity.getCreditfid();
-        String legalphotobackfid = jMerchantEntity.getLegalphotobackfid();
-        String legalphotofrontfid = jMerchantEntity.getLegalphotofrontfid();
-        String taxfid = jMerchantEntity.getTaxfid();
-        String organfid = jMerchantEntity.getOrganfid();
-
-        List<String> fids = List.of(agreementfid, buslicensefid, creditfid, legalphotobackfid, legalphotofrontfid, taxfid, organfid);
-        Map<String, CompletableFuture<String>> jobs = new HashMap<>();
-        for (String fid : fids) {
-            if (StringUtils.isBlank(fid)) {
-                continue;
-            }
-            jobs.put(fid, CompletableFuture.supplyAsync(() -> {
-                return zinFileService.upload(fid);
-            }));
-        }
-        jobs.forEach((j, f) -> {
-            log.info("wait {}...", j);
-            try {
-                f.get();
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new RenException("can not upload file:" + j);
-            }
-        });
-        log.info("文件上传完毕, 开始请求创建商户...");
     }
 
     /**
@@ -233,13 +185,7 @@ public class JMerchantController {
     @PreAuthorize("hasAuthority('zorg:jmerchant:update')")
     public Result queryAllinpay(@RequestParam("id") Long id) {
         JMerchantEntity jMerchantEntity = jMerchantDao.selectById(id);
-        TSubQuery tSubQuery = ConvertUtils.sourceToTarget(jMerchantEntity, TSubQuery.class);
-
-        TSubQueryResponse response = zinSubService.query(tSubQuery);
-        jMerchantDao.update(null, Wrappers.<JMerchantEntity>lambdaUpdate()
-                .eq(JMerchantEntity::getId, jMerchantEntity.getId())
-                .set(JMerchantEntity::getState, response.getState())
-        );
+        jMerchantManager.query(jMerchantEntity);
         return new Result();
     }
 

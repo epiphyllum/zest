@@ -11,6 +11,7 @@ create table j_deposit
     merchant_name  varchar(32)    not null comment '商户名',
     sub_id         bigint         not null comment '子商户ID',
     sub_name       varchar(32)    not null comment '子商户',
+    api            int not null default 1,
 
     -- 请求字段(7)
     meraplid       varchar(32)    not null,                    -- 申请单流水	meraplid	String	32	Y

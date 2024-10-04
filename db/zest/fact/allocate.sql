@@ -10,16 +10,11 @@ create table j_allocate
     merchant_name varchar(50)    not null comment '商户名称',
     sub_id        bigint         null comment '子商户ID: m2s,s2m 存在子商户id',
     sub_name      varchar(50)    null comment '子商户名称',
+    api            int not null default 1,
 
     type          varchar(32)    not null comment 'i2v, v2i, m2s, s2m',
     amount        decimal(18, 2) not null comment '金额',
     currency      varchar(3)     not null comment '币种',
-
-    from_id       bigint         not null comment '出金账户id',
-    to_id         bigint         not null comment '入金账户id',
-
-    from_name     varchar(50)    not null comment '出金账户名',
-    to_name       varchar(50)    not null comment '入金账户名',
 
     creator       bigint comment '创建者',
     create_date   datetime comment '创建时间',

@@ -10,6 +10,7 @@ create table j_sub
     merchant_name      varchar(50) null comment '父商户名',
 
     -- 入网信息
+    meraplid           varchar(32) comment '跟踪号',                                        --	meraplid	String	32	Y	客户自己生成，保持唯一
     cusname            varchar(30) comment '商户名称',                                      --	cusname	String	30	Y
     flag               varchar(3) comment '商户性质',                                       --	flag	String	3	Y	1: 合资、股份制、民营 2 : 世界500强或国有 : 个体户 : 个人
     buslicensename     varchar(100) comment '营业执照名称',                                 --	buslicensename	String	100	Y
@@ -62,4 +63,5 @@ create table j_sub
 create index idx_j_sub_1 on j_sub (create_date);
 create index idx_j_sub_2 on j_sub (agent_id, create_date);
 create index idx_j_sub_3 on j_sub (merchant_id, create_date);
+create index idx_j_sub_4 on j_sub (meraplid);
 

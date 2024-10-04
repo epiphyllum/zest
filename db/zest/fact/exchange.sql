@@ -8,6 +8,7 @@ create table j_exchange
     agent_name     varchar(32) not null comment '代理名',
     merchant_id    bigint      not null comment '商户ID',
     merchant_name  varchar(32) not null comment '商户名',
+    api            int not null default 1,
 
     meraplid       varchar(32) not null comment '申请单流水',
     payeeccy       varchar(3) comment '到账币种',

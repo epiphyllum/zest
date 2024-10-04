@@ -1,5 +1,6 @@
 package io.renren.zadmin.service.impl;
 
+import cn.hutool.core.convert.Convert;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.renren.commons.mybatis.annotation.DataFilter;
@@ -8,6 +9,7 @@ import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.constant.Constant;
 import io.renren.commons.tools.page.PageData;
+import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.service.impl.SysDeptServiceImpl;
 import io.renren.zadmin.dao.JBalanceDao;
 import io.renren.zadmin.dto.JBalanceDTO;
@@ -39,6 +41,15 @@ public class JBalanceServiceImpl extends CrudServiceImpl<JBalanceDao, JBalanceEn
                 applyFilter(params)
         );
         return getPageData(page, JBalanceDTO.class);
+    }
+
+    @Override
+    public List<JBalanceDTO> list(Map<String, Object> params) {
+        List<JBalanceEntity> jBalanceEntities = baseDao.selectList(
+                getPage(params, Constant.CREATE_DATE, false),
+                applyFilter(params)
+        );
+        return ConvertUtils.sourceToTarget(jBalanceEntities, JBalanceDTO.class);
     }
 
     @Override
