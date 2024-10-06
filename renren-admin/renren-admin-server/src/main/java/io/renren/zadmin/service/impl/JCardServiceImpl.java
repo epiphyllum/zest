@@ -1,11 +1,14 @@
 package io.renren.zadmin.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.mybatis.service.impl.CrudServiceImpl;
 import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
+import io.renren.commons.tools.constant.Constant;
 import io.renren.commons.tools.exception.RenException;
+import io.renren.commons.tools.page.PageData;
 import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.commons.tools.utils.Result;
 import io.renren.dao.SysDeptDao;
@@ -15,6 +18,7 @@ import io.renren.zadmin.dao.JCardDao;
 import io.renren.zadmin.dao.JMcardDao;
 import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.dao.JVaDao;
+import io.renren.zadmin.dto.JCardDTO;
 import io.renren.zadmin.dto.JCardDTO;
 import io.renren.zadmin.dto.JMcardDTO;
 import io.renren.zadmin.entity.*;
@@ -60,11 +64,18 @@ public class JCardServiceImpl extends CrudServiceImpl<JCardDao, JCardEntity, JCa
     private ZestConfig zestConfig;
 
     @Override
+    public PageData<JCardDTO> page(Map<String, Object> params) {
+        IPage<JCardEntity> page = baseDao.selectPage(
+                getPage(params, Constant.CREATE_DATE, false),
+                applyFilter(params)
+        );
+        return getPageData(page, JCardDTO.class);
+    }
+
+    @Override
     public QueryWrapper<JCardEntity> getWrapper(Map<String, Object> params) {
         QueryWrapper<JCardEntity> wrapper = new QueryWrapper<>();
-
         CommonFilter.setFilterAll(wrapper, params);
-
         return wrapper;
     }
 

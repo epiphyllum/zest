@@ -1,8 +1,12 @@
 package io.renren.zin.service.sub;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import io.renren.commons.tools.exception.RenException;
+import io.renren.manager.JMerchantManager;
+import io.renren.manager.JSubManager;
 import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.entity.JMerchantEntity;
+import io.renren.zin.config.ZinConstant;
 import io.renren.zin.service.sub.dto.TSubStatusNotify;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
@@ -11,17 +15,16 @@ import org.springframework.stereotype.Service;
 public class SubNotify {
     @Resource
     private JMerchantDao jMerchantDao;
+    @Resource
+    private JMerchantManager manager;
 
-    // {"ctid":"1842166361762832385","cusid":"665000000008412","cusname":"测试商户","meraplid":"1842166361762832385","state":"04","stateexplain":"正常"}
     public void handle(TSubStatusNotify notify) {
-        if (notify.getState().equals("04") || notify.getState().equals("05")) {
-            JMerchantEntity jMerchantEntity = jMerchantDao.selectOne(Wrappers.<JMerchantEntity>lambdaQuery()
-                    .eq(JMerchantEntity::getCusid, notify.getCusid())
-            );
-            jMerchantDao.update(null, Wrappers.<JMerchantEntity>lambdaUpdate()
-                    .set(JMerchantEntity::getState, notify.getState())
-                    .eq(JMerchantEntity::getId, jMerchantEntity.getId())
-            );
+        JMerchantEntity jMerchantEntity = jMerchantDao.selectOne(Wrappers.<JMerchantEntity>lambdaQuery()
+                .eq(JMerchantEntity::getCusid, notify.getCusid())
+        );
+        if (jMerchantEntity == null) {
+            throw new RenException("can not find merchant");
         }
+        manager.changeState(jMerchantEntity, notify.getState(), notify.getCusid());
     }
 }

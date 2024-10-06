@@ -8,11 +8,15 @@ import io.renren.zadmin.dao.JLogDao;
 import io.renren.zadmin.entity.JBalanceEntity;
 import io.renren.zadmin.entity.JLogEntity;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 @Service
+@Slf4j
 public class LedgerUtil {
     @Resource
     private JLogDao jLogDao;
@@ -69,17 +73,32 @@ public class LedgerUtil {
      *
      * @return
      */
-    public void freeze(JBalanceEntity balance, int factType, Long factId, String factMemo, BigDecimal factAmount) {
-        JLogEntity logEntity = getLogEntity(balance, factType, factId, factMemo, factAmount);
-        jLogDao.insert(logEntity);
+    public LambdaUpdateWrapper<JBalanceEntity> freeze(JBalanceEntity balance, int factType, Long factId, String factMemo, BigDecimal factAmount) {
+        JLogEntity logEntity = getLogEntity(balance, factType, factId, factMemo, factAmount.negate());
+        try {
+            jLogDao.insert(logEntity);
+        } catch (DuplicateKeyException ex) {
+            ex.printStackTrace();
+            throw new RenException("重复记账");
+        }
         LambdaUpdateWrapper<JBalanceEntity> wrapper = Wrappers.<JBalanceEntity>lambdaUpdate()
                 .eq(JBalanceEntity::getId, balance.getId())
                 .eq(JBalanceEntity::getVersion, balance.getVersion())
                 .set(JBalanceEntity::getVersion, balance.getVersion() + 1)
                 .set(JBalanceEntity::getBalance, logEntity.getNewBalance())
-                .set(JBalanceEntity::getFrozen, balance.getFrozen().add(factAmount)
-                );
-        int update = jBalanceDao.update(null, wrapper);
+                .set(JBalanceEntity::getFrozen, balance.getFrozen().add(factAmount))
+                .set(JBalanceEntity::getUpdateDate, new Date());
+        return wrapper;
+    }
+
+    /**
+     * 冻结
+     *
+     * @return
+     */
+    public void freezeUpdate(JBalanceEntity balance, int factType, Long factId, String factMemo, BigDecimal factAmount) {
+        LambdaUpdateWrapper<JBalanceEntity> freeze = this.freeze(balance, factType, factId, factMemo, factAmount);
+        int update = jBalanceDao.update(null, freeze);
         if (update != 1) {
             throw new RenException("冻结失败");
         }
@@ -90,15 +109,31 @@ public class LedgerUtil {
      */
     public LambdaUpdateWrapper<JBalanceEntity> confirm(JBalanceEntity balance, int factType, Long factId, String factMemo, BigDecimal factAmount) {
         JLogEntity logEntity = getFreezeConfirmLogEntity(balance, factType, factId, factMemo, factAmount);
-        jLogDao.insert(logEntity);
+        try {
+            jLogDao.insert(logEntity);
+        } catch (DuplicateKeyException ex) {
+            ex.printStackTrace();
+            throw new RenException("重复记账");
+        }
         LambdaUpdateWrapper<JBalanceEntity> wrapper = Wrappers.<JBalanceEntity>lambdaUpdate()
                 .eq(JBalanceEntity::getId, balance.getId())
                 .eq(JBalanceEntity::getVersion, balance.getVersion())
                 .set(JBalanceEntity::getVersion, balance.getVersion() + 1)
                 .set(JBalanceEntity::getBalance, logEntity.getNewBalance())
-                .set(JBalanceEntity::getFrozen, balance.getFrozen().add(factAmount)
-                );
+                .set(JBalanceEntity::getFrozen, balance.getFrozen().subtract(factAmount))
+                .set(JBalanceEntity::getUpdateDate, new Date());
         return wrapper;
+    }
+
+    /**
+     *
+     */
+    public void confirmUpdate(JBalanceEntity balance, int factType, Long factId, String factMemo, BigDecimal factAmount) {
+        LambdaUpdateWrapper<JBalanceEntity> confirm = this.confirm(balance, factType, factId, factMemo, factAmount);
+        int update = jBalanceDao.update(null, confirm);
+        if (update != 1) {
+            throw new RenException("ledge failed");
+        }
     }
 
     /**
@@ -106,14 +141,28 @@ public class LedgerUtil {
      */
     public LambdaUpdateWrapper<JBalanceEntity> unFreeze(JBalanceEntity balance, int factType, Long factId, String factMemo, BigDecimal factAmount) {
         JLogEntity logEntity = getLogEntity(balance, factType, factId, factMemo, factAmount);
-        jLogDao.insert(logEntity);
+        try {
+            jLogDao.insert(logEntity);
+        } catch (DuplicateKeyException ex) {
+            ex.printStackTrace();
+            throw new RenException("重复记账");
+        }
         LambdaUpdateWrapper<JBalanceEntity> wrapper = Wrappers.<JBalanceEntity>lambdaUpdate()
                 .eq(JBalanceEntity::getId, balance.getId())
                 .eq(JBalanceEntity::getVersion, balance.getVersion())
                 .set(JBalanceEntity::getVersion, balance.getVersion() + 1)
                 .set(JBalanceEntity::getBalance, logEntity.getNewBalance())
-                .set(JBalanceEntity::getFrozen, balance.getFrozen().subtract(factAmount));
+                .set(JBalanceEntity::getFrozen, balance.getFrozen().subtract(factAmount))
+                .set(JBalanceEntity::getUpdateDate, new Date());
         return wrapper;
+    }
+
+    public void unFreezeUpdate(JBalanceEntity balance, int factType, Long factId, String factMemo, BigDecimal factAmount) {
+        LambdaUpdateWrapper<JBalanceEntity> unFreeze = this.unFreeze(balance, factType, factId, factMemo, factAmount);
+        int update = jBalanceDao.update(null, unFreeze);
+        if (update != 1) {
+            throw new RenException("ledge failed");
+        }
     }
 
 
@@ -123,12 +172,18 @@ public class LedgerUtil {
     public LambdaUpdateWrapper<JBalanceEntity> ledge(JBalanceEntity balance, int factType, Long factId, String factMemo, BigDecimal factAmount) {
 
         JLogEntity logEntity = getLogEntity(balance, factType, factId, factMemo, factAmount);
-        jLogDao.insert(logEntity);
+        try {
+            jLogDao.insert(logEntity);
+        } catch (DuplicateKeyException ex) {
+            ex.printStackTrace();
+            throw new RenException("重复记账");
+        }
         LambdaUpdateWrapper<JBalanceEntity> wrapper = Wrappers.<JBalanceEntity>lambdaUpdate()
                 .eq(JBalanceEntity::getId, balance.getId())
                 .eq(JBalanceEntity::getVersion, balance.getVersion())
                 .set(JBalanceEntity::getVersion, balance.getVersion() + 1)
-                .set(JBalanceEntity::getBalance, logEntity.getNewBalance());
+                .set(JBalanceEntity::getBalance, logEntity.getNewBalance())
+                .set(JBalanceEntity::getUpdateDate, new Date());
         return wrapper;
 
     }
@@ -136,15 +191,9 @@ public class LedgerUtil {
     /**
      * 直接记账
      */
-    public void update(JBalanceEntity balance, int factType, Long factId, String factMemo, BigDecimal factAmount) {
-        JLogEntity logEntity = getLogEntity(balance, factType, factId, factMemo, factAmount);
-        jLogDao.insert(logEntity);
-        LambdaUpdateWrapper<JBalanceEntity> wrapper = Wrappers.<JBalanceEntity>lambdaUpdate()
-                .eq(JBalanceEntity::getId, balance.getId())
-                .eq(JBalanceEntity::getVersion, balance.getVersion())
-                .set(JBalanceEntity::getVersion, balance.getVersion() + 1)
-                .set(JBalanceEntity::getBalance, logEntity.getNewBalance());
-        int update = jBalanceDao.update(null, wrapper);
+    public void ledgeUpdate(JBalanceEntity balance, int factType, Long factId, String factMemo, BigDecimal factAmount) {
+        LambdaUpdateWrapper<JBalanceEntity> ledge = this.ledge(balance, factType, factId, factMemo, factAmount);
+        int update = jBalanceDao.update(null, ledge);
         if (update != 1) {
             throw new RenException("ledge failed");
         }

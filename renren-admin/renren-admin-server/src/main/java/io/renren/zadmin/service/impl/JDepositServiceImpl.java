@@ -1,12 +1,17 @@
 package io.renren.zadmin.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.renren.commons.mybatis.service.impl.CrudServiceImpl;
 import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
+import io.renren.commons.tools.constant.Constant;
+import io.renren.commons.tools.page.PageData;
 import io.renren.zadmin.ZestConstant;
 import io.renren.zadmin.dao.JDepositDao;
 import io.renren.zadmin.dto.JDepositDTO;
+import io.renren.zadmin.dto.JDepositDTO;
+import io.renren.zadmin.entity.JDepositEntity;
 import io.renren.zadmin.entity.JDepositEntity;
 import io.renren.zadmin.service.JDepositService;
 import org.apache.commons.lang3.StringUtils;
@@ -22,6 +27,15 @@ import java.util.Map;
  */
 @Service
 public class JDepositServiceImpl extends CrudServiceImpl<JDepositDao, JDepositEntity, JDepositDTO> implements JDepositService {
+
+    @Override
+    public PageData<JDepositDTO> page(Map<String, Object> params) {
+        IPage<JDepositEntity> page = baseDao.selectPage(
+                getPage(params, Constant.CREATE_DATE, false),
+                applyFilter(params)
+        );
+        return getPageData(page, JDepositDTO.class);
+    }
 
     @Override
     public QueryWrapper<JDepositEntity> getWrapper(Map<String, Object> params) {

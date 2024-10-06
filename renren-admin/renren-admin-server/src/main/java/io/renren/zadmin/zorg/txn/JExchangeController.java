@@ -86,22 +86,33 @@ public class JExchangeController {
     @LogOperation("保存")
     @PreAuthorize("hasAuthority('zorg:jexchange:save')")
     public Result save(@RequestBody JExchangeDTO dto) {
+        //效验数据
+        ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
+
         // 商户才能发起换汇
         UserDetail user = SecurityUser.getUser();
-        if (!user.getUserType().equals("merchant")) {
+        if (!user.getUserType().equals("merchant") && !user.getUserType().equals("operation")) {
             return Result.fail(9999, "not authorized, you are " + user.getUserType());
         }
 
-        JMerchantEntity merchant = jMerchantDao.selectById(user.getDeptId());
-        dto.setAgentId(merchant.getAgentId());
-        dto.setAgentName(merchant.getAgentName());
-        dto.setMerchantId(user.getDeptId());
-        dto.setMerchantName(user.getDeptName());
-        dto.setMeraplid(CommonUtils.newRequestId());
+        // 填充字段
+        Long merchantId = null;
+        if (user.getUserType().equals("merchant")) {
+            merchantId = user.getDeptId();
+        } else {
+            merchantId = dto.getMerchantId();
+        }
+        JMerchantEntity merchant = jMerchantDao.selectById(merchantId);
 
-        //效验数据
-        ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
-        jExchangeService.save(dto);
+        JExchangeEntity entity = ConvertUtils.sourceToTarget(dto, JExchangeEntity.class);
+        entity.setAgentId(merchant.getAgentId());
+        entity.setAgentName(merchant.getAgentName());
+        entity.setMerchantId(merchantId);
+        entity.setMerchantName(merchant.getCusname());
+        entity.setMeraplid(CommonUtils.newRequestId());
+        entity.setApi(0);
+
+        jExchangeManager.save(entity);
         return new Result();
     }
 
@@ -163,4 +174,21 @@ public class JExchangeController {
         return new Result();
     }
 
+    // 确认
+    @GetMapping("confirm")
+    @PreAuthorize("hasAuthority('zorg:jexchange:update')")
+    public Result confirm(@RequestParam("id") Long id) throws Exception {
+        JExchangeEntity jExchangeEntity = jExchangeDao.selectById(id);
+        jExchangeManager.confirm(jExchangeEntity);
+        return new Result();
+    }
+
+    // 取消
+    @GetMapping("cancel")
+    @PreAuthorize("hasAuthority('zorg:jexchange:update')")
+    public Result cancel(@RequestParam("id") Long id) throws Exception {
+        JExchangeEntity jExchangeEntity = jExchangeDao.selectById(id);
+        jExchangeManager.cancel(jExchangeEntity);
+        return new Result();
+    }
 }

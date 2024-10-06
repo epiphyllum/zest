@@ -131,8 +131,8 @@ public class JMerchantServiceImpl extends CrudServiceImpl<JMerchantDao, JMerchan
         }
 
         insert(jMerchantEntity);
-
         return jMerchantEntity;
+
     }
 
     /**

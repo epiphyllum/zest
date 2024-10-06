@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -98,7 +99,8 @@ public class JVaController {
     @PreAuthorize("hasAuthority('zorg:jva:save')")
     public Result save(@RequestBody JVaDTO dto) {
         UserDetail user = SecurityUser.getUser();
-        if (!user.getUserType().equals("operation")) {
+        if (!user.getUserType().equals("operation") &&
+            !user.getUserType().equals("agent")) {
             return Result.fail(9999, "not authorized");
         }
         //效验数据
@@ -116,7 +118,8 @@ public class JVaController {
                 jVaDao.update(null, Wrappers.<JVaEntity>lambdaUpdate()
                         .eq(JVaEntity::getAccountno, jVaEntity.getAccountno())
                         .set(JVaEntity::getAmount, jVaEntity.getAmount())
-                        .set(JVaEntity::getTid, jVaEntity.getId())
+                        .set(JVaEntity::getTid, jVaEntity.getTid())
+                        .set(JVaEntity::getUpdateDate, new Date())
                 );
             }
         } else {
@@ -148,7 +151,9 @@ public class JVaController {
     @PreAuthorize("hasAuthority('zorg:jva:delete')")
     public Result delete(@RequestBody Long[] ids) {
         UserDetail user = SecurityUser.getUser();
-        if (!user.getUserType().equals("operation")) {
+        if (!user.getUserType().equals("operation") &&
+                !user.getUserType().equals("agent")
+        ) {
             return Result.fail(9999, "not authorized");
         }
         //效验数据

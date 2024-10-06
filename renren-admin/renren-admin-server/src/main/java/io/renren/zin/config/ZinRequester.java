@@ -134,6 +134,7 @@ public class ZinRequester {
             }
             throw new RenException("allinpay exception:" + ttResult.getRspinfo());
         } catch (JsonProcessingException e) {
+            e.printStackTrace();
             throw new RenException("request to allinpay failed");
         }
     }

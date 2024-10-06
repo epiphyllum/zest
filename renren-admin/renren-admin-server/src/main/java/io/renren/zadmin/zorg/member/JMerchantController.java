@@ -87,14 +87,12 @@ public class JMerchantController {
             @RequestParam(value = "merchantId", required = false) Long merchantId
     ) {
         UserDetail user = SecurityUser.getUser();
-        System.out.println("userType = " + user.getUserType());
         List<JMerchantEntity> jMerchantEntities = jMerchantDao.selectList(Wrappers.<JMerchantEntity>lambdaQuery()
                 .eq(agentId != null, JMerchantEntity::getAgentId, agentId)
                 .eq(merchantId != null, JMerchantEntity::getId, merchantId)
                 .eq("agent".equals(user.getUserType()), JMerchantEntity::getAgentId, user.getDeptId())
                 .eq("merchant".equals(user.getUserType()), JMerchantEntity::getId, user.getDeptId())
         );
-
         Result<List<JMerchantDTO>> result = new Result<>();
         List<JMerchantDTO> dtos = ConvertUtils.sourceToTarget(jMerchantEntities, JMerchantDTO.class);
         result.setData(dtos);
@@ -120,7 +118,8 @@ public class JMerchantController {
         }
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
-        jMerchantService.save(dto);
+        // jMerchantService.save(dto);
+        jMerchantManager.save(dto);
         return new Result();
     }
 

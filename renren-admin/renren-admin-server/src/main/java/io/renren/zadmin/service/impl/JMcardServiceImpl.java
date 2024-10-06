@@ -1,17 +1,22 @@
 package io.renren.zadmin.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.mybatis.service.impl.CrudServiceImpl;
 import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
+import io.renren.commons.tools.constant.Constant;
 import io.renren.commons.tools.exception.RenException;
+import io.renren.commons.tools.page.PageData;
 import io.renren.dao.SysDeptDao;
 import io.renren.entity.SysDeptEntity;
 import io.renren.zadmin.ZestConstant;
 import io.renren.zadmin.dao.JMcardDao;
 import io.renren.zadmin.dao.JVaDao;
 import io.renren.zadmin.dto.JMcardDTO;
+import io.renren.zadmin.dto.JMcardDTO;
+import io.renren.zadmin.entity.JMcardEntity;
 import io.renren.zadmin.entity.JMcardEntity;
 import io.renren.zadmin.entity.JVaEntity;
 import io.renren.zadmin.service.JMcardService;
@@ -30,6 +35,15 @@ import java.util.Map;
  */
 @Service
 public class JMcardServiceImpl extends CrudServiceImpl<JMcardDao, JMcardEntity, JMcardDTO> implements JMcardService {
+
+    @Override
+    public PageData<JMcardDTO> page(Map<String, Object> params) {
+        IPage<JMcardEntity> page = baseDao.selectPage(
+                getPage(params, Constant.CREATE_DATE, false),
+                applyFilter(params)
+        );
+        return getPageData(page, JMcardDTO.class);
+    }
 
     @Resource
     private SysDeptDao sysDeptDao;

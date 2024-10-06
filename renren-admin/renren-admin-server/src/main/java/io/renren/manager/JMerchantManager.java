@@ -2,11 +2,20 @@ package io.renren.manager;
 
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import io.renren.commons.security.user.SecurityUser;
+import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.ConvertUtils;
-import io.renren.commons.tools.utils.Result;
+import io.renren.dao.SysDeptDao;
+import io.renren.entity.SysDeptEntity;
+import io.renren.zadmin.ZestConstant;
+import io.renren.zadmin.dao.JBalanceDao;
 import io.renren.zadmin.dao.JMerchantDao;
+import io.renren.zadmin.dto.JMerchantDTO;
+import io.renren.zadmin.entity.JBalanceEntity;
 import io.renren.zadmin.entity.JMerchantEntity;
+import io.renren.zbalance.BalanceType;
+import io.renren.zin.config.ZinConstant;
 import io.renren.zin.service.file.ZinFileService;
 import io.renren.zin.service.sub.ZinSubService;
 import io.renren.zin.service.sub.dto.TSubCreateRequest;
@@ -16,6 +25,7 @@ import io.renren.zin.service.sub.dto.TSubQueryResponse;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.HashMap;
 import java.util.List;
@@ -27,13 +37,96 @@ import java.util.concurrent.CompletableFuture;
 public class JMerchantManager {
 
     @Resource
+    private JBalanceDao jBalanceDao;
+    @Resource
+    private TransactionTemplate tx;
+    @Resource
     private JMerchantDao jMerchantDao;
-
     @Resource
     private ZinFileService zinFileService;
     @Resource
     private ZinSubService zinSubService;
+    @Resource
+    private SysDeptDao sysDeptDao;
 
+    public JMerchantEntity save(JMerchantDTO dto) {
+
+        JMerchantEntity jMerchantEntity = ConvertUtils.sourceToTarget(dto, JMerchantEntity.class);
+        // 拿到用户
+        UserDetail user = SecurityUser.getUser();
+        // 商户所属代理
+        Long agentId = dto.getAgentId();
+        if (user.getUserType().equals(ZestConstant.USER_TYPE_OPERATION)) {
+            if (agentId == null) {
+                throw new RenException("agentId is not provided");
+            }
+        }
+        if (user.getUserType().equals(ZestConstant.USER_TYPE_AGENT)) {
+            agentId = user.getDeptId();
+        }
+
+        // 上传商户附件
+        this.uploadFiles(jMerchantEntity);
+
+        SysDeptEntity agentDept = sysDeptDao.selectById(agentId);
+        String agentName = agentDept.getName();
+        String pids = agentDept.getPid() + "," + agentId;
+
+        // 创建商户部门
+        SysDeptEntity deptEntity = new SysDeptEntity();
+        deptEntity.setPids(pids);
+        deptEntity.setName(dto.getCusname());
+        deptEntity.setPid(agentId);  // 属于agentId
+        deptEntity.setParentName(agentName);
+
+        jMerchantEntity.setAgentId(agentId);
+        jMerchantEntity.setAgentName(agentName);
+
+        return tx.execute(st -> {
+            sysDeptDao.insert(deptEntity);
+            // 商户部门参数
+            jMerchantEntity.setId(deptEntity.getId());  // 商户ID
+            jMerchantDao.insert(jMerchantEntity);
+            return jMerchantEntity;
+        });
+
+    }
+
+    /**
+     * 商户开通VA以及管理账户
+     */
+    public void openVa(JMerchantEntity entity) {
+        // 15 * 5 = 75个账户
+        tx.executeWithoutResult(st -> {
+            for (String currency : BalanceType.CURRENCY_LIST) {
+                newBalance(entity, BalanceType.getInAccount(currency), currency);
+                newBalance(entity, BalanceType.getDepositAccount(currency), currency);  //  预收保证金
+                newBalance(entity, BalanceType.getChargeFeeAccount(currency), currency); // 充值到卡手续费
+                newBalance(entity, BalanceType.getTxnFeeAccount(currency), currency);  // 预收交易手续费
+                newBalance(entity, BalanceType.getVaAccount(currency), currency);  // 创建va账户
+            }
+        });
+    }
+
+    /**
+     * 创建账户
+     */
+    private void newBalance(JMerchantEntity entity, String type, String currency) {
+        JBalanceEntity jBalanceEntity = new JBalanceEntity();
+        jBalanceEntity.setOwnerId(entity.getId());
+        jBalanceEntity.setOwnerName(entity.getCusname());
+        jBalanceEntity.setOwnerType("merchant");
+        jBalanceEntity.setBalanceType(type);
+        jBalanceEntity.setCurrency(currency);
+        jBalanceDao.insert(jBalanceEntity);
+    }
+
+
+    /**
+     * 提交通联
+     *
+     * @param jMerchantEntity
+     */
     public void submit(JMerchantEntity jMerchantEntity) {
         // 上传文件
         this.uploadFiles(jMerchantEntity);
@@ -54,6 +147,11 @@ public class JMerchantManager {
         );
     }
 
+    /**
+     * 上传通联文件:  deprecated
+     *
+     * @param jMerchantEntity
+     */
     private void uploadFiles(JMerchantEntity jMerchantEntity) {
         // 拿到所有文件fid
         String agreementfid = jMerchantEntity.getAgreementfid();
@@ -86,13 +184,37 @@ public class JMerchantManager {
         log.info("文件上传完毕, 开始请求创建商户...");
     }
 
+    /**
+     * 查询通联
+     *
+     * @param jMerchantEntity
+     */
     public void query(JMerchantEntity jMerchantEntity) {
         TSubQuery tSubQuery = ConvertUtils.sourceToTarget(jMerchantEntity, TSubQuery.class);
         TSubQueryResponse response = zinSubService.query(tSubQuery);
-        jMerchantDao.update(null, Wrappers.<JMerchantEntity>lambdaUpdate()
-                .eq(JMerchantEntity::getId, jMerchantEntity.getId())
-                .set(JMerchantEntity::getState, response.getState())
-                .set(JMerchantEntity::getCusid, response.getCusid())
-        );
+        this.changeState(jMerchantEntity, response.getState(), response.getCusid());
+    }
+
+    public void changeState(JMerchantEntity entity, String newState, String cusid) {
+        String oldState = entity.getState();
+
+        // 状态没有变化
+        if (oldState.equals(newState)) {
+            return;
+        }
+
+        // 变为成功, 并开户
+        tx.executeWithoutResult(st -> {
+            jMerchantDao.update(null, Wrappers.<JMerchantEntity>lambdaUpdate()
+                    .eq(JMerchantEntity::getId, entity.getId())
+                    .eq(JMerchantEntity::getState, oldState)
+                    .set(JMerchantEntity::getState, newState)
+                    .set(cusid != null, JMerchantEntity::getCusid, cusid)
+            );
+            // 状态又变化， 且新状态是成功
+            if (ZinConstant.payApplyStateMap.get(newState) == ZinConstant.STATE_SUCCESS) {
+                this.openVa(entity);
+            }
+        });
     }
 }

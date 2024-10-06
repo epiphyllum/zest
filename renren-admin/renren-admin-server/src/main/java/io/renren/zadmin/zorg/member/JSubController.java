@@ -14,6 +14,7 @@ import io.renren.commons.tools.validator.ValidatorUtils;
 import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
+import io.renren.manager.JSubManager;
 import io.renren.zadmin.dao.JSubDao;
 import io.renren.zadmin.dto.JAgentDTO;
 import io.renren.zadmin.dto.JSubDTO;
@@ -48,7 +49,7 @@ public class JSubController {
     @Resource
     private JSubService jSubService;
     @Resource
-    private JAgentService jAgentService;
+    private JSubManager jSubManager;
     @Resource
     private JSubDao jSubDao;
 
@@ -104,11 +105,26 @@ public class JSubController {
         }
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
-
-        jSubService.save(dto);
-
+        jSubManager.save(dto);
         return new Result();
     }
+
+    /**
+     * 审核
+     */
+    @GetMapping("verify")
+    @Operation(summary = "审核")
+    @LogOperation("审核")
+    @PreAuthorize("hasAuthority('zorg:jsub:verify')")
+    public Result verify(@RequestParam("id") Long id, @RequestParam("state") String state) {
+        UserDetail user = SecurityUser.getUser();
+        if (!user.getUserType().equals("operation") && !user.getUserType().equals("agent") && !user.getUserType().equals("merchant")) {
+            return Result.fail(9999, "not authorized");
+        }
+        JSubManager.verify(id, state);
+        return new Result();
+    }
+
 
     @PutMapping
     @Operation(summary = "修改")
@@ -147,19 +163,6 @@ public class JSubController {
     public void export(@Parameter(hidden = true) @RequestParam Map<String, Object> params, HttpServletResponse response) throws Exception {
         List<JSubDTO> list = jSubService.list(params);
         ExcelUtils.exportExcelToTarget(response, null, "j_merchant", list, JSubExcel.class);
-    }
-
-    // 审核
-    @GetMapping("verify")
-    @Operation(summary = "导出")
-    @LogOperation("导出")
-    @PreAuthorize("hasAuthority('zorg:jsub:update')")
-    public Result verify(@RequestParam("id") Long id) throws Exception {
-        JSubEntity update = new JSubEntity();
-        update.setId(id);
-        update.setState("04");
-        jSubService.updateById(update);
-        return new Result();
     }
 
 }

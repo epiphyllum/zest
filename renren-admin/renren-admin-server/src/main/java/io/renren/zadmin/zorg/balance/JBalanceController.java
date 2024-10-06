@@ -49,6 +49,11 @@ public class JBalanceController {
     })
     @PreAuthorize("hasAuthority('zorg:jbalance:page')")
     public Result<PageData<JBalanceDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
+        // 商户查:
+        // 子商户查
+        // 代理查
+        // 机构查
+
         PageData<JBalanceDTO> page = jBalanceService.page(params);
         return new Result<PageData<JBalanceDTO>>().ok(page);
     }

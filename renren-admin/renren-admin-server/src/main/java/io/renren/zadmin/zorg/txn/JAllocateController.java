@@ -4,6 +4,7 @@ import io.renren.commons.log.annotation.LogOperation;
 import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.constant.Constant;
+import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.page.PageData;
 import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.commons.tools.utils.Result;
@@ -82,36 +83,9 @@ public class JAllocateController {
     @LogOperation("保存")
     @PreAuthorize("hasAuthority('zorg:jallocate:save')")
     public Result save(@RequestBody JAllocateDTO dto) {
-        // 商户才能调拨资金
-        UserDetail user = SecurityUser.getUser();
-        if (!"merchant".equals(user.getUserType()) && !"operation".equals(user.getUserType())) {
-            return Result.fail(9999, "not authorized, you are " + user.getUserType());
-        }
-        //效验数据
-        ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
-
-        // 填充代理 + 商户名
-        JMerchantEntity merchant = jMerchantDao.selectById(dto.getMerchantId());
-        dto.setAgentId(merchant.getAgentId());
-        dto.setAgentName(merchant.getAgentName());
-        dto.setMerchantName(merchant.getCusname());
-
-        // 非api操作
-        dto.setApi(0);
-
-        // 子商户-商户资金调度， 需要子商户信息
-        String type = dto.getType();
-        if (type.equals("s2m") || type.equals("m2s")) {
-            JSubEntity subEntity = jSubDao.selectById(dto.getSubId());
-            dto.setSubName(subEntity.getCusname());
-        }
-        JAllocateEntity jAllocateEntity = ConvertUtils.sourceToTarget(dto, JAllocateEntity.class);
-
-        // 资金调度统一入口
-        jAllocateManager.handleAllocation(jAllocateEntity, merchant);
+        jAllocateManager.handleAllocation(dto);
         return new Result();
     }
-
 
     @PutMapping
     @Operation(summary = "修改")
@@ -144,4 +118,55 @@ public class JAllocateController {
         ExcelUtils.exportExcelToTarget(response, null, "j_allocate", list, JAllocateExcel.class);
     }
 
+    /**
+     * 单独放权限
+     */
+    @PostMapping("i2v")
+    @Operation(summary = "入金转VA")
+    @LogOperation("入金转VA")
+    @PreAuthorize("hasAuthority('zorg:jallocate:i2v')")
+    public Result i2v(@RequestBody JAllocateDTO dto) {
+        dto.setType("i2v");
+        jAllocateManager.handleAllocation(dto);
+        return new Result();
+    }
+
+    /**
+     * 单独放权限
+     */
+    @PostMapping("v2i")
+    @Operation(summary = "VA转入金")
+    @LogOperation("入金转VA")
+    @PreAuthorize("hasAuthority('zorg:jallocate:v2i')")
+    public Result v2i(@RequestBody JAllocateDTO dto) {
+        dto.setType("v2i");
+        jAllocateManager.handleAllocation(dto);
+        return new Result();
+    }
+
+    /**
+     * 单独放权限
+     */
+    @PostMapping("转入子商户")
+    @Operation(summary = "转入子商户")
+    @LogOperation("转入子商户")
+    @PreAuthorize("hasAuthority('zorg:jallocate:m2s')")
+    public Result m2s(@RequestBody JAllocateDTO dto) {
+        dto.setType("m2s");
+        jAllocateManager.handleAllocation(dto);
+        return new Result();
+    }
+
+    /**
+     * 单独放权限
+     */
+    @PostMapping("转出子商户")
+    @Operation(summary = "转出子商户")
+    @LogOperation("转出子商户")
+    @PreAuthorize("hasAuthority('zorg:jallocate:s2m')")
+    public Result s2m(@RequestBody JAllocateDTO dto) {
+        dto.setType("s2m");
+        jAllocateManager.handleAllocation(dto);
+        return new Result();
+    }
 }

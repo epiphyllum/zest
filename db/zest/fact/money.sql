@@ -37,6 +37,9 @@ create table j_money
     payeraccountcountry varchar(3) comment '打款方国家',      --
     ps                  varchar(200) comment '附言',          --
 
+    -- state
+    state               varchar(2) comment '通联状态',
+
     -- 匹配情况
     `status`            int         not null default 0 comment '2: 匹配失败, 1: 匹配成功, 0: 待匹配',
     notify_status       int         not null default 0 comment '',

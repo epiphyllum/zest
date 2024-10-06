@@ -1,12 +1,17 @@
 package io.renren.zadmin.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.renren.commons.mybatis.service.impl.CrudServiceImpl;
 import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
+import io.renren.commons.tools.constant.Constant;
+import io.renren.commons.tools.page.PageData;
 import io.renren.zadmin.ZestConstant;
 import io.renren.zadmin.dao.JMoneyDao;
 import io.renren.zadmin.dto.JMoneyDTO;
+import io.renren.zadmin.dto.JMoneyDTO;
+import io.renren.zadmin.entity.JMoneyEntity;
 import io.renren.zadmin.entity.JMoneyEntity;
 import io.renren.zadmin.service.JMoneyService;
 import org.apache.commons.lang3.StringUtils;
@@ -22,6 +27,15 @@ import java.util.Map;
  */
 @Service
 public class JMoneyServiceImpl extends CrudServiceImpl<JMoneyDao, JMoneyEntity, JMoneyDTO> implements JMoneyService {
+
+    @Override
+    public PageData<JMoneyDTO> page(Map<String, Object> params) {
+        IPage<JMoneyEntity> page = baseDao.selectPage(
+                getPage(params, Constant.CREATE_DATE, false),
+                applyFilter(params)
+        );
+        return getPageData(page, JMoneyDTO.class);
+    }
 
     @Override
     public QueryWrapper<JMoneyEntity> getWrapper(Map<String, Object> params) {

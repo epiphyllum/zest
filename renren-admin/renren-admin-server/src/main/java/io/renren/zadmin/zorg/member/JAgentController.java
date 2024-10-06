@@ -33,6 +33,7 @@ import java.util.Map;
 
 /**
  * 代理管理
+ *
  * @author Mark sunlightcs@gmail.com
  * @since 3.0 2024-08-16
  */
@@ -127,7 +128,6 @@ public class JAgentController {
     @PreAuthorize("hasAuthority('zorg:jagent:export')")
     public void export(@Parameter(hidden = true) @RequestParam Map<String, Object> params, HttpServletResponse response) throws Exception {
         List<JAgentDTO> list = jAgentService.list(params);
-
         ExcelUtils.exportExcelToTarget(response, null, "j_agent", list, JAgentExcel.class);
     }
 

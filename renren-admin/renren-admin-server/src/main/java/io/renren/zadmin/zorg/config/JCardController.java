@@ -16,6 +16,7 @@ import io.renren.commons.tools.validator.ValidatorUtils;
 import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
+import io.renren.manager.JCardManager;
 import io.renren.zadmin.dao.JCardDao;
 import io.renren.zadmin.dto.JCardDTO;
 import io.renren.zadmin.entity.JBalanceEntity;
@@ -65,17 +66,9 @@ public class JCardController {
     @Resource
     private JCardService jCardService;
     @Resource
-    private ZinFileService zinFileService;
-    @Resource
-    private ZinCardApplyService zinCardApplyService;
+    private JCardManager jCardManager;
     @Resource
     private JCardDao jCardDao;
-    @Resource
-    private Ledger ledger;
-    @Resource
-    private TransactionTemplate tx;
-    @Resource
-    private ApplicationEventPublisher publisher;
 
     @GetMapping("page")
     @Operation(summary = "分页")
@@ -105,16 +98,18 @@ public class JCardController {
     @PreAuthorize("hasAuthority('zorg:jcard:save')")
     public Result save(@RequestBody JCardDTO dto) {
         UserDetail user = SecurityUser.getUser();
-        if (!user.getUserType().equals("operation") && !user.getUserType().equals("agent") && !user.getUserType().equals("merchant")) {
+        if (!user.getUserType().equals("operation") &&
+                !user.getUserType().equals("agent") &&
+                !user.getUserType().equals("merchant")
+        ) {
             return Result.fail(9999, "not authorized, you are " + user.getUserType());
         }
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
         dto.setApi(0);
 
-        tx.executeWithoutResult(status -> {
-            jCardService.save(dto);
-        });
+        JCardEntity entity = ConvertUtils.sourceToTarget(dto, JCardEntity.class);
+        jCardManager.save(entity);
         return new Result();
     }
 
@@ -163,17 +158,7 @@ public class JCardController {
     @PreAuthorize("hasAuthority('zorg:jcard:update')")
     public Result submit(@RequestParam("id") Long id) {
         JCardEntity jCardEntity = jCardDao.selectById(id);
-
-        this.uploadFiles(jCardEntity);
-        TCardSubApplyRequest request = ConvertUtils.sourceToTarget(jCardEntity, TCardSubApplyRequest.class);
-        request.setMeraplid(jCardEntity.getId().toString());
-        TCardSubApplyResponse response = zinCardApplyService.cardSubApply(request);
-
-        // 更新applyid
-        JCardEntity update = new JCardEntity();
-        update.setId(jCardEntity.getId());
-        update.setApplyid(response.getApplyid());
-        jCardDao.updateById(update);
+        jCardManager.submit(jCardEntity);
         return Result.ok;
     }
 
@@ -183,80 +168,8 @@ public class JCardController {
     @PreAuthorize("hasAuthority('zorg:jcard:update')")
     public Result query(@RequestParam("id") Long id) {
         JCardEntity jCardEntity = jCardDao.selectById(id);
-        TCardApplyQuery query = new TCardApplyQuery();
-        query.setMeraplid(jCardEntity.getId().toString());
-        TCardApplyResponse response = zinCardApplyService.cardApplyQuery(query);
-
-        // 准备待更新字段
-        JCardEntity update = new JCardEntity();
-        update.setId(jCardEntity.getId());
-        update.setState(response.getState());
-        update.setFeecurrency(response.getFeecurrency());
-        update.setFee(response.getFee());
-        update.setCardno(response.getCardno());
-
-        // 开卡成功了
-        if (response.getState().equals(ZinConstant.CARD_APPLY_SUCCESS)) {
-            jCardDao.updateById(update);
-            if (jCardEntity.getApi().equals(1)) {
-                publisher.publishEvent(new CardApplyNotifyEvent(this, jCardEntity.getId()));
-            }
-            return Result.ok;
-        }
-
-
-        // 从非失败  -> 失败,  处理退款
-        String prevState = jCardEntity.getState();
-        String nextState = response.getState();
-        if (!(prevState.equals(ZinConstant.CARD_APPLY_VERIFY_FAIL) ||
-                prevState.equals(ZinConstant.CARD_APPLY_FAIL) ||
-                prevState.equals(ZinConstant.CARD_APPLY_CLOSE)
-        ) && (nextState.equals(ZinConstant.CARD_APPLY_VERIFY_FAIL) ||
-                prevState.equals(ZinConstant.CARD_APPLY_FAIL) ||
-                prevState.equals(ZinConstant.CARD_APPLY_CLOSE))
-        ) {
-            tx.executeWithoutResult(status -> {
-                jCardDao.updateById(update);
-                ledger.ledgeOpenCardUnFreeze(jCardEntity);
-            });
-            // 通知商户
-            if (jCardEntity.getApi().equals(1)) {
-                publisher.publishEvent(new CardApplyNotifyEvent(this, jCardEntity.getId()));
-            }
-        } else {
-            jCardDao.updateById(update);
-        }
-
+        jCardManager.query(jCardEntity);
         return Result.ok;
-    }
-
-    private void uploadFiles(JCardEntity cardEntity) {
-        // 拿到所有文件fid
-        String photofront = cardEntity.getPhotofront();
-        String photoback = cardEntity.getPhotoback();
-        String photofront2 = cardEntity.getPhotofront2();
-        String photoback2 = cardEntity.getPhotoback2();
-
-        List<String> fids = List.of(photofront, photoback, photofront2, photoback2);
-        Map<String, CompletableFuture<String>> jobs = new HashMap<>();
-        for (String fid : fids) {
-            if (StringUtils.isBlank(fid)) {
-                continue;
-            }
-            jobs.put(fid, CompletableFuture.supplyAsync(() -> {
-                return zinFileService.upload(fid);
-            }));
-        }
-        jobs.forEach((j, f) -> {
-            log.info("wait {}...", j);
-            try {
-                f.get();
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new RenException("can not upload file:" + j);
-            }
-        });
-        log.info("文件上传完毕, 开始请求创建商户...");
     }
 
 }

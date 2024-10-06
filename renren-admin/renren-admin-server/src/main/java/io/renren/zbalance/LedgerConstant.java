@@ -3,6 +3,8 @@ package io.renren.zbalance;
 public class LedgerConstant {
     // 原始凭证(100):  收到商户来账 100AUD
     public static final int IN_MONEY = 10001;            // 1. 记账商户账户 +100AUD
+
+    // 原始凭证(200):  换汇
     public static final int EXCHANGE_FREEZE = 20000;
     public static final int EXCHANGE_UN_FREEZE = 20001;
     public static final int EXCHANGE_CONFIRM = 20002;        // 2. 记账商户账户  -100AUD
@@ -17,8 +19,8 @@ public class LedgerConstant {
     // 原始凭证(301): v2i:
     public static final int V2I_OUT = 30101;             // 1. 商户VA -94
     public static final int V2I_IN = 30102;              // 4. 入金户 +100
-    public static final int V2I_OUT_DEPOSIT = 30103;     // 2. 商户保证金预扣账户  -5
-    public static final int V2I_OUT_CHARGE_FEE = 30104;  // 3. 商户手续费预扣账户  -1
+    public static final int V2I_OUT_CHARGE_FEE = 30103;  // 3. 商户手续费预扣账户  -1
+    public static final int V2I_OUT_DEPOSIT = 30104;     // 2. 商户保证金预扣账户  : 保证金不退
     // 原始凭证(400): m2s
     public static final int M2S_IN = 40001;              // 1. 商户VA   -100HKD
     public static final int M2S_OUT = 40002;             // 2. 子商户VA +100HKD
@@ -37,7 +39,6 @@ public class LedgerConstant {
     public static final int CARD_WITHDRAW_FREEZE = 50100;   // 1. 子商户卡资金账户 -100HKD
     public static final int CARD_WITHDRAW_UN_FREEZE = 50101;   // 1. 子商户卡资金账户 -100HKD
     public static final int CARD_WITHDRAW_CONFIRM = 50102;   // 1. 子商户卡资金账户 -100HKD
-    public static final int CARD_WITHDRAW_OUT = 50103;   // 1. 子商户卡资金账户 -100HKD
     public static final int CARD_WITHDRAW_IN = 50104;    // 2. 子商户VA       +100HKD
 
 
@@ -45,8 +46,7 @@ public class LedgerConstant {
     public static final int CARD_OPEN_FREEZE = 60100;    // 2. 子商户费用账户  +100HKD
     public static final int CARD_OPEN_UN_FREEZE = 60101;    // 2. 子商户费用账户  +100HKD
     public static final int CARD_OPEN_CONFIRM = 60102;    // 2. 子商户费用账户  +100HKD
-    public static final int CARD_OPEN_FEE_OUT = 60101;   // 1. 子商户VA户 -100HKD
-    public static final int CARD_OPEN_FEE_IN = 60102;    // 2. 子商户费用账户  +100HKD
+    public static final int CARD_OPEN_FEE_IN = 60103;    // 2. 子商户费用账户  +100HKD
 
 
 }

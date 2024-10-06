@@ -16,7 +16,7 @@ public class TExchangeStateNotify {
     private String stlccy;        // 结算币种
 
     private BigDecimal fee;       // 手续费
-    private BigDecimal feeccy;    // 手续费
+    private String feeccy;    // 手续费
     private BigDecimal fxrate;    // 汇率
 
     private String ps;            // 附言

@@ -1,12 +1,17 @@
 package io.renren.zadmin.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.renren.commons.mybatis.service.impl.CrudServiceImpl;
 import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
+import io.renren.commons.tools.constant.Constant;
+import io.renren.commons.tools.page.PageData;
 import io.renren.service.SysDeptService;
 import io.renren.zadmin.dao.JLogDao;
 import io.renren.zadmin.dto.JLogDTO;
+import io.renren.zadmin.dto.JLogDTO;
+import io.renren.zadmin.entity.JLogEntity;
 import io.renren.zadmin.entity.JLogEntity;
 import io.renren.zadmin.service.JLogService;
 import jakarta.annotation.Resource;
@@ -24,6 +29,16 @@ import java.util.Map;
  */
 @Service
 public class JLogServiceImpl extends CrudServiceImpl<JLogDao, JLogEntity, JLogDTO> implements JLogService {
+
+
+    @Override
+    public PageData<JLogDTO> page(Map<String, Object> params) {
+        IPage<JLogEntity> page = baseDao.selectPage(
+                getPage(params, Constant.CREATE_DATE, false),
+                applyFilter(params)
+        );
+        return getPageData(page, JLogDTO.class);
+    }
 
     @Resource
     private SysDeptService sysDeptService;

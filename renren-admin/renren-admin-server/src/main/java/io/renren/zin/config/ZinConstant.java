@@ -5,6 +5,33 @@ import java.util.Map;
 
 public class ZinConstant {
 
+    // 通用状态管理
+    public static final int STATE_PROCESSING = 0; // 处理中
+    public static final int STATE_MANUAL = 1;     // 需要介入
+    public static final int STATE_SUCCESS = 2;    // 成功
+    public static final int STATE_FAIL = 3;       // 失败
+
+    // 支付申请单状态
+    public static final Map<String, Integer> payApplyStateMap = new HashMap<>() {
+        {
+            // 处理中
+            put("01", STATE_PROCESSING);  // 处理中提交申报明细成功后的状态，此时需要运营人员初审通过。
+            put("05", STATE_PROCESSING);  // 交易处理渠道处理中间过程。
+            put("16", STATE_PROCESSING);  // 初审通过后的状态，此时需要运营人员复审通过。
+            put("12", STATE_PROCESSING);  // 入金待收款环节。
+            put("23", STATE_PROCESSING);  // 入金已退款
+            put("38", STATE_PROCESSING);  // 待补充材料
+            // 需要操作
+            put("13", STATE_MANUAL);      // 待确认提交申请单后，未确认。
+            // 终态成功
+            put("06", STATE_SUCCESS);     // 处理成功申请单全流程成功结束。
+            // 终态失败
+            put("02", STATE_FAIL);        // 审核不通过通联方运营人员审核申请单不通过。
+            put("07", STATE_FAIL);        // 处理失败申请单处理失败，具体原因根据提示了解。
+            put("11", STATE_FAIL);        // 交易已关闭申请单流程中登录商户平台手动关闭，或由运营人员手动关闭申请单。
+        }
+    };
+
     // 卡申请单状态
     public static final String CARD_APPLY_NEW = "00";
     public static final String CARD_APPLY_TO_VERIFY = "01";

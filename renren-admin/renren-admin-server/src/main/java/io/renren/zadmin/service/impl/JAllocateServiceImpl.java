@@ -1,13 +1,18 @@
 package io.renren.zadmin.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.renren.commons.mybatis.service.impl.CrudServiceImpl;
 import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
+import io.renren.commons.tools.constant.Constant;
 import io.renren.commons.tools.exception.RenException;
+import io.renren.commons.tools.page.PageData;
 import io.renren.zadmin.ZestConstant;
 import io.renren.zadmin.dao.JAllocateDao;
 import io.renren.zadmin.dto.JAllocateDTO;
+import io.renren.zadmin.dto.JAllocateDTO;
+import io.renren.zadmin.entity.JAllocateEntity;
 import io.renren.zadmin.entity.JAllocateEntity;
 import io.renren.zadmin.service.JAllocateService;
 import org.apache.commons.lang3.StringUtils;
@@ -23,6 +28,15 @@ import java.util.Map;
  */
 @Service
 public class JAllocateServiceImpl extends CrudServiceImpl<JAllocateDao, JAllocateEntity, JAllocateDTO> implements JAllocateService {
+
+    @Override
+    public PageData<JAllocateDTO> page(Map<String, Object> params) {
+        IPage<JAllocateEntity> page = baseDao.selectPage(
+                getPage(params, Constant.CREATE_DATE, false),
+                applyFilter(params)
+        );
+        return getPageData(page, JAllocateDTO.class);
+    }
 
     @Override
     public QueryWrapper<JAllocateEntity> getWrapper(Map<String, Object> params) {
