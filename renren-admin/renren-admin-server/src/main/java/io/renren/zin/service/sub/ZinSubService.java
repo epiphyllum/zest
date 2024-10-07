@@ -13,8 +13,6 @@ import static io.renren.zin.config.CommonUtils.newRequestId;
 public class ZinSubService {
     @Resource
     private ZinRequester requester;
-    @Resource
-    SubNotify subNotify;
 
     // 创建通联子商户: 5000
     public TSubCreateResponse create(TSubCreateRequest tSubCreateRequest) {
@@ -28,8 +26,5 @@ public class ZinSubService {
         return response;
     }
 
-    // 子商户创建审核通知: 5002
-    public void merchantStatusNotify(TSubStatusNotify notify) {
-        subNotify.handle(notify);
-    }
+
 }

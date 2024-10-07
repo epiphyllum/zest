@@ -57,18 +57,8 @@ public class JBalanceServiceImpl extends CrudServiceImpl<JBalanceDao, JBalanceEn
         QueryWrapper<JBalanceEntity> wrapper = new QueryWrapper<>();
 
         String ownerId = (String) params.get("ownerId");
-        if (ownerId == null) {
-            UserDetail user = SecurityUser.getUser();
-            ownerId = user.getDeptId().toString();
-        }
-
-        // 可查看所有子部门的数据
         if (StringUtils.isNotBlank(ownerId)) {
-            List<Long> subDeptIdList = sysDeptService.getSubDeptIdList(Long.parseLong(ownerId));
-            for (Long aLong : subDeptIdList) {
-                System.out.println(aLong);
-            }
-            wrapper.in("owner_id", subDeptIdList);
+            wrapper.eq("owner_id", Long.parseLong(ownerId));
         }
 
         String ownerType = (String) params.get("ownerType");

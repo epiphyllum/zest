@@ -115,7 +115,7 @@ public class JMerchantManager {
         JBalanceEntity jBalanceEntity = new JBalanceEntity();
         jBalanceEntity.setOwnerId(entity.getId());
         jBalanceEntity.setOwnerName(entity.getCusname());
-        jBalanceEntity.setOwnerType("merchant");
+        jBalanceEntity.setOwnerType(ZestConstant.USER_TYPE_MERCHANT);
         jBalanceEntity.setBalanceType(type);
         jBalanceEntity.setCurrency(currency);
         jBalanceDao.insert(jBalanceEntity);

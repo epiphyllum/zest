@@ -10,11 +10,11 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 /**
-* j_balance
-*
-* @author epiphyllum epiphyllum.zhou@gmail.com
-* @since 3.0 2024-08-17
-*/
+ * j_balance
+ *
+ * @author epiphyllum epiphyllum.zhou@gmail.com
+ * @since 3.0 2024-08-17
+ */
 @Data
 @Schema(description = "j_balance")
 public class JBalanceDTO implements Serializable {
@@ -43,10 +43,37 @@ public class JBalanceDTO implements Serializable {
     private String balanceType;
     @Schema(description = "币种")
     private String currency;
+
     @Schema(description = "余额")
     private BigDecimal balance;
     @Schema(description = "冻结额")
     private BigDecimal frozen;
+
+    /////////////////////////////////////////
+    // 商户四个管理账户
+    /////////////////////////////////////////
+    @Schema(description = "余额")
+    private BigDecimal balanceIn;
+    @Schema(description = "冻结额")
+    private BigDecimal frozenIn;
+
+    @Schema(description = "保证金")
+    private BigDecimal balanceDeposit;
+
+    @Schema(description = "充值手续费")
+    private BigDecimal balanceChargeFee;
+
+    @Schema(description = "交易费用")
+    private BigDecimal balanceTxnFee;
+    /////////////////////////////////////////
+    // 子商户管理账户
+    /////////////////////////////////////////
+    @Schema(description = "发卡汇总")
+    private BigDecimal balanceSubSum;
+
+    @Schema(description = "开卡费用")
+    private BigDecimal balanceSubFee;
+
     @Schema(description = "版本号")
     private Integer version;
 }

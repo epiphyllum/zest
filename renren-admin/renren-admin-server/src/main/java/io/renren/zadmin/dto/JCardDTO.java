@@ -152,4 +152,9 @@ public class JCardDTO implements Serializable {
     private String cardno; //           varchar(30) comment '卡号',              -- 	cardno	String	30	O	申请成功后返回
     @Schema(description = "state")
     private String state; //            varchar(2)  comment '卡申请状态',        --
+    @Schema(description = "cardState")
+    private String cardState; //            varchar(2)  comment '卡申请状态',        --
+
+    @Schema(description = "balance")
+    private BigDecimal balance; //            varchar(2)  comment '卡申请状态',        --
 }

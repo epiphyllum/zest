@@ -13,8 +13,6 @@ import static io.renren.zin.config.CommonUtils.newRequestId;
 public class ZinCardApplyService {
     @Resource
     private ZinRequester requester;
-    @Resource
-    private CardApplyNotify cardApplyNotify;
 
     // 主卡申请: 3000
     public TCardMainApplyResponse cardMainApply(TCardMainApplyRequest request) {
@@ -41,10 +39,6 @@ public class ZinCardApplyService {
         return requester.request(newRequestId(), "/gcpapi/card/vpaopen", request, TCardVpaApplyResponse.class);
     }
 
-    // 卡申请单状态通知: 3005
-    public void cardApplyNotify(TCardApplyNotify notify) {
-        cardApplyNotify.handle(notify);
-    }
 
     // 卡申请单查询:  3006
     public TCardApplyResponse cardApplyQuery(TCardApplyQuery query) {

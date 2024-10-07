@@ -102,4 +102,6 @@ public class JMcardEntity extends BaseEntity {
     private String feecurrency; //      varchar(3) comment '申请费用币种',       -- 	feecurrency	String	3	O
     private String cardno; //           varchar(30) comment '卡号',              -- 	cardno	String	30	O	申请成功后返回
     private String state; //            varchar(2)  comment '卡申请状态',        --
+    private String cardState; //            varchar(2)  comment '卡申请状态',        --
+    private BigDecimal balance; //            varchar(2)  comment '卡申请状态',        --
 }

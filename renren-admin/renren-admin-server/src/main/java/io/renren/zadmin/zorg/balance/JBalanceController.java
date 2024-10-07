@@ -1,7 +1,9 @@
 package io.renren.zadmin.zorg.balance;
 
 import io.renren.commons.log.annotation.LogOperation;
+import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.tools.constant.Constant;
+import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.page.PageData;
 import io.renren.commons.tools.utils.ExcelUtils;
 import io.renren.commons.tools.utils.Result;
@@ -10,6 +12,7 @@ import io.renren.commons.tools.validator.ValidatorUtils;
 import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
+import io.renren.zadmin.ZestConstant;
 import io.renren.zadmin.dto.JBalanceDTO;
 import io.renren.zadmin.excel.JBalanceExcel;
 import io.renren.zadmin.service.JBalanceService;
@@ -19,11 +22,16 @@ import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 /**
@@ -35,6 +43,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("zorg/jbalance")
 @Tag(name = "j_balance")
+@Slf4j
 public class JBalanceController {
     @Resource
     private JBalanceService jBalanceService;
@@ -49,12 +58,160 @@ public class JBalanceController {
     })
     @PreAuthorize("hasAuthority('zorg:jbalance:page')")
     public Result<PageData<JBalanceDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
-        // 商户查:
-        // 子商户查
-        // 代理查
-        // 机构查
-
+        params.put(Constant.LIMIT, "100");
+        params.put(Constant.PAGE, "1");
         PageData<JBalanceDTO> page = jBalanceService.page(params);
+        return new Result<PageData<JBalanceDTO>>().ok(page);
+    }
+
+    @GetMapping("page/merchant")
+    @Operation(summary = "分页")
+    @Parameters({
+            @Parameter(name = Constant.PAGE, description = "当前页码，从1开始", required = true),
+            @Parameter(name = Constant.LIMIT, description = "每页显示记录数", required = true),
+            @Parameter(name = Constant.ORDER_FIELD, description = "排序字段"),
+            @Parameter(name = Constant.ORDER, description = "排序方式，可选值(asc、desc)")
+    })
+    @PreAuthorize("hasAuthority('zorg:jbalance:page')")
+    public Result<PageData<JBalanceDTO>> pageMerchant(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
+
+        if (ZestConstant.isOperationOrAgent()) {
+            if (StringUtils.isBlank((String) params.get("ownerId"))) {
+                PageData<JBalanceDTO> page = new PageData<>();
+                page.setTotal(0);
+                page.setList(List.of());
+                return new Result<PageData<JBalanceDTO>>().ok(page);
+            }
+            log.info("page/merchant, operation/agent, ownerId: {}", params.get("ownerId"));
+        } else if (ZestConstant.isMerchant()) {
+            log.info("page/merchant, ownerId: {}", SecurityUser.getDeptId());
+            params.put("ownerId", SecurityUser.getDeptId().toString());
+        } else {
+            throw new RenException("invalid user");
+        }
+
+        params.put(Constant.LIMIT, "200");
+        params.put(Constant.PAGE, "1");
+        PageData<JBalanceDTO> page = jBalanceService.page(params);
+        Map<String, List<JBalanceDTO>> collectByCurrency = page.getList()
+                .stream()
+                .collect(Collectors.groupingBy(JBalanceDTO::getCurrency));
+
+        List<JBalanceDTO> newList = new ArrayList<>(15);
+        for (Map.Entry<String, List<JBalanceDTO>> entry : collectByCurrency.entrySet()) {
+            String currency = entry.getKey();
+            List<JBalanceDTO> dtoList = entry.getValue();
+
+            BigDecimal deposit = null;
+            BigDecimal in = null;
+            BigDecimal inFrozen = null;
+            BigDecimal chargeFee = null;
+            BigDecimal txnFee = null;
+            JBalanceDTO va = null;
+
+            String vaType = "VA_" + currency;
+            String inType = "IN_" + currency;
+            String depositType = "DEPOSIT_" + currency;
+            String chargeFeeType = "CHARGE_FEE_" + currency;
+            String txnFeeType = "TXN_FEE_" + currency;
+
+            for (JBalanceDTO dto : dtoList) {
+                log.info("check dto: {}-{}-{}-{}", dto.getBalance(), dto.getFrozen(), dto.getCurrency(), dto.getBalanceType());
+                if (dto.getBalanceType().equals(vaType)) {
+                    va = dto;
+                } else if (dto.getBalanceType().equals(inType)) {
+                    in = dto.getBalance();
+                    inFrozen = dto.getFrozen();
+                } else if (dto.getBalanceType().equals(depositType)) {
+                    deposit = dto.getBalance();
+                } else if (dto.getBalanceType().equals(chargeFeeType)) {
+                    chargeFee = dto.getBalance();
+                } else if (dto.getBalanceType().equals(txnFeeType)) {
+                    txnFee = dto.getBalance();
+                }
+            }
+            if (deposit == null || in == null || inFrozen == null || chargeFee == null || txnFee == null || va == null) {
+                log.info("deposit: {}, in: {}, inFrozen: {}, chargeFee: {}, txnFee: {}, va: {}", deposit, in, inFrozen, chargeFee, txnFee, va);
+                throw new RenException("internal logical error");
+            }
+            va.setBalanceIn(in);
+            va.setFrozenIn(inFrozen);
+            va.setBalanceDeposit(deposit);
+            va.setBalanceChargeFee(chargeFee);
+            va.setBalanceTxnFee(txnFee);
+            newList.add(va);
+        }
+        page.setList(newList);
+        page.setTotal(15);
+        return new Result<PageData<JBalanceDTO>>().ok(page);
+    }
+
+    @GetMapping("page/sub")
+    @Operation(summary = "分页")
+    @Parameters({
+            @Parameter(name = Constant.PAGE, description = "当前页码，从1开始", required = true),
+            @Parameter(name = Constant.LIMIT, description = "每页显示记录数", required = true),
+            @Parameter(name = Constant.ORDER_FIELD, description = "排序字段"),
+            @Parameter(name = Constant.ORDER, description = "排序方式，可选值(asc、desc)")
+    })
+    @PreAuthorize("hasAuthority('zorg:jbalance:page')")
+    public Result<PageData<JBalanceDTO>> pageSub(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
+
+        if (ZestConstant.isOperationOrAgentOrMerchant()) {
+            if (StringUtils.isBlank((String) params.get("ownerId"))) {
+                PageData<JBalanceDTO> page = new PageData<>();
+                page.setTotal(0);
+                page.setList(List.of());
+                return new Result<PageData<JBalanceDTO>>().ok(page);
+            }
+            log.info("page/merchant, operation/agent, ownerId: {}", params.get("ownerId"));
+        } else if (ZestConstant.isSub()) {
+            params.put("ownerId", SecurityUser.getDeptId().toString());
+        } else {
+            throw new RenException("invalid user");
+        }
+
+        params.put(Constant.LIMIT, "200");
+        params.put(Constant.PAGE, "1");
+        PageData<JBalanceDTO> page = jBalanceService.page(params);
+        Map<String, List<JBalanceDTO>> collectByCurrency = page.getList()
+                .stream()
+                .collect(Collectors.groupingBy(JBalanceDTO::getCurrency));
+
+        List<JBalanceDTO> newList = new ArrayList<>(15);
+        for (Map.Entry<String, List<JBalanceDTO>> entry : collectByCurrency.entrySet()) {
+            String currency = entry.getKey();
+            List<JBalanceDTO> dtoList = entry.getValue();
+
+            BigDecimal subSum = null;
+            BigDecimal subFee = null;
+            JBalanceDTO subVa = null;
+
+            String subVaType = "SUB_VA_" + currency;
+            String subSumType = "SUB_SUM_" + currency;
+            String subFeeType = "SUB_FEE_" + currency;
+
+            for (JBalanceDTO dto : dtoList) {
+                log.info("check dto: {}-{}-{}-{}", dto.getBalance(), dto.getFrozen(), dto.getCurrency(), dto.getBalanceType());
+                if (dto.getBalanceType().equals(subVaType)) {
+                    subVa = dto;
+                } else if (dto.getBalanceType().equals(subSumType)) {
+                    subSum = dto.getBalance();
+                } else if (dto.getBalanceType().equals(subFeeType)) {
+                    log.info("subFee: {}", dto);
+                    subFee = dto.getBalance();
+                }
+            }
+            if (subSum == null || subFee == null || subVa == null) {
+                log.error("subSum: {}, subFee: {}, subVa: {}", subSum, subFee, subVa);
+                throw new RenException("internal logical error");
+            }
+            subVa.setBalanceSubFee(subFee);
+            subVa.setBalanceSubSum(subSum);
+            newList.add(subVa);
+        }
+        page.setList(newList);
+        page.setTotal(15);
         return new Result<PageData<JBalanceDTO>>().ok(page);
     }
 

@@ -1,24 +1,9 @@
 package io.renren.zin.service.exchange;
 
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import io.renren.commons.tools.exception.RenException;
-import io.renren.commons.tools.utils.ConvertUtils;
-import io.renren.zadmin.dao.JExchangeDao;
-import io.renren.zadmin.dao.JMaccountDao;
-import io.renren.zadmin.dao.JMerchantDao;
-import io.renren.zadmin.dao.JMoneyDao;
-import io.renren.zadmin.entity.JExchangeEntity;
-import io.renren.zadmin.entity.JMerchantEntity;
-import io.renren.zapi.ApiService;
-import io.renren.zapi.service.exchange.dto.ExchangeStateNotify;
-import io.renren.zbalance.Ledger;
-import io.renren.zin.config.ZestConfig;
 import io.renren.zin.config.ZinRequester;
-import io.renren.zin.service.TResult;
 import io.renren.zin.service.exchange.dto.*;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import static io.renren.zin.config.CommonUtils.newRequestId;
 
@@ -26,9 +11,6 @@ import static io.renren.zin.config.CommonUtils.newRequestId;
 public class ZinExchangeService {
     @Resource
     private ZinRequester requester;
-    @Resource
-    private ExchangeNotify exchangeNotify;
-
 
     // 发起换汇: 2000
     public TExchangeResponse exchange(TExchangeRequest tExchangeRequest) {
@@ -50,8 +32,4 @@ public class ZinExchangeService {
         return requester.request(newRequestId(), "/gcpapi/apply/query", tExchangeQueryRequest, TExchangeQueryResponse.class);
     }
 
-    // 申请单状态通知: 2004
-    public void exchangeStateNotify(TExchangeStateNotify notify) {
-        exchangeNotify.exchangeStateNotify(notify);
-    }
 }

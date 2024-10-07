@@ -20,7 +20,7 @@ import java.util.List;
 
 @Service
 @Slf4j
-public class AccountManageNotify {
+public class ZinAccountManageNotifyService {
     @Resource
     private JMaccountDao jMaccountDao;
     @Resource
@@ -32,7 +32,8 @@ public class AccountManageNotify {
     @Resource
     private ApplicationEventPublisher publisher;
 
-    public void handle(TMoneyInNotify notify) {
+    // 入账通知: 6003:
+    public void moneyInNotify(TMoneyInNotify notify) {
         // 直接去匹配申请单
         if (notify.getApplyid() != null) {
             JMoneyEntity jMoneyEntity = jMoneyDao.selectOne(Wrappers.<JMoneyEntity>lambdaQuery()

@@ -32,6 +32,26 @@ public class ZinConstant {
         }
     };
 
+    // 主体类型:
+    public static final String BELONG_TYPE_EMPLOYEE = "1";  // 员工
+    public static final String BELONG_TYPE_COOP = "2";      // 合作企业
+
+    // 卡产品类型
+    public static final String CARD_PRODUCT_ALL = "001001";    // 通华金服VISA公务卡 -- 虚实同发
+    public static final String CARD_PRODUCT_VIRTUAL = " 001201";    // 通华金服VISA虚拟卡 -- 虚拟卡
+
+    // 卡类型
+    public static final String CARD_TYPE_VIRTUAL = "1";      // 虚拟卡
+    public static final String CARD_TYPE_BOTH = "4";         // 虚实同发
+    public static final Map<String, String> cardMap = new HashMap<>() {{
+        put(CARD_TYPE_VIRTUAL, CARD_PRODUCT_VIRTUAL);
+        put(CARD_TYPE_BOTH, CARD_PRODUCT_ALL);
+    }};
+
+    // 持卡人身份
+    public static final String CARD_HOLDER_TYPE_LEGAL = "1"; // 法人持有
+    public static final String CARD_HOLDER_TYPE_OTHER = "0"; // 其他管理员
+
     // 卡申请单状态
     public static final String CARD_APPLY_NEW = "00";
     public static final String CARD_APPLY_TO_VERIFY = "01";
@@ -58,18 +78,6 @@ public class ZinConstant {
     public static final String CARD_STATE_TO_MAKE = "12"; // 待制卡
     public static final String CARD_STATE_TO_DELIVER = "13"; // 待寄出
     public static final String CARD_STATE_TO_ACTIVATE = "14"; // 待激活
-
-    // 卡产品类型
-    public static final String CARD_PRODUCT_ALL = "001001";    // 通华金服VISA公务卡 -- 虚实同发
-    public static final String CARD_PRODUCT_VIRTUAL = " 001201";    // 通华金服VISA虚拟卡 -- 虚拟卡
-
-    // 卡类
-    public static final String CARD_TYPE_VIRTUAL = "1";  // 虚拟卡
-    public static final String CARD_TYPE_ALL = "4"; // 虚实同发
-    public static final Map<String, String> cardMap = new HashMap<>() {{
-        put(CARD_TYPE_VIRTUAL, CARD_PRODUCT_VIRTUAL);
-        put(CARD_TYPE_ALL, CARD_PRODUCT_ALL);
-    }};
 
     // 交易类型
     public static final String CP201 = "CP201"; // 汇款充值	外部资金汇入

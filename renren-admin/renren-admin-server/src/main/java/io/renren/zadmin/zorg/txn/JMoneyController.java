@@ -1,12 +1,10 @@
 package io.renren.zadmin.zorg.txn;
 
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.log.annotation.LogOperation;
 import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.constant.Constant;
-import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.page.PageData;
 import io.renren.commons.tools.utils.Result;
 import io.renren.commons.tools.utils.ExcelUtils;
@@ -15,10 +13,7 @@ import io.renren.commons.tools.validator.ValidatorUtils;
 import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
-import io.renren.dao.SysDeptDao;
-import io.renren.entity.SysDeptEntity;
 import io.renren.manager.JMoneyManager;
-import io.renren.zadmin.ZestConstant;
 import io.renren.zadmin.dao.JMaccountDao;
 import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.dao.JMoneyDao;
@@ -29,8 +24,7 @@ import io.renren.zadmin.entity.JMoneyEntity;
 import io.renren.zadmin.excel.JMoneyExcel;
 import io.renren.zadmin.service.JMoneyService;
 import io.renren.zin.config.CommonUtils;
-import io.renren.zin.service.accountmanage.AccountManageNotify;
-import io.renren.zin.service.accountmanage.ZinAccountManageService;
+import io.renren.zin.service.accountmanage.ZinAccountManageNotifyService;
 import io.renren.zin.service.file.ZinFileService;
 import io.renren.zin.service.umbrella.ZinUmbrellaService;
 import io.renren.zin.service.umbrella.dto.*;
@@ -46,10 +40,8 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 
 /**
@@ -70,7 +62,7 @@ public class JMoneyController {
     @Resource
     private JMaccountDao jMaccountDao;
     @Resource
-    private AccountManageNotify accountManageNotify;
+    private ZinAccountManageNotifyService accountManageNotify;
     @Resource
     private JMerchantDao jMerchantDao;
     @Resource

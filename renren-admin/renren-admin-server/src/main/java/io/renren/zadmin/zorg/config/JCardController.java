@@ -17,6 +17,7 @@ import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
 import io.renren.manager.JCardManager;
+import io.renren.zadmin.ZestConstant;
 import io.renren.zadmin.dao.JCardDao;
 import io.renren.zadmin.dto.JCardDTO;
 import io.renren.zadmin.entity.JBalanceEntity;
@@ -46,6 +47,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletResponse;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -97,13 +99,12 @@ public class JCardController {
     @LogOperation("保存")
     @PreAuthorize("hasAuthority('zorg:jcard:save')")
     public Result save(@RequestBody JCardDTO dto) {
-        UserDetail user = SecurityUser.getUser();
-        if (!user.getUserType().equals("operation") &&
-                !user.getUserType().equals("agent") &&
-                !user.getUserType().equals("merchant")
-        ) {
-            return Result.fail(9999, "not authorized, you are " + user.getUserType());
-        }
+
+//        UserDetail user = SecurityUser.getUser();
+//        if (!ZestConstant.isOperationOrAgentOrMerchant()) {
+//            return Result.fail(9999, "not authorized, you are " + user.getUserType());
+//        }
+
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
         dto.setApi(0);
@@ -118,10 +119,12 @@ public class JCardController {
     @LogOperation("修改")
     @PreAuthorize("hasAuthority('zorg:jcard:update')")
     public Result update(@RequestBody JCardDTO dto) {
-        UserDetail user = SecurityUser.getUser();
-        if (!user.getUserType().equals("operation") && !user.getUserType().equals("agent") && !user.getUserType().equals("merchant")) {
-            return Result.fail(9999, "not authorized");
-        }
+
+//        UserDetail user = SecurityUser.getUser();
+//        if (!ZestConstant.isOperationOrAgentOrMerchant()) {
+//            return Result.fail(9999, "not authorized");
+//        }
+
         //效验数据
         ValidatorUtils.validateEntity(dto, UpdateGroup.class, DefaultGroup.class);
         jCardService.update(dto);
@@ -133,10 +136,6 @@ public class JCardController {
     @LogOperation("删除")
     @PreAuthorize("hasAuthority('zorg:jcard:delete')")
     public Result delete(@RequestBody Long[] ids) {
-        UserDetail user = SecurityUser.getUser();
-        if (!user.getUserType().equals("operation") && !user.getUserType().equals("agent") && !user.getUserType().equals("merchant")) {
-            return Result.fail(9999, "not authorized");
-        }
         //效验数据
         AssertUtils.isArrayEmpty(ids, "id");
         jCardService.delete(ids);
@@ -172,4 +171,85 @@ public class JCardController {
         return Result.ok;
     }
 
+    @GetMapping("queryCard")
+    @Operation(summary = "查询通联卡")
+    @LogOperation("查询通联卡")
+    @PreAuthorize("hasAuthority('zorg:jcard:query')")
+    public Result queryCard(@RequestParam("id") Long id) {
+        JCardEntity jCardEntity = jCardDao.selectById(id);
+        jCardManager.queryCard(jCardEntity);
+        return Result.ok;
+    }
+
+    @GetMapping("cancelCard")
+    @Operation(summary = "销卡")
+    @LogOperation("销卡")
+    @PreAuthorize("hasAuthority('zorg:jcard:cancel')")
+    public Result cancelCard(@RequestParam("id") String id) {
+        jCardManager.runList(id, jCardManager::cancelCard);
+        return Result.ok;
+    }
+
+    @GetMapping("uncancelCard")
+    @Operation(summary = "取消销卡")
+    @LogOperation("取消销卡")
+    @PreAuthorize("hasAuthority('zorg:jcard:uncancel')")
+    public Result uncancelCard(@RequestParam("id") String id) {
+        jCardManager.runList(id, jCardManager::uncancelCard);
+        return Result.ok;
+    }
+
+    @GetMapping("freezeCard")
+    @Operation(summary = "止付")
+    @LogOperation("止付")
+    @PreAuthorize("hasAuthority('zorg:jcard:freeze')")
+    public Result freezeCard(@RequestParam("id") String id) {
+        jCardManager.runList(id, jCardManager::freezeCard);
+        return Result.ok;
+    }
+
+    @GetMapping("unfreezeCard")
+    @Operation(summary = "取消止付")
+    @LogOperation("取消止付")
+    @PreAuthorize("hasAuthority('zorg:jcard:unfreeze')")
+    public Result unfreezeCard(@RequestParam("id") String id) {
+        jCardManager.runList(id, jCardManager::unfreezeCard);
+        return Result.ok;
+    }
+
+    @GetMapping("lossCard")
+    @Operation(summary = "挂失")
+    @LogOperation("挂失")
+    @PreAuthorize("hasAuthority('zorg:jcard:loss')")
+    public Result lossCard(@RequestParam("id") String id) {
+        jCardManager.runList(id, jCardManager::lossCard);
+        return Result.ok;
+    }
+
+    @GetMapping("unlossCard")
+    @Operation(summary = "取消挂失")
+    @LogOperation("取消挂失")
+    @PreAuthorize("hasAuthority('zorg:jcard:unloss')")
+    public Result unlossCard(@RequestParam("id") String id) {
+        jCardManager.runList(id, jCardManager::uncancelCard);
+        return Result.ok;
+    }
+
+    @GetMapping("activateCard")
+    @Operation(summary = "激活")
+    @LogOperation("激活")
+    @PreAuthorize("hasAuthority('zorg:jcard:activate')")
+    public Result activateCard(@RequestParam("id") String id) {
+        jCardManager.runList(id, jCardManager::activateCard);
+        return Result.ok;
+    }
+
+    @GetMapping("balanceCard")
+    @Operation(summary = "卡余额")
+    @LogOperation("卡余额")
+    @PreAuthorize("hasAuthority('zorg:jcard:balance')")
+    public Result balanceCard(@RequestParam("id") String id) {
+        jCardManager.runList(id, jCardManager::balanceCard);
+        return Result.ok;
+    }
 }

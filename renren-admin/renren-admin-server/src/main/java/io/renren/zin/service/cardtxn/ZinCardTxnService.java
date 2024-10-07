@@ -13,7 +13,7 @@ public class ZinCardTxnService {
     @Resource
     private ZinRequester requester;
     @Resource
-    private CardTxnNotify cardTxnNotify;
+    private ZinCardTxnNotifyService zinCardTxnNotifyService;
 
     // 4000-授权交易明细查询
     public TAuthResponse authQuery(TAuthQuery query) {
@@ -25,9 +25,5 @@ public class ZinCardTxnService {
         return requester.request(newRequestId(), "/gcpapi/card/qrytrans", query, TAuthSettledResponse.class);
     }
 
-    // 4002-授权交易通知
-    public void authTxnNotify(TAuthTxnNotify notify) {
-        cardTxnNotify.handle(notify);
-    }
 
 }

@@ -24,7 +24,9 @@ public class JExchangeManager {
     @Resource
     private Ledger ledger;
 
-    // 提交到通联
+    /**
+     * 提交到通联
+     */
     public void submit(JExchangeEntity entity) {
         TExchangeRequest request = ConvertUtils.sourceToTarget(entity, TExchangeRequest.class);
         TExchangeResponse exchange = zinExchangeService.exchange(request);
@@ -36,7 +38,9 @@ public class JExchangeManager {
         this.query(entity);
     }
 
-    // 查询通联
+    /**
+     * 查询通联
+     */
     public void query(JExchangeEntity jExchangeEntity) {
 
         // 调用通联
@@ -52,7 +56,6 @@ public class JExchangeManager {
 
         String oldState = jExchangeEntity.getState();
         String newState = response.getState();
-
         // 状态从不成功到成功
         if (ZinConstant.payApplyStateMap.get(oldState) != ZinConstant.STATE_SUCCESS &&
                 ZinConstant.payApplyStateMap.get(newState) == ZinConstant.STATE_SUCCESS) {
@@ -71,7 +74,9 @@ public class JExchangeManager {
         }
     }
 
-    // 锁汇
+    /**
+     * 锁汇
+     */
     public void lock(JExchangeEntity jExchangeEntity) {
         TExchangeLockRequest request = new TExchangeLockRequest();
         request.setApplyid(jExchangeEntity.getApplyid());
@@ -82,7 +87,9 @@ public class JExchangeManager {
         jExchangeDao.updateById(update);
     }
 
-    // 换汇确认
+    /**
+     * 换汇确认
+     */
     public void confirm(JExchangeEntity jExchangeEntity) {
         TExchangeConfirmRequest request = new TExchangeConfirmRequest();
         request.setApplyid(jExchangeEntity.getApplyid());
@@ -94,7 +101,9 @@ public class JExchangeManager {
         jExchangeDao.updateById(update);
     }
 
-    // 取消换汇
+    /**
+     * 取消换汇
+     */
     public void cancel(JExchangeEntity entity) {
         tx.executeWithoutResult(status -> {
             jExchangeDao.update(null, Wrappers.<JExchangeEntity>lambdaUpdate()
@@ -105,7 +114,9 @@ public class JExchangeManager {
         });
     }
 
-    // 保存
+    /**
+     * 保存
+     */
     public void save(JExchangeEntity entity) {
         tx.executeWithoutResult(status -> {
             jExchangeDao.insert(entity);

@@ -1,5 +1,6 @@
 package io.renren.zadmin.service.impl;
 
+import com.alibaba.cloud.commons.lang.StringUtils;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -27,9 +28,9 @@ import io.renren.zbalance.Ledger;
 import io.renren.zbalance.LedgerUtil;
 import io.renren.zin.config.CardProductConfig;
 import io.renren.zin.config.ZestConfig;
+import io.renren.zin.config.ZinConstant;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -76,6 +77,22 @@ public class JCardServiceImpl extends CrudServiceImpl<JCardDao, JCardEntity, JCa
     public QueryWrapper<JCardEntity> getWrapper(Map<String, Object> params) {
         QueryWrapper<JCardEntity> wrapper = new QueryWrapper<>();
         CommonFilter.setFilterAll(wrapper, params);
+
+        String cardno = (String) params.get("cardno");
+        if (StringUtils.isNotBlank(cardno)) {
+            wrapper.eq("cardno", cardno);
+        }
+
+        String producttype = (String) params.get("producttype");
+        if (StringUtils.isNotBlank(producttype)) {
+            wrapper.eq("producttype", producttype);
+        }
+
+        String surname = (String) params.get("surname");
+        if (StringUtils.isNotBlank(surname)) {
+            wrapper.eq("surname", surname);
+        }
+
         return wrapper;
     }
 
@@ -111,7 +128,7 @@ public class JCardServiceImpl extends CrudServiceImpl<JCardDao, JCardEntity, JCa
                 .eq(JMcardEntity::getCurrency, dto.getCurrency())
                 .eq(JMcardEntity::getCardtype, dto.getCardtype())
                 .eq(JMcardEntity::getProducttype, dto.getProducttype())
-                .eq(JMcardEntity::getState, "04")
+                .eq(JMcardEntity::getCardState, ZinConstant.CARD_STATE_SUCCESS)
         );
         if (jMcardEntity == null) {
             throw new RenException("请先给商户开通主卡-" + dto.getCurrency() + "-" + dto.getCardtype() + "-" + dto.getProducttype());
@@ -119,7 +136,7 @@ public class JCardServiceImpl extends CrudServiceImpl<JCardDao, JCardEntity, JCa
         dto.setMaincardno(jMcardEntity.getCardno());
 
         // 如果子卡是主体是合作企业， 则通联接口要求必须填cusid
-        if (dto.getBelongtype().equals("2")) {
+        if (dto.getBelongtype().equals(ZinConstant.BELONG_TYPE_COOP)) {
             JMerchantEntity merchant = jMerchantDao.selectById(merchantId);
             dto.setCusid(merchant.getCusid());
         }

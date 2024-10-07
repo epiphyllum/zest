@@ -14,8 +14,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-public class ExchangeNotify {
-
+public class ZinExchangeNotifyService {
 
     @Resource
     private CP109 cp109;
@@ -29,7 +28,7 @@ public class ExchangeNotify {
     private CP462 cp462;
 
 
-    // 换汇通知
+    // 申请单状态通知: 2004
     public void exchangeStateNotify(TExchangeStateNotify notify) {
         String state = notify.getState();
 

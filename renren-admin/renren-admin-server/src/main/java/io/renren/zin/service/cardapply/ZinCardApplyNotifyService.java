@@ -6,7 +6,6 @@ import io.renren.zadmin.dao.JMcardDao;
 import io.renren.zadmin.entity.JCardEntity;
 import io.renren.zadmin.entity.JMcardEntity;
 import io.renren.zapi.notifyevent.CardApplyNotifyEvent;
-import io.renren.zapi.service.card.ApiCardService;
 import io.renren.zbalance.Ledger;
 import io.renren.zin.config.ZinConstant;
 import io.renren.zin.service.cardapply.dto.TCardApplyNotify;
@@ -16,14 +15,12 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.math.BigDecimal;
-
 /**
  * 用以在主卡/子卡申请、缴纳保证金、提取保证金、卡注销申请单状态变化时通知合作方。
  */
 @Service
 @Slf4j
-public class CardApplyNotify {
+public class ZinCardApplyNotifyService {
 
     @Resource
     private JCardDao jCardDao;
@@ -36,7 +33,8 @@ public class CardApplyNotify {
     @Resource
     private ApplicationEventPublisher publisher;
 
-    public void handle(TCardApplyNotify notify) {
+    // 卡申请单状态通知: 3005
+    public void cardApplyNotify(TCardApplyNotify notify) {
         String trxcode = notify.getTrxcode();
         if (trxcode.equals(ZinConstant.CP450)) {
             handleCP450(notify);

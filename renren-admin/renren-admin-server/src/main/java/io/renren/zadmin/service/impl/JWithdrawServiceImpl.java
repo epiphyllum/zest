@@ -1,5 +1,6 @@
 package io.renren.zadmin.service.impl;
 
+import com.alibaba.cloud.commons.lang.StringUtils;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.renren.commons.mybatis.service.impl.CrudServiceImpl;
@@ -35,6 +36,12 @@ public class JWithdrawServiceImpl extends CrudServiceImpl<JWithdrawDao, JWithdra
     public QueryWrapper<JWithdrawEntity> getWrapper(Map<String, Object> params) {
         QueryWrapper<JWithdrawEntity> wrapper = new QueryWrapper<>();
         CommonFilter.setFilterAll(wrapper, params);
+
+        String cardno = (String) params.get("cardno");
+        if (StringUtils.isNotBlank(cardno)) {
+            wrapper.eq("cardno", cardno);
+        }
+
         return wrapper;
     }
 

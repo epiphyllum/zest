@@ -14,7 +14,7 @@ public class ZinAccountManageService {
     @Resource
     private ZinRequester requester;
     @Resource
-    private AccountManageNotify accountManageNotify;
+    private ZinAccountManageNotifyService accountManageNotify;
 
     // 查询通联账户列表: 6004
     public TVaListResponse vaList(TVaListRequest request) {
@@ -44,8 +44,5 @@ public class ZinAccountManageService {
         return response;
     }
 
-    // 入账通知: 6003:
-    public void moneyInNotify(TMoneyInNotify notify) {
-        accountManageNotify.handle(notify);
-    }
+
 }
