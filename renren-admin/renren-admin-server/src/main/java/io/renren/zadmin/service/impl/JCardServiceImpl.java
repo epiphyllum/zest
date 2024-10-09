@@ -63,6 +63,8 @@ public class JCardServiceImpl extends CrudServiceImpl<JCardDao, JCardEntity, JCa
     private LedgerUtil ledgerUtil;
     @Resource
     private ZestConfig zestConfig;
+    @Resource
+    private CommonFilter commonFilter;
 
     @Override
     public PageData<JCardDTO> page(Map<String, Object> params) {
@@ -76,7 +78,7 @@ public class JCardServiceImpl extends CrudServiceImpl<JCardDao, JCardEntity, JCa
     @Override
     public QueryWrapper<JCardEntity> getWrapper(Map<String, Object> params) {
         QueryWrapper<JCardEntity> wrapper = new QueryWrapper<>();
-        CommonFilter.setFilterAll(wrapper, params);
+        commonFilter.setFilterAll(wrapper, params);
 
         String cardno = (String) params.get("cardno");
         if (StringUtils.isNotBlank(cardno)) {
@@ -91,6 +93,20 @@ public class JCardServiceImpl extends CrudServiceImpl<JCardDao, JCardEntity, JCa
         String surname = (String) params.get("surname");
         if (StringUtils.isNotBlank(surname)) {
             wrapper.eq("surname", surname);
+        }
+
+        String name = (String) params.get("name");
+        if (StringUtils.isNotBlank(name)) {
+            wrapper.eq("name", name);
+        }
+
+        String normal = (String) params.get("normal");
+        if (StringUtils.isNotBlank(normal)) {
+            // 卡片管理: 需要卡状态是新的, 发卡成功后，
+            wrapper.eq("state", ZinConstant.CARD_APPLY_SUCCESS);
+        } else {
+            // 发卡管理
+            // wrapper.ne("state", ZinConstant.CARD_APPLY_SUCCESS);
         }
 
         return wrapper;

@@ -48,15 +48,12 @@ public class JBalanceDTO implements Serializable {
     private BigDecimal balance;
     @Schema(description = "冻结额")
     private BigDecimal frozen;
+    @Schema(description = "版本号")
+    private Integer version;
 
     /////////////////////////////////////////
-    // 商户四个管理账户
+    // 商户3个管理账户
     /////////////////////////////////////////
-    @Schema(description = "余额")
-    private BigDecimal balanceIn;
-    @Schema(description = "冻结额")
-    private BigDecimal frozenIn;
-
     @Schema(description = "保证金")
     private BigDecimal balanceDeposit;
 
@@ -65,6 +62,7 @@ public class JBalanceDTO implements Serializable {
 
     @Schema(description = "交易费用")
     private BigDecimal balanceTxnFee;
+
     /////////////////////////////////////////
     // 子商户管理账户
     /////////////////////////////////////////
@@ -74,6 +72,10 @@ public class JBalanceDTO implements Serializable {
     @Schema(description = "开卡费用")
     private BigDecimal balanceSubFee;
 
-    @Schema(description = "版本号")
-    private Integer version;
+    /////////////////////////////////////////
+    // 附加查询条件
+    /////////////////////////////////////////
+    private Long agentId;
+    private Long merchantId;
+    private Long subId;
 }

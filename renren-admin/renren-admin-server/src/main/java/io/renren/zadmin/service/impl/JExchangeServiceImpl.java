@@ -13,7 +13,9 @@ import io.renren.zadmin.dao.JExchangeDao;
 import io.renren.zadmin.dto.JExchangeDTO;
 import io.renren.zadmin.entity.JExchangeEntity;
 import io.renren.zadmin.service.JExchangeService;
+import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,9 @@ import java.util.Map;
 @Service
 public class JExchangeServiceImpl extends CrudServiceImpl<JExchangeDao, JExchangeEntity, JExchangeDTO> implements JExchangeService {
 
+    @Resource
+    private CommonFilter commonFilter;
+
     @Override
     public PageData<JExchangeDTO> page(Map<String, Object> params) {
         IPage<JExchangeEntity> page = baseDao.selectPage(
@@ -40,16 +45,8 @@ public class JExchangeServiceImpl extends CrudServiceImpl<JExchangeDao, JExchang
     @Override
     public QueryWrapper<JExchangeEntity> getWrapper(Map<String, Object> params) {
         QueryWrapper<JExchangeEntity> wrapper = new QueryWrapper<>();
-        CommonFilter.setFilterMerchant(wrapper, params);
+        commonFilter.setFilterMerchant(wrapper, params);
         return wrapper;
     }
-
-//    @Override
-//    public void save(JExchangeDTO dto) {
-//        JExchangeEntity entity = ConvertUtils.sourceToTarget(dto, JExchangeEntity.class);
-//        insert(entity);
-//        //copy主键值到dto
-//        BeanUtils.copyProperties(entity, dto);
-//    }
 
 }

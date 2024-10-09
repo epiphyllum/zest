@@ -121,32 +121,6 @@ public class JAllocateController {
     /**
      * 单独放权限
      */
-    @PostMapping("i2v")
-    @Operation(summary = "入金转VA")
-    @LogOperation("入金转VA")
-    @PreAuthorize("hasAuthority('zorg:jallocate:i2v')")
-    public Result i2v(@RequestBody JAllocateDTO dto) {
-        dto.setType("i2v");
-        jAllocateManager.handleAllocation(dto);
-        return new Result();
-    }
-
-    /**
-     * 单独放权限
-     */
-    @PostMapping("v2i")
-    @Operation(summary = "VA转入金")
-    @LogOperation("入金转VA")
-    @PreAuthorize("hasAuthority('zorg:jallocate:v2i')")
-    public Result v2i(@RequestBody JAllocateDTO dto) {
-        dto.setType("v2i");
-        jAllocateManager.handleAllocation(dto);
-        return new Result();
-    }
-
-    /**
-     * 单独放权限
-     */
     @PostMapping("转入子商户")
     @Operation(summary = "转入子商户")
     @LogOperation("转入子商户")

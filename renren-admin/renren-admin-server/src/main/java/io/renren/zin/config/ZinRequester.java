@@ -6,9 +6,11 @@ import cn.hutool.crypto.asymmetric.RSA;
 import cn.hutool.crypto.asymmetric.Sign;
 import cn.hutool.crypto.asymmetric.SignAlgorithm;
 import cn.hutool.crypto.digest.DigestUtil;
+import cn.hutool.crypto.symmetric.AES;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.renren.commons.tools.exception.RenException;
+import io.renren.zin.security.AESUtil;
 import io.renren.zin.service.TResult;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
@@ -23,8 +25,13 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -44,6 +51,8 @@ public class ZinRequester {
     private String commonQueryParams;
     private Sign signer;
     private Sign verifier;
+
+
 
     @PostConstruct
     public void init() {
@@ -201,8 +210,26 @@ public class ZinRequester {
         }
     }
 
+    public String readBody(HttpServletRequest request) {
+        try {
+            InputStream inputStream = request.getInputStream();
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                byteArrayOutputStream.write(buffer, 0, bytesRead);
+            }
+            return byteArrayOutputStream.toString("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RenException("无法读取请求体");
+        } catch (IOException e) {
+            throw new RenException("无法读取请求体");
+        }
+    }
+
     // 验证通联回调
     public <T> T verify(HttpServletRequest request, String body, String auth, String date, Class<T> clazz) {
+        body = this.readBody(request);
         log.info("recv notification[{}]\nbody:[{}]\nauth:[{}]\ndate:[{}]", request.getRequestURI(), body, auth, date);
         String uri = request.getRequestURI();
         String params = request.getQueryString();

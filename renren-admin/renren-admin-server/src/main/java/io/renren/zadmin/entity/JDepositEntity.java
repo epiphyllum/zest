@@ -46,9 +46,13 @@ public class JDepositEntity extends BaseEntity {
 
     // 冗余添加的
     private String currency;
+    private BigDecimal txnAmount;
 
     // 记录返回
     private String applyid;
-    private Integer state;
+    private String state;
+    private String stateexplain;
+    private BigDecimal securityamount;
+    private BigDecimal fee;
 
 }

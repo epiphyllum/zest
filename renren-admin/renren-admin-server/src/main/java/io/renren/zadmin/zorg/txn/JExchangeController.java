@@ -5,6 +5,7 @@ import io.renren.commons.log.annotation.LogOperation;
 import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.constant.Constant;
+import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.page.PageData;
 import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.commons.tools.utils.Result;
@@ -17,6 +18,7 @@ import io.renren.commons.tools.validator.group.UpdateGroup;
 import io.renren.dao.SysDeptDao;
 import io.renren.entity.SysDeptEntity;
 import io.renren.manager.JExchangeManager;
+import io.renren.zadmin.ZestConstant;
 import io.renren.zadmin.dao.JExchangeDao;
 import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.dto.JExchangeDTO;
@@ -69,6 +71,10 @@ public class JExchangeController {
     })
     @PreAuthorize("hasAuthority('zorg:jexchange:page')")
     public Result<PageData<JExchangeDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
+        if (!ZestConstant.isOperationOrAgentOrMerchant()) {
+            throw new RenException("not permitted");
+        }
+
         PageData<JExchangeDTO> page = jExchangeService.page(params);
         return new Result<PageData<JExchangeDTO>>().ok(page);
     }
@@ -77,6 +83,9 @@ public class JExchangeController {
     @Operation(summary = "信息")
     @PreAuthorize("hasAuthority('zorg:jexchange:info')")
     public Result<JExchangeDTO> get(@PathVariable("id") Long id) {
+        if (!ZestConstant.isOperationOrAgentOrMerchant()) {
+            throw new RenException("not permitted");
+        }
         JExchangeDTO data = jExchangeService.get(id);
         return new Result<JExchangeDTO>().ok(data);
     }
@@ -86,15 +95,14 @@ public class JExchangeController {
     @LogOperation("保存")
     @PreAuthorize("hasAuthority('zorg:jexchange:save')")
     public Result save(@RequestBody JExchangeDTO dto) {
+        if (!ZestConstant.isOperationOrAgentOrMerchant()) {
+            throw new RenException("not permitted");
+        }
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
 
         // 商户才能发起换汇
         UserDetail user = SecurityUser.getUser();
-        if (!user.getUserType().equals("merchant") && !user.getUserType().equals("operation")) {
-            return Result.fail(9999, "not authorized, you are " + user.getUserType());
-        }
-
         // 填充字段
         Long merchantId = null;
         if (user.getUserType().equals("merchant")) {
@@ -121,6 +129,9 @@ public class JExchangeController {
     @LogOperation("修改")
     @PreAuthorize("hasAuthority('zorg:jexchange:update')")
     public Result update(@RequestBody JExchangeDTO dto) {
+        if (!ZestConstant.isOperationOrAgentOrMerchant()) {
+            throw new RenException("not permitted");
+        }
         //效验数据
         ValidatorUtils.validateEntity(dto, UpdateGroup.class, DefaultGroup.class);
         jExchangeService.update(dto);
@@ -132,6 +143,9 @@ public class JExchangeController {
     @LogOperation("删除")
     @PreAuthorize("hasAuthority('zorg:jexchange:delete')")
     public Result delete(@RequestBody Long[] ids) {
+        if (!ZestConstant.isOperationOrAgentOrMerchant()) {
+            throw new RenException("not permitted");
+        }
         //效验数据
         AssertUtils.isArrayEmpty(ids, "id");
         jExchangeService.delete(ids);
@@ -143,14 +157,20 @@ public class JExchangeController {
     @LogOperation("导出")
     @PreAuthorize("hasAuthority('zorg:jexchange:export')")
     public void export(@Parameter(hidden = true) @RequestParam Map<String, Object> params, HttpServletResponse response) throws Exception {
+        if (!ZestConstant.isOperationOrAgentOrMerchant()) {
+            throw new RenException("not permitted");
+        }
         List<JExchangeDTO> list = jExchangeService.list(params);
         ExcelUtils.exportExcelToTarget(response, null, "j_exchange", list, JExchangeExcel.class);
     }
 
     // 提交通联
     @GetMapping("submit")
-    @PreAuthorize("hasAuthority('zorg:jexchange:update')")
+    @PreAuthorize("hasAuthority('zorg:jexchange:submit')")
     public Result submit(@RequestParam("id") Long id) throws Exception {
+        if (!ZestConstant.isOperationOrAgentOrMerchant()) {
+            throw new RenException("not permitted");
+        }
         JExchangeEntity jExchangeEntity = jExchangeDao.selectById(id);
         jExchangeManager.submit(jExchangeEntity);
         return new Result();
@@ -158,8 +178,11 @@ public class JExchangeController {
 
     // 查询通联
     @GetMapping("query")
-    @PreAuthorize("hasAuthority('zorg:jexchange:update')")
+    @PreAuthorize("hasAuthority('zorg:jexchange:query')")
     public Result query(@RequestParam("id") Long id) throws Exception {
+        if (!ZestConstant.isOperationOrAgentOrMerchant()) {
+            throw new RenException("not permitted");
+        }
         JExchangeEntity jExchangeEntity = jExchangeDao.selectById(id);
         jExchangeManager.query(jExchangeEntity);
         return new Result();
@@ -167,8 +190,11 @@ public class JExchangeController {
 
     // 锁汇
     @GetMapping("lock")
-    @PreAuthorize("hasAuthority('zorg:jexchange:update')")
+    @PreAuthorize("hasAuthority('zorg:jexchange:lock')")
     public Result lock(@RequestParam("id") Long id) throws Exception {
+        if (!ZestConstant.isOperationOrAgentOrMerchant()) {
+            throw new RenException("not permitted");
+        }
         JExchangeEntity jExchangeEntity = jExchangeDao.selectById(id);
         jExchangeManager.lock(jExchangeEntity);
         return new Result();
@@ -176,8 +202,11 @@ public class JExchangeController {
 
     // 确认
     @GetMapping("confirm")
-    @PreAuthorize("hasAuthority('zorg:jexchange:update')")
+    @PreAuthorize("hasAuthority('zorg:jexchange:confirm')")
     public Result confirm(@RequestParam("id") Long id) throws Exception {
+        if (!ZestConstant.isOperationOrAgentOrMerchant()) {
+            throw new RenException("not permitted");
+        }
         JExchangeEntity jExchangeEntity = jExchangeDao.selectById(id);
         jExchangeManager.confirm(jExchangeEntity);
         return new Result();
@@ -185,8 +214,11 @@ public class JExchangeController {
 
     // 取消
     @GetMapping("cancel")
-    @PreAuthorize("hasAuthority('zorg:jexchange:update')")
+    @PreAuthorize("hasAuthority('zorg:jexchange:cancel')")
     public Result cancel(@RequestParam("id") Long id) throws Exception {
+        if (!ZestConstant.isOperationOrAgentOrMerchant()) {
+            throw new RenException("not permitted");
+        }
         JExchangeEntity jExchangeEntity = jExchangeDao.selectById(id);
         jExchangeManager.cancel(jExchangeEntity);
         return new Result();

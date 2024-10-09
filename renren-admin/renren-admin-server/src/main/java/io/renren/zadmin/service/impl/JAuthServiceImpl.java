@@ -14,6 +14,7 @@ import io.renren.zadmin.dto.JAuthDTO;
 import io.renren.zadmin.entity.JAuthEntity;
 import io.renren.zadmin.entity.JAuthEntity;
 import io.renren.zadmin.service.JAuthService;
+import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +29,9 @@ import java.util.Map;
 @Service
 public class JAuthServiceImpl extends CrudServiceImpl<JAuthDao, JAuthEntity, JAuthDTO> implements JAuthService {
 
+    @Resource
+    private CommonFilter commonFilter;
+
     @Override
     public PageData<JAuthDTO> page(Map<String, Object> params) {
         IPage<JAuthEntity> page = baseDao.selectPage(
@@ -40,7 +44,7 @@ public class JAuthServiceImpl extends CrudServiceImpl<JAuthDao, JAuthEntity, JAu
     @Override
     public QueryWrapper<JAuthEntity> getWrapper(Map<String, Object> params) {
         QueryWrapper<JAuthEntity> wrapper = new QueryWrapper<>();
-        CommonFilter.setFilterAll(wrapper, params);
+        commonFilter.setFilterAll(wrapper, params);
 
         String cardno = (String) params.get("cardno");
         wrapper.eq(StringUtils.isNotBlank(cardno), "cardno", cardno);

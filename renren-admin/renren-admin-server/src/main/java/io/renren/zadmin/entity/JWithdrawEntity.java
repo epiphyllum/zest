@@ -43,6 +43,8 @@ public class JWithdrawEntity extends BaseEntity {
     private BigDecimal amount;
     private String currency;
     private String applyid;
-    private Integer status;
+    private String state;
+    private String stateexplain;
+    private BigDecimal securityamount;
     private Integer version;
 }

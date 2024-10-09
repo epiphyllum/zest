@@ -39,37 +39,6 @@ public class JAllocateManager {
     @Resource
     public LedgerUtil ledgerUtil;
 
-    // 入金账户转va
-    public void handleI2v(JAllocateEntity entity, JMerchantEntity merchant) {
-        JBalanceEntity inAccount = ledgerUtil.getInAccount(entity.getMerchantId(), entity.getCurrency());
-        if (inAccount.getBalance().compareTo(entity.getAmount()) < 0) {
-            throw new RenException("入金账户余额不足, 入金账户:" + inAccount.getBalance());
-        }
-        tx.executeWithoutResult(status -> {
-            jAllocateDao.insert(entity);
-            ledger.ledgeI2v(entity, merchant);
-            JBalanceEntity after = ledgerUtil.getInAccount(entity.getMerchantId(), entity.getCurrency());
-            if (after.getBalance().compareTo(BigDecimal.ZERO) < 0) {
-                throw new RenException("入金账户余额不足");
-            }
-        });
-    }
-
-    // va转入金账户
-    public void handleV2i(JAllocateEntity entity, JMerchantEntity merchant) {
-        JBalanceEntity vaAccount = ledgerUtil.getVaAccount(entity.getMerchantId(), entity.getCurrency());
-        if (vaAccount.getBalance().compareTo(entity.getAmount()) < 0) {
-            throw new RenException("VA账户余额不足, VA账户:" + vaAccount.getBalance());
-        }
-        tx.executeWithoutResult(status -> {
-            jAllocateDao.insert(entity);
-            ledger.ledgeV2i(entity, merchant);
-            JBalanceEntity after = ledgerUtil.getSubVaAccount(entity.getMerchantId(), entity.getCurrency());
-            if (after.getBalance().compareTo(BigDecimal.ZERO) < 0) {
-                throw new RenException("商户VA账户余额不足");
-            }
-        });
-    }
 
     // 商户VA转子商户VA
     public void handleM2s(JAllocateEntity entity) {
@@ -150,12 +119,6 @@ public class JAllocateManager {
                 break;
             case "s2m":
                 handleS2m(entity);
-                break;
-            case "i2v":
-                handleI2v(entity, merchant);
-                break;
-            case "v2i":
-                handleV2i(entity, merchant);
                 break;
         }
     }

@@ -10,6 +10,7 @@ import io.renren.zadmin.dao.JWithdrawDao;
 import io.renren.zadmin.dto.JWithdrawDTO;
 import io.renren.zadmin.entity.JWithdrawEntity;
 import io.renren.zadmin.service.JWithdrawService;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -23,6 +24,9 @@ import java.util.Map;
 @Service
 public class JWithdrawServiceImpl extends CrudServiceImpl<JWithdrawDao, JWithdrawEntity, JWithdrawDTO> implements JWithdrawService {
 
+    @Resource
+    private CommonFilter commonFilter;
+
     @Override
     public PageData<JWithdrawDTO> page(Map<String, Object> params) {
         IPage<JWithdrawEntity> page = baseDao.selectPage(
@@ -35,7 +39,7 @@ public class JWithdrawServiceImpl extends CrudServiceImpl<JWithdrawDao, JWithdra
     @Override
     public QueryWrapper<JWithdrawEntity> getWrapper(Map<String, Object> params) {
         QueryWrapper<JWithdrawEntity> wrapper = new QueryWrapper<>();
-        CommonFilter.setFilterAll(wrapper, params);
+        commonFilter.setFilterAll(wrapper, params);
 
         String cardno = (String) params.get("cardno");
         if (StringUtils.isNotBlank(cardno)) {

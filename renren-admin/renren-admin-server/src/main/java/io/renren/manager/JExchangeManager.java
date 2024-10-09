@@ -99,6 +99,7 @@ public class JExchangeManager {
         update.setId(jExchangeEntity.getId());
         update.setState("CF");  // todo: 呆逼已确认
         jExchangeDao.updateById(update);
+        this.query(jExchangeEntity);
     }
 
     /**
@@ -118,6 +119,7 @@ public class JExchangeManager {
      * 保存
      */
     public void save(JExchangeEntity entity) {
+        entity.setState("NA");
         tx.executeWithoutResult(status -> {
             jExchangeDao.insert(entity);
             ledger.ledgeExchangeFreeze(entity);

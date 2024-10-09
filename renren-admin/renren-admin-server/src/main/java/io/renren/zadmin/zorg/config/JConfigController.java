@@ -1,4 +1,4 @@
-package io.renren.zadmin.zorg.balance;
+package io.renren.zadmin.zorg.config;
 
 import io.renren.commons.log.annotation.LogOperation;
 import io.renren.commons.tools.constant.Constant;
@@ -10,9 +10,9 @@ import io.renren.commons.tools.validator.ValidatorUtils;
 import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
-import io.renren.zadmin.dto.JLogDTO;
-import io.renren.zadmin.excel.JLogExcel;
-import io.renren.zadmin.service.JLogService;
+import io.renren.zadmin.dto.JConfigDTO;
+import io.renren.zadmin.excel.JConfigExcel;
+import io.renren.zadmin.service.JConfigService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -22,23 +22,22 @@ import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletResponse;
-
 import java.util.List;
 import java.util.Map;
 
 
 /**
- * j_log
- *
- * @author epiphyllum epiphyllum.zhou@gmail.com
- * @since 3.0 2024-08-17
- */
+* j_config
+*
+* @author epiphyllum epiphyllum.zhou@gmail.com
+* @since 3.0 2024-10-09
+*/
 @RestController
-@RequestMapping("zorg/jlog")
-@Tag(name = "j_log")
-public class JLogController {
+@RequestMapping("zorg/jconfig")
+@Tag(name = "j_config")
+public class JConfigController {
     @Resource
-    private JLogService jLogService;
+    private JConfigService jConfigService;
 
     @GetMapping("page")
     @Operation(summary = "分页")
@@ -48,71 +47,69 @@ public class JLogController {
             @Parameter(name = Constant.ORDER_FIELD, description = "排序字段"),
             @Parameter(name = Constant.ORDER, description = "排序方式，可选值(asc、desc)")
     })
-    @PreAuthorize(
-            "hasAuthority('zorg:jlog:page') || " +
-                    "hasAuthority('zorg:jlog-va:page') || " +
-                    "hasAuthority('zorg:jlog-deposit:page') || " +
-                    "hasAuthority('zorg:jlog-fee:page') ||" +
-                    "hasAuthority('zorg:jlog-txnfee:page') ||" +
-                    "hasAuthority('zorg:jlog-subva:page') ||" +
-                    "hasAuthority('zorg:jlog-subsum:page') ||" +
-                    "hasAuthority('zorg:jlog-subfee:page')"
-    )
-    public Result<PageData<JLogDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
-        params.put(Constant.ORDER_FIELD, "version");
-        params.put(Constant.ORDER, "desc");
-        PageData<JLogDTO> page = jLogService.page(params);
-        return new Result<PageData<JLogDTO>>().ok(page);
+    @PreAuthorize("hasAuthority('zorg:jconfig:page')")
+    public Result<PageData<JConfigDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params){
+        PageData<JConfigDTO> page = jConfigService.page(params);
+
+        return new Result<PageData<JConfigDTO>>().ok(page);
     }
 
     @GetMapping("{id}")
     @Operation(summary = "信息")
-    @PreAuthorize("hasAuthority('zorg:jlog:info')")
-    public Result<JLogDTO> get(@PathVariable("id") Long id) {
-        JLogDTO data = jLogService.get(id);
-        return new Result<JLogDTO>().ok(data);
+    @PreAuthorize("hasAuthority('zorg:jconfig:info')")
+    public Result<JConfigDTO> get(@PathVariable("id") Long id){
+        JConfigDTO data = jConfigService.get(id);
+
+        return new Result<JConfigDTO>().ok(data);
     }
 
     @PostMapping
     @Operation(summary = "保存")
     @LogOperation("保存")
-    @PreAuthorize("hasAuthority('zorg:jlog:save')")
-    public Result save(@RequestBody JLogDTO dto) {
+    @PreAuthorize("hasAuthority('zorg:jconfig:save')")
+    public Result save(@RequestBody JConfigDTO dto){
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
-        jLogService.save(dto);
+
+        jConfigService.save(dto);
+
         return new Result();
     }
 
     @PutMapping
     @Operation(summary = "修改")
     @LogOperation("修改")
-    @PreAuthorize("hasAuthority('zorg:jlog:update')")
-    public Result update(@RequestBody JLogDTO dto) {
+    @PreAuthorize("hasAuthority('zorg:jconfig:update')")
+    public Result update(@RequestBody JConfigDTO dto){
         //效验数据
         ValidatorUtils.validateEntity(dto, UpdateGroup.class, DefaultGroup.class);
-        jLogService.update(dto);
+
+        jConfigService.update(dto);
+
         return new Result();
     }
 
     @DeleteMapping
     @Operation(summary = "删除")
     @LogOperation("删除")
-    @PreAuthorize("hasAuthority('zorg:jlog:delete')")
-    public Result delete(@RequestBody Long[] ids) {
+    @PreAuthorize("hasAuthority('zorg:jconfig:delete')")
+    public Result delete(@RequestBody Long[] ids){
         //效验数据
         AssertUtils.isArrayEmpty(ids, "id");
-        jLogService.delete(ids);
+
+        jConfigService.delete(ids);
+
         return new Result();
     }
 
     @GetMapping("export")
     @Operation(summary = "导出")
     @LogOperation("导出")
-    @PreAuthorize("hasAuthority('zorg:jlog:export')")
+    @PreAuthorize("hasAuthority('zorg:jconfig:export')")
     public void export(@Parameter(hidden = true) @RequestParam Map<String, Object> params, HttpServletResponse response) throws Exception {
-        List<JLogDTO> list = jLogService.list(params);
-        ExcelUtils.exportExcelToTarget(response, null, "账变流水", list, JLogExcel.class);
+        List<JConfigDTO> list = jConfigService.list(params);
+
+        ExcelUtils.exportExcelToTarget(response, null, "j_config", list, JConfigExcel.class);
     }
 
 }

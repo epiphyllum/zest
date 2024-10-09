@@ -1,9 +1,12 @@
 package io.renren.zin.service.cardapply;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import io.renren.manager.JDepositManager;
 import io.renren.zadmin.dao.JCardDao;
+import io.renren.zadmin.dao.JDepositDao;
 import io.renren.zadmin.dao.JMcardDao;
 import io.renren.zadmin.entity.JCardEntity;
+import io.renren.zadmin.entity.JDepositEntity;
 import io.renren.zadmin.entity.JMcardEntity;
 import io.renren.zapi.notifyevent.CardApplyNotifyEvent;
 import io.renren.zbalance.Ledger;
@@ -32,6 +35,11 @@ public class ZinCardApplyNotifyService {
     private TransactionTemplate tx;
     @Resource
     private ApplicationEventPublisher publisher;
+    @Resource
+    private JDepositManager jDepositManager;
+    @Resource
+    private JDepositDao jDepositDao;
+
 
     // 卡申请单状态通知: 3005
     public void cardApplyNotify(TCardApplyNotify notify) {
@@ -136,23 +144,26 @@ public class ZinCardApplyNotifyService {
         }
     }
 
-    // CP453	注销	卡的注销/撤回注销
+    // CP453: 注销
     public void handleCP453(TCardApplyNotify notify) {
     }
 
-    // CP458	注销撤回
+    // CP458: 注销撤回
     public void handleCP458(TCardApplyNotify notify) {
     }
 
-    // CP451	保证金缴纳	卡片资金充值
+    //CP451 保证金缴纳|卡片资金充值
     public void handleCP451(TCardApplyNotify notify) {
+        String applyid = notify.getApplyid();
+        JDepositEntity entity = jDepositDao.selectOne(Wrappers.<JDepositEntity>lambdaQuery().eq(JDepositEntity::getApplyid, applyid));
+        jDepositManager.query(entity);
     }
 
-    //CP452	保证金提现	卡片资金提现
+    //CP452	保证金提现|卡片资金提现
     public void handleCP452(TCardApplyNotify notify) {
     }
 
-    // CP462	释放担保金
+    // CP462: 释放担保金
     public void handleCP462(TCardApplyNotify notify) {
     }
 

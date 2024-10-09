@@ -37,7 +37,8 @@ public class JLogEntity extends BaseEntity {
     private Long balanceId;
     private String currency;
 
-    // 记账详细信息(7)
+    // 记账详细信息(8)
+    private Integer originType;
     private Integer factType;
     private Long factId;
     private BigDecimal factAmount;

@@ -83,6 +83,14 @@ public class JCardController {
     @PreAuthorize("hasAuthority('zorg:jcard:page')")
     public Result<PageData<JCardDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
         PageData<JCardDTO> page = jCardService.page(params);
+
+        if (!ZestConstant.isOperation()) {
+            page.getList().forEach(e -> {
+                e.setCvv(null);
+                e.setExpiredate(null);
+            });
+        }
+
         return new Result<PageData<JCardDTO>>().ok(page);
     }
 
@@ -91,6 +99,8 @@ public class JCardController {
     @PreAuthorize("hasAuthority('zorg:jcard:info')")
     public Result<JCardDTO> get(@PathVariable("id") Long id) {
         JCardDTO data = jCardService.get(id);
+        data.setExpiredate(null);
+        data.setCvv(null);
         return new Result<JCardDTO>().ok(data);
     }
 
@@ -99,13 +109,6 @@ public class JCardController {
     @LogOperation("保存")
     @PreAuthorize("hasAuthority('zorg:jcard:save')")
     public Result save(@RequestBody JCardDTO dto) {
-
-//        UserDetail user = SecurityUser.getUser();
-//        if (!ZestConstant.isOperationOrAgentOrMerchant()) {
-//            return Result.fail(9999, "not authorized, you are " + user.getUserType());
-//        }
-
-        //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
         dto.setApi(0);
 
@@ -119,12 +122,6 @@ public class JCardController {
     @LogOperation("修改")
     @PreAuthorize("hasAuthority('zorg:jcard:update')")
     public Result update(@RequestBody JCardDTO dto) {
-
-//        UserDetail user = SecurityUser.getUser();
-//        if (!ZestConstant.isOperationOrAgentOrMerchant()) {
-//            return Result.fail(9999, "not authorized");
-//        }
-
         //效验数据
         ValidatorUtils.validateEntity(dto, UpdateGroup.class, DefaultGroup.class);
         jCardService.update(dto);
@@ -148,12 +145,19 @@ public class JCardController {
     @PreAuthorize("hasAuthority('zorg:jcard:export')")
     public void export(@Parameter(hidden = true) @RequestParam Map<String, Object> params, HttpServletResponse response) throws Exception {
         List<JCardDTO> list = jCardService.list(params);
+        if (!ZestConstant.isOperation()) {
+            list.forEach(e -> {
+                        e.setCvv(null);
+                        e.setExpiredate(null);
+                    }
+            );
+        }
         ExcelUtils.exportExcelToTarget(response, null, "j_card", list, JCardExcel.class);
     }
 
     @GetMapping("submit")
-    @Operation(summary = "提交通联")
-    @LogOperation("提交通联")
+    @Operation(summary = "开卡提交通联")
+    @LogOperation("开卡提交通联")
     @PreAuthorize("hasAuthority('zorg:jcard:update')")
     public Result submit(@RequestParam("id") Long id) {
         JCardEntity jCardEntity = jCardDao.selectById(id);
@@ -162,19 +166,23 @@ public class JCardController {
     }
 
     @GetMapping("query")
-    @Operation(summary = "查询通联")
-    @LogOperation("查询通联")
-    @PreAuthorize("hasAuthority('zorg:jcard:update')")
+    @Operation(summary = "开卡查询通联")
+    @LogOperation("开卡查询通联")
+    @PreAuthorize("hasAuthority('zorg:jcard:query')")
     public Result query(@RequestParam("id") Long id) {
         JCardEntity jCardEntity = jCardDao.selectById(id);
         jCardManager.query(jCardEntity);
         return Result.ok;
     }
 
+
+    //////////////////////////////////////////////////////////////////////////////
+    // 开卡后的操作
+    //////////////////////////////////////////////////////////////////////////////
     @GetMapping("queryCard")
-    @Operation(summary = "查询通联卡")
-    @LogOperation("查询通联卡")
-    @PreAuthorize("hasAuthority('zorg:jcard:query')")
+    @Operation(summary = "卡状态查询通联卡")
+    @LogOperation("卡状态查询通联卡")
+    @PreAuthorize("hasAuthority('zorg:jcard:queryCard')")
     public Result queryCard(@RequestParam("id") Long id) {
         JCardEntity jCardEntity = jCardDao.selectById(id);
         jCardManager.queryCard(jCardEntity);

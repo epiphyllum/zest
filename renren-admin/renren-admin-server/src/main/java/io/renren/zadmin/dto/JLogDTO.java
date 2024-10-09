@@ -49,6 +49,8 @@ public class JLogDTO implements Serializable {
     @Schema(description = "币种")
     private String currency;
     @Schema(description = "凭证类型")
+    private Integer originType;
+    @Schema(description = "记账类型")
     private Integer factType;
     @Schema(description = "凭证ID")
     private Long factId;

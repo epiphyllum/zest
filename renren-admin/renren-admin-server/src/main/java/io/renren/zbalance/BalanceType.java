@@ -10,11 +10,6 @@ public class BalanceType {
             , "NOK", "ZAR", "EUR", "NZD", "CNY"
     );
 
-    // 入金账户
-    public static String getInAccount(String currency) {
-        return "IN_" + currency;
-    }
-
     // 商户VA
     public static String getVaAccount(String currency) {
         return "VA_" + currency;

@@ -35,6 +35,8 @@ import java.util.Map;
  */
 @Service
 public class JMcardServiceImpl extends CrudServiceImpl<JMcardDao, JMcardEntity, JMcardDTO> implements JMcardService {
+    @Resource
+    private CommonFilter commonFilter;
 
     @Override
     public PageData<JMcardDTO> page(Map<String, Object> params) {
@@ -54,26 +56,7 @@ public class JMcardServiceImpl extends CrudServiceImpl<JMcardDao, JMcardEntity, 
     @Override
     public QueryWrapper<JMcardEntity> getWrapper(Map<String, Object> params) {
         QueryWrapper<JMcardEntity> wrapper = new QueryWrapper<>();
-
-//        String agentId = (String) params.get("agentId");
-//        if (StringUtils.isNotBlank(agentId)) {
-//            wrapper.eq(StringUtils.isNotBlank(agentId), "agent_id", Long.parseLong(agentId));
-//        }
-//        String merchantId = (String) params.get("merchantId");
-//        if (StringUtils.isNotBlank(merchantId)) {
-//            wrapper.eq(StringUtils.isNotBlank(merchantId), "merchant_id", Long.parseLong(merchantId));
-//        }
-//        UserDetail user = SecurityUser.getUser();
-//        if (agentId != null && ZestConstant.USER_TYPE_AGENT.equals(user.getUserType())) {
-//            // 代理访问
-//            wrapper.eq("agent_id", user.getDeptId());
-//        } else if (merchantId == null && ZestConstant.USER_TYPE_MERCHANT.equals(user.getUserType())) {
-//            // 商户访问
-//            wrapper.eq("merchant_id", user.getDeptId());
-//        }
-
-        CommonFilter.setFilterMerchant(wrapper, params);
-
+        commonFilter.setFilterMerchant(wrapper, params);
         return wrapper;
     }
 

@@ -1,10 +1,12 @@
 package io.renren.zadmin.zorg.balance;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.log.annotation.LogOperation;
 import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.tools.constant.Constant;
 import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.page.PageData;
+import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.commons.tools.utils.ExcelUtils;
 import io.renren.commons.tools.utils.Result;
 import io.renren.commons.tools.validator.AssertUtils;
@@ -12,8 +14,12 @@ import io.renren.commons.tools.validator.ValidatorUtils;
 import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
+import io.renren.dao.SysDeptDao;
+import io.renren.entity.SysDeptEntity;
 import io.renren.zadmin.ZestConstant;
+import io.renren.zadmin.dao.JBalanceDao;
 import io.renren.zadmin.dto.JBalanceDTO;
+import io.renren.zadmin.entity.JBalanceEntity;
 import io.renren.zadmin.excel.JBalanceExcel;
 import io.renren.zadmin.service.JBalanceService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,6 +53,10 @@ import java.util.stream.Collectors;
 public class JBalanceController {
     @Resource
     private JBalanceService jBalanceService;
+    @Resource
+    private JBalanceDao jBalanceDao;
+    @Resource
+    private SysDeptDao sysDeptDao;
 
     @GetMapping("page")
     @Operation(summary = "分页")
@@ -58,8 +68,10 @@ public class JBalanceController {
     })
     @PreAuthorize("hasAuthority('zorg:jbalance:page')")
     public Result<PageData<JBalanceDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
-        params.put(Constant.LIMIT, "100");
-        params.put(Constant.PAGE, "1");
+        if (params.get("list") != null) {
+            params.put(Constant.LIMIT, "100");
+            params.put(Constant.PAGE, "1");
+        }
         PageData<JBalanceDTO> page = jBalanceService.page(params);
         return new Result<PageData<JBalanceDTO>>().ok(page);
     }
@@ -102,26 +114,20 @@ public class JBalanceController {
             String currency = entry.getKey();
             List<JBalanceDTO> dtoList = entry.getValue();
 
-            BigDecimal deposit = null;
-            BigDecimal in = null;
-            BigDecimal inFrozen = null;
-            BigDecimal chargeFee = null;
-            BigDecimal txnFee = null;
+            BigDecimal deposit = BigDecimal.ZERO;
+            BigDecimal chargeFee = BigDecimal.ZERO;
+            BigDecimal txnFee = BigDecimal.ZERO;
             JBalanceDTO va = null;
 
             String vaType = "VA_" + currency;
-            String inType = "IN_" + currency;
             String depositType = "DEPOSIT_" + currency;
             String chargeFeeType = "CHARGE_FEE_" + currency;
             String txnFeeType = "TXN_FEE_" + currency;
 
             for (JBalanceDTO dto : dtoList) {
-                log.info("check dto: {}-{}-{}-{}", dto.getBalance(), dto.getFrozen(), dto.getCurrency(), dto.getBalanceType());
                 if (dto.getBalanceType().equals(vaType)) {
+                    log.debug("check dto: {}-{}-{}-{}", dto.getBalance(), dto.getFrozen(), dto.getCurrency(), dto.getBalanceType());
                     va = dto;
-                } else if (dto.getBalanceType().equals(inType)) {
-                    in = dto.getBalance();
-                    inFrozen = dto.getFrozen();
                 } else if (dto.getBalanceType().equals(depositType)) {
                     deposit = dto.getBalance();
                 } else if (dto.getBalanceType().equals(chargeFeeType)) {
@@ -130,12 +136,10 @@ public class JBalanceController {
                     txnFee = dto.getBalance();
                 }
             }
-            if (deposit == null || in == null || inFrozen == null || chargeFee == null || txnFee == null || va == null) {
-                log.info("deposit: {}, in: {}, inFrozen: {}, chargeFee: {}, txnFee: {}, va: {}", deposit, in, inFrozen, chargeFee, txnFee, va);
+            if (deposit == null || chargeFee == null || txnFee == null || va == null) {
+                log.info("deposit: {}, chargeFee: {}, txnFee: {}, va: {}", deposit, chargeFee, txnFee, va);
                 throw new RenException("internal logical error");
             }
-            va.setBalanceIn(in);
-            va.setFrozenIn(inFrozen);
             va.setBalanceDeposit(deposit);
             va.setBalanceChargeFee(chargeFee);
             va.setBalanceTxnFee(txnFee);
@@ -231,6 +235,29 @@ public class JBalanceController {
         return new Result<List<JBalanceDTO>>().ok(list);
     }
 
+    // 查询指定子商户的父商户的va
+    @GetMapping("parent")
+    @Operation(summary = "parent")
+    @PreAuthorize("hasAuthority('zorg:jbalance:parent')")
+    public Result<JBalanceDTO> parent(@RequestParam("ownerId") Long ownerId,
+                                      @RequestParam("balanceType") String balanceType,
+                                      @RequestParam("currency") String currency
+    ) {
+        SysDeptEntity deptEntity = sysDeptDao.selectById(ownerId);
+        if (deptEntity == null) {
+            log.error("can not find dept: {}", ownerId);
+            throw new RenException("无法找到到部门");
+        }
+        Long pid = deptEntity.getPid();
+        JBalanceEntity jBalanceEntity = jBalanceDao.selectOne(Wrappers.<JBalanceEntity>lambdaQuery()
+                .eq(JBalanceEntity::getOwnerId, pid)
+                .eq(JBalanceEntity::getCurrency, currency)
+                .eq(JBalanceEntity::getBalanceType, balanceType)
+        );
+        JBalanceDTO jBalanceDTO = ConvertUtils.sourceToTarget(jBalanceEntity, JBalanceDTO.class);
+        return new Result<JBalanceDTO>().ok(jBalanceDTO);
+    }
+
     @GetMapping("{id}")
     @Operation(summary = "信息")
     @PreAuthorize("hasAuthority('zorg:jbalance:info')")
@@ -242,7 +269,7 @@ public class JBalanceController {
     @PostMapping
     @Operation(summary = "保存")
     @LogOperation("保存")
-    @PreAuthorize("hasAuthority('zorg:jbalance:save')")
+    @PreAuthorize("hasAuthority('zorg:jbalance:save') || hasAuthority('zorg:jbalance:adjust')")
     public Result save(@RequestBody JBalanceDTO dto) {
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);

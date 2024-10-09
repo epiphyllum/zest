@@ -90,7 +90,6 @@ public class JSubController {
     @PreAuthorize("hasAuthority('zorg:jsub:info')")
     public Result<JSubDTO> get(@PathVariable("id") Long id) {
         JSubDTO data = jSubService.get(id);
-
         return new Result<JSubDTO>().ok(data);
     }
 
@@ -121,7 +120,7 @@ public class JSubController {
         if (!user.getUserType().equals("operation") && !user.getUserType().equals("agent") && !user.getUserType().equals("merchant")) {
             return Result.fail(9999, "not authorized");
         }
-        JSubManager.verify(id, state);
+        jSubManager.verify(id, state);
         return new Result();
     }
 

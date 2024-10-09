@@ -1,6 +1,7 @@
 package io.renren.zin.config;
 
 import io.renren.commons.tools.exception.RenException;
+import io.renren.zin.security.AESUtil;
 import jakarta.annotation.PostConstruct;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -8,6 +9,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.UnsupportedEncodingException;
+import java.security.GeneralSecurityException;
 import java.util.List;
 
 @Configuration
@@ -54,5 +57,16 @@ public class ZestConfig {
             throw new RenException("无法找到卡产品费用配置:" + producttype + "|" + currency + "|" + cardtype);
         }
         return config;
+    }
+
+    public String decryptSensitive(String sensitiveData) {
+        String key = this.getAccessConfig().getSensitiveKey();
+        try {
+            return AESUtil.decrypt(sensitiveData,key, false, AESUtil.ECB_PKCS5, "UTF-8");
+        } catch (GeneralSecurityException e) {
+            throw new RenException("解密敏感数据失败");
+        } catch (UnsupportedEncodingException e) {
+            throw new RenException("解密敏感数据失败");
+        }
     }
 }

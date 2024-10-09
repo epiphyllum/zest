@@ -9,6 +9,7 @@ import io.renren.zadmin.dao.JMaccountDao;
 import io.renren.zadmin.dto.JMaccountDTO;
 import io.renren.zadmin.entity.JMaccountEntity;
 import io.renren.zadmin.service.JMaccountService;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -22,6 +23,9 @@ import java.util.Map;
 @Service
 public class JMaccountServiceImpl extends CrudServiceImpl<JMaccountDao, JMaccountEntity, JMaccountDTO> implements JMaccountService {
 
+    @Resource
+    private CommonFilter commonFilter;
+
     @Override
     public PageData<JMaccountDTO> page(Map<String, Object> params) {
         IPage<JMaccountEntity> page = baseDao.selectPage(
@@ -34,7 +38,7 @@ public class JMaccountServiceImpl extends CrudServiceImpl<JMaccountDao, JMaccoun
     @Override
     public QueryWrapper<JMaccountEntity> getWrapper(Map<String, Object> params) {
         QueryWrapper<JMaccountEntity> wrapper = new QueryWrapper<>();
-        CommonFilter.setFilterMerchant(wrapper, params);
+        commonFilter.setFilterMerchant(wrapper, params);
         return wrapper;
     }
 }

@@ -4,16 +4,28 @@ import com.alibaba.cloud.commons.lang.StringUtils;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
+import io.renren.service.SysDeptService;
 import io.renren.zadmin.ZestConstant;
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 // 按操作用的类型过滤
+@Service
 public class CommonFilter {
+    @Resource
+    private SysDeptService sysDeptService;
 
-    public static void setFilterAll(QueryWrapper<?> wrapper, Map<String, Object> params) {
+    public void setFilterAll(QueryWrapper<?> wrapper, Map<String, Object> params) {
+        String id = (String) params.get("id");
+        if (StringUtils.isNotBlank(id)) {
+            wrapper.eq("id", Long.parseLong(id));
+        }
+
         Set<String> set = new HashSet<>();
         UserDetail user = SecurityUser.getUser();
         if (ZestConstant.USER_TYPE_AGENT.equals(user.getUserType())) {
@@ -54,7 +66,12 @@ public class CommonFilter {
 
     }
 
-    public static void setFilterMerchant(QueryWrapper<?> wrapper, Map<String, Object> params) {
+    public  void setFilterMerchant(QueryWrapper<?> wrapper, Map<String, Object> params) {
+        String id = (String) params.get("id");
+        if (StringUtils.isNotBlank(id)) {
+            wrapper.eq("id", Long.parseLong(id));
+        }
+
         Set<String> set = new HashSet<>();
         UserDetail user = SecurityUser.getUser();
         if (ZestConstant.USER_TYPE_AGENT.equals(user.getUserType())) {
@@ -83,7 +100,12 @@ public class CommonFilter {
         }
     }
 
-    public static void setFilterAgent(QueryWrapper<?> wrapper , Map<String, Object> params) {
+    public void setFilterAgent(QueryWrapper<?> wrapper, Map<String, Object> params) {
+        String id = (String) params.get("id");
+        if (StringUtils.isNotBlank(id)) {
+            wrapper.eq("id", Long.parseLong(id));
+        }
+
         Set<String> set = new HashSet<>();
         UserDetail user = SecurityUser.getUser();
         if (ZestConstant.USER_TYPE_AGENT.equals(user.getUserType())) {
@@ -101,4 +123,29 @@ public class CommonFilter {
         }
     }
 
+    public void setLogBalanceFilter(QueryWrapper<?> wrapper, Map<String, Object> params) {
+        // ownerId优先,  如果有， 就只看ownerId的
+        String ownerId = (String) params.get("ownerId");
+        if (org.apache.commons.lang3.StringUtils.isNotBlank(ownerId)) {
+            wrapper.eq("owner_id", Long.parseLong(ownerId));
+        } else {
+            // 没有ownerId, 就看选到哪个层次， 就看那个层次下所有的
+            String rootId = null;
+            String subId = (String) params.get("subId");
+            String merchantId = (String) params.get("merchantId");
+            String agentId = (String) params.get("agentId");
+            if (org.apache.commons.lang3.StringUtils.isNotBlank(subId)) {
+                rootId = subId;
+            } else if (org.apache.commons.lang3.StringUtils.isNotBlank(merchantId)) {
+                rootId = merchantId;
+            } else if (org.apache.commons.lang3.StringUtils.isNotBlank(agentId)) {
+                rootId = agentId;
+            }
+            if (org.apache.commons.lang3.StringUtils.isNotBlank(rootId)) {
+                Long top = Long.parseLong(rootId);
+                List<Long> subDeptIdList = sysDeptService.getSubDeptIdList(top);
+                wrapper.in("owner_id", subDeptIdList);
+            }
+        }
+    }
 }

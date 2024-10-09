@@ -140,10 +140,6 @@ public class JMaccountController {
     @LogOperation("修改")
     @PreAuthorize("hasAuthority('zorg:jmaccount:update')")
     public Result update(@RequestBody JMaccountDTO dto) {
-        UserDetail user = SecurityUser.getUser();
-        if (!user.getUserType().equals("operation") && !user.getUserType().equals("agent")) {
-            return Result.fail(9999, "not authorized");
-        }
         //效验数据
         ValidatorUtils.validateEntity(dto, UpdateGroup.class, DefaultGroup.class);
         jMaccountService.update(dto);
@@ -176,7 +172,7 @@ public class JMaccountController {
 
     // 提交通联
     @GetMapping("submit")
-    @PreAuthorize("hasAuthority('zorg:jmaccount:update')")
+    @PreAuthorize("hasAuthority('zorg:jmaccount:submit')")
     public Result submit(@RequestParam("id") Long id) throws Exception {
 
         JMaccountEntity jMaccountEntity = jMaccountDao.selectById(id);
@@ -193,7 +189,7 @@ public class JMaccountController {
 
     // 查询通联
     @GetMapping("query")
-    @PreAuthorize("hasAuthority('zorg:jmaccount:update')")
+    @PreAuthorize("hasAuthority('zorg:jmaccount:query')")
     public Result query(@RequestParam("id") Long id) throws Exception {
         JMaccountEntity jMaccountEntity = jMaccountDao.selectById(id);
         TMoneyAccountQuery query = ConvertUtils.sourceToTarget(jMaccountEntity, TMoneyAccountQuery.class);

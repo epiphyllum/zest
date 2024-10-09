@@ -43,6 +43,8 @@ import java.util.Map;
 @Slf4j
 public class JSubServiceImpl extends CrudServiceImpl<JSubDao, JSubEntity, JSubDTO> implements JSubService {
     @Resource
+    private CommonFilter commonFilter;
+    @Resource
     private SysDeptService sysDeptService;
     @Resource
     private SysDeptDao sysDeptDao;
@@ -63,13 +65,7 @@ public class JSubServiceImpl extends CrudServiceImpl<JSubDao, JSubEntity, JSubDT
     @Override
     public QueryWrapper<JSubEntity> getWrapper(Map<String, Object> params) {
         QueryWrapper<JSubEntity> wrapper = new QueryWrapper<>();
-
-        String id = (String) params.get("id");
-        if (StringUtils.isNotBlank(id)) {
-            wrapper.eq("id", Long.parseLong(id));
-        }
-
-        CommonFilter.setFilterMerchant(wrapper, params);
+        commonFilter.setFilterMerchant(wrapper, params);
         return wrapper;
     }
 

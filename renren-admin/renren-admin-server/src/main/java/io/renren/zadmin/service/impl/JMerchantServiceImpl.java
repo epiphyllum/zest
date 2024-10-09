@@ -50,6 +50,8 @@ public class JMerchantServiceImpl extends CrudServiceImpl<JMerchantDao, JMerchan
     private JBalanceDao jBalanceDao;
     @Resource
     private JSubService jSubService;
+    @Resource
+    private CommonFilter commonFilter;
 
     @Override
     public PageData<JMerchantDTO> page(Map<String, Object> params) {
@@ -63,12 +65,7 @@ public class JMerchantServiceImpl extends CrudServiceImpl<JMerchantDao, JMerchan
     @Override
     public QueryWrapper<JMerchantEntity> getWrapper(Map<String, Object> params) {
         QueryWrapper<JMerchantEntity> wrapper = new QueryWrapper<>();
-
-        String id = (String) params.get("id");
-        if (StringUtils.isNotBlank(id)) {
-            wrapper.eq("id", Long.parseLong(id));
-        }
-        CommonFilter.setFilterAgent(wrapper, params);
+        commonFilter.setFilterAgent(wrapper, params);
         return wrapper;
     }
 
@@ -123,7 +120,6 @@ public class JMerchantServiceImpl extends CrudServiceImpl<JMerchantDao, JMerchan
 
         // 15 * 5 = 75个账户
         for (String currency : BalanceType.CURRENCY_LIST) {
-            newBalance(deptEntity, BalanceType.getInAccount(currency), currency);
             newBalance(deptEntity, BalanceType.getDepositAccount(currency), currency);  //  预收保证金
             newBalance(deptEntity, BalanceType.getChargeFeeAccount(currency), currency); // 充值到卡手续费
             newBalance(deptEntity, BalanceType.getTxnFeeAccount(currency), currency);  // 预收交易手续费

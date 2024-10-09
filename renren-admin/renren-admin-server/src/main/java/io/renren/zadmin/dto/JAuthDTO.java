@@ -49,14 +49,16 @@ public class JAuthDTO implements Serializable {
     // 业务
     @Schema(description = "流水号")
     private String logkv;
-    @Schema(description = "交易类型")
+    @Schema(description = "交易代码")
     private String trxcode;
     @Schema(description = "卡号")
     private String cardno;
+
     @Schema(description = "交易状态")
     private String state;
     @Schema(description = "交易状态说明")
     private String stateexplain;
+
     @Schema(description = "交易金额")
     private BigDecimal amount;
     @Schema(description = "币种")

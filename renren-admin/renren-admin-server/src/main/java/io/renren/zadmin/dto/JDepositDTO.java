@@ -63,10 +63,20 @@ public class JDepositDTO implements Serializable {
     // 冗余增加的
     @Schema(description = "币种")
     private String currency;
+    @Schema(description = "发起金额")
+    private BigDecimal txnAmount;
 
     // 通联返回
     @Schema(description = "申请单号")
     private String applyid;
     @Schema(description = "状态")
-    private Integer state;
+    private String state;
+
+    // 查询或者通知
+    @Schema(description = "解释")
+    private String stateexplain;
+    @Schema(description = "担保金")
+    private BigDecimal securityamount;
+    @Schema(description = "通联手续费")
+    private BigDecimal fee;
 }

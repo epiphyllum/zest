@@ -5,6 +5,7 @@ import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.constant.Constant;
 import io.renren.commons.tools.page.PageData;
+import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.commons.tools.utils.Result;
 import io.renren.commons.tools.utils.ExcelUtils;
 import io.renren.commons.tools.validator.AssertUtils;
@@ -12,9 +13,15 @@ import io.renren.commons.tools.validator.ValidatorUtils;
 import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
+import io.renren.manager.JWithdrawManager;
+import io.renren.zadmin.dao.JWithdrawDao;
 import io.renren.zadmin.dto.JWithdrawDTO;
+import io.renren.zadmin.entity.JDepositEntity;
+import io.renren.zadmin.entity.JWithdrawEntity;
 import io.renren.zadmin.excel.JWithdrawExcel;
 import io.renren.zadmin.service.JWithdrawService;
+import io.renren.zadmin.service.impl.CommonFilter;
+import io.renren.zin.config.CommonUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -24,22 +31,27 @@ import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.util.List;
 import java.util.Map;
 
 
 /**
-* j_withdraw
-*
-* @author epiphyllum epiphyllum.zhou@gmail.com
-* @since 3.0 2024-08-19
-*/
+ * j_withdraw
+ *
+ * @author epiphyllum epiphyllum.zhou@gmail.com
+ * @since 3.0 2024-08-19
+ */
 @RestController
 @RequestMapping("zorg/jwithdraw")
 @Tag(name = "j_withdraw")
 public class JWithdrawController {
     @Resource
     private JWithdrawService jWithdrawService;
+    @Resource
+    private JWithdrawDao jWithdrawDao;
+    @Resource
+    private JWithdrawManager jWithdrawManager;
 
     @GetMapping("page")
     @Operation(summary = "分页")
@@ -50,7 +62,7 @@ public class JWithdrawController {
             @Parameter(name = Constant.ORDER, description = "排序方式，可选值(asc、desc)")
     })
     @PreAuthorize("hasAuthority('zorg:jwithdraw:page')")
-    public Result<PageData<JWithdrawDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params){
+    public Result<PageData<JWithdrawDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
         PageData<JWithdrawDTO> page = jWithdrawService.page(params);
         return new Result<PageData<JWithdrawDTO>>().ok(page);
     }
@@ -58,7 +70,7 @@ public class JWithdrawController {
     @GetMapping("{id}")
     @Operation(summary = "信息")
     @PreAuthorize("hasAuthority('zorg:jwithdraw:info')")
-    public Result<JWithdrawDTO> get(@PathVariable("id") Long id){
+    public Result<JWithdrawDTO> get(@PathVariable("id") Long id) {
         JWithdrawDTO data = jWithdrawService.get(id);
         return new Result<JWithdrawDTO>().ok(data);
     }
@@ -67,15 +79,13 @@ public class JWithdrawController {
     @Operation(summary = "保存")
     @LogOperation("保存")
     @PreAuthorize("hasAuthority('zorg:jwithdraw:save')")
-    public Result save(@RequestBody JWithdrawDTO dto){
-        UserDetail user = SecurityUser.getUser();
-        if (!user.getUserType().equals("operation") && !user.getUserType().equals("agent") && !user.getUserType().equals("merchant")) {
-            return Result.fail(9999, "not authorized, you are " + user.getUserType());
-        }
-
+    public Result save(@RequestBody JWithdrawDTO dto) {
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
-        jWithdrawService.save(dto);
+        JWithdrawEntity jWithdrawEntity = ConvertUtils.sourceToTarget(dto, JWithdrawEntity.class);
+        jWithdrawEntity.setApi(0);
+        jWithdrawEntity.setMeraplid(CommonUtils.newRequestId());
+        jWithdrawManager.save(jWithdrawEntity);
         return new Result();
     }
 
@@ -83,7 +93,7 @@ public class JWithdrawController {
     @Operation(summary = "修改")
     @LogOperation("修改")
     @PreAuthorize("hasAuthority('zorg:jwithdraw:update')")
-    public Result update(@RequestBody JWithdrawDTO dto){
+    public Result update(@RequestBody JWithdrawDTO dto) {
         //效验数据
         ValidatorUtils.validateEntity(dto, UpdateGroup.class, DefaultGroup.class);
         jWithdrawService.update(dto);
@@ -94,7 +104,7 @@ public class JWithdrawController {
     @Operation(summary = "删除")
     @LogOperation("删除")
     @PreAuthorize("hasAuthority('zorg:jwithdraw:delete')")
-    public Result delete(@RequestBody Long[] ids){
+    public Result delete(@RequestBody Long[] ids) {
         //效验数据
         AssertUtils.isArrayEmpty(ids, "id");
         jWithdrawService.delete(ids);
@@ -108,6 +118,26 @@ public class JWithdrawController {
     public void export(@Parameter(hidden = true) @RequestParam Map<String, Object> params, HttpServletResponse response) throws Exception {
         List<JWithdrawDTO> list = jWithdrawService.list(params);
         ExcelUtils.exportExcelToTarget(response, null, "提取资金", list, JWithdrawExcel.class);
+    }
+
+    @GetMapping("submit")
+    @Operation(summary = "提交通联")
+    @LogOperation("提交通联")
+    @PreAuthorize("hasAuthority('zorg:jwithdraw:submit')")
+    public Result submit(@RequestParam("id") Long id) {
+        JWithdrawEntity entity = jWithdrawDao.selectById(id);
+        jWithdrawManager.submit(entity);
+        return Result.ok;
+    }
+
+    @GetMapping("query")
+    @Operation(summary = "查询通联")
+    @LogOperation("查询通联")
+    @PreAuthorize("hasAuthority('zorg:jwithdraw:query')")
+    public Result query(@RequestParam("id") Long id) {
+        JWithdrawEntity entity = jWithdrawDao.selectById(id);
+        jWithdrawManager.query(entity);
+        return Result.ok;
     }
 
 }

@@ -66,7 +66,7 @@ public class JMoneyManager {
         updateEntity.setApplyAmount(entity.getApplyAmount());
         jMoneyDao.updateById(updateEntity);
 
-        //
+        // 上传文件到通联
         this.uploadFiles(entity);
 
         // 提交通联
@@ -80,7 +80,7 @@ public class JMoneyManager {
         // 更新为待匹配
         jMoneyDao.update(null, Wrappers.<JMoneyEntity>lambdaUpdate()
                 .eq(JMoneyEntity::getId, entity.getId())
-                .set(JMoneyEntity::getStatus, 1)
+                .set(JMoneyEntity::getStatus, 0)
         );
     }
 }

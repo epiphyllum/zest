@@ -30,6 +30,8 @@ import java.util.Map;
 @Service
 public class JLogServiceImpl extends CrudServiceImpl<JLogDao, JLogEntity, JLogDTO> implements JLogService {
 
+    @Resource
+    private CommonFilter commonFilter;
 
     @Override
     public PageData<JLogDTO> page(Map<String, Object> params) {
@@ -40,38 +42,33 @@ public class JLogServiceImpl extends CrudServiceImpl<JLogDao, JLogEntity, JLogDT
         return getPageData(page, JLogDTO.class);
     }
 
-    @Resource
-    private SysDeptService sysDeptService;
 
     @Override
     public QueryWrapper<JLogEntity> getWrapper(Map<String, Object> params) {
         QueryWrapper<JLogEntity> wrapper = new QueryWrapper<>();
 
-        // 用户可以看自己下面所有子部门的数据
-        String ownerId = (String) params.get("ownerId");
-        if (ownerId == null) {
-            UserDetail user = SecurityUser.getUser();
-            ownerId = user.getDeptId().toString();
-        }
-        if (StringUtils.isNotBlank(ownerId)) {
-            List<Long> subDeptIdList = sysDeptService.getSubDeptIdList(Long.parseLong(ownerId));
-            System.out.println("子部门id列表:");
-            for (Long aLong : subDeptIdList) {
-                System.out.println(aLong);
-            }
-            wrapper.in("owner_id", subDeptIdList);
-        }
+        commonFilter.setLogBalanceFilter(wrapper, params);
 
         String ownerType = (String) params.get("ownerType");
         wrapper.eq(StringUtils.isNotBlank(ownerType), "owner_type", ownerType);
 
         //
-        String balanceType = (String) params.get("balanceType");
-        wrapper.eq(StringUtils.isNotBlank(balanceType), "balance_type", balanceType);
-
-        //
         String currency = (String) params.get("currency");
         wrapper.eq(StringUtils.isNotBlank(currency), "currency", currency);
+
+        //
+        String balanceType = (String) params.get("balanceType");
+        if (StringUtils.isNotBlank(balanceType)) {
+            if (balanceType.endsWith("_")) {
+                if (currency != null) {
+                    wrapper.eq("balance_type", balanceType + currency);
+                } else {
+                    wrapper.likeRight("balance_type", balanceType);
+                }
+            } else {
+                    wrapper.eq("balance_type", balanceType + currency);
+            }
+        }
 
         //
         String factType = (String) params.get("factType");

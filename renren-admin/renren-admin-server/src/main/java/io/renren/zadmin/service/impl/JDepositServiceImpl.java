@@ -15,6 +15,7 @@ import io.renren.zadmin.dto.JDepositDTO;
 import io.renren.zadmin.entity.JDepositEntity;
 import io.renren.zadmin.entity.JDepositEntity;
 import io.renren.zadmin.service.JDepositService;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -27,6 +28,8 @@ import java.util.Map;
  */
 @Service
 public class JDepositServiceImpl extends CrudServiceImpl<JDepositDao, JDepositEntity, JDepositDTO> implements JDepositService {
+    @Resource
+    private CommonFilter commonFilter;
 
     @Override
     public PageData<JDepositDTO> page(Map<String, Object> params) {
@@ -40,7 +43,7 @@ public class JDepositServiceImpl extends CrudServiceImpl<JDepositDao, JDepositEn
     @Override
     public QueryWrapper<JDepositEntity> getWrapper(Map<String, Object> params) {
         QueryWrapper<JDepositEntity> wrapper = new QueryWrapper<>();
-        CommonFilter.setFilterAll(wrapper, params);
+        commonFilter.setFilterAll(wrapper, params);
 
         String cardno = (String) params.get("cardno");
         if (StringUtils.isNotBlank(cardno)) {

@@ -14,6 +14,7 @@ import io.renren.zadmin.dto.JMoneyDTO;
 import io.renren.zadmin.entity.JMoneyEntity;
 import io.renren.zadmin.entity.JMoneyEntity;
 import io.renren.zadmin.service.JMoneyService;
+import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +28,8 @@ import java.util.Map;
  */
 @Service
 public class JMoneyServiceImpl extends CrudServiceImpl<JMoneyDao, JMoneyEntity, JMoneyDTO> implements JMoneyService {
+    @Resource
+    private CommonFilter commonFilter;
 
     @Override
     public PageData<JMoneyDTO> page(Map<String, Object> params) {
@@ -41,7 +44,7 @@ public class JMoneyServiceImpl extends CrudServiceImpl<JMoneyDao, JMoneyEntity, 
     public QueryWrapper<JMoneyEntity> getWrapper(Map<String, Object> params) {
         QueryWrapper<JMoneyEntity> wrapper = new QueryWrapper<>();
 
-        CommonFilter.setFilterMerchant(wrapper, params);
+        commonFilter.setFilterMerchant(wrapper, params);
 
         // 通联账号
         String acctno = (String) params.get("acctno");
@@ -57,9 +60,5 @@ public class JMoneyServiceImpl extends CrudServiceImpl<JMoneyDao, JMoneyEntity, 
 
         return wrapper;
     }
-
-//    @Override
-//    public void save(JMoneyDTO dto) {
-//    }
 
 }

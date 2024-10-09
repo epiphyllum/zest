@@ -30,42 +30,6 @@ public class ApiAllocateService {
     @Resource
     private JMerchantDao jMerchantDao;
 
-    // 商户入金转入va
-    public Result<I2vRes> i2v(Long merchantId, String reqId, String name, String body, String sign) {
-        ApiContext context = new ApiContext();
-        I2vReq request = apiService.<I2vReq>initRequest(I2vReq.class, context, merchantId, reqId, name, body, sign);
-
-        // 记账
-        {
-            JMerchantEntity merchant = context.getMerchant();
-            JAllocateEntity entity = new JAllocateEntity();
-            entity.setMerchantId(merchantId);
-            entity.setMerchantName(merchant.getCusname());
-            ledger.ledgeI2v(entity, merchant);
-        }
-
-        Result<I2vRes> result = new Result<>();
-        return result;
-    }
-
-    // va转商户入金
-    public Result<I2vRes> v2i(Long merchantId, String reqId, String name, String body, String sign) {
-        ApiContext context = new ApiContext();
-        I2vReq request = apiService.<I2vReq>initRequest(I2vReq.class, context, merchantId, reqId, name, body, sign);
-
-        // 记账
-        {
-            JMerchantEntity merchant = context.getMerchant();
-            JAllocateEntity entity = new JAllocateEntity();
-            entity.setMerchantId(merchantId);
-            entity.setMerchantName(merchant.getCusname());
-            ledger.ledgeV2i(entity, merchant);
-        }
-
-        Result<I2vRes> result = new Result<>();
-        return result;
-    }
-
     // 商户转入子商户
     public Result<M2sRes> m2s(Long merchantId, String reqId, String name, String body, String sign) {
         ApiContext context = new ApiContext();
@@ -88,7 +52,6 @@ public class ApiAllocateService {
     public Result<M2sQueryRes> m2sQuery(Long merchantId, String reqId, String name, String body, String sign) {
         ApiContext context = new ApiContext();
         M2sQuery request = apiService.<M2sQuery>initRequest(M2sQuery.class, context, merchantId, reqId, name, body, sign);
-
         Result<M2sQueryRes> result = new Result<>();
         return result;
     }
@@ -97,7 +60,6 @@ public class ApiAllocateService {
     public Result<S2mRes> s2m(Long merchantId, String reqId, String name, String body, String sign) {
         ApiContext context = new ApiContext();
         S2mReq request = apiService.<S2mReq>initRequest(S2mReq.class, context, merchantId, reqId, name, body, sign);
-
         {
             JMerchantEntity merchant = context.getMerchant();
             JAllocateEntity entity = new JAllocateEntity();
@@ -105,7 +67,6 @@ public class ApiAllocateService {
             entity.setMerchantName(merchant.getCusname());
             ledger.ledgeS2m(entity);
         }
-
         Result<S2mRes> result = new Result<>();
         return result;
     }

@@ -5,6 +5,7 @@ import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.constant.Constant;
 import io.renren.commons.tools.page.PageData;
+import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.commons.tools.utils.Result;
 import io.renren.commons.tools.utils.ExcelUtils;
 import io.renren.commons.tools.validator.AssertUtils;
@@ -12,9 +13,18 @@ import io.renren.commons.tools.validator.ValidatorUtils;
 import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
+import io.renren.manager.JDepositManager;
+import io.renren.zadmin.dao.JDepositDao;
 import io.renren.zadmin.dto.JDepositDTO;
+import io.renren.zadmin.entity.JDepositEntity;
+import io.renren.zadmin.entity.JMcardEntity;
 import io.renren.zadmin.excel.JDepositExcel;
 import io.renren.zadmin.service.JDepositService;
+import io.renren.zin.config.CommonUtils;
+import io.renren.zin.service.cardapply.dto.TCardApplyQuery;
+import io.renren.zin.service.cardapply.dto.TCardApplyResponse;
+import io.renren.zin.service.cardapply.dto.TCardMainApplyRequest;
+import io.renren.zin.service.cardapply.dto.TCardMainApplyResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -24,22 +34,27 @@ import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.util.List;
 import java.util.Map;
 
 
 /**
-* j_deposit
-*
-* @author epiphyllum epiphyllum.zhou@gmail.com
-* @since 3.0 2024-08-19
-*/
+ * j_deposit
+ *
+ * @author epiphyllum epiphyllum.zhou@gmail.com
+ * @since 3.0 2024-08-19
+ */
 @RestController
 @RequestMapping("zorg/jdeposit")
 @Tag(name = "j_deposit")
 public class JDepositController {
     @Resource
     private JDepositService jDepositService;
+    @Resource
+    private JDepositDao jDepositDao;
+    @Resource
+    private JDepositManager jDepositManager;
 
     @GetMapping("page")
     @Operation(summary = "分页")
@@ -50,7 +65,7 @@ public class JDepositController {
             @Parameter(name = Constant.ORDER, description = "排序方式，可选值(asc、desc)")
     })
     @PreAuthorize("hasAuthority('zorg:jdeposit:page')")
-    public Result<PageData<JDepositDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params){
+    public Result<PageData<JDepositDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
         PageData<JDepositDTO> page = jDepositService.page(params);
         return new Result<PageData<JDepositDTO>>().ok(page);
     }
@@ -58,7 +73,7 @@ public class JDepositController {
     @GetMapping("{id}")
     @Operation(summary = "信息")
     @PreAuthorize("hasAuthority('zorg:jdeposit:info')")
-    public Result<JDepositDTO> get(@PathVariable("id") Long id){
+    public Result<JDepositDTO> get(@PathVariable("id") Long id) {
         JDepositDTO data = jDepositService.get(id);
         return new Result<JDepositDTO>().ok(data);
     }
@@ -67,14 +82,13 @@ public class JDepositController {
     @Operation(summary = "保存")
     @LogOperation("保存")
     @PreAuthorize("hasAuthority('zorg:jdeposit:save')")
-    public Result save(@RequestBody JDepositDTO dto){
-        UserDetail user = SecurityUser.getUser();
-        if (!user.getUserType().equals("operation") && !user.getUserType().equals("agent") && !user.getUserType().equals("merchant")) {
-            return Result.fail(9999, "not authorized, you are " + user.getUserType());
-        }
+    public Result save(@RequestBody JDepositDTO dto) {
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
-        jDepositService.save(dto);
+        JDepositEntity entity = ConvertUtils.sourceToTarget(dto, JDepositEntity.class);
+        entity.setApi(0);
+        entity.setMeraplid(CommonUtils.newRequestId());
+        jDepositManager.save(entity);
         return new Result();
     }
 
@@ -82,7 +96,7 @@ public class JDepositController {
     @Operation(summary = "修改")
     @LogOperation("修改")
     @PreAuthorize("hasAuthority('zorg:jdeposit:update')")
-    public Result update(@RequestBody JDepositDTO dto){
+    public Result update(@RequestBody JDepositDTO dto) {
         //效验数据
         ValidatorUtils.validateEntity(dto, UpdateGroup.class, DefaultGroup.class);
         jDepositService.update(dto);
@@ -93,7 +107,7 @@ public class JDepositController {
     @Operation(summary = "删除")
     @LogOperation("删除")
     @PreAuthorize("hasAuthority('zorg:jdeposit:delete')")
-    public Result delete(@RequestBody Long[] ids){
+    public Result delete(@RequestBody Long[] ids) {
         //效验数据
         AssertUtils.isArrayEmpty(ids, "id");
         jDepositService.delete(ids);
@@ -108,5 +122,26 @@ public class JDepositController {
         List<JDepositDTO> list = jDepositService.list(params);
         ExcelUtils.exportExcelToTarget(response, null, "j_deposit", list, JDepositExcel.class);
     }
+
+    @GetMapping("submit")
+    @Operation(summary = "提交通联")
+    @LogOperation("提交通联")
+    @PreAuthorize("hasAuthority('zorg:jdeposit:submit')")
+    public Result submit(@RequestParam("id") Long id) {
+        JDepositEntity entity = jDepositDao.selectById(id);
+        jDepositManager.submit(entity);
+        return Result.ok;
+    }
+
+    @GetMapping("query")
+    @Operation(summary = "查询通联")
+    @LogOperation("查询通联")
+    @PreAuthorize("hasAuthority('zorg:jdeposit:query')")
+    public Result query(@RequestParam("id") Long id) {
+        JDepositEntity entity = jDepositDao.selectById(id);
+        jDepositManager.query(entity);
+        return Result.ok;
+    }
+
 
 }

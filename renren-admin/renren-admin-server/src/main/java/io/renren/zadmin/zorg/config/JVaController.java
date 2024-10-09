@@ -67,6 +67,8 @@ public class JVaController {
     })
     @PreAuthorize("hasAuthority('zorg:jva:page')")
     public Result<PageData<JVaDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
+        params.put(Constant.PAGE, "1");
+        params.put(Constant.LIMIT, "15");
         PageData<JVaDTO> page = jVaService.page(params);
         return new Result<PageData<JVaDTO>>().ok(page);
     }
@@ -100,7 +102,7 @@ public class JVaController {
     public Result save(@RequestBody JVaDTO dto) {
         UserDetail user = SecurityUser.getUser();
         if (!user.getUserType().equals("operation") &&
-            !user.getUserType().equals("agent")) {
+                !user.getUserType().equals("agent")) {
             return Result.fail(9999, "not authorized");
         }
         //效验数据

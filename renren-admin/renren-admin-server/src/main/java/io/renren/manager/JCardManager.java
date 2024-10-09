@@ -1,6 +1,7 @@
 package io.renren.manager;
 
 
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.tools.exception.RenException;
@@ -19,11 +20,10 @@ import io.renren.zbalance.LedgerUtil;
 import io.renren.zin.config.CardProductConfig;
 import io.renren.zin.config.ZestConfig;
 import io.renren.zin.config.ZinConstant;
+import io.renren.zin.config.ZinRequester;
+import io.renren.zin.security.AESUtil;
 import io.renren.zin.service.cardapply.ZinCardApplyService;
-import io.renren.zin.service.cardapply.dto.TCardApplyQuery;
-import io.renren.zin.service.cardapply.dto.TCardApplyResponse;
-import io.renren.zin.service.cardapply.dto.TCardSubApplyRequest;
-import io.renren.zin.service.cardapply.dto.TCardSubApplyResponse;
+import io.renren.zin.service.cardapply.dto.*;
 import io.renren.zin.service.cardmoney.ZinCardMoneyService;
 import io.renren.zin.service.cardmoney.dto.TCardBalanceRequest;
 import io.renren.zin.service.cardmoney.dto.TCardBalanceResponse;
@@ -36,6 +36,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.io.UnsupportedEncodingException;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -77,6 +79,7 @@ public class JCardManager {
     private ZestConfig zestConfig;
 
 
+
     // 补充agentId, agentName, merchantName
     public void fillByMerchant(JCardEntity entity) {
         Long merchantId = entity.getMerchantId();
@@ -104,6 +107,9 @@ public class JCardManager {
         // 填充ID信息
         Long merchantId = entity.getMerchantId();
         this.fillByMerchant(entity);
+
+        entity.setState(ZinConstant.CARD_APPLY_NEW_DJ);
+        entity.setCardState(ZinConstant.CARD_STATE_NEW_DJ);
 
         // 费用卡:  什么币种的卡， 就用那个va
         List<JVaEntity> jVaEntities = jVaDao.selectList(Wrappers.emptyWrapper());
@@ -156,54 +162,64 @@ public class JCardManager {
         jCardDao.updateById(update);
     }
 
-    // 查询通联
+    // 查询发卡状态
     public void query(JCardEntity jCardEntity) {
         TCardApplyQuery query = new TCardApplyQuery();
         query.setMeraplid(jCardEntity.getId().toString());
         TCardApplyResponse response = zinCardApplyService.cardApplyQuery(query);
 
-        // 准备待更新字段
-        JCardEntity update = new JCardEntity();
-        update.setId(jCardEntity.getId());
-        update.setState(response.getState());
-        update.setFeecurrency(response.getFeecurrency());
-        update.setFee(response.getFee());
-        update.setCardno(response.getCardno());
-
-        // 开卡成功了: 确认记账
-        if (response.getState().equals(ZinConstant.CARD_APPLY_SUCCESS)) {
-            tx.executeWithoutResult(status -> {
-                jCardDao.updateById(update);
-                ledger.ledgeOpenCard(jCardEntity);
-            });
-            if (jCardEntity.getApi().equals(1)) {
-                publisher.publishEvent(new CardApplyNotifyEvent(this, jCardEntity.getId()));
-            }
-            return;
-        }
-
         // 从非失败  -> 失败,  处理退款
         String prevState = jCardEntity.getState();
         String nextState = response.getState();
-        if (!(prevState.equals(ZinConstant.CARD_APPLY_VERIFY_FAIL) ||
-                prevState.equals(ZinConstant.CARD_APPLY_FAIL) ||
-                prevState.equals(ZinConstant.CARD_APPLY_CLOSE)
-        ) && (nextState.equals(ZinConstant.CARD_APPLY_VERIFY_FAIL) ||
-                prevState.equals(ZinConstant.CARD_APPLY_FAIL) ||
-                prevState.equals(ZinConstant.CARD_APPLY_CLOSE))
-        ) {
+
+        LambdaUpdateWrapper<JCardEntity> updateWrapper = Wrappers.<JCardEntity>lambdaUpdate()
+                .eq(JCardEntity::getId, jCardEntity.getId())
+                .eq(JCardEntity::getState, prevState)
+                .set(JCardEntity::getState, nextState)
+                .set(JCardEntity::getFeecurrency, response.getFeecurrency())
+                .set(JCardEntity::getFee, response.getFee())
+                .set(JCardEntity::getCardno, response.getCardno());
+
+        // 不成功 -> 成功
+        if (!ZinConstant.isCardApplySuccess(prevState) && ZinConstant.isCardApplySuccess(nextState)) {
+
+            // 调用下通联获取cvv2 + expiredate
+            TCardPayInfoRequest req = new TCardPayInfoRequest();
+            req.setCardno(response.getCardno());
+            TCardPayInfoResponse resp = zinCardApplyService.cardPayInfo(req);
+
+            String cvv = zestConfig.decryptSensitive(resp.getCvv());
+            String expiredate = zestConfig.decryptSensitive(resp.getExpiredate());
+
+            updateWrapper.set(JCardEntity::getCvv, cvv)
+                    .set(JCardEntity::getExpiredate, expiredate);
+
+            tx.executeWithoutResult(status -> {
+                jCardDao.update(null, updateWrapper);
+                ledger.ledgeOpenCard(jCardEntity);
+            });
+
+            if (jCardEntity.getApi().equals(1)) {
+                publisher.publishEvent(new CardApplyNotifyEvent(this, jCardEntity.getId()));
+            }
+
+            return;
+        }
+
+        // 非失败 -> 失败
+        if (!ZinConstant.isCardApplyFail(prevState) && ZinConstant.isCardApplyFail(nextState)) {
             // 解冻释放
             tx.executeWithoutResult(status -> {
-                jCardDao.updateById(update);
+                jCardDao.update(null, updateWrapper);
                 ledger.ledgeOpenCardUnFreeze(jCardEntity);
             });
             // 通知商户
             if (jCardEntity.getApi().equals(1)) {
                 publisher.publishEvent(new CardApplyNotifyEvent(this, jCardEntity.getId()));
             }
-        } else {
-            jCardDao.updateById(update);
         }
+        // 其他情况
+        jCardDao.update(null, updateWrapper);
     }
 
     public void uploadFiles(JCardEntity cardEntity) {
@@ -284,6 +300,7 @@ public class JCardManager {
         queryCard(jCardEntity);
     }
 
+    // 查询卡面状态
     public void queryCard(JCardEntity jCardEntity) {
         TCardStatusQuery request = new TCardStatusQuery();
         request.setCardno(jCardEntity.getCardno());
@@ -305,7 +322,7 @@ public class JCardManager {
         jCardDao.updateById(update);
     }
 
-    //
+    // 批量操作卡状态变更
     public void runList(String id, Consumer<JCardEntity> consumer) {
         String[] split = id.split(",");
         List<Long> ids = new ArrayList<>();

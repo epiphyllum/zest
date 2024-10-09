@@ -99,7 +99,6 @@ public class JMerchantManager {
         // 15 * 5 = 75个账户
         tx.executeWithoutResult(st -> {
             for (String currency : BalanceType.CURRENCY_LIST) {
-                newBalance(entity, BalanceType.getInAccount(currency), currency);
                 newBalance(entity, BalanceType.getDepositAccount(currency), currency);  //  预收保证金
                 newBalance(entity, BalanceType.getChargeFeeAccount(currency), currency); // 充值到卡手续费
                 newBalance(entity, BalanceType.getTxnFeeAccount(currency), currency);  // 预收交易手续费

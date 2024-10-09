@@ -104,4 +104,9 @@ public class JMcardEntity extends BaseEntity {
     private String state; //            varchar(2)  comment '卡申请状态',        --
     private String cardState; //            varchar(2)  comment '卡申请状态',        --
     private BigDecimal balance; //            varchar(2)  comment '卡申请状态',        --
+
+    // cvv2 + expire date
+    private String cvv;
+    private String expiredate;
+
 }

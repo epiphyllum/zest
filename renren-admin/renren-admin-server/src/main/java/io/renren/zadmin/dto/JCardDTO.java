@@ -156,5 +156,12 @@ public class JCardDTO implements Serializable {
     private String cardState; //            varchar(2)  comment '卡申请状态',        --
 
     @Schema(description = "balance")
-    private BigDecimal balance; //            varchar(2)  comment '卡申请状态',        --
+    private BigDecimal balance; //
+
+    @Schema(description = "cvv")
+    private String cvv;
+    @Schema(description = "expiredate")
+    private String expiredate;
+
+
 }

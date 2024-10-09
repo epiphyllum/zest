@@ -1,5 +1,6 @@
 package io.renren.manager;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.exception.RenException;
@@ -42,12 +43,24 @@ public class JSubManager {
      * 审核通过
      *
      * @param id
-     * @param verify
+     * @param state
      */
-    public static void verify(Long id, String state) {
-        JSubEntity update = new JSubEntity();
-        update.setId(id);
-        update.setState(state);
+    public void verify(Long id, String state) {
+        JSubEntity entity = jSubDao.selectById(id);
+        if (!"06".equals(entity.getState()) && "06".equals(state)) {
+            tx.executeWithoutResult(st -> {
+                this.openSubVa(entity);
+                jSubDao.update(null, Wrappers.<JSubEntity>lambdaUpdate()
+                        .eq(JSubEntity::getId, id)
+                        .set(JSubEntity::getState, "06")
+                );
+            });
+            return;
+        }
+        jSubDao.update(null, Wrappers.<JSubEntity>lambdaUpdate()
+                .eq(JSubEntity::getId, id)
+                .set(JSubEntity::getState, state)
+        );
     }
 
     public Long fill(JSubEntity entity) {
