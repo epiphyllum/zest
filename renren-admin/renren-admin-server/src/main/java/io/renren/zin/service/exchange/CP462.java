@@ -1,6 +1,8 @@
 package io.renren.zin.service.exchange;
 
+import io.renren.zadmin.dao.JDepositDao;
 import io.renren.zin.service.exchange.dto.TExchangeStateNotify;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 
@@ -8,7 +10,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class CP462 {
 
-    public void handle(TExchangeStateNotify notify, int status) {
+    @Resource
+    private JDepositDao jDepositDao;
 
+    // todo:
+    public void handle(TExchangeStateNotify notify) {
     }
 }

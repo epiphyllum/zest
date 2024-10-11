@@ -5,7 +5,9 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.zadmin.dao.*;
+import io.renren.zadmin.dto.JDepositDTO;
 import io.renren.zadmin.entity.*;
+import io.renren.zadmin.service.JDepositService;
 import io.renren.zbalance.Ledger;
 import io.renren.zin.config.ZinConstant;
 import io.renren.zin.service.cardapply.ZinCardApplyService;
@@ -49,6 +51,8 @@ public class JDepositManager {
     @Resource
     private JDepositDao jDepositDao;
     @Resource
+    private JDepositService jDepositService;
+    @Resource
     private JConfigDao jConfigDao;
 
     // 填充信息
@@ -66,6 +70,18 @@ public class JDepositManager {
         return subEntity;
     }
 
+    public BigDecimal calcTxnAmount(BigDecimal amount) {
+        JConfigEntity jConfigEntity = jConfigDao.selectOne(Wrappers.emptyWrapper());
+        if (jConfigEntity == null) {
+            throw new RenException("请配置全局参数");
+        }
+        // 计算发起金额
+        BigDecimal rate1 = BigDecimal.ONE.subtract(jConfigEntity.getChargeRate());
+        BigDecimal rate2 = BigDecimal.ONE.subtract(jConfigEntity.getDepositRate());
+        BigDecimal mul = rate1.multiply(rate2);
+        return amount.divide(mul, 2, RoundingMode.HALF_UP);
+    }
+
     /**
      * 保存充值
      * 这种情况下，设置充值手续费1%，担保金2%，充值金额100 HKD
@@ -81,16 +97,7 @@ public class JDepositManager {
         entity.setPayerid(jVaEntity.getTid());
         this.uploadFiles(entity);
 
-        JConfigEntity jConfigEntity = jConfigDao.selectOne(Wrappers.emptyWrapper());
-        if (jConfigEntity == null) {
-            throw new RenException("请配置全局参数");
-        }
-
-        // 计算发起金额
-        BigDecimal rate1 = BigDecimal.ONE.subtract(jConfigEntity.getChargeRate());
-        BigDecimal rate2 = BigDecimal.ONE.subtract(jConfigEntity.getDepositRate());
-        BigDecimal mul = rate1.multiply(rate2);
-        BigDecimal txnAmount = entity.getAmount().divide(mul, 2, RoundingMode.HALF_UP);
+        BigDecimal txnAmount = calcTxnAmount(entity.getAmount());
         entity.setTxnAmount(txnAmount);
 
         // 填充其他ID
@@ -101,6 +108,12 @@ public class JDepositManager {
             jDepositDao.insert(entity);
             ledger.ledgeCardChargeFreeze(entity, subEntity);
         });
+
+        try {
+            this.submit(entity);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     /**
@@ -139,7 +152,7 @@ public class JDepositManager {
         TCardApplyQuery query = new TCardApplyQuery();
         query.setApplyid(entity.getApplyid());
         TCardApplyResponse response = zinCardApplyService.cardApplyQuery(query);
-        String oldState = entity.getState();
+        String oldState = entity.getState() == null ? "" : entity.getState();
         String newState = response.getState();
         // 状态无变化
         if (oldState.equals(newState)) {
@@ -183,6 +196,23 @@ public class JDepositManager {
         update.setId(entity.getId());
         update.setApplyid(applyid);
         jDepositDao.updateById(update);
+
+        // 立即发起查询
+        entity.setApplyid(applyid);
+        this.query(entity);
     }
 
+    public void update(JDepositDTO dto) {
+        JDepositEntity entity = jDepositDao.selectById(dto.getId());
+
+        log.info("oldAmount: {}, newAmount: {}", entity.getAmount(), dto.getAmount());
+
+        // 如果修改了金额: 需要重新计算发起金额
+        if (entity.getAmount().compareTo(dto.getAmount()) != 0) {
+            BigDecimal txnAmount = calcTxnAmount(dto.getAmount());
+            dto.setTxnAmount(txnAmount);
+        }
+
+        jDepositService.update(dto);
+    }
 }

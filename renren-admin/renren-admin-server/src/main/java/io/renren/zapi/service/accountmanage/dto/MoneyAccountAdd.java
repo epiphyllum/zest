@@ -21,6 +21,6 @@ public class MoneyAccountAdd {
     String interbankmsg;   // 中转行swiftCode
     String swiftcode;      // swiftcode
     String depositcountry; // 银行所在国家/地区
-    String biccode;
-    String branchcode;
+    String biccode;        //
+    String branchcode;     //
 }

@@ -15,7 +15,7 @@ public class CP213 {
     @Resource
     private JMoneyDao jMoneyDao;
 
-    public void handle(TExchangeStateNotify notify, int status) {
+    public void handle(TExchangeStateNotify notify) {
         jMoneyDao.update(null, Wrappers.<JMoneyEntity>lambdaUpdate()
                 .eq(JMoneyEntity::getApplyid, notify.getApplyid())
                 .set(JMoneyEntity::getState, notify.getState())

@@ -94,7 +94,7 @@ public class JExchangeController {
     @Operation(summary = "保存")
     @LogOperation("保存")
     @PreAuthorize("hasAuthority('zorg:jexchange:save')")
-    public Result save(@RequestBody JExchangeDTO dto) {
+    public Result<Long> save(@RequestBody JExchangeDTO dto) {
         if (!ZestConstant.isOperationOrAgentOrMerchant()) {
             throw new RenException("not permitted");
         }
@@ -121,7 +121,7 @@ public class JExchangeController {
         entity.setApi(0);
 
         jExchangeManager.save(entity);
-        return new Result();
+        return new Result<Long>().ok(entity.getId());
     }
 
     @PutMapping

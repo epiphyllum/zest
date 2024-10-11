@@ -13,6 +13,7 @@ import io.renren.zin.service.exchange.ZinExchangeNotifyService;
 import io.renren.zin.service.exchange.dto.TExchangeStateNotify;
 import io.renren.zin.service.sub.ZinSubNotifyService;
 import io.renren.zin.service.sub.dto.TSubStatusNotify;
+import io.renren.zin.service.umbrella.ZinUmbrellaNotifyService;
 import io.renren.zin.service.umbrella.ZinUmbrellaService;
 import io.renren.zin.service.umbrella.dto.TMoneyAccountNotify;
 import jakarta.annotation.Resource;
@@ -43,7 +44,7 @@ public class ZinController {
     @Resource
     private ZinAccountManageNotifyService zinAccountManageNotifyService;
     @Resource
-    private ZinUmbrellaService zinUmbrellaService;
+    private ZinUmbrellaNotifyService zinUmbrellaNotifyService;
     @Resource
     private ZinRequester requester;
 
@@ -51,7 +52,7 @@ public class ZinController {
     @PostMapping("bnfauditrst")
     public String bnfauditrst(HttpServletRequest request, @RequestBody String body, @RequestHeader("X-AGCP-Auth") String auth, @RequestHeader("X-AGCP-Date") String date) {
         TMoneyAccountNotify notify = requester.<TMoneyAccountNotify>verify(request, body, auth, date, TMoneyAccountNotify.class);
-        zinUmbrellaService.moneyAccountStatusNotify(notify);
+        zinUmbrellaNotifyService.moneyAccountStatusNotify(notify);
         return "OK";
     }
 
@@ -81,8 +82,8 @@ public class ZinController {
 
     // 授权交易通知
     @PostMapping("cardtrxrst")
-    public String cardtrxrst(HttpServletRequest request, @RequestHeader("X-AGCP-Auth") String auth, @RequestHeader("X-AGCP-Date") String date) {
-        TAuthTxnNotify tAuthTxnNotify = requester.<TAuthTxnNotify>verify(request, null, auth, date, TAuthTxnNotify.class);
+    public String cardtrxrst(HttpServletRequest request, @RequestBody String body, @RequestHeader("X-AGCP-Auth") String auth, @RequestHeader("X-AGCP-Date") String date) {
+        TAuthTxnNotify tAuthTxnNotify = requester.<TAuthTxnNotify>verify(request, body, auth, date, TAuthTxnNotify.class);
         zinCardTxnNotifyService.handle(tAuthTxnNotify);
         return "OK";
     }

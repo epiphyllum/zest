@@ -82,14 +82,14 @@ public class JDepositController {
     @Operation(summary = "保存")
     @LogOperation("保存")
     @PreAuthorize("hasAuthority('zorg:jdeposit:save')")
-    public Result save(@RequestBody JDepositDTO dto) {
+    public Result<Long> save(@RequestBody JDepositDTO dto) {
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
         JDepositEntity entity = ConvertUtils.sourceToTarget(dto, JDepositEntity.class);
         entity.setApi(0);
         entity.setMeraplid(CommonUtils.newRequestId());
         jDepositManager.save(entity);
-        return new Result();
+        return new Result<Long>().ok(entity.getId());
     }
 
     @PutMapping
@@ -99,7 +99,7 @@ public class JDepositController {
     public Result update(@RequestBody JDepositDTO dto) {
         //效验数据
         ValidatorUtils.validateEntity(dto, UpdateGroup.class, DefaultGroup.class);
-        jDepositService.update(dto);
+        jDepositManager.update(dto);
         return new Result();
     }
 

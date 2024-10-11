@@ -7,17 +7,9 @@ import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.dao.SysDeptDao;
 import io.renren.entity.SysDeptEntity;
-import io.renren.zadmin.dao.JCardDao;
 import io.renren.zadmin.dao.JMcardDao;
-import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.dao.JVaDao;
 import io.renren.zadmin.entity.*;
-import io.renren.zapi.notifyevent.CardApplyNotifyEvent;
-import io.renren.zbalance.Ledger;
-import io.renren.zbalance.LedgerUtil;
-import io.renren.zin.config.CardProductConfig;
-import io.renren.zin.config.ZestConfig;
-import io.renren.zin.config.ZinConstant;
 import io.renren.zin.service.cardapply.ZinCardApplyService;
 import io.renren.zin.service.cardapply.dto.TCardApplyQuery;
 import io.renren.zin.service.cardapply.dto.TCardApplyResponse;
@@ -31,7 +23,6 @@ import io.renren.zin.service.cardstatus.dto.*;
 import io.renren.zin.service.file.ZinFileService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -89,6 +80,12 @@ public class JMcardManager {
         tx.executeWithoutResult(status -> {
             jMcardDao.insert(entity);
         });
+
+        try {
+            this.submit(entity);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     // 提交通联
@@ -103,6 +100,10 @@ public class JMcardManager {
         update.setId(entity.getId());
         update.setApplyid(response.getApplyid());
         jMcardDao.updateById(update);
+
+        entity.setApplyid(response.getApplyid());
+
+        this.query(entity);
     }
 
     // 查询通联

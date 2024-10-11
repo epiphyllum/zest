@@ -6,22 +6,15 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.ConvertUtils;
-import io.renren.commons.tools.utils.Result;
 import io.renren.dao.SysDeptDao;
 import io.renren.entity.SysDeptEntity;
-import io.renren.zadmin.dao.JCardDao;
-import io.renren.zadmin.dao.JMcardDao;
-import io.renren.zadmin.dao.JMerchantDao;
-import io.renren.zadmin.dao.JVaDao;
+import io.renren.zadmin.dao.*;
 import io.renren.zadmin.entity.*;
 import io.renren.zapi.notifyevent.CardApplyNotifyEvent;
 import io.renren.zbalance.Ledger;
 import io.renren.zbalance.LedgerUtil;
-import io.renren.zin.config.CardProductConfig;
 import io.renren.zin.config.ZestConfig;
 import io.renren.zin.config.ZinConstant;
-import io.renren.zin.config.ZinRequester;
-import io.renren.zin.security.AESUtil;
 import io.renren.zin.service.cardapply.ZinCardApplyService;
 import io.renren.zin.service.cardapply.dto.*;
 import io.renren.zin.service.cardmoney.ZinCardMoneyService;
@@ -36,8 +29,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.io.UnsupportedEncodingException;
-import java.security.GeneralSecurityException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -77,8 +69,8 @@ public class JCardManager {
     private LedgerUtil ledgerUtil;
     @Resource
     private ZestConfig zestConfig;
-
-
+    @Resource
+    private JCardFeeConfigDao jCardFeeConfigDao;
 
     // 补充agentId, agentName, merchantName
     public void fillByMerchant(JCardEntity entity) {
@@ -96,11 +88,23 @@ public class JCardManager {
     // 保存发卡信息
     public void save(JCardEntity entity) {
         // 查询开卡费用配置
-        CardProductConfig config = zestConfig.getCardProductConfig(entity.getProducttype(), entity.getCurrency(), entity.getCardtype());
+        List<JCardFeeConfigEntity> cardFeeConfigList = jCardFeeConfigDao.selectList(Wrappers.emptyWrapper());
+        BigDecimal fee = null;
+        for (JCardFeeConfigEntity cfg : cardFeeConfigList) {
+            if(cfg.getCardtype().equals(entity.getCardtype()) &&
+                    cfg.getProducttype().equals(entity.getProducttype()) &&
+                    cfg.getCurrency().equals(entity.getCurrency()) ) {
+                fee = cfg.getFee();
+                break;
+            }
+        }
+        if (fee == null) {
+            throw new RenException("can not find open card fee config");
+        }
 
         // 查询子商户va余额
         JBalanceEntity subVaAccount = ledgerUtil.getSubVaAccount(entity.getSubId(), entity.getCurrency());
-        if (subVaAccount.getBalance().compareTo(config.getFee()) == -1) {
+        if (subVaAccount.getBalance().compareTo(fee) == -1) {
             throw new RenException("余额不足");
         }
 
@@ -136,7 +140,7 @@ public class JCardManager {
         }
 
         // 发卡收费
-        entity.setMerchantFee(config.getFee());
+        entity.setMerchantFee(fee);
 
         // 将文件上传到通联
         this.uploadFiles(entity);
@@ -187,13 +191,10 @@ public class JCardManager {
             TCardPayInfoRequest req = new TCardPayInfoRequest();
             req.setCardno(response.getCardno());
             TCardPayInfoResponse resp = zinCardApplyService.cardPayInfo(req);
-
             String cvv = zestConfig.decryptSensitive(resp.getCvv());
             String expiredate = zestConfig.decryptSensitive(resp.getExpiredate());
 
-            updateWrapper.set(JCardEntity::getCvv, cvv)
-                    .set(JCardEntity::getExpiredate, expiredate);
-
+            updateWrapper.set(JCardEntity::getCvv, cvv).set(JCardEntity::getExpiredate, expiredate);
             tx.executeWithoutResult(status -> {
                 jCardDao.update(null, updateWrapper);
                 ledger.ledgeOpenCard(jCardEntity);
@@ -202,6 +203,10 @@ public class JCardManager {
             if (jCardEntity.getApi().equals(1)) {
                 publisher.publishEvent(new CardApplyNotifyEvent(this, jCardEntity.getId()));
             }
+
+            // 发卡成功, 查询更新状态
+            jCardEntity.setCardno(response.getCardno());
+            this.queryCard(jCardEntity);
 
             return;
         }

@@ -15,6 +15,7 @@ import io.renren.zadmin.entity.JLogEntity;
 import io.renren.zadmin.entity.JLogEntity;
 import io.renren.zadmin.service.JLogService;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +29,7 @@ import java.util.Map;
  * @since 3.0 2024-08-17
  */
 @Service
+@Slf4j
 public class JLogServiceImpl extends CrudServiceImpl<JLogDao, JLogEntity, JLogDTO> implements JLogService {
 
     @Resource
@@ -60,13 +62,19 @@ public class JLogServiceImpl extends CrudServiceImpl<JLogDao, JLogEntity, JLogDT
         String balanceType = (String) params.get("balanceType");
         if (StringUtils.isNotBlank(balanceType)) {
             if (balanceType.endsWith("_")) {
-                if (currency != null) {
+                if (StringUtils.isNotBlank(currency)) {
+                    // 余额类型以"_"结尾, 且有币种: 就等于
                     wrapper.eq("balance_type", balanceType + currency);
+                    log.debug("1. use eq: {}", balanceType + currency);
                 } else {
+                    // 余额类型以"_"结尾, 没有币种: likeRight;
                     wrapper.likeRight("balance_type", balanceType);
+                    log.debug("2. use likeRight: {}", balanceType);
                 }
             } else {
-                    wrapper.eq("balance_type", balanceType + currency);
+                // 不以"_"结尾
+                wrapper.eq("balance_type", balanceType);
+                log.debug("3. use eq: {}", balanceType);
             }
         }
 

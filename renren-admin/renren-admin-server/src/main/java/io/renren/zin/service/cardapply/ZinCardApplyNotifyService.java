@@ -1,13 +1,18 @@
 package io.renren.zin.service.cardapply;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import io.renren.manager.JCardManager;
 import io.renren.manager.JDepositManager;
+import io.renren.manager.JMcardManager;
+import io.renren.manager.JWithdrawManager;
 import io.renren.zadmin.dao.JCardDao;
 import io.renren.zadmin.dao.JDepositDao;
 import io.renren.zadmin.dao.JMcardDao;
+import io.renren.zadmin.dao.JWithdrawDao;
 import io.renren.zadmin.entity.JCardEntity;
 import io.renren.zadmin.entity.JDepositEntity;
 import io.renren.zadmin.entity.JMcardEntity;
+import io.renren.zadmin.entity.JWithdrawEntity;
 import io.renren.zapi.notifyevent.CardApplyNotifyEvent;
 import io.renren.zbalance.Ledger;
 import io.renren.zin.config.ZinConstant;
@@ -25,21 +30,24 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Slf4j
 public class ZinCardApplyNotifyService {
 
+    // dao
     @Resource
     private JCardDao jCardDao;
     @Resource
     private JMcardDao jMcardDao;
     @Resource
-    private Ledger ledger;
+    private JDepositDao jDepositDao;
     @Resource
-    private TransactionTemplate tx;
-    @Resource
-    private ApplicationEventPublisher publisher;
+    private JWithdrawDao jWithdrawDao;
+    // manager
     @Resource
     private JDepositManager jDepositManager;
     @Resource
-    private JDepositDao jDepositDao;
-
+    private JWithdrawManager jWithdrawManager;
+    @Resource
+    private JCardManager jCardManager;
+    @Resource
+    private JMcardManager jMcardManager;
 
     // 卡申请单状态通知: 3005
     public void cardApplyNotify(TCardApplyNotify notify) {
@@ -70,17 +78,7 @@ public class ZinCardApplyNotifyService {
         if (jMcardEntity.getState().equals(notify.getState())) {
             return;
         }
-
-        tx.executeWithoutResult(status -> {
-            jMcardDao.update(null, Wrappers.<JMcardEntity>lambdaUpdate()
-                    .eq(JMcardEntity::getId, jMcardEntity.getId())
-                    .eq(JMcardEntity::getState, jMcardEntity.getState())  // 确保中间没有状态变化
-                    .set(JMcardEntity::getState, notify.getState())
-                    .set(JMcardEntity::getCardno, notify.getCardno())
-                    .set(JMcardEntity::getFee, notify.getFee())
-                    .set(JMcardEntity::getFeecurrency, notify.getFeecurrency())
-            );
-        });
+        jMcardManager.query(jMcardEntity);
     }
 
     // 收到子卡申请通知
@@ -88,46 +86,11 @@ public class ZinCardApplyNotifyService {
         JCardEntity jCardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
                 .eq(JCardEntity::getApplyid, notify.getApplyid())
         );
-
         // 状态一样: 不需要处理
         if (jCardEntity.getState().equals(notify.getState())) {
             return;
         }
-
-        // 准备待更新字段
-        JCardEntity update = new JCardEntity();
-        update.setId(jCardEntity.getId());
-        update.setState(notify.getState());
-        update.setFeecurrency(notify.getFeecurrency());
-        update.setFee(notify.getFee());
-        update.setCardno(notify.getCardno());
-
-        // 从非失败  -> 失败,  处理退款
-        String prevState = jCardEntity.getState();
-        String nextState = notify.getState();
-        if (!(prevState.equals(ZinConstant.CARD_APPLY_VERIFY_FAIL) ||
-                prevState.equals(ZinConstant.CARD_APPLY_FAIL) ||
-                prevState.equals(ZinConstant.CARD_APPLY_CLOSE)
-        ) && (nextState.equals(ZinConstant.CARD_APPLY_VERIFY_FAIL) ||
-                prevState.equals(ZinConstant.CARD_APPLY_FAIL) ||
-                prevState.equals(ZinConstant.CARD_APPLY_CLOSE))
-        ) {
-            tx.executeWithoutResult(status -> {
-                jCardDao.updateById(update);
-                ledger.ledgeOpenCardUnFreeze(jCardEntity);
-            });
-        } else {
-            // 其他情况， 只需要更新状态
-            jCardDao.updateById(update);
-        }
-
-        // 不是API就不用通知接入商户了
-        if (jCardEntity.getApi().equals(0)) {
-            return;
-        }
-
-        // 通知接入商户
-        publisher.publishEvent(new CardApplyNotifyEvent(this, jCardEntity.getId()));
+        jCardManager.query(jCardEntity);
     }
 
     // CP450	开卡	申请开卡
@@ -137,9 +100,8 @@ public class ZinCardApplyNotifyService {
         if (cardbusinesstype.equals("1")) {
             this.handleCP450MainCard(notify);
         }
-
         // 子卡
-        if (cardbusinesstype.equals("1")) {
+        if (cardbusinesstype.equals("0")) {
             this.handleCP450SubCard(notify);
         }
     }
@@ -154,6 +116,7 @@ public class ZinCardApplyNotifyService {
 
     //CP451 保证金缴纳|卡片资金充值
     public void handleCP451(TCardApplyNotify notify) {
+        // 查询下申请单
         String applyid = notify.getApplyid();
         JDepositEntity entity = jDepositDao.selectOne(Wrappers.<JDepositEntity>lambdaQuery().eq(JDepositEntity::getApplyid, applyid));
         jDepositManager.query(entity);
@@ -161,6 +124,9 @@ public class ZinCardApplyNotifyService {
 
     //CP452	保证金提现|卡片资金提现
     public void handleCP452(TCardApplyNotify notify) {
+        String applyid = notify.getApplyid();
+        JWithdrawEntity entity = jWithdrawDao.selectOne(Wrappers.<JWithdrawEntity>lambdaQuery().eq(JWithdrawEntity::getApplyid, applyid));
+        jWithdrawManager.query(entity);
     }
 
     // CP462: 释放担保金

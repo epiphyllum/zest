@@ -9,6 +9,7 @@ import io.renren.zin.config.ZinConstant;
 import io.renren.zin.service.exchange.ZinExchangeService;
 import io.renren.zin.service.exchange.dto.*;
 import jakarta.annotation.Resource;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -23,6 +24,8 @@ public class JExchangeManager {
     private TransactionTemplate tx;
     @Resource
     private Ledger ledger;
+    @Resource
+    private ApplicationEventPublisher publisher;
 
     /**
      * 提交到通联
@@ -71,6 +74,11 @@ public class JExchangeManager {
         } else {
             // 其他情况,  只是简单更新
             jExchangeDao.updateById(update);
+        }
+
+        // 是否通知商户
+        if (jExchangeEntity.getApi() == 1) {
+            publisher.publishEvent(null); // todo;
         }
     }
 

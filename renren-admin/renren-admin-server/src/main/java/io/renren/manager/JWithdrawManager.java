@@ -80,6 +80,13 @@ public class JWithdrawManager {
             jWithdrawDao.insert(entity);
             ledger.ledgeCardWithdrawFreeze(entity, subEntity);
         });
+
+        // 立即发起提交到通联
+        try {
+            this.submit(entity);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     /**
@@ -89,7 +96,7 @@ public class JWithdrawManager {
         TCardApplyQuery query = new TCardApplyQuery();
         query.setApplyid(entity.getApplyid());
         TCardApplyResponse response = zinCardApplyService.cardApplyQuery(query);
-        String oldState = entity.getState();
+        String oldState = entity.getState() == null ? "" : entity.getState();
         String newState = response.getState();
         // 状态无变化
         if (oldState.equals(newState)) {
@@ -131,5 +138,9 @@ public class JWithdrawManager {
         update.setId(entity.getId());
         update.setApplyid(response.getApplyid());
         jWithdrawDao.updateById(update);
+
+        // 立即查询通联
+        entity.setApplyid(response.getApplyid());
+        this.query(entity);
     }
 }

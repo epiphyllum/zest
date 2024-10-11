@@ -3,6 +3,7 @@ package io.renren.zin.service.exchange;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.ConvertUtils;
+import io.renren.manager.JExchangeManager;
 import io.renren.zadmin.dao.JExchangeDao;
 import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.entity.JExchangeEntity;
@@ -17,7 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
 
-// CP110  离岸换汇
+// CP110 离岸换汇通知
 @Service
 @Slf4j
 public class CP110 {
@@ -27,13 +28,11 @@ public class CP110 {
     @Resource
     private JExchangeDao jExchangeDao;
     @Resource
-    private Ledger ledger;
-    @Resource
     private JMerchantDao jMerchantDao;
     @Resource
-    private TransactionTemplate tx;
+    private JExchangeManager jExchangeManager;
 
-    public void handle(TExchangeStateNotify notify, int status) {
+    public void handle(TExchangeStateNotify notify) {
         JExchangeEntity jExchangeEntity = jExchangeDao.selectOne(Wrappers.<JExchangeEntity>lambdaQuery()
                 .eq(JExchangeEntity::getApplyid, notify.getApplyid())
         );
@@ -42,37 +41,11 @@ public class CP110 {
             throw new RenException("invalid meraplid");
         }
 
-        // 已经是终态了: 只需要通知商户
+        // 已经是终态了， 属于重复通知
         if (jExchangeEntity.getState().equals("06")) {
-            log.info("换汇已经是终态！");
-            notifyMerchant(notify, jExchangeEntity);
             return;
         }
-
-        // 只有换汇成功， 且之前不是成功
-        if (status == 1 && !jExchangeEntity.getState().equals("06")) {
-            log.info("通知换汇成功, 且之前是不成功");
-            tx.executeWithoutResult(st -> {
-                jExchangeDao.update(null, Wrappers.<JExchangeEntity>lambdaUpdate()
-                        .eq(JExchangeEntity::getId, jExchangeEntity.getId())
-                        .ne(JExchangeEntity::getState, "06")
-                        .set(JExchangeEntity::getState, "06")
-                        .set(JExchangeEntity::getExfxrate, notify.getFxrate())
-                        .set(JExchangeEntity::getExfee, notify.getFee())
-                );
-                jExchangeEntity.setExfxrate(notify.getFxrate());
-                jExchangeEntity.setExfxrate(notify.getFee());
-                ledger.ledgeExchange(jExchangeEntity);
-            });
-        } else {
-            // 准备待更新内容
-            JExchangeEntity updateEntity = ConvertUtils.sourceToTarget(notify, JExchangeEntity.class);
-            updateEntity.setId(jExchangeEntity.getId());
-            updateEntity.setExfxrate(notify.getFxrate());
-            updateEntity.setExfee(notify.getFee());
-            jExchangeDao.updateById(updateEntity);
-        }
-        notifyMerchant(notify, jExchangeEntity);
+        jExchangeManager.query(jExchangeEntity);
     }
 
     private void notifyMerchant(TExchangeStateNotify notify, JExchangeEntity jExchangeEntity) {

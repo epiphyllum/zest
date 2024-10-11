@@ -79,14 +79,14 @@ public class JWithdrawController {
     @Operation(summary = "保存")
     @LogOperation("保存")
     @PreAuthorize("hasAuthority('zorg:jwithdraw:save')")
-    public Result save(@RequestBody JWithdrawDTO dto) {
+    public Result<Long> save(@RequestBody JWithdrawDTO dto) {
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
         JWithdrawEntity jWithdrawEntity = ConvertUtils.sourceToTarget(dto, JWithdrawEntity.class);
         jWithdrawEntity.setApi(0);
         jWithdrawEntity.setMeraplid(CommonUtils.newRequestId());
         jWithdrawManager.save(jWithdrawEntity);
-        return new Result();
+        return new Result<Long>().ok(jWithdrawEntity.getId());
     }
 
     @PutMapping

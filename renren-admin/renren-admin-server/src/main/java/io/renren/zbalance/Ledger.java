@@ -63,7 +63,7 @@ public class Ledger {
         JMerchantEntity merchant = jMerchantDao.selectById(entity.getMerchantId());
         BigDecimal hundred = new BigDecimal("100");
         BigDecimal chargeShare = merchant.getChargeRate().multiply(hundred);
-        BigDecimal depositShare = merchant.getChargeRate().multiply(hundred);
+        BigDecimal depositShare = merchant.getDepositRate().multiply(hundred);
         BigDecimal vaShare = hundred.subtract(chargeShare).subtract(depositShare);
 
         // 先反算出入金总额
@@ -72,13 +72,19 @@ public class Ledger {
         // 再算出这个金额对应多少保证金和手续费
         BigDecimal vaAmount = entity.getAmount();
         BigDecimal depositAmount = total.multiply(merchant.getDepositRate()).setScale(2, RoundingMode.HALF_UP);
-        BigDecimal feeAmount = total.subtract(depositAmount).subtract(entity.getAmount());
+        BigDecimal feeAmount = total.subtract(depositAmount).subtract(vaAmount);
+
+        log.debug("reverse in:     {} = (100 * {}) / {}", total, entity.getAmount(), vaShare);
+        log.debug("reverse deposit:{} = {} * {}", depositAmount, total, merchant.getDepositRate());
+        log.debug("reverse fee:    {} = {} - {} - {}", feeAmount, total, depositAmount, vaAmount);
 
         // 凭证说明
         BigDecimal showVa = BigDecimal.ZERO.add(vaAmount).setScale(2, RoundingMode.HALF_UP);
-        String factMemo = String.format("换汇:%s(%s)->%s(%s), 换算冻结(%s): VA:%s, 保证金:%s, 充值费用:%s",
-                showVa, entity.getPayerccy(),
-                showVa, entity.getPayeeccy(),
+        String factMemo = String.format("冻结 | 换汇卖出%s买入%s | 卖出金额: %s, %s账户: (VA:%s, 保证金:%s, 充值费用:%s)",
+                entity.getPayerccy(), entity.getPayeeccy(),
+                entity.getAmount(),
+
+                entity.getPayeeccy(),
                 showVa,
                 BigDecimal.ZERO.add(depositAmount).setScale(2, RoundingMode.HALF_UP),
                 BigDecimal.ZERO.add(feeAmount).setScale(2, RoundingMode.HALF_UP)
@@ -102,7 +108,7 @@ public class Ledger {
         JMerchantEntity merchant = jMerchantDao.selectById(entity.getMerchantId());
         BigDecimal hundred = new BigDecimal("100");
         BigDecimal chargeShare = merchant.getChargeRate().multiply(hundred);
-        BigDecimal depositShare = merchant.getChargeRate().multiply(hundred);
+        BigDecimal depositShare = merchant.getDepositRate().multiply(hundred);
         BigDecimal vaShare = hundred.subtract(chargeShare).subtract(depositShare);
 
         // 先反算出入金总额
@@ -111,13 +117,19 @@ public class Ledger {
         // 再算出这个金额对应多少保证金和手续费
         BigDecimal vaAmount = entity.getAmount();
         BigDecimal depositAmount = total.multiply(merchant.getDepositRate()).setScale(2, RoundingMode.HALF_UP);
-        BigDecimal feeAmount = total.subtract(depositAmount).subtract(entity.getAmount());
+        BigDecimal feeAmount = total.subtract(depositAmount).subtract(vaAmount);
+
+        log.debug("reverse in:     {} = (100 * {}) / {}", total, entity.getAmount(), vaShare);
+        log.debug("reverse deposit:{} = {} * {}", depositAmount, total, merchant.getDepositRate());
+        log.debug("reverse fee:    {} = {} - {} - {}", feeAmount, total, depositAmount, vaAmount);
 
         // 凭证说明
         BigDecimal showVa = BigDecimal.ZERO.add(vaAmount).setScale(2, RoundingMode.HALF_UP);
-        String factMemo = String.format("换汇:%s(%s)->%s(%s), 换算冻结(%s): VA:%s, 保证金:%s, 充值费用:%s",
-                showVa, entity.getPayerccy(),
-                showVa, entity.getPayeeccy(),
+        String factMemo = String.format("解冻 | 换汇卖出%s买入%s | 卖出金额:%s, (VA:%s, 保证金:%s, 充值费用:%s)",
+                entity.getPayerccy(), entity.getPayeeccy(),
+
+                entity.getPayeeccy(),
+                entity.getAmount(),
                 showVa,
                 BigDecimal.ZERO.add(depositAmount).setScale(2, RoundingMode.HALF_UP),
                 BigDecimal.ZERO.add(feeAmount).setScale(2, RoundingMode.HALF_UP)
@@ -136,37 +148,54 @@ public class Ledger {
     public void ledgeExchange(JExchangeEntity entity) {
         Long merchantId = entity.getMerchantId();
 
-
-        // 算份额
+        // 更具商户费率算出 入金分配份额
         JMerchantEntity merchant = jMerchantDao.selectById(entity.getMerchantId());
         BigDecimal hundred = new BigDecimal("100");
         BigDecimal chargeShare = merchant.getChargeRate().multiply(hundred);
-        BigDecimal depositShare = merchant.getChargeRate().multiply(hundred);
+        BigDecimal depositShare = merchant.getDepositRate().multiply(hundred);
         BigDecimal vaShare = hundred.subtract(chargeShare).subtract(depositShare);
 
-        // 先反算出总额度
+        // 先反算出入金总额
         BigDecimal total = hundred.multiply(entity.getAmount()).divide(vaShare, 2, RoundingMode.HALF_UP);
 
         // 再算出这个金额对应多少保证金和手续费
         BigDecimal vaAmount = entity.getAmount();
         BigDecimal depositAmount = total.multiply(merchant.getDepositRate()).setScale(2, RoundingMode.HALF_UP);
-        BigDecimal feeAmount = total.subtract(depositAmount).subtract(entity.getAmount());
+        BigDecimal feeAmount = total.subtract(depositAmount).subtract(vaAmount);
+
+        log.debug("reverse in:     {} = (100 * {}) / {}", total, entity.getAmount(), vaShare);
+        log.debug("reverse deposit:{} = {} * {}", depositAmount, total, merchant.getDepositRate());
+        log.debug("reverse fee:    {} = {} - {} - {}", feeAmount, total, depositAmount, vaAmount);
+
+
+        // 反算实际目标账户的入金
+        BigDecimal targetTotal = hundred.multiply(entity.getStlamount()).divide(vaShare, 2, RoundingMode.HALF_UP);
+
 
         // 再计算买入币种对应的金额
-        BigDecimal targetDepositAmount = entity.getStlamount().multiply(merchant.getDepositRate()).setScale(2, RoundingMode.HALF_UP);
-        BigDecimal targetFeeAmount = entity.getStlamount().multiply(merchant.getChargeRate()).setScale(2, RoundingMode.HALF_UP);
-        BigDecimal targetVaAmount = entity.getStlamount().subtract(targetDepositAmount).subtract(targetFeeAmount);
+        BigDecimal targetDepositAmount = targetTotal.multiply(merchant.getDepositRate()).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal targetFeeAmount = targetTotal.multiply(merchant.getChargeRate()).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal targetVaAmount = targetTotal.subtract(targetDepositAmount).subtract(targetFeeAmount);
+
+        log.debug("reverse target in:     {} = (100 * {}) / {}", targetTotal, entity.getStlamount(), vaShare);
+        log.debug("reverse target deposit:{} = {} * {}", targetDepositAmount, targetTotal, merchant.getDepositRate());
+        log.debug("reverse target fee:    {} = {} - {} - {}", targetFeeAmount, targetTotal, depositAmount, vaAmount);
 
         // 凭证说明
         BigDecimal showVa = BigDecimal.ZERO.add(vaAmount).setScale(2, RoundingMode.HALF_UP);
-        String factMemo = String.format("换汇:%s(%s)->%s(%s), 换算冻结(%s): VA:%s, 保证金:%s, 充值费用:%s | 入账(%s): VA:%s, 保证金:%s, 充值费用:%s",
-                showVa, entity.getPayerccy(),
-                showVa, entity.getPayeeccy(),
+        String factMemo = String.format("确认 | 换汇卖出%s买入%s | 卖出金额:%s, (VA:%s, 保证金:%s, 充值费用:%s) | 买入%s: 换汇:%s, 换算:(VA:%s, 保证金:%s, 充值费用:%s)",
+                entity.getPayerccy(), entity.getPayeeccy(),
+
+                // 卖出
+                entity.getAmount(),
                 showVa,
                 BigDecimal.ZERO.add(depositAmount).setScale(2, RoundingMode.HALF_UP),
                 BigDecimal.ZERO.add(feeAmount).setScale(2, RoundingMode.HALF_UP),
 
+                // 买入
                 entity.getPayeeccy(),
+                entity.getStlamount(),
+
                 targetVaAmount,
                 targetDepositAmount,
                 targetFeeAmount
@@ -237,8 +266,8 @@ public class Ledger {
         BigDecimal showMerchantFee = BigDecimal.ZERO.add(entity.getMerchantFee()).setScale(2, RoundingMode.HALF_UP);
         String factMemo = "开卡费用确认:" + showMerchantFee;
         BigDecimal merchantFee = entity.getMerchantFee();
-        // 子商户va扣除费用k
-        ledgerUtil.ledgeUpdate(subVa, LedgerConstant.ORIGIN_CARD_OPEN, LedgerConstant.FACT_CARD_OPEN_CONFIRM, entity.getId(), factMemo, merchantFee.negate());
+        // 子商户va扣除费用
+        ledgerUtil.confirmUpdate(subVa, LedgerConstant.ORIGIN_CARD_OPEN, LedgerConstant.FACT_CARD_OPEN_CONFIRM, entity.getId(), factMemo, merchantFee);
         // 子商户开卡费用账户
         ledgerUtil.ledgeUpdate(feeAccount, LedgerConstant.ORIGIN_CARD_OPEN, LedgerConstant.FACT_CARD_OPEN_FEE_IN, entity.getId(), factMemo, merchantFee);
     }
@@ -267,7 +296,7 @@ public class Ledger {
         String factMemo = "卡充值确认:" + showAmount;
         BigDecimal factAmount = entity.getAmount();
         // 记账1: 子商户subVa-
-        ledgerUtil.ledgeUpdate(subVa, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_CONFIRM, entity.getId(), factMemo, factAmount.negate());
+        ledgerUtil.confirmUpdate(subVa, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_CONFIRM, entity.getId(), factMemo, factAmount);
         // 记账2: 子商户subSum+
         ledgerUtil.ledgeUpdate(subSum, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_IN, entity.getId(), factMemo, factAmount);
     }

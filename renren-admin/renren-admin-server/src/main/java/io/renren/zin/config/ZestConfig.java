@@ -28,8 +28,6 @@ public class ZestConfig {
     private String baseUrl;  // 接口地址
     private String uploadDir;  // 上传路径
 
-    private List<CardProductConfig> cardProductConfigs;
-
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();
@@ -38,25 +36,6 @@ public class ZestConfig {
     @PostConstruct
     public void init() {
         System.out.println("zestConfig: " + this);
-    }
-
-    public CardProductConfig getCardProductConfig(String producttype, String currency, String cardtype) {
-        // 查询开卡费用配置
-        CardProductConfig config = null;
-        for (CardProductConfig cardProductConfig : cardProductConfigs) {
-            System.out.println("try: " + cardProductConfig);
-            if (producttype.equals(cardProductConfig.getProducttype()) &&
-                    currency.equals(cardProductConfig.getCurrency()) &&
-                    cardtype.equals(cardProductConfig.getCardtype())
-            ) {
-                config = cardProductConfig;
-                break;
-            }
-        }
-        if (config == null) {
-            throw new RenException("无法找到卡产品费用配置:" + producttype + "|" + currency + "|" + cardtype);
-        }
-        return config;
     }
 
     public String decryptSensitive(String sensitiveData) {

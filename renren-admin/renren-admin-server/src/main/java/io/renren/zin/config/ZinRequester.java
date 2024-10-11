@@ -1,16 +1,15 @@
 package io.renren.zin.config;
 
+import cn.hutool.core.lang.Pair;
 import cn.hutool.core.util.HexUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.asymmetric.RSA;
 import cn.hutool.crypto.asymmetric.Sign;
 import cn.hutool.crypto.asymmetric.SignAlgorithm;
 import cn.hutool.crypto.digest.DigestUtil;
-import cn.hutool.crypto.symmetric.AES;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.renren.commons.tools.exception.RenException;
-import io.renren.zin.security.AESUtil;
 import io.renren.zin.service.TResult;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
@@ -31,7 +30,6 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.security.GeneralSecurityException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -53,7 +51,6 @@ public class ZinRequester {
     private Sign verifier;
 
 
-
     @PostConstruct
     public void init() {
         AccessConfig accessConfig = zestConfig.getAccessConfig();
@@ -68,13 +65,12 @@ public class ZinRequester {
         this.verifier.setPublicKey(rsaVerifier.getPublicKey());
     }
 
-    private HttpHeaders getHeaders(String reqId, Object body, String uri, String params) {
+    private Pair<HttpHeaders, String> getHeaders(String reqId, Object body, String uri, String params) {
         ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
         String agcpDate = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         String today = now.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String agcpCrdt = zestConfig.getAccessConfig().getKeyId() + ":" + today + ":gcpservice";
         String agcpSend = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
-
 
         StringBuilder sb = new StringBuilder();
         String toSign = null;
@@ -94,7 +90,6 @@ public class ZinRequester {
                     .append(sha256Hex).toString();
         }
 
-        log.info("toSign = [{}]", toSign);
         String sign = this.signer.signHex(toSign);
         String agcpAuth = "GCP1-RSA-SHA512:" + sign;
 
@@ -110,9 +105,7 @@ public class ZinRequester {
         headers.add("X-AGCP-Date", agcpDate);
         headers.add("X-AGCP-Send", agcpSend);
         headers.add("X-AGCP-Auth", agcpAuth);
-        log.info("\nX-AGCP-Crdt:[{}]\nX-AGCP-Date:[{}]\nX-AGCP-Send:[{}]\nX-AGCP-Auth:[{}]\n", agcpCrdt, agcpDate, agcpSend, sign);
-
-        return headers;
+        return Pair.of(headers, toSign);
     }
 
     // 传对象过来
@@ -123,7 +116,8 @@ public class ZinRequester {
         } catch (JsonProcessingException e) {
             throw new RenException("invalid request, can not convert to json");
         }
-        HttpHeaders headers = getHeaders(reqId, body, uri, null);
+        Pair<HttpHeaders, String> headerInfo = getHeaders(reqId, body, uri, null);
+        HttpHeaders headers = headerInfo.getKey();
         headers.setContentType(MediaType.APPLICATION_JSON);
         RequestEntity requestEntity = RequestEntity.post("")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -132,15 +126,15 @@ public class ZinRequester {
                 .headers(headers)
                 .body(body);
         String url = zestConfig.getAccessConfig().getBaseUrl() + uri + "?" + commonQueryParams + "&" + "reqid=" + reqId;
-        log.info("req:[{}][{}]", url, body);
         ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
         String bodyResp = responseEntity.getBody();
-        log.info("res:[{}]", bodyResp);
+        log.info("req-res: [{}][{}][{}]", url, body, bodyResp);
         try {
             T ttResult = objectMapper.readValue(bodyResp, clazz);
             if (ttResult.getRspcode().equals("0000")) {
                 return ttResult;
             }
+            log.error("toSign: [{}]", headerInfo.getValue());
             throw new RenException("allinpay exception:" + ttResult.getRspinfo());
         } catch (JsonProcessingException e) {
             e.printStackTrace();
@@ -151,7 +145,8 @@ public class ZinRequester {
     // 传map过来的
     public <T extends TResult> T request(String reqId, String uri, Map<String, Object> map, Class<T> clazz) throws JsonProcessingException {
         String body = this.objectMapper.writeValueAsString(map);
-        HttpHeaders headers = getHeaders(reqId, body, uri, null);
+        Pair<HttpHeaders, String> headerInfo = getHeaders(reqId, body, uri, null);
+        HttpHeaders headers = headerInfo.getKey();
         headers.setContentType(MediaType.APPLICATION_JSON);
         RequestEntity requestEntity = RequestEntity.post("")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -160,12 +155,14 @@ public class ZinRequester {
                 .headers(headers)
                 .body(body);
         String url = zestConfig.getAccessConfig().getBaseUrl() + uri + "?" + commonQueryParams + "&" + "reqid=" + reqId;
-        log.info("req:[{}][{}]", url, body);
         ResponseEntity<String> response = restTemplate.postForEntity(url, requestEntity, String.class);
         String bodyResp = response.getBody();
-        log.info("req:[{}][{}]", url, bodyResp);
+        log.info("req:[{}][{}][{}]", url, body, bodyResp);
         try {
             T ttResult = objectMapper.readValue(bodyResp, clazz);
+            if (!ttResult.getRspcode().equals("0000")) {
+                log.error("toSign:[{}][{}]", headerInfo.getValue());
+            }
             return ttResult;
         } catch (JsonProcessingException e) {
             throw new RenException("request to allinpay failed");
@@ -183,7 +180,8 @@ public class ZinRequester {
                 "&zip=0";
         String body = Base64.getUrlEncoder().encodeToString(bodyBytes);
         String uri = "/gcpapi/file/upload";
-        HttpHeaders headers = getHeaders(reqId, bodyBytes, uri, params);
+        Pair<HttpHeaders, String> headerInfo = getHeaders(reqId, bodyBytes, uri, params);
+        HttpHeaders headers = headerInfo.getKey();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
 
         RequestEntity requestEntity = RequestEntity.post("")
@@ -192,12 +190,9 @@ public class ZinRequester {
                 .headers(headers)
                 .body(body);
 
-
         String url = zestConfig.getAccessConfig().getBaseUrl() + uri + "?" + params;
-        log.info("req:[{}]", url);
         ResponseEntity<String> response = restTemplate.postForEntity(url, requestEntity, String.class);
         String bodyStr = response.getBody();
-        log.info("res:[{}]", bodyStr);
         TResult tResult = null;
         try {
             tResult = objectMapper.readValue(bodyStr, TResult.class);
@@ -229,7 +224,6 @@ public class ZinRequester {
 
     // 验证通联回调
     public <T> T verify(HttpServletRequest request, String body, String auth, String date, Class<T> clazz) {
-        body = this.readBody(request);
         log.info("recv notification[{}]\nbody:[{}]\nauth:[{}]\ndate:[{}]", request.getRequestURI(), body, auth, date);
         String uri = request.getRequestURI();
         String params = request.getQueryString();
