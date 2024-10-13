@@ -2,6 +2,7 @@ package io.renren.zadmin.zorg.config;
 
 import io.renren.commons.log.annotation.LogOperation;
 import io.renren.commons.tools.constant.Constant;
+import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.page.PageData;
 import io.renren.commons.tools.utils.Result;
 import io.renren.commons.tools.utils.ExcelUtils;
@@ -10,6 +11,7 @@ import io.renren.commons.tools.validator.ValidatorUtils;
 import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
+import io.renren.zadmin.ZestConstant;
 import io.renren.zadmin.dto.JConfigDTO;
 import io.renren.zadmin.excel.JConfigExcel;
 import io.renren.zadmin.service.JConfigService;
@@ -49,6 +51,9 @@ public class JConfigController {
     })
     @PreAuthorize("hasAuthority('zorg:jconfig:page')")
     public Result<PageData<JConfigDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params){
+        if (!ZestConstant.isOperation()) {
+            throw new RenException("not permitted");
+        }
         PageData<JConfigDTO> page = jConfigService.page(params);
 
         return new Result<PageData<JConfigDTO>>().ok(page);

@@ -1,6 +1,5 @@
 package io.renren.zadmin.zorg.member;
 
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.log.annotation.LogOperation;
 import io.renren.commons.security.user.SecurityUser;
@@ -17,18 +16,12 @@ import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
 import io.renren.manager.JMerchantManager;
+import io.renren.zadmin.ZestConstant;
 import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.dto.JMerchantDTO;
 import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zadmin.excel.JMerchantExcel;
-import io.renren.zadmin.service.JAgentService;
 import io.renren.zadmin.service.JMerchantService;
-import io.renren.zin.service.file.ZinFileService;
-import io.renren.zin.service.sub.ZinSubService;
-import io.renren.zin.service.sub.dto.TSubCreateRequest;
-import io.renren.zin.service.sub.dto.TSubCreateResponse;
-import io.renren.zin.service.sub.dto.TSubQuery;
-import io.renren.zin.service.sub.dto.TSubQueryResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -39,10 +32,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 
 /**
@@ -74,6 +65,9 @@ public class JMerchantController {
     })
     @PreAuthorize("hasAuthority('zorg:jmerchant:page')")
     public Result<PageData<JMerchantDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
+        if (!ZestConstant.isOperationOrAgent()) {
+            throw new RenException("not permitted");
+        }
         PageData<JMerchantDTO> page = jMerchantService.page(params);
         return new Result<PageData<JMerchantDTO>>().ok(page);
     }
@@ -92,6 +86,8 @@ public class JMerchantController {
                 .eq(merchantId != null, JMerchantEntity::getId, merchantId)
                 .eq("agent".equals(user.getUserType()), JMerchantEntity::getAgentId, user.getDeptId())
                 .eq("merchant".equals(user.getUserType()), JMerchantEntity::getId, user.getDeptId())
+                .eq(JMerchantEntity::getEnabled, 1)
+                .eq(JMerchantEntity::getState, "01")
         );
         Result<List<JMerchantDTO>> result = new Result<>();
         List<JMerchantDTO> dtos = ConvertUtils.sourceToTarget(jMerchantEntities, JMerchantDTO.class);
@@ -118,7 +114,6 @@ public class JMerchantController {
         }
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
-        // jMerchantService.save(dto);
         jMerchantManager.save(dto);
         return new Result();
     }

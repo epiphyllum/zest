@@ -1,6 +1,7 @@
 package io.renren.zapi;
 
 
+import ch.qos.logback.classic.Logger;
 import cn.hutool.core.lang.Pair;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.asymmetric.RSA;
@@ -11,6 +12,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.Result;
+import io.renren.commons.tools.validator.ValidatorUtils;
+import io.renren.commons.tools.validator.group.AddGroup;
+import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zapi.service.account.ApiAccountService;
@@ -149,7 +153,12 @@ public class ApiService {
 
         try {
             Object req = objectMapper.readValue(body, apiMeta.getReqClass());
-            return (Result)apiMeta.getMethod().invoke(apiMeta.getInstance(), req);
+            // todo: validate request
+            // ValidatorUtils.validateEntity(req);
+
+            Logger logger = CommonUtils.getLogger(merchant.getCusname());
+            ApiContext context = new ApiContext(merchant, logger);
+            return (Result)apiMeta.getMethod().invoke(apiMeta.getInstance(), req, context);
         } catch (JsonProcessingException e) {
             throw new RenException("invalid json");
         } catch (InvocationTargetException e) {

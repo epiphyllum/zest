@@ -1,5 +1,6 @@
 package io.renren.zadmin.service.impl;
 
+import com.alibaba.cloud.commons.lang.StringUtils;
 import com.alibaba.cloud.sentinel.datasource.factorybean.ZookeeperDataSourceFactoryBean;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -27,7 +28,6 @@ import io.renren.zadmin.zorg.member.JMerchantController;
 import io.renren.zbalance.BalanceType;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -66,6 +66,12 @@ public class JMerchantServiceImpl extends CrudServiceImpl<JMerchantDao, JMerchan
     public QueryWrapper<JMerchantEntity> getWrapper(Map<String, Object> params) {
         QueryWrapper<JMerchantEntity> wrapper = new QueryWrapper<>();
         commonFilter.setFilterAgent(wrapper, params);
+
+            String merchantId = (String) params.get("merchantId");
+            if (StringUtils.isNotBlank(merchantId)) {
+                wrapper.eq( "id", Long.parseLong(merchantId));
+            }
+
         return wrapper;
     }
 

@@ -3,9 +3,11 @@ package io.renren.zapi;
 import ch.qos.logback.classic.Logger;
 import com.alibaba.ttl.TransmittableThreadLocal;
 import io.renren.zadmin.entity.JMerchantEntity;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
 public class ApiContext {
     private static final ThreadLocal<ApiContext> API_CONTEXT_THREAD_LOCAL = new TransmittableThreadLocal<>();
     public static void setContext(ApiContext context) {

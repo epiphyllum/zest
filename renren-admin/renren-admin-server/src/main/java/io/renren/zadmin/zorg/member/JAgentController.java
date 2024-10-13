@@ -4,6 +4,7 @@ import io.renren.commons.log.annotation.LogOperation;
 import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.constant.Constant;
+import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.page.PageData;
 import io.renren.commons.tools.utils.Result;
 import io.renren.commons.tools.utils.ExcelUtils;
@@ -13,6 +14,7 @@ import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
 import io.renren.service.SysDeptService;
+import io.renren.zadmin.ZestConstant;
 import io.renren.zadmin.dto.JAgentDTO;
 import io.renren.zadmin.excel.JAgentExcel;
 import io.renren.zadmin.service.JAgentService;
@@ -54,6 +56,9 @@ public class JAgentController {
     })
     @PreAuthorize("hasAuthority('zorg:jagent:page')")
     public Result<PageData<JAgentDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
+        if (!ZestConstant.isOperation()) {
+            throw new RenException("not permitted");
+        }
         PageData<JAgentDTO> page = jAgentService.page(params);
         return new Result<PageData<JAgentDTO>>().ok(page);
     }

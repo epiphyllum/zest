@@ -72,10 +72,26 @@ public class JBalanceController {
             params.put(Constant.LIMIT, "100");
             params.put(Constant.PAGE, "1");
         }
+
+        if (ZestConstant.isMerchant()) {
+            params.put("merchantId", SecurityUser.getDeptId().toString());
+        }
+        else if (ZestConstant.isSub()) {
+            params.put("subId", SecurityUser.getDeptId().toString());
+        }
+        else if (ZestConstant.isAgent()) {
+            params.put("agentId", SecurityUser.getDeptId().toString());
+        }
+
         PageData<JBalanceDTO> page = jBalanceService.page(params);
         return new Result<PageData<JBalanceDTO>>().ok(page);
     }
 
+    /**
+     *  这里是按组展示商户的账户。 必须要有ownerId
+     * @param params
+     * @return
+     */
     @GetMapping("page/merchant")
     @Operation(summary = "分页")
     @Parameters({
@@ -86,8 +102,8 @@ public class JBalanceController {
     })
     @PreAuthorize("hasAuthority('zorg:jbalance:page')")
     public Result<PageData<JBalanceDTO>> pageMerchant(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
-
         if (ZestConstant.isOperationOrAgent()) {
+            // 运营+代理登录， 必须有ownerId
             if (StringUtils.isBlank((String) params.get("ownerId"))) {
                 PageData<JBalanceDTO> page = new PageData<>();
                 page.setTotal(0);
@@ -96,9 +112,11 @@ public class JBalanceController {
             }
             log.info("page/merchant, operation/agent, ownerId: {}", params.get("ownerId"));
         } else if (ZestConstant.isMerchant()) {
+            // 商户登录， ownerId 就是自己
             log.info("page/merchant, ownerId: {}", SecurityUser.getDeptId());
             params.put("ownerId", SecurityUser.getDeptId().toString());
         } else {
+            // 其他为非法用户
             throw new RenException("invalid user");
         }
 
@@ -162,6 +180,7 @@ public class JBalanceController {
     public Result<PageData<JBalanceDTO>> pageSub(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
 
         if (ZestConstant.isOperationOrAgentOrMerchant()) {
+            // 机构+代理+商户登录， 必须有ownerId(subId)
             if (StringUtils.isBlank((String) params.get("ownerId"))) {
                 PageData<JBalanceDTO> page = new PageData<>();
                 page.setTotal(0);
@@ -170,6 +189,7 @@ public class JBalanceController {
             }
             log.info("page/merchant, operation/agent, ownerId: {}", params.get("ownerId"));
         } else if (ZestConstant.isSub()) {
+            // 子商户登录， subId就是ownerId
             params.put("ownerId", SecurityUser.getDeptId().toString());
         } else {
             throw new RenException("invalid user");

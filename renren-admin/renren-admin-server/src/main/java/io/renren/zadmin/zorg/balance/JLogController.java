@@ -1,6 +1,7 @@
 package io.renren.zadmin.zorg.balance;
 
 import io.renren.commons.log.annotation.LogOperation;
+import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.tools.constant.Constant;
 import io.renren.commons.tools.page.PageData;
 import io.renren.commons.tools.utils.Result;
@@ -10,6 +11,7 @@ import io.renren.commons.tools.validator.ValidatorUtils;
 import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
+import io.renren.zadmin.ZestConstant;
 import io.renren.zadmin.dto.JLogDTO;
 import io.renren.zadmin.excel.JLogExcel;
 import io.renren.zadmin.service.JLogService;
@@ -59,8 +61,16 @@ public class JLogController {
                     "hasAuthority('zorg:jlog-subfee:page')"
     )
     public Result<PageData<JLogDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
-//        params.put(Constant.ORDER_FIELD, "version");
         params.put(Constant.ORDER, "desc");
+        if (ZestConstant.isMerchant()) {
+            params.put("merchantId", SecurityUser.getDeptId().toString());
+        }
+        else if (ZestConstant.isSub()) {
+            params.put("subId", SecurityUser.getDeptId().toString());
+        }
+        else if (ZestConstant.isAgent()) {
+            params.put("agentId", SecurityUser.getDeptId().toString());
+        }
         PageData<JLogDTO> page = jLogService.page(params);
         return new Result<PageData<JLogDTO>>().ok(page);
     }

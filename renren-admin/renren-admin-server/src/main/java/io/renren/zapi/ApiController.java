@@ -1,6 +1,5 @@
 package io.renren.zapi;
 
-
 import io.renren.commons.tools.utils.Result;
 import io.renren.zapi.service.file.ApiFileService;
 import jakarta.annotation.Resource;
@@ -32,9 +31,7 @@ public class ApiController {
         return apiService.invokeService(body, merchantId, sign, reqId, name);
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////
     // 通知我们的商户
-    //////////////////////////////////////////////////////////////////////////////////////
     @PostMapping("mock/webhook")
     public String webhook(
             @RequestBody String body,

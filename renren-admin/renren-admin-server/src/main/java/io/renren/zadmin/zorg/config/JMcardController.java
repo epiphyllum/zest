@@ -15,6 +15,7 @@ import io.renren.commons.tools.validator.ValidatorUtils;
 import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
+import io.renren.zadmin.ZestConstant;
 import io.renren.zadmin.dao.JMcardDao;
 import io.renren.zadmin.dto.JMcardDTO;
 import io.renren.zadmin.entity.JMcardEntity;
@@ -74,6 +75,9 @@ public class JMcardController {
     })
     @PreAuthorize("hasAuthority('zorg:jmcard:page')")
     public Result<PageData<JMcardDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
+        if (!ZestConstant.isOperationOrAgent()) {
+            throw new RenException("not permitted");
+        }
         PageData<JMcardDTO> page = jmcardService.page(params);
         return new Result<PageData<JMcardDTO>>().ok(page);
     }

@@ -1,5 +1,6 @@
 package io.renren.zadmin.service.impl;
 
+import com.alibaba.cloud.commons.lang.StringUtils;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -25,7 +26,6 @@ import io.renren.zadmin.service.JSubService;
 import io.renren.zbalance.BalanceType;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -66,6 +66,12 @@ public class JSubServiceImpl extends CrudServiceImpl<JSubDao, JSubEntity, JSubDT
     public QueryWrapper<JSubEntity> getWrapper(Map<String, Object> params) {
         QueryWrapper<JSubEntity> wrapper = new QueryWrapper<>();
         commonFilter.setFilterMerchant(wrapper, params);
+
+        String subId = (String) params.get("subId");
+        if (com.alibaba.cloud.commons.lang.StringUtils.isNotBlank(subId)) {
+            wrapper.eq("id", Long.parseLong(subId));
+        }
+
         return wrapper;
     }
 

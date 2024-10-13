@@ -5,6 +5,7 @@ import io.renren.commons.log.annotation.LogOperation;
 import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.constant.Constant;
+import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.page.PageData;
 import io.renren.commons.tools.utils.Result;
 import io.renren.commons.tools.utils.ExcelUtils;
@@ -14,6 +15,7 @@ import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
 import io.renren.manager.JMoneyManager;
+import io.renren.zadmin.ZestConstant;
 import io.renren.zadmin.dao.JMaccountDao;
 import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.dao.JMoneyDao;
@@ -82,6 +84,9 @@ public class JMoneyController {
     })
     @PreAuthorize("hasAuthority('zorg:jmoney:page')")
     public Result<PageData<JMoneyDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
+        if (!ZestConstant.isOperationOrAgentOrMerchant()) {
+            throw new RenException("not permitted");
+        }
         PageData<JMoneyDTO> page = jMoneyService.page(params);
         return new Result<PageData<JMoneyDTO>>().ok(page);
     }

@@ -5,6 +5,7 @@ import io.renren.commons.log.annotation.LogOperation;
 import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.constant.Constant;
+import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.page.PageData;
 import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.commons.tools.utils.Result;
@@ -14,6 +15,7 @@ import io.renren.commons.tools.validator.ValidatorUtils;
 import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
+import io.renren.zadmin.ZestConstant;
 import io.renren.zadmin.dao.JVaDao;
 import io.renren.zadmin.dto.JVaDTO;
 import io.renren.zadmin.entity.JVaEntity;
@@ -67,6 +69,9 @@ public class JVaController {
     })
     @PreAuthorize("hasAuthority('zorg:jva:page')")
     public Result<PageData<JVaDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
+        if (!ZestConstant.isOperationOrAgent()) {
+            throw new RenException("not permitted");
+        }
         params.put(Constant.PAGE, "1");
         params.put(Constant.LIMIT, "15");
         PageData<JVaDTO> page = jVaService.page(params);

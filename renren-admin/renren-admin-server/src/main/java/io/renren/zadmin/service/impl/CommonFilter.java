@@ -136,12 +136,12 @@ public class CommonFilter {
             String agentId = (String) params.get("agentId");
             if (org.apache.commons.lang3.StringUtils.isNotBlank(subId)) {
                 rootId = subId;
-            } else if (org.apache.commons.lang3.StringUtils.isNotBlank(merchantId)) {
+            } else if (StringUtils.isNotBlank(merchantId)) {
                 rootId = merchantId;
             } else if (org.apache.commons.lang3.StringUtils.isNotBlank(agentId)) {
                 rootId = agentId;
             }
-            if (org.apache.commons.lang3.StringUtils.isNotBlank(rootId)) {
+            if (StringUtils.isNotBlank(rootId)) {
                 Long top = Long.parseLong(rootId);
                 List<Long> subDeptIdList = sysDeptService.getSubDeptIdList(top);
                 wrapper.in("owner_id", subDeptIdList);

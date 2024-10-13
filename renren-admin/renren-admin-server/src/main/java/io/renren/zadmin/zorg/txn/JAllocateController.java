@@ -15,6 +15,7 @@ import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
 import io.renren.manager.JAllocateManager;
+import io.renren.zadmin.ZestConstant;
 import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.dao.JSubDao;
 import io.renren.zadmin.dto.JAllocateDTO;
@@ -66,6 +67,9 @@ public class JAllocateController {
     })
     @PreAuthorize("hasAuthority('zorg:jallocate:page')")
     public Result<PageData<JAllocateDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
+        if (!ZestConstant.isOperationOrAgentOrMerchant()) {
+            throw new RenException("not permitted");
+        }
         PageData<JAllocateDTO> page = jAllocateService.page(params);
         return new Result<PageData<JAllocateDTO>>().ok(page);
     }
