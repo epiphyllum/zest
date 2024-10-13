@@ -43,6 +43,10 @@ public class JAllocateDTO implements Serializable {
     private Long subId;
     @Schema(description = "子商户名称")
     private String subName;
+
+    @Schema(description = "商户单号")
+    private String meraplid;
+    @Schema(description = "商户单号")
     private Integer api;
 
     // 业务字段

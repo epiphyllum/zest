@@ -38,6 +38,7 @@ public class JMaccountDTO implements Serializable {
 
     // api
     private Integer api;
+    private String meraplid;
 
     // 17
     private String flag;

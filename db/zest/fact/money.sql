@@ -8,6 +8,8 @@ create table j_money
     agent_name          varchar(50) not null comment '代理名称',
     merchant_id         bigint      not null comment '商户ID',
     merchant_name       varchar(50) not null comment '商户名',
+
+    meraplid            varchar(64) not null comment '商户单号',
     api                 int         not null default 1,
 
     -- 通联返回

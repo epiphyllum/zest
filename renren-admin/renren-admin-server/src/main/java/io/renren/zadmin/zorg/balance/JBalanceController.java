@@ -16,7 +16,7 @@ import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
 import io.renren.dao.SysDeptDao;
 import io.renren.entity.SysDeptEntity;
-import io.renren.zadmin.ZestConstant;
+import io.renren.zcommon.ZestConstant;
 import io.renren.zadmin.dao.JBalanceDao;
 import io.renren.zadmin.dto.JBalanceDTO;
 import io.renren.zadmin.entity.JBalanceEntity;

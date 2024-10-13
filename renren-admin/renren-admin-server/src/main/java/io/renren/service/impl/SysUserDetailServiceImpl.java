@@ -11,7 +11,7 @@ import io.renren.redis.SysMenuRedis;
 import io.renren.service.SysMenuService;
 import io.renren.service.SysRoleDataScopeService;
 import io.renren.service.SysUserDetailService;
-import io.renren.zadmin.ZestConstant;
+import io.renren.zcommon.ZestConstant;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 

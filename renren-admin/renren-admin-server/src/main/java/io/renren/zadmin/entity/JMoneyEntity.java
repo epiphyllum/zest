@@ -1,5 +1,6 @@
 package io.renren.zadmin.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import com.baomidou.mybatisplus.annotation.*;
@@ -32,7 +33,10 @@ public class JMoneyEntity extends BaseEntity {
     private String agentName;
     private Long merchantId;
     private String merchantName;
+
+    //
     private Integer api;
+    private String  meraplid;
 
     //
     private String referencecode;

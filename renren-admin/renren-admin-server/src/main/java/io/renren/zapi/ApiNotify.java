@@ -1,11 +1,11 @@
 package io.renren.zapi;
 
-import io.renren.zapi.service.account.ApiAccountNotifyService;
-import io.renren.zapi.service.allocate.ApiAllocateNotifyService;
-import io.renren.zapi.service.cardapply.ApiCardApplyNotifyService;
-import io.renren.zapi.service.cardmoney.ApiCardMoneyNotifyService;
-import io.renren.zapi.service.cardstate.ApiCardStateNotifyService;
-import io.renren.zapi.service.exchange.ApiExchangeNotifyService;
+import io.renren.zapi.account.ApiAccountNotifyService;
+import io.renren.zapi.allocate.ApiAllocateNotifyService;
+import io.renren.zapi.cardapply.ApiCardApplyNotifyService;
+import io.renren.zapi.cardmoney.ApiCardMoneyNotifyService;
+import io.renren.zapi.cardstate.ApiCardStateNotifyService;
+import io.renren.zapi.exchange.ApiExchangeNotifyService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 

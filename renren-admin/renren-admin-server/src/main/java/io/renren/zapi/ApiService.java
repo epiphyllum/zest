@@ -2,7 +2,6 @@ package io.renren.zapi;
 
 
 import ch.qos.logback.classic.Logger;
-import cn.hutool.core.lang.Pair;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.asymmetric.RSA;
 import cn.hutool.crypto.asymmetric.Sign;
@@ -12,21 +11,19 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.Result;
-import io.renren.commons.tools.validator.ValidatorUtils;
-import io.renren.commons.tools.validator.group.AddGroup;
-import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.zadmin.dao.JMerchantDao;
+import io.renren.zadmin.dao.JPacketDao;
 import io.renren.zadmin.entity.JMerchantEntity;
-import io.renren.zapi.service.account.ApiAccountService;
-import io.renren.zapi.service.allocate.ApiAllocateService;
-import io.renren.zapi.service.cardapply.ApiCardApplyService;
-import io.renren.zapi.service.cardmoney.ApiCardMoneyService;
-import io.renren.zapi.service.cardstate.ApiCardStateService;
-import io.renren.zapi.service.exchange.ApiExchangeService;
-import io.renren.zapi.service.file.ApiFileService;
-import io.renren.zapi.service.sub.ApiSubService;
-import io.renren.zin.config.CommonUtils;
-import io.renren.zin.config.ZestConfig;
+import io.renren.zadmin.entity.JPacketEntity;
+import io.renren.zapi.account.ApiAccountService;
+import io.renren.zapi.allocate.ApiAllocateService;
+import io.renren.zapi.cardapply.ApiCardApplyService;
+import io.renren.zapi.cardmoney.ApiCardMoneyService;
+import io.renren.zapi.cardstate.ApiCardStateService;
+import io.renren.zapi.exchange.ApiExchangeService;
+import io.renren.zapi.sub.ApiSubService;
+import io.renren.zcommon.CommonUtils;
+import io.renren.zcommon.ZestConfig;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.AllArgsConstructor;
@@ -39,18 +36,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.client.RestTemplate;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @Slf4j
@@ -86,6 +81,8 @@ public class ApiService {
     private ApiCardStateService apiCardStateService;
     @Resource
     private ApiCardApplyService apiCardApplyService;
+    @Resource
+    private JPacketDao jPacketDao;
 
     // 签名工具
     private Sign signer;
@@ -130,6 +127,38 @@ public class ApiService {
         return verifier;
     }
 
+    // 记录日志
+    public void logPacketSuccess(JPacketEntity packetEntity, Result<?> result) {
+        CompletableFuture.runAsync(() -> {
+            packetEntity.setRecvHeader(null);
+            try {
+                packetEntity.setSend(objectMapper.writeValueAsString(result));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                return;
+            }
+            jPacketDao.insert(packetEntity);
+        });
+
+    }
+
+    // 记录日志
+    public void logPacketException(JPacketEntity packetEntity, Exception failEx) {
+        // 记录日志
+        CompletableFuture.runAsync(() -> {
+            packetEntity.setRecvHeader(null);
+            try {
+                packetEntity.setSend(objectMapper.writeValueAsString(failEx));
+                // todo
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                return;
+            }
+            jPacketDao.insert(packetEntity);
+        });
+
+    }
+
     // 调用服务
     public Result<?> invokeService(String body, Long merchantId, String sign, String reqId, String name) {
         log.info("body: {}", body);
@@ -151,26 +180,39 @@ public class ApiService {
             }
         }
 
+        // 记录日志准备
+        JPacketEntity packetEntity = new JPacketEntity();
+        packetEntity.setApiName(name);
+        packetEntity.setMerchantId(merchantId);
+        packetEntity.setMerchantName(merchant.getCusname());
+        packetEntity.setAgentId(merchant.getAgentId());
+        packetEntity.setAgentName(merchant.getAgentName());
+        packetEntity.setRecv(body);
+
         try {
             Object req = objectMapper.readValue(body, apiMeta.getReqClass());
             // todo: validate request
             // ValidatorUtils.validateEntity(req);
-
             Logger logger = CommonUtils.getLogger(merchant.getCusname());
             ApiContext context = new ApiContext(merchant, logger);
-            return (Result)apiMeta.getMethod().invoke(apiMeta.getInstance(), req, context);
+            Result<?> result = (Result)apiMeta.getMethod().invoke(apiMeta.getInstance(), req, context);
+            logPacketSuccess(packetEntity, result);
+            return result;
         } catch (JsonProcessingException e) {
+            logPacketException(packetEntity, e);
             throw new RenException("invalid json");
         } catch (InvocationTargetException e) {
             Throwable cause = e.getCause();
             if (cause instanceof RenException) {
                 RenException ex = (RenException) cause;
+                logPacketException(packetEntity, ex);
                 throw ex;
             } else {
                 cause.printStackTrace();
                 throw new RenException("unknown exception");
             }
         } catch (IllegalAccessException e) {
+            logPacketException(packetEntity, e);
             throw new RuntimeException(e);
         }
     }

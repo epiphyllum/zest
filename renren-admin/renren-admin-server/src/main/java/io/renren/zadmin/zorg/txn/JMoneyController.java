@@ -1,45 +1,39 @@
 package io.renren.zadmin.zorg.txn;
 
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.log.annotation.LogOperation;
 import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.constant.Constant;
 import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.page.PageData;
-import io.renren.commons.tools.utils.Result;
+import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.commons.tools.utils.ExcelUtils;
+import io.renren.commons.tools.utils.Result;
 import io.renren.commons.tools.validator.AssertUtils;
 import io.renren.commons.tools.validator.ValidatorUtils;
 import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
-import io.renren.manager.JMoneyManager;
-import io.renren.zadmin.ZestConstant;
+import io.renren.zcommon.CommonUtils;
+import io.renren.zmanager.JMoneyManager;
+import io.renren.zcommon.ZestConstant;
 import io.renren.zadmin.dao.JMaccountDao;
 import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.dao.JMoneyDao;
 import io.renren.zadmin.dto.JMoneyDTO;
-import io.renren.zadmin.entity.JMaccountEntity;
-import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zadmin.entity.JMoneyEntity;
 import io.renren.zadmin.excel.JMoneyExcel;
 import io.renren.zadmin.service.JMoneyService;
-import io.renren.zin.config.CommonUtils;
-import io.renren.zin.service.accountmanage.ZinAccountManageNotifyService;
-import io.renren.zin.service.file.ZinFileService;
-import io.renren.zin.service.umbrella.ZinUmbrellaService;
-import io.renren.zin.service.umbrella.dto.*;
+import io.renren.zin.umbrella.ZinUmbrellaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
-import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
-
-import jakarta.servlet.http.HttpServletResponse;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -64,13 +58,9 @@ public class JMoneyController {
     @Resource
     private JMaccountDao jMaccountDao;
     @Resource
-    private ZinAccountManageNotifyService accountManageNotify;
-    @Resource
     private JMerchantDao jMerchantDao;
     @Resource
     private ZinUmbrellaService zinUmbrellaService;
-    @Resource
-    private ZinFileService zinFileService;
     @Resource
     private JMoneyManager jMoneyManager;
 
@@ -106,29 +96,10 @@ public class JMoneyController {
     public Result save(@RequestBody JMoneyDTO dto) {
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
-        dto.setApi(0);
-        UserDetail user = SecurityUser.getUser();
-
-        JMerchantEntity merchant = jMerchantDao.selectById(dto.getMerchantId());
-        dto.setMerchantName(merchant.getCusname());
-        dto.setAgentName(merchant.getAgentName());
-        dto.setAgentId(merchant.getAgentId());
-
-        JMaccountEntity jMaccountEntity = jMaccountDao.selectOne(Wrappers.<JMaccountEntity>lambdaQuery().eq(JMaccountEntity::getCardId, dto.getCardId()));
-        dto.setCardname(jMaccountEntity.getCardname());
-        dto.setCardno(jMaccountEntity.getCardno());
-
-        // 调用通联
-        TVaDepositApply apply = new TVaDepositApply();
-        apply.setCurrency(dto.getCurrency());
-        apply.setId(dto.getCardId());
-        apply.setMeraplid(CommonUtils.newRequestId());
-
-        TVaDepositApplyResponse response = zinUmbrellaService.depositApply(apply);
-        dto.setReferencecode(response.getReferencecode());
-        dto.setApplyid(response.getApplyid());
-        jMoneyService.save(dto);
-
+        JMoneyEntity entity = ConvertUtils.sourceToTarget(dto, JMoneyEntity.class);
+        entity.setApi(0);
+        entity.setMeraplid(CommonUtils.newRequestId());
+        jMoneyManager.save(entity, dto.getCardId());
         return new Result();
     }
 

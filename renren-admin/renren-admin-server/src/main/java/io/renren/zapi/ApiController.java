@@ -1,7 +1,7 @@
 package io.renren.zapi;
 
 import io.renren.commons.tools.utils.Result;
-import io.renren.zapi.service.file.ApiFileService;
+import io.renren.zapi.file.ApiFileService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;

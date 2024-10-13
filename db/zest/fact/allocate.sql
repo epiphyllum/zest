@@ -13,6 +13,7 @@ create table j_allocate
 
     -- 业务字段
     api            int not null default 1,
+    meraplid      varchar(64)    not null comment '商户单号',
     type          varchar(32)    not null comment 'm2s, s2m',
     amount        decimal(18, 2) not null comment '金额',
     currency      varchar(3)     not null comment '币种',

@@ -11,7 +11,8 @@ create table j_maccount
     merchant_name  varchar(50) not null comment '商户名', --
 
     -- mode
-    api            int         not null default 1,
+    api            int          not null default 1,
+    meraplid       varchar(64)  not null,
 
     -- 17
     flag           varchar(1),                            -- 账户类型  0:个人，1：企业

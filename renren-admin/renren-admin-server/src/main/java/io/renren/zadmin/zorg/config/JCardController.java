@@ -11,8 +11,9 @@ import io.renren.commons.tools.validator.ValidatorUtils;
 import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
-import io.renren.manager.JCardManager;
-import io.renren.zadmin.ZestConstant;
+import io.renren.zcommon.CommonUtils;
+import io.renren.zmanager.JCardManager;
+import io.renren.zcommon.ZestConstant;
 import io.renren.zadmin.dao.JCardDao;
 import io.renren.zadmin.dto.JCardDTO;
 import io.renren.zadmin.entity.JCardEntity;
@@ -89,9 +90,10 @@ public class JCardController {
     @PreAuthorize("hasAuthority('zorg:jcard:save')")
     public Result save(@RequestBody JCardDTO dto) {
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
-        dto.setApi(0);
 
         JCardEntity entity = ConvertUtils.sourceToTarget(dto, JCardEntity.class);
+        entity.setApi(0);
+        entity.setMeraplid(CommonUtils.newRequestId());
         jCardManager.save(entity);
         return new Result();
     }

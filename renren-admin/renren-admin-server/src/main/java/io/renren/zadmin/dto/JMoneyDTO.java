@@ -39,8 +39,13 @@ public class JMoneyDTO implements Serializable {
     private Long merchantId;
     @Schema(description = "商户名")
     private String merchantName;
+
+
     @Schema(description = "接口发起")
     private Integer api;
+    @Schema(description = "商户单号")
+    private String  meraplid;
+
 
     @Schema(description = "申请单ID")
     private String applyid;
@@ -96,6 +101,6 @@ public class JMoneyDTO implements Serializable {
     @Schema(description = "通知次数")
     private Integer notifyCount;
 
-    //
+    // 通联来账白名单卡id
     private String cardId;
 }

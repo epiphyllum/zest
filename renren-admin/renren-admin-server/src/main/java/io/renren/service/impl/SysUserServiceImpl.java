@@ -22,7 +22,7 @@ import io.renren.dto.SysUserDTO;
 import io.renren.entity.SysDeptEntity;
 import io.renren.entity.SysUserEntity;
 import io.renren.service.*;
-import io.renren.zadmin.ZestConstant;
+import io.renren.zcommon.ZestConstant;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;

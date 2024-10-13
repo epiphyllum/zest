@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
 import io.renren.service.SysDeptService;
-import io.renren.zadmin.ZestConstant;
+import io.renren.zcommon.ZestConstant;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 

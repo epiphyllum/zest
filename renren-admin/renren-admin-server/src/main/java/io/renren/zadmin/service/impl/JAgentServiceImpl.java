@@ -4,18 +4,15 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.renren.commons.mybatis.service.impl.CrudServiceImpl;
 import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
-import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.entity.SysDeptEntity;
 import io.renren.service.SysDeptService;
-import io.renren.zadmin.ZestConstant;
 import io.renren.zadmin.dao.JAgentDao;
 import io.renren.zadmin.dto.JAgentDTO;
 import io.renren.zadmin.entity.JAgentEntity;
 import io.renren.zadmin.service.JAgentService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

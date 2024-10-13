@@ -34,6 +34,7 @@ public class JMaccountEntity extends BaseEntity {
 
     // (1) API
     private Integer api;
+    private String meraplid;
 
     // 17
     private String flag;

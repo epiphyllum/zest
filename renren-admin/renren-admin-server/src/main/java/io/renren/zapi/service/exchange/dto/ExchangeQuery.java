@@ -1,9 +1,0 @@
-package io.renren.zapi.service.exchange.dto;
-
-import lombok.Data;
-
-@Data
-public class ExchangeQuery {
-    private	String meraplid;  // 申请单流水
-    private String applyid;   // 申请单号
-}

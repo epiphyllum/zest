@@ -11,7 +11,7 @@ import io.renren.commons.tools.validator.ValidatorUtils;
 import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
-import io.renren.zadmin.ZestConstant;
+import io.renren.zcommon.ZestConstant;
 import io.renren.zadmin.dto.JConfigDTO;
 import io.renren.zadmin.excel.JConfigExcel;
 import io.renren.zadmin.service.JConfigService;

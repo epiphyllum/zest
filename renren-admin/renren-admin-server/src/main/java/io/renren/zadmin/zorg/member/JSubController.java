@@ -14,13 +14,11 @@ import io.renren.commons.tools.validator.ValidatorUtils;
 import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
-import io.renren.manager.JSubManager;
+import io.renren.zmanager.JSubManager;
 import io.renren.zadmin.dao.JSubDao;
-import io.renren.zadmin.dto.JAgentDTO;
 import io.renren.zadmin.dto.JSubDTO;
 import io.renren.zadmin.entity.JSubEntity;
 import io.renren.zadmin.excel.JSubExcel;
-import io.renren.zadmin.service.JAgentService;
 import io.renren.zadmin.service.JSubService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -31,7 +29,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 

@@ -19,17 +19,16 @@ import io.renren.entity.SysDeptEntity;
 import io.renren.zadmin.dao.JMaccountDao;
 import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.dto.JMaccountDTO;
-import io.renren.zadmin.dto.JSubDTO;
 import io.renren.zadmin.entity.JMaccountEntity;
-import io.renren.zadmin.entity.JSubEntity;
 import io.renren.zadmin.excel.JMaccountExcel;
 import io.renren.zadmin.service.JMaccountService;
-import io.renren.zin.service.accountmanage.ZinAccountManageService;
-import io.renren.zin.service.umbrella.ZinUmbrellaService;
-import io.renren.zin.service.umbrella.dto.TMoneyAccountAdd;
-import io.renren.zin.service.umbrella.dto.TMoneyAccountAddResponse;
-import io.renren.zin.service.umbrella.dto.TMoneyAccountQuery;
-import io.renren.zin.service.umbrella.dto.TMoneyAccountQueryResponse;
+import io.renren.zcommon.CommonUtils;
+import io.renren.zin.accountmanage.ZinAccountManageService;
+import io.renren.zin.umbrella.ZinUmbrellaService;
+import io.renren.zin.umbrella.dto.TMoneyAccountAdd;
+import io.renren.zin.umbrella.dto.TMoneyAccountAddResponse;
+import io.renren.zin.umbrella.dto.TMoneyAccountQuery;
+import io.renren.zin.umbrella.dto.TMoneyAccountQueryResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -130,6 +129,7 @@ public class JMaccountController {
         } else if (user.getUserType().equals("operation")) {
         }
         dto.setApi(0);
+        dto.setMeraplid(CommonUtils.newRequestId());
         jMaccountService.save(dto);
         return new Result();
     }

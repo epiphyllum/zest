@@ -3,7 +3,7 @@ package io.renren.zadmin.controller;
 
 import cn.hutool.core.date.DateUtil;
 import io.renren.commons.tools.utils.Result;
-import io.renren.zin.config.ZestConfig;
+import io.renren.zcommon.ZestConfig;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;

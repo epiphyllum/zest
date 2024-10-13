@@ -1,8 +1,6 @@
 package io.renren.zadmin.zorg.txn;
 
 import io.renren.commons.log.annotation.LogOperation;
-import io.renren.commons.security.user.SecurityUser;
-import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.constant.Constant;
 import io.renren.commons.tools.page.PageData;
 import io.renren.commons.tools.utils.ConvertUtils;
@@ -13,15 +11,13 @@ import io.renren.commons.tools.validator.ValidatorUtils;
 import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
-import io.renren.manager.JWithdrawManager;
+import io.renren.zmanager.JWithdrawManager;
 import io.renren.zadmin.dao.JWithdrawDao;
 import io.renren.zadmin.dto.JWithdrawDTO;
-import io.renren.zadmin.entity.JDepositEntity;
 import io.renren.zadmin.entity.JWithdrawEntity;
 import io.renren.zadmin.excel.JWithdrawExcel;
 import io.renren.zadmin.service.JWithdrawService;
-import io.renren.zadmin.service.impl.CommonFilter;
-import io.renren.zin.config.CommonUtils;
+import io.renren.zcommon.CommonUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
