@@ -106,7 +106,6 @@ public class JMaccountController {
     @LogOperation("保存")
     @PreAuthorize("hasAuthority('zorg:jmaccount:save')")
     public Result save(@RequestBody JMaccountDTO dto) {
-
         UserDetail user = SecurityUser.getUser();
         if (!user.getUserType().equals("operation") &&
                 !user.getUserType().equals("agent") &&
@@ -117,7 +116,6 @@ public class JMaccountController {
 
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
-
         if (user.getUserType().equals("merchant")) {
             SysDeptEntity merchantDept = sysDeptDao.selectById(user.getDeptId());
             SysDeptEntity agentDept = sysDeptDao.selectById(merchantDept.getPid());
@@ -131,6 +129,7 @@ public class JMaccountController {
             dto.setAgentName(agentDept.getName());
         } else if (user.getUserType().equals("operation")) {
         }
+        dto.setApi(0);
         jMaccountService.save(dto);
         return new Result();
     }

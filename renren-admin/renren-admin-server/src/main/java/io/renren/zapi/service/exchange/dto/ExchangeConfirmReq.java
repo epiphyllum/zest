@@ -1,6 +1,5 @@
 package io.renren.zapi.service.exchange.dto;
 
-
 import lombok.Data;
 
 @Data

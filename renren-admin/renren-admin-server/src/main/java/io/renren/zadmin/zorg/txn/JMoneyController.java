@@ -192,11 +192,7 @@ public class JMoneyController {
         if (!user.getUserType().equals("operation") && !user.getUserType().equals("agent") && !user.getUserType().equals("merchant")) {
             return Result.fail(9999, "not authorized, you are " + user.getUserType());
         }
-
-        if (accountManageNotify.match(id)) {
-            return Result.ok;
-        } else {
-            return Result.fail(9999, "匹配失败");
-        }
+        // todo
+        return new Result();
     }
 }

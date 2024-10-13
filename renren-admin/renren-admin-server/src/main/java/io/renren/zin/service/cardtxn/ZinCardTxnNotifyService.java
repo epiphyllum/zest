@@ -6,16 +6,12 @@ import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.manager.JCardManager;
 import io.renren.zadmin.dao.JAuthDao;
 import io.renren.zadmin.dao.JCardDao;
-import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.dao.JSubDao;
 import io.renren.zadmin.entity.JAuthEntity;
 import io.renren.zadmin.entity.JCardEntity;
 import io.renren.zadmin.entity.JSubEntity;
-import io.renren.zadmin.service.JAuthService;
-import io.renren.zin.service.cardstatus.ZinCardStatusService;
 import io.renren.zin.service.cardtxn.dto.TAuthTxnNotify;
 import jakarta.annotation.Resource;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -35,9 +31,10 @@ public class ZinCardTxnNotifyService {
     @Resource
     private JCardManager jCardManager;
 
-
-
-    // 4002-授权交易通知
+    // 4002-授权交易通知:  包含了
+    // 1. 消费流水,
+    // 2. 卡充值记录
+    // 3. 提现记录
     public void handle(TAuthTxnNotify notify) {
         JAuthEntity entity = ConvertUtils.sourceToTarget(notify, JAuthEntity.class);
         JCardEntity card = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()

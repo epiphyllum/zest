@@ -11,8 +11,8 @@ create table j_balance
 
     balance_type varchar(16)    not null comment '余额类型',
     currency     varchar(3)     not null comment '币种',
-    balance      decimal(18, 6) not null default 0 comment '余额',
-    frozen       decimal(18, 6) not null default 0 comment '冻结额',
+    balance      decimal(18, 2) not null default 0 comment '余额',
+    frozen       decimal(18, 2) not null default 0 comment '冻结额',
     version      int            not null default 0 comment '版本号',
 
     -- basic
@@ -43,12 +43,13 @@ create table j_log
     currency     varchar(3)     not null comment '币种',
 
     -- fact info
-    fact_type    int            not null comment '凭证类型',
+    origin_type  int            not null comment '原始凭证类型',
+    fact_type    int            not null comment '记账类型',
     fact_id      bigint         not null comment '凭证ID',
-    fact_amount  decimal(18, 6) not null comment '凭证金额',
+    fact_amount  decimal(18, 2) not null comment '凭证金额',
     fact_memo    varchar(200)   not null comment '凭证描述',
-    old_balance  decimal(18, 6) not null comment '旧余额',
-    new_balance  decimal(18, 6) not null comment '新余额',
+    old_balance  decimal(18, 2) not null comment '旧余额',
+    new_balance  decimal(18, 2) not null comment '新余额',
     version      bigint         not null comment '新version',
 
     -- basic

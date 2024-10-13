@@ -39,5 +39,7 @@ create table j_authed
   collate utf8mb4_bin
   DEFAULT CHARACTER SET utf8mb4 COMMENT ='j_authed';
 create index idx_j_authed_1 on j_authed (agent_id, create_date);
-create index idx_j_auth_2 on j_authed (merchant_id, create_date);
-create index idx_j_auth_3 on j_authed (sub_id, create_date);
+create index idx_j_authed_2 on j_authed (merchant_id, create_date);
+create index idx_j_authed_3 on j_authed (sub_id, create_date);
+create index idx_j_authed_4 on j_authed (sub_id, cardno, create_date);
+create index idx_j_authed_5 on j_authed (cardno, create_date);

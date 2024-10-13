@@ -133,6 +133,16 @@ public class JDepositController {
         return Result.ok;
     }
 
+    @GetMapping("cancel")
+    @Operation(summary = "作废")
+    @LogOperation("作废")
+    @PreAuthorize("hasAuthority('zorg:jdeposit:cancel')")
+    public Result cancel(@RequestParam("id") Long id) {
+        JDepositEntity entity = jDepositDao.selectById(id);
+        jDepositManager.cancel(entity);
+        return Result.ok;
+    }
+
     @GetMapping("query")
     @Operation(summary = "查询通联")
     @LogOperation("查询通联")

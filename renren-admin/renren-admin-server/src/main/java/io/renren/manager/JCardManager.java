@@ -10,7 +10,7 @@ import io.renren.dao.SysDeptDao;
 import io.renren.entity.SysDeptEntity;
 import io.renren.zadmin.dao.*;
 import io.renren.zadmin.entity.*;
-import io.renren.zapi.notifyevent.CardApplyNotifyEvent;
+import io.renren.zapi.ApiNotify;
 import io.renren.zbalance.Ledger;
 import io.renren.zbalance.LedgerUtil;
 import io.renren.zin.config.ZestConfig;
@@ -20,12 +20,11 @@ import io.renren.zin.service.cardapply.dto.*;
 import io.renren.zin.service.cardmoney.ZinCardMoneyService;
 import io.renren.zin.service.cardmoney.dto.TCardBalanceRequest;
 import io.renren.zin.service.cardmoney.dto.TCardBalanceResponse;
-import io.renren.zin.service.cardstatus.ZinCardStatusService;
-import io.renren.zin.service.cardstatus.dto.*;
+import io.renren.zin.service.cardstate.ZinCardStateService;
+import io.renren.zin.service.cardstate.dto.*;
 import io.renren.zin.service.file.ZinFileService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -46,11 +45,11 @@ public class JCardManager {
     @Resource
     private ZinCardApplyService zinCardApplyService;
     @Resource
-    private ZinCardStatusService zinCardStatusService;
+    private ZinCardStateService zinCardStateService;
     @Resource
     private ZinCardMoneyService zinCardMoneyService;
     @Resource
-    private ApplicationEventPublisher publisher;
+    private ApiNotify apiNotify;
     @Resource
     private TransactionTemplate tx;
     @Resource
@@ -201,7 +200,8 @@ public class JCardManager {
             });
 
             if (jCardEntity.getApi().equals(1)) {
-                publisher.publishEvent(new CardApplyNotifyEvent(this, jCardEntity.getId()));
+                // 发卡状态更新
+                apiNotify.cardNewNotify();
             }
 
             // 发卡成功, 查询更新状态
@@ -220,7 +220,8 @@ public class JCardManager {
             });
             // 通知商户
             if (jCardEntity.getApi().equals(1)) {
-                publisher.publishEvent(new CardApplyNotifyEvent(this, jCardEntity.getId()));
+                // 发卡状态更新
+                apiNotify.cardTxnNotify();
             }
         }
         // 其他情况
@@ -259,49 +260,49 @@ public class JCardManager {
     public void activateCard(JCardEntity jCardEntity) {
         TCardActivateRequest request = new TCardActivateRequest();
         request.setCardno(jCardEntity.getCardno());
-        TCardActivateResponse response = zinCardStatusService.cardActivate(request);
+        TCardActivateResponse response = zinCardStateService.cardActivate(request);
         queryCard(jCardEntity);
     }
 
     public void lossCard(JCardEntity jCardEntity) {
         TCardLossRequest request = new TCardLossRequest();
         request.setCardno(jCardEntity.getCardno());
-        TCardLossResponse response = zinCardStatusService.cardLoss(request);
+        TCardLossResponse response = zinCardStateService.cardLoss(request);
         queryCard(jCardEntity);
     }
 
     public void unlossCard(JCardEntity jCardEntity) {
         TCardUnlossRequest request = new TCardUnlossRequest();
         request.setCardno(jCardEntity.getCardno());
-        zinCardStatusService.cardUnloss(request);
+        zinCardStateService.cardUnloss(request);
         queryCard(jCardEntity);
     }
 
     public void freezeCard(JCardEntity jCardEntity) {
         TCardFreezeRequest request = new TCardFreezeRequest();
         request.setCardno(jCardEntity.getCardno());
-        TCardFreezeResponse response = zinCardStatusService.cardFreeze(request);
+        TCardFreezeResponse response = zinCardStateService.cardFreeze(request);
         queryCard(jCardEntity);
     }
 
     public void unfreezeCard(JCardEntity jCardEntity) {
         TCardUnfreezeRequest request = new TCardUnfreezeRequest();
         request.setCardno(jCardEntity.getCardno());
-        TCardUnfreezeResponse response = zinCardStatusService.cardUnfreeze(request);
+        TCardUnfreezeResponse response = zinCardStateService.cardUnfreeze(request);
         queryCard(jCardEntity);
     }
 
     public void cancelCard(JCardEntity jCardEntity) {
         TCardCancelRequest request = new TCardCancelRequest();
         request.setCardno(jCardEntity.getCardno());
-        TCardCancelResponse response = zinCardStatusService.cardCancel(request);
+        TCardCancelResponse response = zinCardStateService.cardCancel(request);
         queryCard(jCardEntity);
     }
 
     public void uncancelCard(JCardEntity jCardEntity) {
         TCardUncancelRequest request = new TCardUncancelRequest();
         request.setCardno(jCardEntity.getCardno());
-        TCardUncancelResponse response = zinCardStatusService.cardUncancel(request);
+        TCardUncancelResponse response = zinCardStateService.cardUncancel(request);
         queryCard(jCardEntity);
     }
 
@@ -309,7 +310,7 @@ public class JCardManager {
     public void queryCard(JCardEntity jCardEntity) {
         TCardStatusQuery request = new TCardStatusQuery();
         request.setCardno(jCardEntity.getCardno());
-        TCardStatusResponse response = zinCardStatusService.cardStatusQuery(request);
+        TCardStatusResponse response = zinCardStateService.cardStatusQuery(request);
         JCardEntity update = new JCardEntity();
         update.setId(jCardEntity.getId());
         update.setCardState(response.getCardstate());

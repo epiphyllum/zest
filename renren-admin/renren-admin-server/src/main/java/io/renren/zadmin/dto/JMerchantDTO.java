@@ -118,6 +118,12 @@ public class JMerchantDTO implements Serializable {
     private BigDecimal txnRate;
     @Schema(description = "失败费")
     private BigDecimal failFee;
+    @Schema(description = "L50")
+    private BigDecimal l50;
+    @Schema(description = "Gef50")
+    private BigDecimal gef50;
+    @Schema(description = "争议处理费")
+    private BigDecimal disputeFee;
     @Schema(description = "商户公钥")
     private String publicKey;
     @Schema(description = "webhook")

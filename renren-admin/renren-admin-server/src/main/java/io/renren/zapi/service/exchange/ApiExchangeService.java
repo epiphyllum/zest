@@ -11,11 +11,9 @@ import io.renren.zapi.ApiContext;
 import io.renren.zapi.ApiService;
 import io.renren.zapi.service.exchange.dto.*;
 import io.renren.zbalance.Ledger;
-import io.renren.zin.config.ZinConstant;
 import io.renren.zin.service.exchange.ZinExchangeService;
 import io.renren.zin.service.exchange.dto.*;
 import jakarta.annotation.Resource;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -24,8 +22,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Service
 @Slf4j
 public class ApiExchangeService {
-    @Resource
-    private  ApiService apiService;
     @Resource
     private  ZinExchangeService zinExchangeService;
     @Resource
@@ -36,18 +32,14 @@ public class ApiExchangeService {
     private TransactionTemplate tx;
 
     // 换汇申请
-    public Result<ExchangeRes> exchange(Long merchantId, String reqId, String name, String body, String sign) {
-
-        // 解析请求
-        ApiContext context = new ApiContext();
-        ExchangeReq request = apiService.<ExchangeReq>initRequest(ExchangeReq.class, context, merchantId, reqId, name, body, sign);
+    public Result<ExchangeRes> exchange(ExchangeReq request, ApiContext context) {
 
         // 查找商户
         JMerchantEntity merchant = context.getMerchant();
 
         // 转换为实体， 添加deptId, deptName
         JExchangeEntity jExchangeEntity = ConvertUtils.sourceToTarget(request, JExchangeEntity.class);
-        jExchangeEntity.setMerchantId(merchantId);
+        jExchangeEntity.setMerchantId(context.getMerchant().getId());
         jExchangeEntity.setMerchantName(merchant.getCusengname());
 
         // 入库申请换汇流水
@@ -72,12 +64,7 @@ public class ApiExchangeService {
     }
 
     // 锁汇询价
-    public Result<ExchangeLockRes> exchangeLock(Long merchantId, String reqId, String name, String body, String sign) {
-
-        // 准备商户请求
-        ApiContext context = new ApiContext();
-        ExchangeLockReq request = apiService.<ExchangeLockReq>initRequest(ExchangeLockReq.class, context, merchantId, reqId, name, body, sign);
-
+    public Result<ExchangeLockRes> exchangeLock(ExchangeLockReq request, ApiContext context) {
         // 校验
         if (request.getApplyid() == null && request.getMeraplid() == null) {
             throw new RenException("must provide applyid or meraplid");
@@ -87,7 +74,7 @@ public class ApiExchangeService {
         JExchangeEntity jExchangeEntity = jExchangeDao.selectOne(Wrappers.<JExchangeEntity>lambdaQuery()
                 .eq(request.getMeraplid() != null, JExchangeEntity::getMeraplid, request.getMeraplid())
                 .eq(request.getApplyid() != null, JExchangeEntity::getApplyid, request.getApplyid())
-                .eq(JExchangeEntity::getMerchantId, merchantId) // 商户号
+                .eq(JExchangeEntity::getMerchantId, context.getMerchant().getId()) // 商户号
         );
         if (jExchangeEntity == null) {
             throw new RenException("请求非法");
@@ -115,9 +102,7 @@ public class ApiExchangeService {
     }
 
     // 换汇申请单确认
-    public Result<ExchangeConfirmRes> exchangeConfirm(Long merchantId, String reqId, String name, String body, String sign) {
-        ApiContext context = new ApiContext();
-        ExchangeConfirmReq request = apiService.<ExchangeConfirmReq>initRequest(ExchangeConfirmReq.class, context, merchantId, reqId, name, body, sign);
+    public Result<ExchangeConfirmRes> exchangeConfirm(ExchangeConfirmReq request, ApiContext context) {
 
         // 必须提供LK / MT
         String extype = request.getExtype();
@@ -129,7 +114,7 @@ public class ApiExchangeService {
         JExchangeEntity jExchangeEntity = jExchangeDao.selectOne(Wrappers.<JExchangeEntity>lambdaQuery()
                 .eq(request.getMeraplid() != null, JExchangeEntity::getMeraplid, request.getMeraplid())
                 .eq(request.getApplyid() != null, JExchangeEntity::getApplyid, request.getApplyid())
-                .eq(JExchangeEntity::getMerchantId, merchantId)
+                .eq(JExchangeEntity::getMerchantId, context.getMerchant().getId())
         );
         if (jExchangeEntity == null) {
             throw new RenException("请求非法");
@@ -158,9 +143,7 @@ public class ApiExchangeService {
     }
 
     // 换汇申请单查询
-    public Result<ExchangeQueryRes> exchangeQuery(Long merchantId, String reqId, String name, String body, String sign) {
-        ApiContext context = new ApiContext();
-        ExchangeQueryReq request = apiService.<ExchangeQueryReq>initRequest(ExchangeQueryReq.class, context, merchantId, reqId, name, body, sign);
+    public Result<ExchangeQueryRes> exchangeQuery(ExchangeQuery request, ApiContext context) {
 
         if (request.getApplyid() == null && request.getMeraplid() == null) {
             throw new RenException("must provide applyid or meraplid");
@@ -169,7 +152,7 @@ public class ApiExchangeService {
         JExchangeEntity jExchangeEntity = jExchangeDao.selectOne(Wrappers.<JExchangeEntity>lambdaQuery()
                 .eq(request.getMeraplid() != null, JExchangeEntity::getMeraplid, request.getMeraplid())
                 .eq(request.getApplyid() != null, JExchangeEntity::getApplyid, request.getApplyid())
-                .eq(JExchangeEntity::getMerchantId, merchantId)
+                .eq(JExchangeEntity::getMerchantId, context.getMerchant().getId())
         );
         if (jExchangeEntity == null) {
             throw new RenException("请求非法");

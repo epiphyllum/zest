@@ -215,4 +215,18 @@ public class JDepositManager {
 
         jDepositService.update(dto);
     }
+
+    // 作废, 需要解冻！！！
+    public void cancel(JDepositEntity entity) {
+        JSubEntity subEntity = jSubDao.selectById(entity.getSubId());
+        // 入库
+        tx.executeWithoutResult(st -> {
+            jDepositDao.update(null, Wrappers.<JDepositEntity>lambdaUpdate()
+                    .isNull(JDepositEntity::getApplyid)
+                    .eq(JDepositEntity::getId, entity.getId())
+                    .set(JDepositEntity::getState, "07")
+            );
+            ledger.ledgeCardChargeUnFreeze(entity, subEntity);
+        });
+    }
 }

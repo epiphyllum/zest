@@ -1,7 +1,5 @@
 package io.renren.zbalance;
 
-import io.renren.commons.tools.exception.RenException;
-import io.renren.zadmin.dao.JBalanceDao;
 import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.entity.*;
 import jakarta.annotation.Resource;
@@ -18,8 +16,6 @@ public class Ledger {
     private JMerchantDao jMerchantDao;
     @Resource
     private LedgerUtil ledgerUtil;
-    @Resource
-    private JBalanceDao jBalanceDao;
 
     // 原始凭证(100):  收到商户入金
     public void ledgeMoneyIn(JMoneyEntity entity) {
@@ -185,17 +181,15 @@ public class Ledger {
         BigDecimal showVa = BigDecimal.ZERO.add(vaAmount).setScale(2, RoundingMode.HALF_UP);
         String factMemo = String.format("确认 | 换汇卖出%s买入%s | 卖出金额:%s, (VA:%s, 保证金:%s, 充值费用:%s) | 买入%s: 换汇:%s, 换算:(VA:%s, 保证金:%s, 充值费用:%s)",
                 entity.getPayerccy(), entity.getPayeeccy(),
-
                 // 卖出
                 entity.getAmount(),
                 showVa,
                 BigDecimal.ZERO.add(depositAmount).setScale(2, RoundingMode.HALF_UP),
                 BigDecimal.ZERO.add(feeAmount).setScale(2, RoundingMode.HALF_UP),
-
                 // 买入
                 entity.getPayeeccy(),
                 entity.getStlamount(),
-
+                // 账户
                 targetVaAmount,
                 targetDepositAmount,
                 targetFeeAmount
@@ -222,7 +216,7 @@ public class Ledger {
     public void ledgeM2s(JAllocateEntity entity) {
         JBalanceEntity mVa = ledgerUtil.getVaAccount(entity.getMerchantId(), entity.getCurrency());
         JBalanceEntity sVa = ledgerUtil.getSubVaAccount(entity.getSubId(), entity.getCurrency());
-        String factMemo = String.format("转入子商户商户VA:%s", BigDecimal.ZERO.add(entity.getAmount()).setScale(2, RoundingMode.HALF_UP));
+        String factMemo = String.format("转入子商户:%s", BigDecimal.ZERO.add(entity.getAmount()).setScale(2, RoundingMode.HALF_UP));
         // 记账1: 商户Va-
         ledgerUtil.ledgeUpdate(mVa, LedgerConstant.ORIGIN_TYPE_ALLOCATE_M2S, LedgerConstant.FACT_M2S_OUT, entity.getId(), factMemo, entity.getAmount().negate());
         ledgerUtil.ledgeUpdate(sVa, LedgerConstant.ORIGIN_TYPE_ALLOCATE_M2S, LedgerConstant.FACT_M2S_IN, entity.getId(), factMemo, entity.getAmount());
@@ -232,7 +226,7 @@ public class Ledger {
     public void ledgeS2m(JAllocateEntity entity) {
         JBalanceEntity mVa = ledgerUtil.getVaAccount(entity.getMerchantId(), entity.getCurrency());
         JBalanceEntity sVa = ledgerUtil.getSubVaAccount(entity.getSubId(), entity.getCurrency());
-        String factMemo = String.format("转出子商户VA:%s", BigDecimal.ZERO.add(entity.getAmount()).setScale(2, RoundingMode.HALF_UP));
+        String factMemo = String.format("转出子商户:%s", BigDecimal.ZERO.add(entity.getAmount()).setScale(2, RoundingMode.HALF_UP));
         // 记账1: 子商户Va-
         ledgerUtil.ledgeUpdate(sVa, LedgerConstant.ORIGIN_TYPE_ALLOCATE_S2M, LedgerConstant.FACT_S2M_OUT, entity.getId(), factMemo, entity.getAmount().negate());
         // 记账2: 商户Va+
@@ -243,7 +237,7 @@ public class Ledger {
     public void ledgeOpenCardFreeze(JCardEntity entity) {
         // 子商户va扣除费用冻结
         JBalanceEntity subVa = ledgerUtil.getSubVaAccount(entity.getSubId(), entity.getCurrency());
-        String factMemo = "开卡费用冻结:" + BigDecimal.ZERO.add(entity.getMerchantFee()).setScale(2, RoundingMode.HALF_UP);
+        String factMemo = "冻结开卡费用:" + BigDecimal.ZERO.add(entity.getMerchantFee()).setScale(2, RoundingMode.HALF_UP);
         BigDecimal factAmount = entity.getMerchantFee();
         ledgerUtil.freezeUpdate(subVa, LedgerConstant.ORIGIN_CARD_OPEN, LedgerConstant.FACT_CARD_OPEN_FREEZE, entity.getId(), factMemo, factAmount);
     }
@@ -252,7 +246,7 @@ public class Ledger {
     public void ledgeOpenCardUnFreeze(JCardEntity entity) {
         // 子商户va扣除费用冻结
         JBalanceEntity subVa = ledgerUtil.getSubVaAccount(entity.getSubId(), entity.getCurrency());
-        String factMemo = "开卡费用解冻:" + BigDecimal.ZERO.add(entity.getMerchantFee()).setScale(2, RoundingMode.HALF_UP);
+        String factMemo = "解冻开卡费用:" + BigDecimal.ZERO.add(entity.getMerchantFee()).setScale(2, RoundingMode.HALF_UP);
         BigDecimal factAmount = entity.getMerchantFee();
         ledgerUtil.unFreezeUpdate(subVa, LedgerConstant.ORIGIN_CARD_OPEN, LedgerConstant.FACT_CARD_OPEN_UN_FREEZE, entity.getId(), factMemo, factAmount);
     }
@@ -264,7 +258,7 @@ public class Ledger {
         // 开卡费用账户
         JBalanceEntity feeAccount = ledgerUtil.getSubFeeAccount(entity.getSubId(), entity.getCurrency());
         BigDecimal showMerchantFee = BigDecimal.ZERO.add(entity.getMerchantFee()).setScale(2, RoundingMode.HALF_UP);
-        String factMemo = "开卡费用确认:" + showMerchantFee;
+        String factMemo = "确认开卡费用:" + showMerchantFee;
         BigDecimal merchantFee = entity.getMerchantFee();
         // 子商户va扣除费用
         ledgerUtil.confirmUpdate(subVa, LedgerConstant.ORIGIN_CARD_OPEN, LedgerConstant.FACT_CARD_OPEN_CONFIRM, entity.getId(), factMemo, merchantFee);
@@ -274,18 +268,18 @@ public class Ledger {
 
     //
     public void ledgeCardChargeFreeze(JDepositEntity entity, JSubEntity sub) {
-        String factMemo = "卡充值冻结:" + BigDecimal.ZERO.add(entity.getAmount()).setScale(2, RoundingMode.HALF_UP);
+        String factMemo = "冻结卡充值:" + BigDecimal.ZERO.add(entity.getAmount()).setScale(2, RoundingMode.HALF_UP);
         BigDecimal factAmount = entity.getAmount();
         JBalanceEntity subVa = ledgerUtil.getSubVaAccount(sub.getId(), entity.getCurrency());
-        ledgerUtil.ledgeUpdate(subVa, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_FREEZE, entity.getId(), factMemo, factAmount);
+        ledgerUtil.freezeUpdate(subVa, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_FREEZE, entity.getId(), factMemo, factAmount);
     }
 
     // 取消卡充值, 卡充值失败
     public void ledgeCardChargeUnFreeze(JDepositEntity entity, JSubEntity sub) {
-        String factMemo = "卡充值解冻:" + BigDecimal.ZERO.add(entity.getAmount()).setScale(2, RoundingMode.HALF_UP);
+        String factMemo = "解冻卡充值:" + BigDecimal.ZERO.add(entity.getAmount()).setScale(2, RoundingMode.HALF_UP);
         BigDecimal factAmount = entity.getAmount();
         JBalanceEntity subVa = ledgerUtil.getSubVaAccount(sub.getId(), entity.getCurrency());
-        ledgerUtil.ledgeUpdate(subVa, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_UN_FREEZE, entity.getId(), factMemo, factAmount);
+        ledgerUtil.unFreezeUpdate(subVa, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_UN_FREEZE, entity.getId(), factMemo, factAmount);
     }
 
     // 卡充值
@@ -293,7 +287,7 @@ public class Ledger {
         JBalanceEntity subVa = ledgerUtil.getSubVaAccount(sub.getId(), entity.getCurrency());
         JBalanceEntity subSum = ledgerUtil.getSubSumAccount(sub.getId(), entity.getCurrency());
         BigDecimal showAmount = BigDecimal.ZERO.add(entity.getAmount()).setScale(2, RoundingMode.HALF_UP);
-        String factMemo = "卡充值确认:" + showAmount;
+        String factMemo = "确认卡充值:" + showAmount;
         BigDecimal factAmount = entity.getAmount();
         // 记账1: 子商户subVa-
         ledgerUtil.confirmUpdate(subVa, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_CONFIRM, entity.getId(), factMemo, factAmount);
@@ -303,17 +297,17 @@ public class Ledger {
 
     // 卡资金退回: 冻结
     public void ledgeCardWithdrawFreeze(JWithdrawEntity entity, JSubEntity sub) {
-        String factMemo = "卡资金退回冻结:" + BigDecimal.ZERO.add(entity.getAmount()).setScale(2, RoundingMode.HALF_UP);
+        String factMemo = "冻结卡资金提取:" + BigDecimal.ZERO.add(entity.getAmount()).setScale(2, RoundingMode.HALF_UP);
         BigDecimal factAmount = entity.getAmount();
         JBalanceEntity subSum = ledgerUtil.getSubSumAccount(sub.getId(), entity.getCurrency());
         ledgerUtil.freezeUpdate(subSum, LedgerConstant.ORIGIN_TYPE_CARD_WITHDRAW, LedgerConstant.FACT_CARD_WITHDRAW_FREEZE, entity.getId(), factMemo, factAmount);
     }
 
     // 卡资金退回: 解冻
-    public void ledgeCardWithdrawUnFreeze(JMerchantEntity sub, JWithdrawEntity entity) {
+    public void ledgeCardWithdrawUnFreeze(JWithdrawEntity entity, JSubEntity sub) {
         BigDecimal factAmount = entity.getAmount();
         JBalanceEntity subSum = ledgerUtil.getSubSumAccount(sub.getId(), entity.getCurrency());
-        String factMemo = "卡资金退回确认:" + BigDecimal.ZERO.add(factAmount).setScale(2, RoundingMode.HALF_UP);
+        String factMemo = "确认卡资金提取:" + BigDecimal.ZERO.add(factAmount).setScale(2, RoundingMode.HALF_UP);
         ledgerUtil.unFreezeUpdate(subSum, LedgerConstant.ORIGIN_TYPE_CARD_WITHDRAW, LedgerConstant.FACT_CARD_WITHDRAW_UN_FREEZE, entity.getId(), factMemo, factAmount);
     }
 
@@ -323,7 +317,7 @@ public class Ledger {
         JBalanceEntity subVa = ledgerUtil.getSubVaAccount(sub.getId(), entity.getCurrency());
         JBalanceEntity subSum = ledgerUtil.getSubSumAccount(sub.getId(), entity.getCurrency());
         BigDecimal showAmount = entity.getAmount().add(BigDecimal.ZERO).setScale(2, RoundingMode.HALF_UP);
-        String factMemo = "卡资金退回确认:" + showAmount;
+        String factMemo = "确认卡资金提取:" + showAmount;
         BigDecimal factAmount = entity.getAmount();
         // 记账1: 子商户Va-confirm
         ledgerUtil.confirmUpdate(subSum, LedgerConstant.ORIGIN_TYPE_CARD_WITHDRAW, LedgerConstant.FACT_CARD_WITHDRAW_CONFIRM, entity.getId(), factMemo, factAmount);

@@ -9,13 +9,11 @@ import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.entity.JExchangeEntity;
 import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zapi.ApiService;
-import io.renren.zapi.service.exchange.dto.ExchangeStateNotify;
-import io.renren.zbalance.Ledger;
+import io.renren.zapi.service.exchange.dto.ExchangeNotify;
 import io.renren.zin.service.exchange.dto.TExchangeStateNotify;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionTemplate;
 
 
 // CP110 离岸换汇通知
@@ -51,12 +49,11 @@ public class CP110 {
     private void notifyMerchant(TExchangeStateNotify notify, JExchangeEntity jExchangeEntity) {
         // 通知商户
         JMerchantEntity merchant = jMerchantDao.selectById(jExchangeEntity.getMerchantId());
-        ExchangeStateNotify exchangeStateNotify = ConvertUtils.sourceToTarget(notify, ExchangeStateNotify.class);
-        exchangeStateNotify.setMeraplid(jExchangeEntity.getMeraplid());  // 换下meraplid
-        String ok = apiService.notifyMerchant(exchangeStateNotify, merchant, "exchangeNotify");
+        ExchangeNotify exchangeNotify = ConvertUtils.sourceToTarget(notify, ExchangeNotify.class);
+        exchangeNotify.setMeraplid(jExchangeEntity.getMeraplid());  // 换下meraplid
+        String ok = apiService.notifyMerchant(exchangeNotify, merchant, "exchangeNotify");
         if (!ok.equals("OK")) {
             throw new RenException("process not completed");
         }
-
     }
 }

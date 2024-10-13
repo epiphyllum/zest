@@ -30,9 +30,9 @@ public class JConfigEntity extends BaseEntity {
      */
     private BigDecimal chargeRate;
 
+    private BigDecimal failFee;
     private BigDecimal l50;
     private BigDecimal gef50;
-    private BigDecimal failFee;
     private BigDecimal disputeFee;
 
     /**

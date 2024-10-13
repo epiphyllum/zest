@@ -24,6 +24,6 @@ public class ZinSubNotifyService {
         if (jMerchantEntity == null) {
             throw new RenException("can not find merchant");
         }
-        manager.changeState(jMerchantEntity, notify.getState(), notify.getCusid());
+        manager.query(jMerchantEntity);
     }
 }

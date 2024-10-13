@@ -18,7 +18,7 @@ create table j_exchange
 
     -- response
     applyid        varchar(32) comment '申请单号',
-    state          varchar(16) comment '状态',
+    state          varchar(16) default 'NA' comment '状态',
 
     -- lock(5)
     feecurrency    varchar(16) comment '手续费币种',
@@ -44,4 +44,5 @@ create table j_exchange
   DEFAULT CHARACTER SET utf8mb4 COMMENT ='j_exchange';
 create index idx_j_exchange_1 on j_exchange (agent_id, create_date);
 create index idx_j_exchange_2 on j_exchange (merchant_id, create_date);
+create index idx_j_exchange_3 on j_exchange (applyid);
 

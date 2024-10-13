@@ -55,4 +55,5 @@ create table j_money
   DEFAULT CHARACTER SET utf8mb4 COMMENT ='j_money';
 create index idx_j_money_1 on j_money (agent_id, create_date);
 create index idx_j_money_2 on j_money (merchant_id, create_date);
+create index idx_j_money_3 on j_money (applyid);
 create unique index uidx_j_money_1 on j_money (nid);

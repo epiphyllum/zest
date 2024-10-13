@@ -18,8 +18,8 @@ import io.renren.zin.service.cardapply.dto.TCardSubApplyResponse;
 import io.renren.zin.service.cardmoney.ZinCardMoneyService;
 import io.renren.zin.service.cardmoney.dto.TCardBalanceRequest;
 import io.renren.zin.service.cardmoney.dto.TCardBalanceResponse;
-import io.renren.zin.service.cardstatus.ZinCardStatusService;
-import io.renren.zin.service.cardstatus.dto.*;
+import io.renren.zin.service.cardstate.ZinCardStateService;
+import io.renren.zin.service.cardstate.dto.*;
 import io.renren.zin.service.file.ZinFileService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +42,7 @@ public class JMcardManager {
     @Resource
     private ZinCardApplyService zinCardApplyService;
     @Resource
-    private ZinCardStatusService zinCardStatusService;
+    private ZinCardStateService zinCardStateService;
     @Resource
     private ZinCardMoneyService zinCardMoneyService;
     @Resource
@@ -155,56 +155,56 @@ public class JMcardManager {
     public void activateCard(JMcardEntity jCardEntity) {
         TCardActivateRequest request = new TCardActivateRequest();
         request.setCardno(jCardEntity.getCardno());
-        TCardActivateResponse response = zinCardStatusService.cardActivate(request);
+        TCardActivateResponse response = zinCardStateService.cardActivate(request);
         queryCard(jCardEntity);
     }
 
     public void lossCard(JMcardEntity jCardEntity) {
         TCardLossRequest request = new TCardLossRequest();
         request.setCardno(jCardEntity.getCardno());
-        TCardLossResponse response = zinCardStatusService.cardLoss(request);
+        TCardLossResponse response = zinCardStateService.cardLoss(request);
         queryCard(jCardEntity);
     }
 
     public void unlossCard(JMcardEntity jCardEntity) {
         TCardUnlossRequest request = new TCardUnlossRequest();
         request.setCardno(jCardEntity.getCardno());
-        zinCardStatusService.cardUnloss(request);
+        zinCardStateService.cardUnloss(request);
         queryCard(jCardEntity);
     }
 
     public void freezeCard(JMcardEntity jCardEntity) {
         TCardFreezeRequest request = new TCardFreezeRequest();
         request.setCardno(jCardEntity.getCardno());
-        TCardFreezeResponse response = zinCardStatusService.cardFreeze(request);
+        TCardFreezeResponse response = zinCardStateService.cardFreeze(request);
         queryCard(jCardEntity);
     }
 
     public void unfreezeCard(JMcardEntity jCardEntity) {
         TCardUnfreezeRequest request = new TCardUnfreezeRequest();
         request.setCardno(jCardEntity.getCardno());
-        TCardUnfreezeResponse response = zinCardStatusService.cardUnfreeze(request);
+        TCardUnfreezeResponse response = zinCardStateService.cardUnfreeze(request);
         queryCard(jCardEntity);
     }
 
     public void cancelCard(JMcardEntity jCardEntity) {
         TCardCancelRequest request = new TCardCancelRequest();
         request.setCardno(jCardEntity.getCardno());
-        TCardCancelResponse response = zinCardStatusService.cardCancel(request);
+        TCardCancelResponse response = zinCardStateService.cardCancel(request);
         queryCard(jCardEntity);
     }
 
     public void uncancelCard(JMcardEntity jCardEntity) {
         TCardUncancelRequest request = new TCardUncancelRequest();
         request.setCardno(jCardEntity.getCardno());
-        TCardUncancelResponse response = zinCardStatusService.cardUncancel(request);
+        TCardUncancelResponse response = zinCardStateService.cardUncancel(request);
         queryCard(jCardEntity);
     }
 
     public void queryCard(JMcardEntity jCardEntity) {
         TCardStatusQuery request = new TCardStatusQuery();
         request.setCardno(jCardEntity.getCardno());
-        TCardStatusResponse response = zinCardStatusService.cardStatusQuery(request);
+        TCardStatusResponse response = zinCardStateService.cardStatusQuery(request);
         JMcardEntity update = new JMcardEntity();
         update.setId(jCardEntity.getId());
         update.setCardState(response.getCardstate());

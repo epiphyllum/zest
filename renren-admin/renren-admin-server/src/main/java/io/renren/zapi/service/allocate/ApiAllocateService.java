@@ -7,22 +7,18 @@ import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.dao.JMoneyDao;
 import io.renren.zadmin.entity.JAllocateEntity;
 import io.renren.zadmin.entity.JMerchantEntity;
-import io.renren.zadmin.entity.JMoneyEntity;
 import io.renren.zapi.ApiContext;
 import io.renren.zapi.ApiService;
-import io.renren.zapi.ZapiConstant;
-import io.renren.zapi.notifyevent.VaDepositNotifyEvent;
 import io.renren.zapi.service.allocate.dto.*;
 import io.renren.zbalance.Ledger;
+import io.renren.zin.service.umbrella.ZinUmbrellaService;
+import io.renren.zin.service.umbrella.dto.*;
 import jakarta.annotation.Resource;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ApiAllocateService {
 
-    @Resource
-    private ApiService apiService;
     @Resource
     private Ledger ledger;
     @Resource
@@ -30,67 +26,75 @@ public class ApiAllocateService {
     @Resource
     private JMerchantDao jMerchantDao;
 
+    @Resource
+    private ZinUmbrellaService zinUmbrellaService;
+
+    /**
+     * 入账申请:  拿到一个applyid  +  referencecode:附言信息
+     */
+    public Result<MoneyApplyRes> moneyApply(MoneyApply request, ApiContext apiContext) {
+        TVaDepositApply tVaDepositApply = ConvertUtils.sourceToTarget(request, TVaDepositApply.class);
+        // 请求通联
+        TVaDepositApplyResponse response = zinUmbrellaService.depositApply(tVaDepositApply);
+        // 转换回来
+        MoneyApplyRes moneyApplyRes = ConvertUtils.sourceToTarget(response, MoneyApplyRes.class);
+        // 应答
+        Result<MoneyApplyRes> result = new Result<>();
+        result.setData(moneyApplyRes);
+        return result;
+    }
+
+    /**
+     * 8001-入金申请确认: 需要申请id
+     */
+    public Result<MoneyConfirmRes> moneyConfirm(MoneyConfirm request, ApiContext apiContext) {
+        TVaDepositConfirm tVaDepositConfirm = ConvertUtils.sourceToTarget(request, TVaDepositConfirm.class);
+        TVaDepositConfirmResponse tVaDepositConfirmResponse = zinUmbrellaService.depositConfirm(tVaDepositConfirm);
+        MoneyConfirmRes moneyConfirmRes = ConvertUtils.sourceToTarget(tVaDepositConfirmResponse, MoneyConfirmRes.class);
+        Result<MoneyConfirmRes> result = new Result<>();
+        result.setData(moneyConfirmRes);
+        return result;
+    }
+
+    /**
+     * 8002-补充材料
+     */
+    public Result<MoneyMaterialRes> moneyMaterial(MoneyMaterial request, ApiContext apiContext) {
+        TSubmitMaterial tSubmitMaterial = ConvertUtils.sourceToTarget(request, TSubmitMaterial.class);
+        TSubmitMaterialResponse tSubmitMaterialResponse = zinUmbrellaService.submitMaterial(tSubmitMaterial);
+        MoneyMaterialRes moneyMaterialRes = ConvertUtils.sourceToTarget(tSubmitMaterialResponse, MoneyMaterialRes.class);
+        Result<MoneyMaterialRes> result = new Result<>();
+        result.setData(moneyMaterialRes);
+        return result;
+    }
+
     // 商户转入子商户
-    public Result<M2sRes> m2s(Long merchantId, String reqId, String name, String body, String sign) {
-        ApiContext context = new ApiContext();
-        M2sReq request = apiService.<M2sReq>initRequest(M2sReq.class, context, merchantId, reqId, name, body, sign);
-
+    public Result<M2sRes> m2s(M2sReq request, ApiContext apiContext) {
         // 记账
-        {
-            JMerchantEntity merchant = context.getMerchant();
-            JAllocateEntity entity = new JAllocateEntity();
-            entity.setMerchantId(merchantId);
-            entity.setMerchantName(merchant.getCusname());
-            ledger.ledgeM2s(entity);
-        }
-
         Result<M2sRes> result = new Result<>();
         return result;
     }
 
     // 商户转入子商户查询
     public Result<M2sQueryRes> m2sQuery(Long merchantId, String reqId, String name, String body, String sign) {
-        ApiContext context = new ApiContext();
-        M2sQuery request = apiService.<M2sQuery>initRequest(M2sQuery.class, context, merchantId, reqId, name, body, sign);
         Result<M2sQueryRes> result = new Result<>();
         return result;
     }
 
     // 子商户转商户
-    public Result<S2mRes> s2m(Long merchantId, String reqId, String name, String body, String sign) {
-        ApiContext context = new ApiContext();
-        S2mReq request = apiService.<S2mReq>initRequest(S2mReq.class, context, merchantId, reqId, name, body, sign);
-        {
-            JMerchantEntity merchant = context.getMerchant();
-            JAllocateEntity entity = new JAllocateEntity();
-            entity.setMerchantId(merchantId);
-            entity.setMerchantName(merchant.getCusname());
-            ledger.ledgeS2m(entity);
-        }
+    public Result<S2mRes> s2m(S2mReq request, ApiContext context) {
+        JMerchantEntity merchant = context.getMerchant();
+        JAllocateEntity entity = new JAllocateEntity();
+        entity.setMerchantName(merchant.getCusname());
+        ledger.ledgeS2m(entity);
         Result<S2mRes> result = new Result<>();
         return result;
     }
 
     // 子商户转商户查询
-    public Result<S2mQueryRes> s2mQuery(Long merchantId, String reqId, String name, String body, String sign) {
-        ApiContext context = new ApiContext();
-        S2mQuery request = apiService.<S2mQuery>initRequest(S2mQuery.class, context, merchantId, reqId, name, body, sign);
+    public Result<S2mQueryRes> s2mQuery(S2mQuery request, ApiContext context) {
         Result<S2mQueryRes> result = new Result<>();
         return result;
     }
 
-    // 通知入账
-    public void notifyMoneyIn(MoneyInNotify notify, JMerchantEntity merchant) {
-        apiService.notifyMerchant(notify, merchant, ZapiConstant.API_MONEY_IN_NOTIFY);
-    }
-
-    // 事件通知
-    @EventListener
-    public void handle(VaDepositNotifyEvent event) {
-        Long moneyId = event.getMoneyId();
-        JMoneyEntity jMoneyEntity = jMoneyDao.selectById(moneyId);
-        JMerchantEntity merchant = jMerchantDao.selectById(jMoneyEntity.getMerchantId());
-        MoneyInNotify moneyInNotify = ConvertUtils.sourceToTarget(jMoneyEntity, MoneyInNotify.class);
-        this.notifyMoneyIn(moneyInNotify, merchant);
-    }
 }

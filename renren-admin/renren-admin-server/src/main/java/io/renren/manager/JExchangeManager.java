@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.zadmin.dao.JExchangeDao;
 import io.renren.zadmin.entity.JExchangeEntity;
+import io.renren.zapi.ApiNotify;
 import io.renren.zbalance.Ledger;
 import io.renren.zin.config.ZinConstant;
 import io.renren.zin.service.exchange.ZinExchangeService;
@@ -25,7 +26,7 @@ public class JExchangeManager {
     @Resource
     private Ledger ledger;
     @Resource
-    private ApplicationEventPublisher publisher;
+    private ApiNotify apiNotify;
 
     /**
      * 提交到通联
@@ -78,7 +79,7 @@ public class JExchangeManager {
 
         // 是否通知商户
         if (jExchangeEntity.getApi() == 1) {
-            publisher.publishEvent(null); // todo;
+            apiNotify.exchangeNotify();
         }
     }
 
@@ -105,7 +106,7 @@ public class JExchangeManager {
         TExchangeConfirmResponse response = zinExchangeService.exchangeConfirm(request);
         JExchangeEntity update = new JExchangeEntity();
         update.setId(jExchangeEntity.getId());
-        update.setState("CF");  // todo: 呆逼已确认
+        update.setState(ZinConstant.PAY_APPLY_CF);  // 中间内部态: 以提交
         jExchangeDao.updateById(update);
         this.query(jExchangeEntity);
     }
@@ -117,7 +118,7 @@ public class JExchangeManager {
         tx.executeWithoutResult(status -> {
             jExchangeDao.update(null, Wrappers.<JExchangeEntity>lambdaUpdate()
                     .eq(JExchangeEntity::getId, entity.getId())
-                    .set(JExchangeEntity::getState, "CC")   // 代表已取消
+                    .set(JExchangeEntity::getState, ZinConstant.PAY_APPLY_CC)   // 内部取消
             );
             ledger.ledgeExchangeUnFreeze(entity);
         });
@@ -127,7 +128,7 @@ public class JExchangeManager {
      * 保存
      */
     public void save(JExchangeEntity entity) {
-        entity.setState("NA");
+        entity.setState(ZinConstant.PAY_APPLY_NA);  // 内部状态新建
         tx.executeWithoutResult(status -> {
             jExchangeDao.insert(entity);
             ledger.ledgeExchangeFreeze(entity);

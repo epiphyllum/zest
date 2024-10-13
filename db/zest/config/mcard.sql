@@ -88,4 +88,5 @@ create table j_mcard
   collate utf8mb4_bin
   DEFAULT CHARACTER SET utf8mb4 COMMENT ='j_mcard';
 create index idx_j_mcard_1 on j_mcard (merchant_id, create_date);
+create index idx_j_mcard_2 on j_mcard (applyid);
 

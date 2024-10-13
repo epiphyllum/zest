@@ -41,6 +41,10 @@ public class ZinCardApplyService {
 
 
     // 卡申请单查询:  3006
+    // 1. 主卡/子卡申请
+    // 2. 缴纳保证金
+    // 3. 提取保证金
+    // 4. 卡注销申请单当前处理进度。
     public TCardApplyResponse cardApplyQuery(TCardApplyQuery query) {
         return requester.request(newRequestId(), "/gcpapi/card/applyquery", query, TCardApplyResponse.class);
     }

@@ -1,6 +1,7 @@
 package io.renren.zapi;
 
 
+import cn.hutool.core.lang.Pair;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.asymmetric.RSA;
 import cn.hutool.crypto.asymmetric.Sign;
@@ -9,12 +10,23 @@ import cn.hutool.crypto.digest.DigestUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.renren.commons.tools.exception.RenException;
+import io.renren.commons.tools.utils.Result;
 import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.entity.JMerchantEntity;
+import io.renren.zapi.service.account.ApiAccountService;
+import io.renren.zapi.service.allocate.ApiAllocateService;
+import io.renren.zapi.service.cardapply.ApiCardApplyService;
+import io.renren.zapi.service.cardmoney.ApiCardMoneyService;
+import io.renren.zapi.service.cardstate.ApiCardStateService;
+import io.renren.zapi.service.exchange.ApiExchangeService;
+import io.renren.zapi.service.file.ApiFileService;
+import io.renren.zapi.service.sub.ApiSubService;
 import io.renren.zin.config.CommonUtils;
 import io.renren.zin.config.ZestConfig;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -23,33 +35,88 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.client.RestTemplate;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
 public class ApiService {
+
+    @Data
+    @AllArgsConstructor
+    public static class ApiMeta {
+        Object instance;
+        Method method;
+        Class<?> reqClass;
+    }
+
     @Resource
     private ZestConfig zestConfig;
     @Resource
     private ObjectMapper objectMapper;
     @Resource
     private JMerchantDao jMerchantDao;
-
     @Resource
     private RestTemplate restTemplate;
+    @Resource
+    private ApiSubService apiSubService;
+    @Resource
+    private ApiAccountService apiAccountService;
+    @Resource
+    private ApiAllocateService apiAllocateService;
+    @Resource
+    private ApiExchangeService apiExchangeService;
+    @Resource
+    private ApiCardMoneyService apiCardMoneyService;
+    @Resource
+    private ApiCardStateService apiCardStateService;
+    @Resource
+    private ApiCardApplyService apiCardApplyService;
 
     // 签名工具
     private Sign signer;
 
+    public static Map<String, ApiMeta> metaMap = new HashMap<>();
+    public void initService(Object object) {
+        Method[] methods = object.getClass().getMethods();
+        for (Method method : methods) {
+            // 获取返回类型
+            Class<?> returnType = method.getReturnType();
+            Class<?>[] parameterTypes = method.getParameterTypes();
+            if (returnType == Result.class && parameterTypes.length == 2 && parameterTypes[1].equals(ApiContext.class)) {
+                metaMap.put(method.getName(), new ApiMeta(object, method, parameterTypes[0]));
+            }
+        }
+    }
+
+    /**
+     *  初始化服务
+     */
     @PostConstruct
     public void init() {
         RSA rsaSigner = new RSA(zestConfig.getPrivateKey(), null);
         this.signer = SecureUtil.sign(SignAlgorithm.SHA512withRSA);
         this.signer.setPrivateKey(rsaSigner.getPrivateKey());
+
+        initService(apiSubService);
+        initService(apiAccountService);
+        initService(apiCardMoneyService);
+        initService(apiExchangeService);
+        initService(apiAllocateService);
+
+        initService(apiCardApplyService);
+        initService(apiCardMoneyService);
+        initService(apiCardStateService);
     }
 
     public Sign getMerchantVerifier(JMerchantEntity merchant) {
@@ -59,25 +126,18 @@ public class ApiService {
         return verifier;
     }
 
-    /**
-     * 解析并验证商户请求
-     *
-     * @return
-     */
-    public <T> T initRequest(Class<T> clazz, ApiContext context, Long merchantId, String reqId, String name, String body, String sign) {
-
+    // 调用服务
+    public Result<?> invokeService(String body, Long merchantId, String sign, String reqId, String name) {
+        log.info("body: {}", body);
+        ApiMeta apiMeta = metaMap.get(name);
         JMerchantEntity merchant = jMerchantDao.selectById(merchantId);
         if (merchant == null) {
-            log.error("商户号错误:{}", merchantId);
             throw new RenException("invalid merchant id:" + merchantId);
         }
-        context.setMerchant(merchant);
-        context.setLogger(CommonUtils.getLogger("todo"));
-        context.info("recv: {}|{}|{}|{}|{}", reqId, name, body, sign, merchantId);
-        ApiContext.setContext(context);
 
-        // 测试暂时不验证签名
-        if (false) {
+        // 开发环境不验证签名
+        if (!zestConfig.isDev()) {
+            // 测试暂时不验证签名
             String bodyDigest = DigestUtil.sha256Hex(body);
             String toSign = bodyDigest + reqId + merchantId;
             Sign merchantVerifier = getMerchantVerifier(merchant);
@@ -87,13 +147,23 @@ public class ApiService {
             }
         }
 
-        T request = null;
         try {
-            request = objectMapper.readValue(body, clazz);
+            Object req = objectMapper.readValue(body, apiMeta.getReqClass());
+            return (Result)apiMeta.getMethod().invoke(apiMeta.getInstance(), req);
         } catch (JsonProcessingException e) {
             throw new RenException("invalid json");
+        } catch (InvocationTargetException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof RenException) {
+                RenException ex = (RenException) cause;
+                throw ex;
+            } else {
+                cause.printStackTrace();
+                throw new RenException("unknown exception");
+            }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
         }
-        return request;
     }
 
     // 通知商户: OK| FAIL

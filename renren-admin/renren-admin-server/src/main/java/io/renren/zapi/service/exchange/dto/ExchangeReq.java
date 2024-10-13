@@ -4,6 +4,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 
+// 换汇申请
 @Data
 public class ExchangeReq {
     private String	meraplid;//	申请单流水

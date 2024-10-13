@@ -5,8 +5,8 @@ import io.renren.zin.service.accountmanage.ZinAccountManageNotifyService;
 import io.renren.zin.service.accountmanage.dto.TMoneyInNotify;
 import io.renren.zin.service.cardapply.ZinCardApplyNotifyService;
 import io.renren.zin.service.cardapply.dto.TCardApplyNotify;
-import io.renren.zin.service.cardstatus.ZinCardStatusNotifyService;
-import io.renren.zin.service.cardstatus.dto.TCardChangeNotify;
+import io.renren.zin.service.cardstate.ZinCardStateNotifyService;
+import io.renren.zin.service.cardstate.dto.TCardChangeNotify;
 import io.renren.zin.service.cardtxn.ZinCardTxnNotifyService;
 import io.renren.zin.service.cardtxn.dto.TAuthTxnNotify;
 import io.renren.zin.service.exchange.ZinExchangeNotifyService;
@@ -14,7 +14,6 @@ import io.renren.zin.service.exchange.dto.TExchangeStateNotify;
 import io.renren.zin.service.sub.ZinSubNotifyService;
 import io.renren.zin.service.sub.dto.TSubStatusNotify;
 import io.renren.zin.service.umbrella.ZinUmbrellaNotifyService;
-import io.renren.zin.service.umbrella.ZinUmbrellaService;
 import io.renren.zin.service.umbrella.dto.TMoneyAccountNotify;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,7 +33,7 @@ public class ZinController {
     @Resource
     private ZinCardApplyNotifyService zinCardApplyNotifyService;
     @Resource
-    private ZinCardStatusNotifyService zinCardStatusNotifyService;
+    private ZinCardStateNotifyService zinCardStateNotifyService;
     @Resource
     private ZinCardTxnNotifyService zinCardTxnNotifyService;
     @Resource
@@ -60,7 +59,7 @@ public class ZinController {
     @PostMapping("applynotify")
     public String auditrst(HttpServletRequest request, @RequestBody String body, @RequestHeader("X-AGCP-Auth") String auth, @RequestHeader("X-AGCP-Date") String date) {
         TExchangeStateNotify tExchangeStateNotify = requester.<TExchangeStateNotify>verify(request, body, auth, date, TExchangeStateNotify.class);
-        zinExchangeNotifyService.exchangeStateNotify(tExchangeStateNotify);
+        zinExchangeNotifyService.handle(tExchangeStateNotify);
         return "OK";
     }
 
@@ -76,7 +75,7 @@ public class ZinController {
     @PostMapping("cardchangenotify")
     public String cardchangenotify(HttpServletRequest request, @RequestBody String body, @RequestHeader("X-AGCP-Auth") String auth, @RequestHeader("X-AGCP-Date") String date) {
         TCardChangeNotify tCardChangeNotify = requester.<TCardChangeNotify>verify(request, body, auth, date, TCardChangeNotify.class);
-        zinCardStatusNotifyService.cardStatusChangeNotify(tCardChangeNotify);
+        zinCardStateNotifyService.handle(tCardChangeNotify);
         return "OK";
     }
 
@@ -100,7 +99,7 @@ public class ZinController {
     @PostMapping("acctbalauditrst")
     public String acctbalauditrst(HttpServletRequest request, @RequestBody String body, @RequestHeader("X-AGCP-Auth") String auth, @RequestHeader("X-AGCP-Date") String date) {
         TMoneyInNotify tMoneyInNotify = requester.verify(request, body, auth, date, TMoneyInNotify.class);
-        zinAccountManageNotifyService.moneyInNotify(tMoneyInNotify);
+        zinAccountManageNotifyService.handle(tMoneyInNotify);
         return "OK";
     }
 

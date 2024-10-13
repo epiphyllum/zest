@@ -13,15 +13,11 @@ import io.renren.zadmin.entity.JCardEntity;
 import io.renren.zadmin.entity.JDepositEntity;
 import io.renren.zadmin.entity.JMcardEntity;
 import io.renren.zadmin.entity.JWithdrawEntity;
-import io.renren.zapi.notifyevent.CardApplyNotifyEvent;
-import io.renren.zbalance.Ledger;
 import io.renren.zin.config.ZinConstant;
 import io.renren.zin.service.cardapply.dto.TCardApplyNotify;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * 用以在主卡/子卡申请、缴纳保证金、提取保证金、卡注销申请单状态变化时通知合作方。
@@ -93,7 +89,7 @@ public class ZinCardApplyNotifyService {
         jCardManager.query(jCardEntity);
     }
 
-    // CP450	开卡	申请开卡
+    // CP450 开卡申请开卡
     public void handleCP450(TCardApplyNotify notify) {
         String cardbusinesstype = notify.getCardbusinesstype();
         // 主卡
@@ -108,13 +104,15 @@ public class ZinCardApplyNotifyService {
 
     // CP453: 注销
     public void handleCP453(TCardApplyNotify notify) {
+        this.handleCP450(notify);
     }
 
     // CP458: 注销撤回
     public void handleCP458(TCardApplyNotify notify) {
+        this.handleCP450(notify);
     }
 
-    //CP451 保证金缴纳|卡片资金充值
+    //CP451 保证金缴纳
     public void handleCP451(TCardApplyNotify notify) {
         // 查询下申请单
         String applyid = notify.getApplyid();
@@ -122,7 +120,7 @@ public class ZinCardApplyNotifyService {
         jDepositManager.query(entity);
     }
 
-    //CP452	保证金提现|卡片资金提现
+    //CP452	保证金提现
     public void handleCP452(TCardApplyNotify notify) {
         String applyid = notify.getApplyid();
         JWithdrawEntity entity = jWithdrawDao.selectOne(Wrappers.<JWithdrawEntity>lambdaQuery().eq(JWithdrawEntity::getApplyid, applyid));

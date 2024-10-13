@@ -76,7 +76,7 @@ public class ApiFileService {
 
         Result<UploadRes> result = new Result<>();
         UploadRes uploadRes = new UploadRes();
-        uploadRes.setFileId(filename);;
+        uploadRes.setFid(filename);;
         result.setData(uploadRes);
         return result;
     }

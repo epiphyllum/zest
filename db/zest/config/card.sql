@@ -73,8 +73,11 @@ create table j_card
     feecurrency      varchar(3) comment '申请费用币种',                         -- 	feecurrency	String	3	O
     cardno           varchar(30) comment '卡号',                                -- 	cardno	String	30	O	申请成功后返回
     state            varchar(2)              default '00' comment '卡申请状态', --
-    card_state       varchar(2)              default '00' comment '', -- '卡状态'
+    card_state       varchar(2)              default '00' comment '',           -- '卡状态'
     balance          decimal(18, 2) comment '卡余额',
+    --
+    cvv              varchar(3),
+    expiredate       varchar(4),
 
     -- basic
     creator          bigint comment '创建者',
@@ -88,3 +91,4 @@ create table j_card
 create index idx_j_card_1 on j_card (merchant_id, create_date);
 create index idx_j_card_2 on j_card (sub_id, create_date);
 create index idx_j_card_3 on j_card (agent_id, create_date);
+create index idx_j_card_4 on j_card (applyid);

@@ -81,12 +81,13 @@ public class JWithdrawManager {
             ledger.ledgeCardWithdrawFreeze(entity, subEntity);
         });
 
-        // 立即发起提交到通联
-        try {
-            this.submit(entity);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+//        // 立即发起提交到通联
+//        try {
+//            this.submit(entity);
+//        } catch (Exception ex) {
+//            ex.printStackTrace();
+//        }
+
     }
 
     /**
@@ -142,5 +143,21 @@ public class JWithdrawManager {
         // 立即查询通联
         entity.setApplyid(response.getApplyid());
         this.query(entity);
+    }
+
+    /**
+     * 作废
+     * @param entity
+     */
+    public void cancel(JWithdrawEntity entity) {
+        JSubEntity subEntity = jSubDao.selectById(entity.getSubId());
+        tx.executeWithoutResult(st -> {
+            jWithdrawDao.update(null, Wrappers.<JWithdrawEntity>lambdaUpdate()
+                    .eq(JWithdrawEntity::getId, entity.getId())
+                    .isNull(JWithdrawEntity::getApplyid)
+                    .set(JWithdrawEntity::getState, "07")
+            );
+            ledger.ledgeCardWithdrawUnFreeze(entity,subEntity);
+        });
     }
 }
