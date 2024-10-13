@@ -9,6 +9,7 @@ import io.renren.zin.cardapply.dto.TCardApplyQuery;
 import io.renren.zin.cardapply.dto.TCardApplyResponse;
 import io.renren.zin.cardapply.dto.TCardSubApplyRequest;
 import io.renren.zin.cardapply.dto.TCardSubApplyResponse;
+import io.renren.zin.cardstate.ZinCardStateService;
 import io.renren.zin.cardstate.dto.TCardActivateRequest;
 import io.renren.zin.cardstate.dto.TCardActivateResponse;
 import io.renren.zin.cardapply.ZinCardApplyService;

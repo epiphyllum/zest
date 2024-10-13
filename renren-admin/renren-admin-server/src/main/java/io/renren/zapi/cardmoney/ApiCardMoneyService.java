@@ -4,6 +4,7 @@ import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.commons.tools.utils.Result;
 import io.renren.zapi.ApiContext;
 import io.renren.zapi.cardmoney.dto.*;
+import io.renren.zin.cardmoney.ZinCardMoneyService;
 import io.renren.zin.cardmoney.dto.TDepositRequest;
 import io.renren.zin.cardmoney.dto.TDepositResponse;
 import io.renren.zin.cardmoney.dto.TWithdrawRequest;
