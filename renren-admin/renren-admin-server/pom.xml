@@ -78,12 +78,15 @@
             <groupId>com.github.whvcse</groupId>
             <artifactId>easy-captcha</artifactId>
         </dependency>
-        <!-- 积木报表 -->
+
+        <!-- 积木报表
         <dependency>
             <groupId>org.jeecgframework.jimureport</groupId>
             <artifactId>jimureport-spring-boot3-starter-fastjson2</artifactId>
             <version>1.7.8</version>
         </dependency>
+       -->
+
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>transmittable-thread-local</artifactId>
