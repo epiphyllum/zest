@@ -196,8 +196,8 @@ public class JCardManager {
             TCardPayInfoRequest req = new TCardPayInfoRequest();
             req.setCardno(response.getCardno());
             TCardPayInfoResponse resp = zinCardApplyService.cardPayInfo(req);
-            String cvv = zestConfig.decryptSensitive(resp.getCvv());
-            String expiredate = zestConfig.decryptSensitive(resp.getExpiredate());
+            String cvv = resp.getCvv();
+            String expiredate = resp.getExpiredate();
 
             updateWrapper.set(JCardEntity::getCvv, cvv).set(JCardEntity::getExpiredate, expiredate);
             tx.executeWithoutResult(status -> {

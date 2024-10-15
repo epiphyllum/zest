@@ -62,5 +62,5 @@ public class JMaccountDTO implements Serializable {
     // 2
     private String state;
     private String stateexplain;
-    private String cardId;
+    private String cardid;
 }

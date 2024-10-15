@@ -1,7 +1,10 @@
 package io.renren.zadmin.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.renren.commons.mybatis.service.impl.CrudServiceImpl;
+import io.renren.commons.tools.constant.Constant;
+import io.renren.commons.tools.page.PageData;
 import io.renren.zadmin.dao.JPacketDao;
 import io.renren.zadmin.dto.JPacketDTO;
 import io.renren.zadmin.entity.JPacketEntity;
@@ -19,6 +22,15 @@ import java.util.Map;
  */
 @Service
 public class JPacketServiceImpl extends CrudServiceImpl<JPacketDao, JPacketEntity, JPacketDTO> implements JPacketService {
+
+    @Override
+    public PageData<JPacketDTO> page(Map<String, Object> params) {
+        IPage<JPacketEntity> page = baseDao.selectPage(
+                getPage(params, Constant.CREATE_DATE, false),
+                applyFilter(params)
+        );
+        return getPageData(page, JPacketDTO.class);
+    }
 
     @Override
     public QueryWrapper<JPacketEntity> getWrapper(Map<String, Object> params){

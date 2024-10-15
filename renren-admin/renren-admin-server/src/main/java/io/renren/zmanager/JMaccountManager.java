@@ -33,8 +33,8 @@ public class JMaccountManager {
 
         JMaccountEntity update = new JMaccountEntity();
         update.setId(entity.getId());
-        update.setCardId(tMoneyAccountAddResponse.getId());
+        update.setCardid(tMoneyAccountAddResponse.getId());
         jMaccountDao.updateById(update);
-        entity.setCardId(tMoneyAccountAddResponse.getId());
+        entity.setCardid(tMoneyAccountAddResponse.getId());
     }
 }

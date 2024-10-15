@@ -45,4 +45,3 @@ create table j_exchange
 create index idx_j_exchange_1 on j_exchange (agent_id, create_date);
 create index idx_j_exchange_2 on j_exchange (merchant_id, create_date);
 create index idx_j_exchange_3 on j_exchange (applyid);
-

@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.io.UnsupportedEncodingException;
+import java.security.GeneralSecurityException;
 import java.text.DecimalFormat;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -105,6 +107,16 @@ public class CommonUtils {
     // 唯一ID生成器
     public static  String uniqueId() {
         return DefaultIdentifierGenerator.getInstance().nextId(null).toString();
+    }
+
+    public String decryptSensitive(String sensitiveData, String key) {
+        try {
+            return AESUtil.decrypt(sensitiveData,key, false, AESUtil.ECB_PKCS5, "UTF-8");
+        } catch (GeneralSecurityException e) {
+            throw new RenException("解密敏感数据失败");
+        } catch (UnsupportedEncodingException e) {
+            throw new RenException("解密敏感数据失败");
+        }
     }
 
 }

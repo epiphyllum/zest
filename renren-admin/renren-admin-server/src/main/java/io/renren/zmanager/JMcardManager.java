@@ -130,7 +130,12 @@ public class JMcardManager {
         String photofront2 = cardEntity.getPhotofront2();
         String photoback2 = cardEntity.getPhotoback2();
 
-        List<String> fids = List.of(photofront, photoback, photofront2, photoback2);
+        List<String> fids =  new ArrayList<>();
+        if (photofront != null) { fids.add(photofront); }
+        if (photoback != null) { fids.add(photoback); }
+        if (photofront2 != null) { fids.add(photofront2); }
+        if (photoback2 != null) { fids.add(photoback2); }
+
         Map<String, CompletableFuture<String>> jobs = new HashMap<>();
         for (String fid : fids) {
             if (StringUtils.isBlank(fid)) {

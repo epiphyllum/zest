@@ -58,5 +58,5 @@ public class JMaccountEntity extends BaseEntity {
     // 2
     private String state;
     private String stateexplain;
-    private String cardId;  // id
+    private String cardid;  // id
 }

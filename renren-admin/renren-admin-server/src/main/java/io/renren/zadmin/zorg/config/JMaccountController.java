@@ -180,7 +180,7 @@ public class JMaccountController {
         String cardId = response.getId();
         JMaccountEntity update = new JMaccountEntity();
         update.setId(id);
-        update.setCardId(cardId);
+        update.setCardid(cardId);
         jMaccountDao.updateById(update);
 
         return new Result();
@@ -192,7 +192,7 @@ public class JMaccountController {
     public Result query(@RequestParam("id") Long id) throws Exception {
         JMaccountEntity jMaccountEntity = jMaccountDao.selectById(id);
         TMoneyAccountQuery query = ConvertUtils.sourceToTarget(jMaccountEntity, TMoneyAccountQuery.class);
-        query.setId(jMaccountEntity.getCardId());
+        query.setId(jMaccountEntity.getCardid());
         query.setCurrency(null);
         TMoneyAccountQueryResponse response = zinUmbrellaService.queryMoneyAccount(query);
         JMaccountEntity update = new JMaccountEntity();

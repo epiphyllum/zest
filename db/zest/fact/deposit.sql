@@ -18,9 +18,9 @@ create table j_deposit
     cardno         varchar(30)    not null,                -- 卡号	cardno	String	30	Y
     payerid        varchar(30)    not null,                -- 出账账户	payerid	String	30	Y
     amount         decimal(18, 2) not null,                -- 缴纳金额	amount	Number	18,2	Y
-    payeeaccount   varchar(30) comment '交易对手',         -- 交易对手	payeeaccount	String	30	O
-    procurecontent varchar(200) comment '采购内容',        -- 采购内容	procurecontent	String	200	O
-    agmfid         varchar(100) comment '合同文件',        -- 保证金对应合同协议	agmfid	String	100	O
+    payeeaccount   varchar(30) comment '交易对手',          -- 交易对手	payeeaccount	String	30	O
+    procurecontent varchar(200) comment '采购内容',         -- 采购内容	procurecontent	String	200	O
+    agmfid         varchar(100) comment '合同文件',         -- 保证金对应合同协议	agmfid	String	100	O
 
     -- 冗余增加的(1)
     currency       varchar(3)     not null,                -- 币种
@@ -32,8 +32,8 @@ create table j_deposit
     applyid        varchar(32)    null comment '申请单号', -- 申请单号	applyid	String	32	Y
     `state`        varchar(2)     not null default 0 comment '状态',
     `stateexplain` varchar(200)   null,
-    securityamount decimal(18, 2) null,
-    fee            decimal(18,2)  null,
+    securityamount decimal(18, 2) null comment '通联担保金',
+    fee            decimal(18,2)  null comment '通联手续费',
 
     -- basic(4)
     creator        bigint comment '创建者',
@@ -44,8 +44,10 @@ create table j_deposit
 ) ENGINE = InnoDB
   collate utf8mb4_bin
   DEFAULT CHARACTER SET utf8mb4 COMMENT ='j_deposit';
+-- 普通索引
 create index idx_j_deposit_1 on j_deposit (agent_id, create_date);
 create index idx_j_deposit_2 on j_deposit (merchant_id, create_date);
 create index idx_j_deposit_3 on j_deposit (sub_id, create_date);
-create index idx_j_deposit_4 on j_deposit (applyid);
-create index idx_j_deposit_4 on j_deposit (meraplid);
+create index idx_j_deposit_4 on j_deposit (merchant_id, meraplid);
+-- 唯一索引
+create unique index  idx_j_deposit_1 on j_deposit (applyid);

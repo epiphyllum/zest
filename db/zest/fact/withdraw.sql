@@ -37,7 +37,7 @@ create table j_withdraw
 create index idx_j_withdraw_1 on j_withdraw (agent_id, create_date);
 create index idx_j_withdraw_2 on j_withdraw (merchant_id, create_date);
 create index idx_j_withdraw_3 on j_withdraw (sub_id, create_date);
-create index idx_j_withdraw_4 on j_deposit (applyid);
-create index idx_j_withdraw_5 on j_deposit (meraplid);
+create index idx_j_withdraw_4 on j_withdraw (merchant_id, meraplid);
+create unique index  uidx_j_withdraw_1 on j_withdraw(applyid);
 
 

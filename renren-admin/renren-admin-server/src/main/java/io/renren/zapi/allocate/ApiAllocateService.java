@@ -42,7 +42,7 @@ public class ApiAllocateService {
         JMoneyEntity entity = ConvertUtils.sourceToTarget(request, JMoneyEntity.class);
         entity.setApi(1);
         entity.setMerchantId(context.getMerchant().getId());
-        jMoneyManager.saveAndSubmit(entity, context.getMerchant(), request.getId());
+        jMoneyManager.saveAndSubmit(entity, context.getMerchant(), request.getCardId());
 
         // 应答
         entity = jMoneyDao.selectById(entity.getId());

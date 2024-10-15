@@ -13,14 +13,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
  * 管理后台
+ * @SpringBootApplication(scanBasePackages = {"org.jeecg.modules.jmreport", "io.renren"})
  *
  * @author Mark sunlightcs@gmail.com
  */
-@SpringBootApplication(scanBasePackages = {"org.jeecg.modules.jmreport", "io.renren"})
+@SpringBootApplication
 public class AdminApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(AdminApplication.class, args);
     }
-
 }

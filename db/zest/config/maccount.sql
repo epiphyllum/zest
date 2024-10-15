@@ -35,8 +35,7 @@ create table j_maccount
 
     state          varchar(2),
     stateexplain   varchar(100),
-    card_id        varchar(15),
-
+    cardid        varchar(15),                           -- 就是通联的id
 
     -- basic
     creator        bigint comment '创建者',
@@ -50,3 +49,4 @@ create table j_maccount
       SET utf8mb4 COMMENT = 'j_maccount';
 create index idx_j_maccount_1 on j_maccount (merchant_id, create_date);
 create index idx_j_maccount_2 on j_maccount (agent_id, create_date);
+create unique index uidx_j_maccount_1 on j_maccount (merchant_id, cardno);

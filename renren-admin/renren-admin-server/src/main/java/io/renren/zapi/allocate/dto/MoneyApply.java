@@ -7,5 +7,5 @@ import lombok.Data;
 public class MoneyApply {
     String meraplid;     // 申请单流水
     String currency;     // 币种
-    String id;           // 银行账户id
+    String cardId;       // 银行账户id
 }

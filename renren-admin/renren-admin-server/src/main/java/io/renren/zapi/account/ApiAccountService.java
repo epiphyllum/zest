@@ -42,7 +42,7 @@ public class ApiAccountService {
 
         JMaccountEntity update = new JMaccountEntity();
         update.setId(entity.getId());
-        update.setCardId(tMoneyAccountAddResponse.getId());
+        update.setCardid(tMoneyAccountAddResponse.getId());
         jMaccountDao.updateById(update);
 
         return tMoneyAccountAddResponse;
@@ -71,7 +71,7 @@ public class ApiAccountService {
         jMaccountManager.submit(entity);
 
         // 转换结果返回
-        MoneyAccountAddResponse response =  new MoneyAccountAddResponse(entity.getCardId());
+        MoneyAccountAddResponse response =  new MoneyAccountAddResponse(entity.getCardid());
         Result<MoneyAccountAddResponse> result = new Result<>();
         result.setData(response);
         return result;

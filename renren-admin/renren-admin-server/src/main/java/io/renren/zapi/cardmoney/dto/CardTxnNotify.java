@@ -22,5 +22,4 @@ public class CardTxnNotify {
     private String trxaddr;
     private String authcode;
     private String mcc;
-    private String time;
 }

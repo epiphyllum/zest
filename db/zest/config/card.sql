@@ -52,16 +52,16 @@ create table j_card
     photofront2      varchar(100) comment '正面照片',                           --	photofront	String	100	Y
     photoback2       varchar(100) comment '反面照片',                           --	photoback	String	100	Y
 
-    payerid          varchar(15) comment '申请费用扣款账户',                    --	payerid	String	15	Y	【VA账户列表查询】响应报文中的账户唯一标识id
+    payerid          varchar(15) comment '申请费用扣款账户',                      --	payerid	String	15	Y	【VA账户列表查询】响应报文中的账户唯一标识id
 
-    deliverycountry  varchar(10) comment '邮寄国家/地区',                       -- 	deliverycountry	String	10	C	卡片类型为虚实同发时必填，见附录【国别信息】中的CODE
+    deliverycountry  varchar(10) comment '邮寄国家/地区',                        -- 	deliverycountry	String	10	C	卡片类型为虚实同发时必填，见附录【国别信息】中的CODE
     deliveryprovince varchar(6) comment '邮寄省份',                             -- 	deliveryprovince	String	6	C	邮寄国家/地区为CHN时必填，见附件【地区代码】
     deliverycity     varchar(6) comment '邮寄城市',                             -- 	deliverycity	String	6	C	邮寄国家/地区为CHN时必填，见附件【地区代码】
     deliveryaddress  varchar(200) comment '邮寄城市',                           -- 	deliveryaddress	String	200	C	卡片类型为虚实同发时必填
 
     -- 大吉设计
-    currency         varchar(3)     not null,
-    merchant_fee     decimal(18, 2) not null default 0,
+    currency         varchar(3)     not null comment '卡的币种',
+    merchantfee     decimal(18, 2) not null default 0 comment '我们收商户的费用',
     notify_count     int            not null default 0,
     notify_status    int            not null default 0 comment '0: 待通知, 1: 通知成功, 2: 通知失败',
 
@@ -69,15 +69,15 @@ create table j_card
     applyid          varchar(32) comment '申请ID',                              --
 
     -- notify:
-    fee              decimal(18, 2) comment '申请费用',                         -- fee	Number	18,2	O
+    fee              decimal(18, 2) comment '申请费用(通联收费)',                         -- fee	Number	18,2	O
     feecurrency      varchar(3) comment '申请费用币种',                         -- 	feecurrency	String	3	O
     cardno           varchar(30) comment '卡号',                                -- 	cardno	String	30	O	申请成功后返回
     state            varchar(2)              default '00' comment '卡申请状态', --
     card_state       varchar(2)              default '00' comment '',           -- '卡状态'
-    balance          decimal(18, 2) comment '卡余额',
+    balance          decimal(18, 2) comment '卡余额',   -- 可以收到授权通知后查询
     --
-    cvv              varchar(3),
-    expiredate       varchar(4),
+    cvv              varchar(20),
+    expiredate       varchar(20),
 
     -- basic
     creator          bigint comment '创建者',

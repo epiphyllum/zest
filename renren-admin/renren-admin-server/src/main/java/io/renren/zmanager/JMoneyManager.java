@@ -28,14 +28,13 @@ import java.util.concurrent.CompletableFuture;
 @Service
 @Slf4j
 public class JMoneyManager {
+
     @Resource
     private ZinFileService zinFileService;
     @Resource
     private JMoneyDao jMoneyDao;
     @Resource
     private JMaccountDao jMaccountDao;
-    @Resource
-    private JMerchantDao jMerchantDao;
     @Resource
     private ZinUmbrellaService zinUmbrellaService;
 
@@ -47,9 +46,10 @@ public class JMoneyManager {
         entity.setAgentId(merchant.getAgentId());
 
         // 填充来账账户信息
-        JMaccountEntity jMaccountEntity = jMaccountDao.selectOne(Wrappers.<JMaccountEntity>lambdaQuery().eq(JMaccountEntity::getCardId, cardId));
+        JMaccountEntity jMaccountEntity = jMaccountDao.selectOne(Wrappers.<JMaccountEntity>lambdaQuery().eq(JMaccountEntity::getCardid, cardId));
         entity.setCardname(jMaccountEntity.getCardname());
         entity.setCardno(jMaccountEntity.getCardno());
+
         // 调用通联
         TMoneyApply apply = new TMoneyApply();
         apply.setCurrency(entity.getCurrency());
