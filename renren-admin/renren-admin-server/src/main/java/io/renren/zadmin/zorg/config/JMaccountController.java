@@ -129,7 +129,7 @@ public class JMaccountController {
         } else if (user.getUserType().equals("operation")) {
         }
         dto.setApi(0);
-        dto.setMeraplid(CommonUtils.newRequestId());
+        dto.setMeraplid(CommonUtils.uniqueId());
         jMaccountService.save(dto);
         return new Result();
     }

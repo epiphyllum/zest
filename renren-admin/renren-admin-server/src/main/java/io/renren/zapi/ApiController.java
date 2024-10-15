@@ -15,6 +15,8 @@ public class ApiController {
     private ApiFileService apiFileService;
     @Resource
     private ApiService apiService;
+    @Resource
+    private ApiNotifyMock apiNotifyMock;
 
     @PostMapping
     public Result<?> request(@RequestBody String body,
@@ -40,7 +42,7 @@ public class ApiController {
             @RequestHeader("x-req-id") String reqId,
             @RequestHeader("x-api-name") String name
     ) {
-        log.info("mock webhook recv[{}][{}][{}]", merchantId, name, body);
+        apiNotifyMock.handle(name);
         return "OK";
     }
 

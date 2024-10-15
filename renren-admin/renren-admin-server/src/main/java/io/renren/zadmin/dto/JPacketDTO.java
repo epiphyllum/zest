@@ -28,18 +28,18 @@ public class JPacketDTO implements Serializable {
     private Long merchantId;
     @Schema(description = "商户名")
     private String merchantName;
+
     @Schema(description = "请求ID")
     private String reqId;
     @Schema(description = "接口名称")
     private String apiName;
-    @Schema(description = "接收头")
-    private String recvHeader;
     @Schema(description = "报文内容")
     private String recv;
     @Schema(description = "报文内容")
     private String send;
-    @Schema(description = "报文内容")
-    private String sendHeader;
+    @Schema(description = "签名")
+    private String sign;
+
     @Schema(description = "创建者")
     private Long creator;
     @Schema(description = "创建时间")

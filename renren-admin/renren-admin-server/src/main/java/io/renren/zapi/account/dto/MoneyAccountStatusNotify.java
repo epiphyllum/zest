@@ -4,9 +4,9 @@ import lombok.Data;
 
 @Data
 public class MoneyAccountStatusNotify {
-    String cardno;       // 账户号码cardnoString30Y银行卡号
-    String currency;     // 账户名称cardnameString16Y
-    String id;
-    String state;
-    String stateexplain;
+    String cardno;       // 账户号码|银行卡号
+    String currency;     // 币种
+    String id;           // 银行卡ID
+    String state;        // 状态
+    String stateexplain; // 状态描述
 }

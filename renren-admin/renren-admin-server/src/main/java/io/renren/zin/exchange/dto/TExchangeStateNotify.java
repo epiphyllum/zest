@@ -4,6 +4,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 
+// 其实是支付类收单通知, 不只是换汇
 @Data
 public class TExchangeStateNotify {
     private String meraplid;      // 申请单流水
@@ -16,7 +17,7 @@ public class TExchangeStateNotify {
     private String stlccy;        // 结算币种
 
     private BigDecimal fee;       // 手续费
-    private String feeccy;    // 手续费
+    private String feeccy;        // 手续费币种
     private BigDecimal fxrate;    // 汇率
 
     private String ps;            // 附言

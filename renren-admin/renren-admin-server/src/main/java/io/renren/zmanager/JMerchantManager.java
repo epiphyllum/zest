@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -161,7 +162,15 @@ public class JMerchantManager {
         String taxfid = jMerchantEntity.getTaxfid();
         String organfid = jMerchantEntity.getOrganfid();
 
-        List<String> fids = List.of(agreementfid, buslicensefid, creditfid, legalphotobackfid, legalphotofrontfid, taxfid, organfid);
+        List<String> fids = new ArrayList<>();
+        if (agreementfid != null) { fids.add(agreementfid); }
+        if (buslicensefid != null) { fids.add(buslicensefid); }
+        if (creditfid != null) { fids.add(agreementfid); }
+        if (legalphotobackfid != null) { fids.add(legalphotobackfid); }
+        if (legalphotofrontfid != null) { fids.add(legalphotofrontfid); }
+        if (taxfid != null) { fids.add(taxfid); }
+        if (organfid != null) { fids.add(organfid); }
+
         Map<String, CompletableFuture<String>> jobs = new HashMap<>();
         for (String fid : fids) {
             if (StringUtils.isBlank(fid)) {

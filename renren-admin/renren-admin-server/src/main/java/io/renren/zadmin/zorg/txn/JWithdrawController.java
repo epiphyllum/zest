@@ -80,7 +80,7 @@ public class JWithdrawController {
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
         JWithdrawEntity jWithdrawEntity = ConvertUtils.sourceToTarget(dto, JWithdrawEntity.class);
         jWithdrawEntity.setApi(0);
-        jWithdrawEntity.setMeraplid(CommonUtils.newRequestId());
+        jWithdrawEntity.setMeraplid(CommonUtils.uniqueId());
         jWithdrawManager.save(jWithdrawEntity);
         return new Result<Long>().ok(jWithdrawEntity.getId());
     }
@@ -142,7 +142,7 @@ public class JWithdrawController {
     @PreAuthorize("hasAuthority('zorg:jwithdraw:query')")
     public Result query(@RequestParam("id") Long id) {
         JWithdrawEntity entity = jWithdrawDao.selectById(id);
-        jWithdrawManager.query(entity);
+        jWithdrawManager.query(entity, false);
         return Result.ok;
     }
 

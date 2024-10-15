@@ -26,7 +26,6 @@ import java.util.UUID;
 @Service
 @Slf4j
 public class ApiFileService {
-
     @Resource
     private ZestConfig zestConfig;
     @Resource
@@ -75,7 +74,7 @@ public class ApiFileService {
         }
 
         Result<UploadRes> result = new Result<>();
-        UploadRes uploadRes = new UploadRes();
+        UploadRes uploadRes = new UploadRes(filename);
         uploadRes.setFid(filename);;
         result.setData(uploadRes);
         return result;

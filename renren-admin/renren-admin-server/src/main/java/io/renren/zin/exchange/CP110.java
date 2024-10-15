@@ -3,6 +3,8 @@ package io.renren.zin.exchange;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.ConvertUtils;
+import io.renren.zapi.ApiNotifyService;
+import io.renren.zcommon.ZinConstant;
 import io.renren.zmanager.JExchangeManager;
 import io.renren.zadmin.dao.JExchangeDao;
 import io.renren.zadmin.dao.JMerchantDao;
@@ -15,18 +17,12 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-
 // CP110 离岸换汇通知
 @Service
 @Slf4j
 public class CP110 {
-
-    @Resource
-    private ApiService apiService;
     @Resource
     private JExchangeDao jExchangeDao;
-    @Resource
-    private JMerchantDao jMerchantDao;
     @Resource
     private JExchangeManager jExchangeManager;
 
@@ -38,22 +34,11 @@ public class CP110 {
             log.error("can not find exchange with notify: {}", notify.getApplyid());
             throw new RenException("invalid meraplid");
         }
-
         // 已经是终态了， 属于重复通知
-        if (jExchangeEntity.getState().equals("06")) {
+        if (jExchangeEntity.getState().equals(ZinConstant.PAY_APPLY_FIRST_VERIFY)) {
             return;
         }
-        jExchangeManager.query(jExchangeEntity);
-    }
-
-    private void notifyMerchant(TExchangeStateNotify notify, JExchangeEntity jExchangeEntity) {
-        // 通知商户
-        JMerchantEntity merchant = jMerchantDao.selectById(jExchangeEntity.getMerchantId());
-        ExchangeNotify exchangeNotify = ConvertUtils.sourceToTarget(notify, ExchangeNotify.class);
-        exchangeNotify.setMeraplid(jExchangeEntity.getMeraplid());  // 换下meraplid
-        String ok = apiService.notifyMerchant(exchangeNotify, merchant, "exchangeNotify");
-        if (!ok.equals("OK")) {
-            throw new RenException("process not completed");
-        }
+        // 查询下通联: 同时通知下下游商户
+        jExchangeManager.query(jExchangeEntity, true);
     }
 }

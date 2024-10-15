@@ -5,6 +5,7 @@ import io.renren.commons.log.annotation.LogOperation;
 import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.constant.Constant;
+import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.page.PageData;
 import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.commons.tools.utils.ExcelUtils;
@@ -14,6 +15,7 @@ import io.renren.commons.tools.validator.ValidatorUtils;
 import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
+import io.renren.zcommon.ZinConstant;
 import io.renren.zmanager.JSubManager;
 import io.renren.zadmin.dao.JSubDao;
 import io.renren.zadmin.dto.JSubDTO;
@@ -116,6 +118,9 @@ public class JSubController {
         UserDetail user = SecurityUser.getUser();
         if (!user.getUserType().equals("operation") && !user.getUserType().equals("agent") && !user.getUserType().equals("merchant")) {
             return Result.fail(9999, "not authorized");
+        }
+        if (!state.equals(ZinConstant.MERCHANT_STATE_VERIFIED) && state.equals(ZinConstant.MERCHANT_STATE_FAIL)) {
+            throw new RenException("invalid state");
         }
         jSubManager.verify(id, state);
         return new Result();

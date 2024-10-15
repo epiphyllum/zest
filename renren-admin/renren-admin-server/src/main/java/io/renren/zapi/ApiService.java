@@ -60,6 +60,9 @@ public class ApiService {
     }
 
     @Resource
+    private ApiLogger apiLogger;
+
+    @Resource
     private ZestConfig zestConfig;
     @Resource
     private ObjectMapper objectMapper;
@@ -67,6 +70,10 @@ public class ApiService {
     private JMerchantDao jMerchantDao;
     @Resource
     private RestTemplate restTemplate;
+    @Resource
+    private JPacketDao jPacketDao;
+
+    // 服务模块
     @Resource
     private ApiSubService apiSubService;
     @Resource
@@ -81,11 +88,8 @@ public class ApiService {
     private ApiCardStateService apiCardStateService;
     @Resource
     private ApiCardApplyService apiCardApplyService;
-    @Resource
-    private JPacketDao jPacketDao;
 
-    // 签名工具
-    private Sign signer;
+
 
     public static Map<String, ApiMeta> metaMap = new HashMap<>();
     public void initService(Object object) {
@@ -99,27 +103,26 @@ public class ApiService {
             }
         }
     }
-
     /**
      *  初始化服务
      */
     @PostConstruct
     public void init() {
-        RSA rsaSigner = new RSA(zestConfig.getPrivateKey(), null);
-        this.signer = SecureUtil.sign(SignAlgorithm.SHA512withRSA);
-        this.signer.setPrivateKey(rsaSigner.getPrivateKey());
-
         initService(apiSubService);
         initService(apiAccountService);
         initService(apiCardMoneyService);
         initService(apiExchangeService);
         initService(apiAllocateService);
-
         initService(apiCardApplyService);
         initService(apiCardMoneyService);
         initService(apiCardStateService);
     }
 
+    /**
+     * 商户签名验证器
+     * @param merchant
+     * @return
+     */
     public Sign getMerchantVerifier(JMerchantEntity merchant) {
         Sign verifier = SecureUtil.sign(SignAlgorithm.SHA512withRSA);
         RSA rsa = new RSA(null, merchant.getPublicKey());
@@ -127,39 +130,27 @@ public class ApiService {
         return verifier;
     }
 
-    // 记录日志
-    public void logPacketSuccess(JPacketEntity packetEntity, Result<?> result) {
-        CompletableFuture.runAsync(() -> {
-            packetEntity.setRecvHeader(null);
-            try {
-                packetEntity.setSend(objectMapper.writeValueAsString(result));
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                return;
-            }
-            jPacketDao.insert(packetEntity);
-        });
 
+    public void verify(String body, String reqId, JMerchantEntity merchant, String sign) {
+        String bodyDigest = DigestUtil.sha256Hex(body);
+        String toSign = bodyDigest + reqId + merchant.getId();
+        Sign merchantVerifier = getMerchantVerifier(merchant);
+        byte[] bytes = DigestUtil.sha256(toSign);
+        if (merchantVerifier.verify(bytes, sign.getBytes())) {
+            throw new RenException("signature verification failed");
+        }
     }
 
-    // 记录日志
-    public void logPacketException(JPacketEntity packetEntity, Exception failEx) {
-        // 记录日志
-        CompletableFuture.runAsync(() -> {
-            packetEntity.setRecvHeader(null);
-            try {
-                packetEntity.setSend(objectMapper.writeValueAsString(failEx));
-                // todo
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                return;
-            }
-            jPacketDao.insert(packetEntity);
-        });
 
-    }
-
-    // 调用服务
+    /**
+     *  调用服务
+     * @param body
+     * @param merchantId
+     * @param sign
+     * @param reqId
+     * @param name
+     * @return
+     */
     public Result<?> invokeService(String body, Long merchantId, String sign, String reqId, String name) {
         log.info("body: {}", body);
         ApiMeta apiMeta = metaMap.get(name);
@@ -170,24 +161,22 @@ public class ApiService {
 
         // 开发环境不验证签名
         if (!zestConfig.isDev()) {
+            verify(body, reqId, merchant, sign);
+        } else {
             // 测试暂时不验证签名
-            String bodyDigest = DigestUtil.sha256Hex(body);
-            String toSign = bodyDigest + reqId + merchantId;
-            Sign merchantVerifier = getMerchantVerifier(merchant);
-            byte[] bytes = DigestUtil.sha256(toSign);
-            if (merchantVerifier.verify(bytes, sign.getBytes())) {
-                throw new RenException("signature verification failed");
-            }
+            log.debug("开发环境, 不校验签名");
         }
 
         // 记录日志准备
         JPacketEntity packetEntity = new JPacketEntity();
-        packetEntity.setApiName(name);
         packetEntity.setMerchantId(merchantId);
         packetEntity.setMerchantName(merchant.getCusname());
         packetEntity.setAgentId(merchant.getAgentId());
         packetEntity.setAgentName(merchant.getAgentName());
+        packetEntity.setApiName(name);
+        packetEntity.setReqId(reqId);
         packetEntity.setRecv(body);
+        packetEntity.setSign(sign);
 
         try {
             Object req = objectMapper.readValue(body, apiMeta.getReqClass());
@@ -196,70 +185,27 @@ public class ApiService {
             Logger logger = CommonUtils.getLogger(merchant.getCusname());
             ApiContext context = new ApiContext(merchant, logger);
             Result<?> result = (Result)apiMeta.getMethod().invoke(apiMeta.getInstance(), req, context);
-            logPacketSuccess(packetEntity, result);
+            apiLogger.logPacketSuccess(packetEntity, result);
             return result;
         } catch (JsonProcessingException e) {
-            logPacketException(packetEntity, e);
+            apiLogger.logPacketException(packetEntity, e);
+            e.printStackTrace();
             throw new RenException("invalid json");
         } catch (InvocationTargetException e) {
             Throwable cause = e.getCause();
             if (cause instanceof RenException) {
                 RenException ex = (RenException) cause;
-                logPacketException(packetEntity, ex);
+                apiLogger.logPacketException(packetEntity, ex);
                 throw ex;
             } else {
-                cause.printStackTrace();
+                e.printStackTrace();
                 throw new RenException("unknown exception");
             }
         } catch (IllegalAccessException e) {
-            logPacketException(packetEntity, e);
-            throw new RuntimeException(e);
+            apiLogger.logPacketException(packetEntity, e);
+            e.printStackTrace();
+            throw new RenException("接口异常");
         }
-    }
-
-    // 通知商户: OK| FAIL
-    public String notifyMerchant(Object object, JMerchantEntity merchant, String apiName) {
-        String body = null;
-        try {
-            body = this.objectMapper.writeValueAsString(object);
-        } catch (JsonProcessingException e) {
-            throw new RenException("invalid request, can not convert to json");
-        }
-
-        // 设置基本请求头
-        HttpHeaders headers = new HttpHeaders();
-        List<HttpMessageConverter<?>> messageConverters = restTemplate.getMessageConverters();
-        for (HttpMessageConverter<?> messageConverter : messageConverters) {
-            if (messageConverter instanceof StringHttpMessageConverter) {
-                ((StringHttpMessageConverter) messageConverter).setDefaultCharset(Charset.forName("UTF8"));
-            }
-        }
-
-        String reqId = CommonUtils.newRequestId();
-        String bodyDigest = DigestUtil.sha256Hex(body);
-        String toSign = bodyDigest + reqId + merchant.getId().toString();
-        String sign = this.signer.signHex(toSign);
-
-        headers.add("x-api-name", apiName);
-        headers.add("x-merchant-id", merchant.getId().toString());
-        headers.add("x-req-id", CommonUtils.newRequestId());
-        headers.add("x-sign", sign);
-
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        RequestEntity requestEntity = RequestEntity.post("")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.ALL)
-                .acceptCharset(StandardCharsets.UTF_8)
-                .headers(headers)
-                .body(body);
-
-        // 商户webhook地址
-        String url = merchant.getWebhook();
-        log.info("req:[{}][{}]", url, body);
-        ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
-        String result = responseEntity.getBody();
-        log.info("res:[{}]", result);
-        return result;
     }
 }
 

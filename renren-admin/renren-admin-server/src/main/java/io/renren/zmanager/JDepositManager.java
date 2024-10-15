@@ -8,6 +8,7 @@ import io.renren.zadmin.dao.*;
 import io.renren.zadmin.dto.JDepositDTO;
 import io.renren.zadmin.entity.*;
 import io.renren.zadmin.service.JDepositService;
+import io.renren.zapi.ApiNotify;
 import io.renren.zbalance.Ledger;
 import io.renren.zcommon.ZinConstant;
 import io.renren.zin.cardapply.ZinCardApplyService;
@@ -49,6 +50,8 @@ public class JDepositManager {
     @Resource
     private JMerchantDao jMerchantDao;
     @Resource
+    private ApiNotify apiNotify;
+    @Resource
     private JDepositDao jDepositDao;
     @Resource
     private JDepositService jDepositService;
@@ -66,10 +69,16 @@ public class JDepositManager {
         entity.setMerchantName(subEntity.getMerchantName());
         entity.setMerchantId(subEntity.getMerchantId());
         entity.setSubName(subEntity.getCusname());
-
         return subEntity;
     }
 
+    /**
+     * 计算需要发起金额
+     * 充值手续费1%，担保金2%，充值金额100 HKD,  则：
+     * 担保金=100*0.02=2 HKD
+     * 充值手续费=（100-2）*0.01=0.98 HKD
+     * 到账金额 = 100-2-0.98=97.02 HKD
+     */
     public BigDecimal calcTxnAmount(BigDecimal amount) {
         JConfigEntity jConfigEntity = jConfigDao.selectOne(Wrappers.emptyWrapper());
         if (jConfigEntity == null) {
@@ -82,15 +91,7 @@ public class JDepositManager {
         return amount.divide(mul, 2, RoundingMode.HALF_UP);
     }
 
-    /**
-     * 保存充值
-     * 这种情况下，设置充值手续费1%，担保金2%，充值金额100 HKD
-     * 则：担保金=100*0.02=2 HKD
-     * 充值手续费=（100-2）*0.01=0.98 HKD
-     * 到账金额 = 100-2-0.98=97.02 HKD
-     * x *(1-
-     */
-    public void save(JDepositEntity entity) {
+    public void saveAndSubmit(JDepositEntity entity) {
         // 填充payerid, 什么币种的卡， 就用哪个通联va
         List<JVaEntity> jVaEntities = jVaDao.selectList(Wrappers.emptyWrapper());
         JVaEntity jVaEntity = jVaEntities.stream().filter(e -> e.getCurrency().equals(entity.getCurrency())).findFirst().get();
@@ -148,7 +149,7 @@ public class JDepositManager {
     /**
      * 查询充值申请单状态
      */
-    public void query(final JDepositEntity entity) {
+    public void query(final JDepositEntity entity, boolean notify) {
         TCardApplyQuery query = new TCardApplyQuery();
         query.setApplyid(entity.getApplyid());
         TCardApplyResponse response = zinCardApplyService.cardApplyQuery(query);
@@ -160,7 +161,6 @@ public class JDepositManager {
         }
 
         JSubEntity subEntity = jSubDao.selectById(entity.getSubId());
-
         log.info("卡充值, state: {} -> {}", oldState, newState);
         // 变成成功
         if (newState.equals(ZinConstant.CARD_APPLY_SUCCESS) && !oldState.equals(ZinConstant.CARD_APPLY_SUCCESS)) {
@@ -182,6 +182,12 @@ public class JDepositManager {
                     .set(JDepositEntity::getState, newState)
             );
         }
+
+        if (entity.getApi() == 1 && notify) {
+            JMerchantEntity merchant = jMerchantDao.selectById(entity.getMerchantId());
+            JDepositEntity freshEntity = jDepositDao.selectById(entity.getId());
+            apiNotify.cardChargeNotify(freshEntity, merchant);
+        }
     }
 
     /**
@@ -199,24 +205,28 @@ public class JDepositManager {
 
         // 立即发起查询
         entity.setApplyid(applyid);
-        this.query(entity);
+        this.query(entity, false);
     }
 
+    /**
+     * 修改了金额， 需要重新设置发起金额
+     * @param dto
+     */
     public void update(JDepositDTO dto) {
         JDepositEntity entity = jDepositDao.selectById(dto.getId());
-
         log.info("oldAmount: {}, newAmount: {}", entity.getAmount(), dto.getAmount());
-
         // 如果修改了金额: 需要重新计算发起金额
         if (entity.getAmount().compareTo(dto.getAmount()) != 0) {
             BigDecimal txnAmount = calcTxnAmount(dto.getAmount());
             dto.setTxnAmount(txnAmount);
         }
-
         jDepositService.update(dto);
     }
 
-    // 作废, 需要解冻！！！
+    /**
+     * 作废, 需要解冻
+     * @param entity
+     */
     public void cancel(JDepositEntity entity) {
         JSubEntity subEntity = jSubDao.selectById(entity.getSubId());
         // 入库

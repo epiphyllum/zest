@@ -6,7 +6,8 @@ import java.math.BigDecimal;
 
 @Data
 public class M2sReq {
+    String currency;
     BigDecimal amount;
-    Long subid;
+    Long subId;
     String meraplid;
 }

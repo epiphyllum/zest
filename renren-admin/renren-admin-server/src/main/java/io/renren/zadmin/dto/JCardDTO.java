@@ -133,7 +133,7 @@ public class JCardDTO implements Serializable {
     @Schema(description = "币种ID")
     private String currency;
     @Schema(description = "商户费用")
-    private BigDecimal merchantFee;
+    private BigDecimal merchantfee;
     @Schema(description = "通知次数")
     private Integer notifyCount;
     @Schema(description = "通知状态")

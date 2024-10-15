@@ -47,6 +47,8 @@ public class ZinRequester {
     private RestTemplate restTemplate;
     @Resource
     private ObjectMapper objectMapper;
+
+    // init 设置
     private String commonQueryParams;
     private Sign signer;
     private Sign verifier;

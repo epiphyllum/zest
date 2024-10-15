@@ -17,6 +17,8 @@ import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zadmin.entity.JSubEntity;
 import io.renren.zbalance.Ledger;
 import io.renren.zbalance.LedgerUtil;
+import io.renren.zcommon.ZapiConstant;
+import io.renren.zcommon.ZestConstant;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -43,6 +45,9 @@ public class JAllocateManager {
     // 商户VA转子商户VA
     public void handleM2s(JAllocateEntity entity) {
         JBalanceEntity vaAccount = ledgerUtil.getVaAccount(entity.getMerchantId(), entity.getCurrency());
+        if (vaAccount == null) {
+            throw new RenException("can not find account for merchant: " + entity.getMerchantId());
+        }
         if (vaAccount.getBalance().compareTo(entity.getAmount()) < 0) {
             throw new RenException("VA账户余额不足, VA账户:" + vaAccount.getBalance());
         }
@@ -75,13 +80,13 @@ public class JAllocateManager {
         });
     }
 
-    // 资金调度处理
+    // 资金调度处理: web端调用
     public void handleAllocation(JAllocateDTO dto) {
         // 商户才能调拨资金
         UserDetail user = SecurityUser.getUser();
-        if (!"merchant".equals(user.getUserType()) &&
-                !"operation".equals(user.getUserType()) &&
-                !"agent".equals(user.getUserType())
+        if (!ZestConstant.USER_TYPE_MERCHANT.equals(user.getUserType()) &&
+                !ZestConstant.USER_TYPE_OPERATION.equals(user.getUserType()) &&
+                !ZestConstant.USER_TYPE_AGENT.equals(user.getUserType())
         ) {
             throw new RenException("not authorized, you are " + user.getUserType());
         }
@@ -90,7 +95,7 @@ public class JAllocateManager {
         JAllocateEntity entity = ConvertUtils.sourceToTarget(dto, JAllocateEntity.class);
 
         Long merchantId = null;
-        if (user.getUserType().equals("merchant")) {
+        if (ZestConstant.USER_TYPE_MERCHANT.equals(user.getUserType())) {
             merchantId = user.getDeptId();
             entity.setMerchantId(merchantId);
         } else {
@@ -109,15 +114,15 @@ public class JAllocateManager {
 
         // 子商户-商户资金调度， 需要子商户信息
         String type = dto.getType();
-        if (type.equals("s2m") || type.equals("m2s")) {
+        if (type.equals(ZapiConstant.ALLOCATE_TYPE_S2M) || type.equals(ZapiConstant.ALLOCATE_TYPE_M2S)) {
             JSubEntity subEntity = jSubDao.selectById(entity.getSubId());
             entity.setSubName(subEntity.getCusname());
         }
         switch (entity.getType()) {
-            case "m2s":
+            case ZapiConstant.ALLOCATE_TYPE_M2S:
                 handleM2s(entity);
                 break;
-            case "s2m":
+            case ZapiConstant.ALLOCATE_TYPE_S2M:
                 handleS2m(entity);
                 break;
         }

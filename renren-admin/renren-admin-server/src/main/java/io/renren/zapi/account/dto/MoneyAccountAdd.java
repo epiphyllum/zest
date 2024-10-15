@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class MoneyAccountAdd {
+    String meraplid;      // 商户单号
     // 10
     String flag;          // 账户类型 0:个人，1：企业
     String currency;      // 币种

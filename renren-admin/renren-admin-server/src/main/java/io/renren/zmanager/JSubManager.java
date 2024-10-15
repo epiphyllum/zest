@@ -17,6 +17,7 @@ import io.renren.zadmin.entity.JBalanceEntity;
 import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zadmin.entity.JSubEntity;
 import io.renren.zbalance.BalanceType;
+import io.renren.zcommon.ZinConstant;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -47,16 +48,19 @@ public class JSubManager {
      */
     public void verify(Long id, String state) {
         JSubEntity entity = jSubDao.selectById(id);
-        if (!"06".equals(entity.getState()) && "06".equals(state)) {
+        // 审核通过
+        if (!ZinConstant.MERCHANT_STATE_VERIFIED.equals(entity.getState()) && ZinConstant.MERCHANT_STATE_VERIFIED.equals(state)) {
             tx.executeWithoutResult(st -> {
                 this.openSubVa(entity);
                 jSubDao.update(null, Wrappers.<JSubEntity>lambdaUpdate()
                         .eq(JSubEntity::getId, id)
-                        .set(JSubEntity::getState, "06")
+                        .set(JSubEntity::getState, ZinConstant.MERCHANT_STATE_VERIFIED)
                 );
             });
             return;
         }
+
+        // 审核不通过
         jSubDao.update(null, Wrappers.<JSubEntity>lambdaUpdate()
                 .eq(JSubEntity::getId, id)
                 .set(JSubEntity::getState, state)
@@ -106,6 +110,8 @@ public class JSubManager {
     public void save(JSubDTO dto) {
         // 属性copy
         JSubEntity jSubEntity = ConvertUtils.sourceToTarget(dto, JSubEntity.class);
+        jSubEntity.setState(ZinConstant.MERCHANT_STATE_TO_VERIFY);
+
         // 填充
         Long djId = this.fill(jSubEntity);
         // 自商户部门id是三级别:  大吉Id, agentId, merchantId

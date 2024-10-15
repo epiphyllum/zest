@@ -1,9 +1,13 @@
 package io.renren.zapi.cardstate;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.commons.tools.utils.Result;
+import io.renren.zadmin.dao.JCardDao;
+import io.renren.zadmin.entity.JCardEntity;
 import io.renren.zapi.ApiContext;
+import io.renren.zapi.ApiNotify;
 import io.renren.zapi.cardmoney.ApiCardMoneyService;
 import io.renren.zapi.cardstate.dto.*;
 import io.renren.zin.TResult;
@@ -15,80 +19,111 @@ import io.renren.zin.cardmoney.dto.TCardBalanceRequest;
 import io.renren.zin.cardmoney.dto.TCardBalanceResponse;
 import io.renren.zin.cardstate.ZinCardStateService;
 import io.renren.zin.cardstate.dto.*;
+import io.renren.zmanager.JCardManager;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 
 @Service
 public class ApiCardStateService {
+
     @Resource
     private ZinCardApplyService zinCardApplyService;
     @Resource
     private ZinCardStateService zinCardStateService;
     @Resource
     private ZinCardMoneyService zinCardMoneyService;
+    @Resource
+    private JCardDao jCardDao;
+
+    @Resource
+    private JCardManager jCardManager;
+
+    private JCardEntity  getCardEntity(String cardno, ApiContext context) {
+        // 查询卡
+        JCardEntity entity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
+                .eq(JCardEntity::getCardno, cardno)
+        );
+        if (entity == null) {
+            throw new RenException("no record");
+        }
+        // 看是否为这个商户的卡
+        if(!entity.getMerchantId().equals(context.getMerchant().getId())) {
+            throw new RenException("no record");
+        }
+        return entity;
+    }
 
     // 卡状态变更申请
-    public Result cardChange(CardChangeReq request, ApiCardMoneyService context) {
-
-        // 准备应答
-        TResult tResult = null;
-
+    public Result<CardChangeRes> cardChange(CardChangeReq request, ApiContext context) {
         switch (request.getChangetype()) {
-            case CardConstant.CARD_LOSS:
+            case CardStateChangeType.CARD_LOSS:
                 TCardLossRequest tCardLossRequest = ConvertUtils.sourceToTarget(request, TCardLossRequest.class);
-                tResult = zinCardStateService.cardLoss(tCardLossRequest);
+                zinCardStateService.cardLoss(tCardLossRequest);
                 break;
-            case CardConstant.CARD_UNLOSS:
+            case CardStateChangeType.CARD_UNLOSS:
                 TCardUnlossRequest tCardUnlossRequest = ConvertUtils.sourceToTarget(request, TCardUnlossRequest.class);
-                tResult = zinCardStateService.cardUnloss(tCardUnlossRequest);
+                zinCardStateService.cardUnloss(tCardUnlossRequest);
                 break;
-            case CardConstant.CARD_CANCEL:
+            case CardStateChangeType.CARD_CANCEL:
                 TCardCancelRequest tCardCancelRequest = ConvertUtils.sourceToTarget(request, TCardCancelRequest.class);
-                tResult = zinCardStateService.cardCancel(tCardCancelRequest);
+                zinCardStateService.cardCancel(tCardCancelRequest);
                 break;
-            case CardConstant.CARD_UNCANCEL:
+            case CardStateChangeType.CARD_UNCANCEL:
                 TCardUncancelRequest tCardUncancelRequest = ConvertUtils.sourceToTarget(request, TCardUncancelRequest.class);
-                tResult = zinCardStateService.cardUncancel(tCardUncancelRequest);
+                zinCardStateService.cardUncancel(tCardUncancelRequest);
                 break;
-            case CardConstant.CARD_FREEZE:
+            case CardStateChangeType.CARD_FREEZE:
                 TCardFreezeRequest tCardFreezeRequest = ConvertUtils.sourceToTarget(request, TCardFreezeRequest.class);
-                tResult = zinCardStateService.cardFreeze(tCardFreezeRequest);
+                zinCardStateService.cardFreeze(tCardFreezeRequest);
                 break;
-            case CardConstant.CARD_UNFREEZE:
+            case CardStateChangeType.CARD_UNFREEZE:
                 TCardUnfreezeRequest tCardUnfreezeRequest = ConvertUtils.sourceToTarget(request, TCardUnfreezeRequest.class);
-                tResult = zinCardStateService.cardUnfreeze(tCardUnfreezeRequest);
-        }
-        if (tResult == null) {
-            throw new RenException("internal error");
+                zinCardStateService.cardUnfreeze(tCardUnfreezeRequest);
+            default:
+                throw new RenException("unsupported change type");
         }
 
-        if (tResult.getRspcode().equals("0000")) {
-            return new Result();
-        }
-        return Result.fail(9999, tResult.getRspinfo());
+        Result<CardChangeRes> result = new Result<>();
+        result.setData(new CardChangeRes());
+        return result;
+    }
+
+    // 卡状态查询
+    public Result<CardChangeQueryRes> cardChangeQuery(CardChangeQuery request, ApiContext context) {
+
+        // 查询卡信息
+        JCardEntity entity = getCardEntity(request.getCardno(), context);
+
+        // 查询卡状态
+        jCardManager.queryCard(entity);
+
+        // 应答
+        Result<CardChangeQueryRes> result = new Result<>();
+        CardChangeQueryRes  res = new CardChangeQueryRes(entity.getState(), entity.getCardno());
+        result.setData(res);
+        return result;
     }
 
     // 卡余额查询
     public Result<CardBalanceRes> cardBalance(CardBalanceReq request, ApiContext context) {
-        TCardBalanceRequest tCardBalanceRequest = ConvertUtils.sourceToTarget(request, TCardBalanceRequest.class);
+        // 查询卡信息: 确保卡是这个商户的
+        JCardEntity entity = getCardEntity(request.getCardno(), context);
 
+        // 调用通联
+        TCardBalanceRequest tCardBalanceRequest = ConvertUtils.sourceToTarget(request, TCardBalanceRequest.class);
         TCardBalanceResponse balance = zinCardMoneyService.balance(tCardBalanceRequest);
         CardBalanceRes cardBalanceRes = ConvertUtils.sourceToTarget(balance, CardBalanceRes.class);
 
+        // 应答
         Result<CardBalanceRes> result = new Result<>();
         result.setData(cardBalanceRes);
         return result;
     }
 
-    // 卡支付信息: cvv2 | expiredate | 不外提供
+    // 卡支付信息: cvv2 | expiredate
     public Result<CardPayInfoRes> cardPayInfo(CardPayInfoReq request, ApiContext context) {
-        TCardPayInfoRequest tCardPayInfoRequest = ConvertUtils.sourceToTarget(request, TCardPayInfoRequest.class);
-        TCardPayInfoResponse tCardPayInfoResponse = zinCardApplyService.cardPayInfo(tCardPayInfoRequest);
-        CardPayInfoRes cardPayInfoRes = ConvertUtils.sourceToTarget(tCardPayInfoResponse, CardPayInfoRes.class);
-
-        Result<CardPayInfoRes> result = new Result<>();
-        result.setData(cardPayInfoRes);
-        return result;
+        throw new RenException("unsupported");
     }
+
 }

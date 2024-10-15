@@ -7,7 +7,8 @@ import org.springframework.stereotype.Service;
 // CP201 汇款充值外部资金汇入
 @Service
 public class CP201 {
-    public void handle(TExchangeStateNotify notify) {
 
+    // 我们暂时应该没有这个功能
+    public void handle(TExchangeStateNotify notify) {
     }
 }

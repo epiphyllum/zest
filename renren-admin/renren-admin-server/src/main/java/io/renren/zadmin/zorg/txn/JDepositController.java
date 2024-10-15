@@ -80,8 +80,8 @@ public class JDepositController {
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
         JDepositEntity entity = ConvertUtils.sourceToTarget(dto, JDepositEntity.class);
         entity.setApi(0);
-        entity.setMeraplid(CommonUtils.newRequestId());
-        jDepositManager.save(entity);
+        entity.setMeraplid(CommonUtils.uniqueId());
+        jDepositManager.saveAndSubmit(entity);
         return new Result<Long>().ok(entity.getId());
     }
 
@@ -142,7 +142,7 @@ public class JDepositController {
     @PreAuthorize("hasAuthority('zorg:jdeposit:query')")
     public Result query(@RequestParam("id") Long id) {
         JDepositEntity entity = jDepositDao.selectById(id);
-        jDepositManager.query(entity);
+        jDepositManager.query(entity, false);
         return Result.ok;
     }
 

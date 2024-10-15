@@ -10,6 +10,7 @@ package io.renren.commons.tools.config;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.renren.commons.tools.utils.DateUtils;
@@ -53,6 +54,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
         //忽略未知属性
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 
         //日期格式转换
         //mapper.setDateFormat(new SimpleDateFormat(DateUtils.DATE_PATTERN));
@@ -62,6 +64,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
         SimpleModule simpleModule = new SimpleModule();
         simpleModule.addSerializer(Long.class, ToStringSerializer.instance);
         simpleModule.addSerializer(Long.TYPE, ToStringSerializer.instance);
+
         mapper.registerModule(simpleModule);
 
         converter.setObjectMapper(mapper);

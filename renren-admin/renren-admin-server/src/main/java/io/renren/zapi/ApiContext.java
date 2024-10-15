@@ -3,6 +3,7 @@ package io.renren.zapi;
 import ch.qos.logback.classic.Logger;
 import com.alibaba.ttl.TransmittableThreadLocal;
 import io.renren.zadmin.entity.JMerchantEntity;
+import io.renren.zapi.account.dto.MoneyAccountAdd;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -46,7 +47,10 @@ public class ApiContext {
     public void warn(String format, Object... arguments) {
         logger.warn(format, arguments);
     }
-
+    public void debug(String format, Object arg) { logger.debug(format, arg); }
+    public void debug(String format, Object arg1, Object arg2) { logger.debug(format, arg1, arg2); }
+    public void debug(String format, Object... arguments) { logger.debug(format, arguments); }
     JMerchantEntity merchant;
     Logger logger;
+
 }

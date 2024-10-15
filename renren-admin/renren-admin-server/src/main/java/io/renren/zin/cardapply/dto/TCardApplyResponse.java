@@ -12,7 +12,7 @@ public class TCardApplyResponse extends TResult {
     String applyid;            // 申请单号	applyid	String	32	Y	   //	String	32	Y	 
     String createtime;         // 申请时间	createtime	String	20	Y	   //	String	20	Y	 
 
-    BigDecimal fee;                // 申请费用	fee	Number	18,2	O	   //	Number	18,2	O	 
+    BigDecimal fee;            // 申请费用	fee	Number	18,2	O	   //	Number	18,2	O	 
     String feecurrency;        // 申请费用币种	feecurrency	String	3	O		String	3	O
 
     String cardno;             // 卡号	cardno	String	30	O	申请成功后返回 //	String	30	O	申请成功后返回

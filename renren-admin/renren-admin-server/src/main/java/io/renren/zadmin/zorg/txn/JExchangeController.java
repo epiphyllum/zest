@@ -113,7 +113,7 @@ public class JExchangeController {
         entity.setAgentName(merchant.getAgentName());
         entity.setMerchantId(merchantId);
         entity.setMerchantName(merchant.getCusname());
-        entity.setMeraplid(CommonUtils.newRequestId());
+        entity.setMeraplid(CommonUtils.uniqueId());
         entity.setApi(0);
 
         jExchangeManager.save(entity);
@@ -180,7 +180,7 @@ public class JExchangeController {
             throw new RenException("not permitted");
         }
         JExchangeEntity jExchangeEntity = jExchangeDao.selectById(id);
-        jExchangeManager.query(jExchangeEntity);
+        jExchangeManager.query(jExchangeEntity, false);
         return new Result();
     }
 

@@ -13,15 +13,13 @@ public class LedgerConstant {
     public static final int FACT_EXCHANGE_FREEZE_VA = 20001;            // 1. 冻结
     public static final int FACT_EXCHANGE_FREEZE_DEPOSIT = 20002;       // 1. 冻结
     public static final int FACT_EXCHANGE_FREEZE_CHARGE_FEE = 20003;    // 1. 冻结
-
     public static final int FACT_EXCHANGE_UN_FREEZE_VA = 20010;         // 2. 解冻
     public static final int FACT_EXCHANGE_UN_FREEZE_DEPOSIT = 20011;    // 2. 解冻
     public static final int FACT_EXCHANGE_UN_FREEZE_CHARGE_FEE = 20012; // 2. 解冻
-
-    public static final int FACT_EXCHANGE_CONFIRM_VA = 20020;           // 3. 记账商户账户  -100AUD
-    public static final int FACT_EXCHANGE_CONFIRM_DEPOSIT = 20021;      // 3. 记账商户账户  -100AUD
-    public static final int FACT_EXCHANGE_CONFIRM_CHARGE_FEE = 20022;   // 3. 记账商户账户  -100AUD
-    public static final int FACT_EXCHANGE_IN_VA = 20030;                // 4. 记账商户账户  +500HKD
+    public static final int FACT_EXCHANGE_CONFIRM_VA = 20020;           // 3. 确认  -100AUD
+    public static final int FACT_EXCHANGE_CONFIRM_DEPOSIT = 20021;      // 3. 确认  -100AUD
+    public static final int FACT_EXCHANGE_CONFIRM_CHARGE_FEE = 20022;   // 3. 确认  -100AUD
+    public static final int FACT_EXCHANGE_IN_VA = 20030;                // 4. 确认  +500HKD
     public static final int FACT_EXCHANGE_IN_DEPOSIT = 20031;           // 4. 记账商户账户  +500HKD
     public static final int FACT_EXCHANGE_IN_CHARGE_FEE = 20032;        // 4. 记账商户账户  +500HKD
 

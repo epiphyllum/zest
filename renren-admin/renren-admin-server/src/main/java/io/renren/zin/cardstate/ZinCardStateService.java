@@ -7,7 +7,7 @@ import io.renren.zin.cardstate.dto.*;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
-import static io.renren.zcommon.CommonUtils.newRequestId;
+import static io.renren.zcommon.CommonUtils.uniqueId;
 
 @Service
 public class ZinCardStateService {
@@ -16,41 +16,41 @@ public class ZinCardStateService {
 
     // 3200-卡激活
     public TCardActivateResponse cardActivate(TCardActivateRequest request) {
-        return requester.request(newRequestId(), "/gcpapi/card/active", request, TCardActivateResponse.class);
+        return requester.request(uniqueId(), "/gcpapi/card/active", request, TCardActivateResponse.class);
     }
 
     // 3201-卡止付
     public TCardFreezeResponse cardFreeze(TCardFreezeRequest request) {
-        return requester.request(newRequestId(), "/gcpapi/card/freeze", request, TCardFreezeResponse.class);
+        return requester.request(uniqueId(), "/gcpapi/card/freeze", request, TCardFreezeResponse.class);
     }
 
     // 3202-卡解除止付
     public TCardUnfreezeResponse cardUnfreeze(TCardUnfreezeRequest request) {
-        return requester.request(newRequestId(), "/gcpapi/card/unfreeze", request, TCardUnfreezeResponse.class);
+        return requester.request(uniqueId(), "/gcpapi/card/unfreeze", request, TCardUnfreezeResponse.class);
     }
 
     // 3203-卡挂失
     public TCardLossResponse cardLoss(TCardLossRequest request) {
-        return requester.request(newRequestId(), "/gcpapi/card/loss", request, TCardLossResponse.class);
+        return requester.request(uniqueId(), "/gcpapi/card/loss", request, TCardLossResponse.class);
     }
 
     // 3204-卡解除挂失
     public TCardUnlossResponse cardUnloss(TCardUnlossRequest request) {
-        return requester.request(newRequestId(), "/gcpapi/card/unloss", request, TCardUnlossResponse.class);
+        return requester.request(uniqueId(), "/gcpapi/card/unloss", request, TCardUnlossResponse.class);
     }
 
     // 3205-销卡
     public TCardCancelResponse cardCancel(TCardCancelRequest request) {
-        return requester.request(newRequestId(), "/gcpapi/card/cancel", request, TCardCancelResponse.class);
+        return requester.request(uniqueId(), "/gcpapi/card/cancel", request, TCardCancelResponse.class);
     }
 
     // 3206-解除销卡
     public TCardUncancelResponse cardUncancel(TCardUncancelRequest request) {
-        return requester.request(newRequestId(), "/gcpapi/card/uncancel", request, TCardUncancelResponse.class);
+        return requester.request(uniqueId(), "/gcpapi/card/uncancel", request, TCardUncancelResponse.class);
     }
 
     // 3208-查询卡状态
     public TCardStatusResponse cardStatusQuery(TCardStatusQuery request) {
-        return requester.request(newRequestId(), "/gcpapi/card/querycardstate", request, TCardStatusResponse.class);
+        return requester.request(uniqueId(), "/gcpapi/card/querycardstate", request, TCardStatusResponse.class);
     }
 }

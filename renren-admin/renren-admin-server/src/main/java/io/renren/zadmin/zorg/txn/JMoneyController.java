@@ -14,6 +14,7 @@ import io.renren.commons.tools.validator.ValidatorUtils;
 import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
+import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zcommon.CommonUtils;
 import io.renren.zmanager.JMoneyManager;
 import io.renren.zcommon.ZestConstant;
@@ -98,8 +99,9 @@ public class JMoneyController {
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
         JMoneyEntity entity = ConvertUtils.sourceToTarget(dto, JMoneyEntity.class);
         entity.setApi(0);
-        entity.setMeraplid(CommonUtils.newRequestId());
-        jMoneyManager.save(entity, dto.getCardId());
+        entity.setMeraplid(CommonUtils.uniqueId());
+        JMerchantEntity merchant = jMerchantDao.selectById(dto.getMerchantId());
+        jMoneyManager.saveAndSubmit(entity, merchant, dto.getCardId());
         return new Result();
     }
 

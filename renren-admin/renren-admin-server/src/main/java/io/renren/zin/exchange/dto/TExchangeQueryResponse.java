@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 
+// 换汇查询
 @Data
 public class TExchangeQueryResponse extends TResult {
     private String meraplid;      // 申请单流水
@@ -16,8 +17,8 @@ public class TExchangeQueryResponse extends TResult {
     private BigDecimal stlamount; // 结算金额
     private String stlccy;        // 结算币种
 
+    private String feeccy;        // 手续费币种
     private BigDecimal fee;       // 手续费
-    private String feeccy;    // 手续费
     private BigDecimal fxrate;    // 汇率
 
     private String ps;            // 附言

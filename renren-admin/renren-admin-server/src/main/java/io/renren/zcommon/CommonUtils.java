@@ -72,15 +72,12 @@ public class CommonUtils {
         return df.format(fen / 100.0);
     }
 
-
     private static ConcurrentHashMap<String, Logger> loggerCache = new ConcurrentHashMap<>();
-
     public static Logger getLogger(String name) {
         Logger cache = loggerCache.get(name);
         if (cache != null) {
             return cache;
         }
-
         loggerCache.computeIfAbsent(name, x -> {
             System.out.println("new log:" + x);
             Logger logger = (Logger) LoggerFactory.getLogger(name);
@@ -106,8 +103,7 @@ public class CommonUtils {
     }
 
     // 唯一ID生成器
-    public static  String newRequestId() {
-        // return UUID.randomUUID().toString().replaceAll("-", "");
+    public static  String uniqueId() {
         return DefaultIdentifierGenerator.getInstance().nextId(null).toString();
     }
 

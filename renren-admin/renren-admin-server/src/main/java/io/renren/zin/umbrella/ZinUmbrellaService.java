@@ -5,7 +5,7 @@ import io.renren.zin.umbrella.dto.*;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
-import static io.renren.zcommon.CommonUtils.newRequestId;
+import static io.renren.zcommon.CommonUtils.uniqueId;
 
 @Service
 public class ZinUmbrellaService {
@@ -19,7 +19,7 @@ public class ZinUmbrellaService {
      * 说明：伞形账户入金申请。
      */
     public TMoneyApplyResponse depositApply(TMoneyApply apply) {
-        String requestId = newRequestId();
+        String requestId = uniqueId();
         TMoneyApplyResponse response = requester.request(requestId, "/gcpapi/card/vadepositapply", apply, TMoneyApplyResponse.class);
         return response;
     }
@@ -30,7 +30,7 @@ public class ZinUmbrellaService {
      * 说明：伞形账户入金申请。
      */
     public TMoneyConfirmResponse depositConfirm(TMoneyConfirm confirm) {
-        String requestId = newRequestId();
+        String requestId = uniqueId();
         TMoneyConfirmResponse response = requester.request(requestId, "/gcpapi/card/vadepositconfirm", confirm, TMoneyConfirmResponse.class);
         return response;
     }
@@ -41,7 +41,7 @@ public class ZinUmbrellaService {
      * 说明：伞形账户入金申请被退回，重新补充材料。
      */
     public TMaterialSubmitResponse submitMaterial(TMaterialSubmit submit) {
-        String requestId = newRequestId();
+        String requestId = uniqueId();
         TMaterialSubmitResponse response = requester.request(requestId, "/gcpapi/card/submitmaterial", submit, TMaterialSubmitResponse.class);
         return response;
     }
@@ -53,7 +53,7 @@ public class ZinUmbrellaService {
      * 请求报文
      */
     public TMoneyAccountAddResponse addMoneyAccount(TMoneyAccountAdd add) {
-        String requestId = newRequestId();
+        String requestId = uniqueId();
         TMoneyAccountAddResponse response = requester.request(requestId, "/gcpapi/card/addcardinfo", add, TMoneyAccountAddResponse.class);
         return response;
     }
@@ -64,7 +64,7 @@ public class ZinUmbrellaService {
      * 说明：根据银行账户ID更新持卡人信息。
      */
     public TMoneyAccountUpdateResponse updateMoneyAccount(TMoneyAccountUpdate update) {
-        String requestId = newRequestId();
+        String requestId = uniqueId();
         TMoneyAccountUpdateResponse response = requester.request(requestId, "/gcpapi/card/uptcardinfo", update, TMoneyAccountUpdateResponse.class);
         return response;
     }
@@ -76,7 +76,7 @@ public class ZinUmbrellaService {
      * 说明：根据卡号查看持卡人信息。
      */
     public TMoneyAccountQueryResponse queryMoneyAccount(TMoneyAccountQuery query) {
-        String requestId = newRequestId();
+        String requestId = uniqueId();
         TMoneyAccountQueryResponse response = requester.request(requestId, "/gcpapi/card/qrycardinfo", query, TMoneyAccountQueryResponse.class);
         return response;
     }
@@ -87,7 +87,7 @@ public class ZinUmbrellaService {
      * 1001-VA入金信息查询
      */
     public TMoneyAccountDetailResponse accountDetail(TMoneyAccountDetailRequest request) {
-        String requestId = newRequestId();
+        String requestId = uniqueId();
         TMoneyAccountDetailResponse response = requester.request(requestId, "/gcpapi/va/accountdetail", request, TMoneyAccountDetailResponse.class);
         return response;
     }

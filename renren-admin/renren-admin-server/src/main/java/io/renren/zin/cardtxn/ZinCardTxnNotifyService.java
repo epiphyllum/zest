@@ -3,6 +3,10 @@ package io.renren.zin.cardtxn;
 import com.baomidou.mybatisplus.core.incrementer.DefaultIdentifierGenerator;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.tools.utils.ConvertUtils;
+import io.renren.zadmin.dao.JMerchantDao;
+import io.renren.zadmin.entity.JMerchantEntity;
+import io.renren.zapi.ApiNotify;
+import io.renren.zapi.ApiNotifyService;
 import io.renren.zmanager.JCardManager;
 import io.renren.zadmin.dao.JAuthDao;
 import io.renren.zadmin.dao.JCardDao;
@@ -21,15 +25,16 @@ public class ZinCardTxnNotifyService {
 
     @Resource
     private JAuthDao jAuthDao;
-
     @Resource
     private JCardDao jCardDao;
-
     @Resource
     private JSubDao jSubDao;
-
+    @Resource
+    private JMerchantDao jMerchantDao;
     @Resource
     private JCardManager jCardManager;
+    @Resource
+    private ApiNotify apiNotify;
 
     // 4002-授权交易通知:  包含了
     // 1. 消费流水,
@@ -56,5 +61,10 @@ public class ZinCardTxnNotifyService {
 
         // 更新下余额
         jCardManager.balanceCard(card);
+
+        // 通知商户
+        entity = jAuthDao.selectById(id);
+        JMerchantEntity merchant = jMerchantDao.selectById(subEntity.getMerchantId());
+        apiNotify.cardTxnNotify(entity, merchant);
     }
 }

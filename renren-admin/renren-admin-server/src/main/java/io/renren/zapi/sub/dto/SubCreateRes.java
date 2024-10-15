@@ -1,9 +1,12 @@
 package io.renren.zapi.sub.dto;
 
-import io.renren.zin.TResult;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-public class SubCreateRes extends TResult {
-    private String cusid;
+@AllArgsConstructor
+@NoArgsConstructor
+public class SubCreateRes {
+    private Long subId;
 }

@@ -39,12 +39,13 @@ public class JMoneyManager {
     @Resource
     private ZinUmbrellaService zinUmbrellaService;
 
-    public void save(JMoneyEntity entity, String cardId) {
+    // 保存
+    public void saveAndSubmit(JMoneyEntity entity, JMerchantEntity merchant, String cardId) {
         // 填充商户代理信息
-        JMerchantEntity merchant = jMerchantDao.selectById(entity.getMerchantId());
         entity.setMerchantName(merchant.getCusname());
         entity.setAgentName(merchant.getAgentName());
         entity.setAgentId(merchant.getAgentId());
+
         // 填充来账账户信息
         JMaccountEntity jMaccountEntity = jMaccountDao.selectOne(Wrappers.<JMaccountEntity>lambdaQuery().eq(JMaccountEntity::getCardId, cardId));
         entity.setCardname(jMaccountEntity.getCardname());
@@ -53,7 +54,7 @@ public class JMoneyManager {
         TMoneyApply apply = new TMoneyApply();
         apply.setCurrency(entity.getCurrency());
         apply.setId(cardId);
-        apply.setMeraplid(CommonUtils.newRequestId());
+        apply.setMeraplid(CommonUtils.uniqueId());
         TMoneyApplyResponse response = zinUmbrellaService.depositApply(apply);
         entity.setReferencecode(response.getReferencecode());
         entity.setApplyid(response.getApplyid());
@@ -86,6 +87,7 @@ public class JMoneyManager {
         });
     }
 
+    // confirm
     public void confirm(JMoneyEntity entity) {
         // 更新
         JMoneyEntity updateEntity = new JMoneyEntity();
@@ -112,4 +114,5 @@ public class JMoneyManager {
                 .set(JMoneyEntity::getStatus, 0)
         );
     }
+
 }

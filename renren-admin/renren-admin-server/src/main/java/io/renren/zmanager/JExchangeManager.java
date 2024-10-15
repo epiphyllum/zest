@@ -3,7 +3,9 @@ package io.renren.zmanager;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.zadmin.dao.JExchangeDao;
+import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.entity.JExchangeEntity;
+import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zapi.ApiNotify;
 import io.renren.zbalance.Ledger;
 import io.renren.zcommon.ZinConstant;
@@ -21,11 +23,24 @@ public class JExchangeManager {
     @Resource
     private JExchangeDao jExchangeDao;
     @Resource
+    private JMerchantDao jMerchantDao;
+    @Resource
     private TransactionTemplate tx;
     @Resource
     private Ledger ledger;
     @Resource
     private ApiNotify apiNotify;
+
+    /**
+     * 保存
+     */
+    public void save(JExchangeEntity entity) {
+        entity.setState(ZinConstant.PAY_APPLY_NA_DJ);  // 内部状态新建
+        tx.executeWithoutResult(status -> {
+            jExchangeDao.insert(entity);
+            ledger.ledgeExchangeFreeze(entity);
+        });
+    }
 
     /**
      * 提交到通联
@@ -38,13 +53,13 @@ public class JExchangeManager {
                 .set(JExchangeEntity::getApplyid, exchange.getApplyid())
         );
         entity.setApplyid(exchange.getApplyid());
-        this.query(entity);
+        this.query(entity, false);
     }
 
     /**
      * 查询通联
      */
-    public void query(JExchangeEntity jExchangeEntity) {
+    public void query(JExchangeEntity jExchangeEntity, boolean notify) {
 
         // 调用通联
         TExchangeQueryRequest query = new TExchangeQueryRequest();
@@ -65,7 +80,7 @@ public class JExchangeManager {
             tx.executeWithoutResult(st -> {
                 jExchangeDao.update(update, Wrappers.<JExchangeEntity>lambdaUpdate()
                         .eq(JExchangeEntity::getId, jExchangeEntity.getId())
-                        .ne(JExchangeEntity::getState, "06")
+                        .ne(JExchangeEntity::getState, ZinConstant.PAY_APPLY_SUCCESS)
                 );
                 jExchangeEntity.setExfee(response.getFee());
                 jExchangeEntity.setExfxrate(response.getFxrate());
@@ -77,22 +92,25 @@ public class JExchangeManager {
         }
 
         // 是否通知商户
-        if (jExchangeEntity.getApi() == 1) {
-            apiNotify.exchangeNotify();
+        if (jExchangeEntity.getApi() == 1 && notify) {
+            JExchangeEntity entity = jExchangeDao.selectById(jExchangeEntity.getId());
+            JMerchantEntity merchant = jMerchantDao.selectById(entity.getMerchantId());
+            apiNotify.exchangeNotify(entity, merchant);
         }
     }
 
     /**
      * 锁汇
      */
-    public void lock(JExchangeEntity jExchangeEntity) {
-        TExchangeLockRequest request = new TExchangeLockRequest();
+    public JExchangeEntity lock(JExchangeEntity jExchangeEntity) {
+        TExchangeLockRequest request = new TExchangeLockRequest(jExchangeEntity.getApplyid(), null);
         request.setApplyid(jExchangeEntity.getApplyid());
         TExchangeLockResponse response = zinExchangeService.exchangeLock(request);
         JExchangeEntity update = ConvertUtils.sourceToTarget(response, JExchangeEntity.class);
         update.setExtype("LK");
         update.setId(jExchangeEntity.getId());
         jExchangeDao.updateById(update);
+        return jExchangeDao.selectById(jExchangeEntity.getId());
     }
 
     /**
@@ -105,9 +123,9 @@ public class JExchangeManager {
         TExchangeConfirmResponse response = zinExchangeService.exchangeConfirm(request);
         JExchangeEntity update = new JExchangeEntity();
         update.setId(jExchangeEntity.getId());
-        update.setState(ZinConstant.PAY_APPLY_CF);  // 中间内部态: 以提交
+        update.setState(ZinConstant.PAY_APPLY_CF_DJ);  // 中间内部态: 以提交
         jExchangeDao.updateById(update);
-        this.query(jExchangeEntity);
+        this.query(jExchangeEntity, false);
     }
 
     /**
@@ -117,20 +135,11 @@ public class JExchangeManager {
         tx.executeWithoutResult(status -> {
             jExchangeDao.update(null, Wrappers.<JExchangeEntity>lambdaUpdate()
                     .eq(JExchangeEntity::getId, entity.getId())
-                    .set(JExchangeEntity::getState, ZinConstant.PAY_APPLY_CC)   // 内部取消
+                    .set(JExchangeEntity::getState, ZinConstant.PAY_APPLY_CC_DJ)   // 内部取消
             );
             ledger.ledgeExchangeUnFreeze(entity);
         });
     }
 
-    /**
-     * 保存
-     */
-    public void save(JExchangeEntity entity) {
-        entity.setState(ZinConstant.PAY_APPLY_NA);  // 内部状态新建
-        tx.executeWithoutResult(status -> {
-            jExchangeDao.insert(entity);
-            ledger.ledgeExchangeFreeze(entity);
-        });
-    }
+
 }

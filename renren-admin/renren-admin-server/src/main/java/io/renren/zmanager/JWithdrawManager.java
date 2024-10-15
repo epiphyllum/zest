@@ -7,9 +7,8 @@ import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.dao.JSubDao;
 import io.renren.zadmin.dao.JVaDao;
 import io.renren.zadmin.dao.JWithdrawDao;
-import io.renren.zadmin.entity.JSubEntity;
-import io.renren.zadmin.entity.JVaEntity;
-import io.renren.zadmin.entity.JWithdrawEntity;
+import io.renren.zadmin.entity.*;
+import io.renren.zapi.ApiNotify;
 import io.renren.zbalance.Ledger;
 import io.renren.zcommon.ZinConstant;
 import io.renren.zin.cardapply.ZinCardApplyService;
@@ -34,6 +33,8 @@ public class JWithdrawManager {
     private JMerchantDao jMerchantDao;
     @Resource
     private ZinFileService zinFileService;
+    @Resource
+    private ApiNotify apiNotify;
     @Resource
     private Ledger ledger;
     @Resource
@@ -79,20 +80,12 @@ public class JWithdrawManager {
             jWithdrawDao.insert(entity);
             ledger.ledgeCardWithdrawFreeze(entity, subEntity);
         });
-
-//        // 立即发起提交到通联
-//        try {
-//            this.submit(entity);
-//        } catch (Exception ex) {
-//            ex.printStackTrace();
-//        }
-
     }
 
     /**
      * 查询
      */
-    public void query(JWithdrawEntity entity) {
+    public void query(JWithdrawEntity entity, boolean notify) {
         TCardApplyQuery query = new TCardApplyQuery();
         query.setApplyid(entity.getApplyid());
         TCardApplyResponse response = zinCardApplyService.cardApplyQuery(query);
@@ -113,7 +106,7 @@ public class JWithdrawManager {
                         .eq(JWithdrawEntity::getState, oldState)
                         .set(JWithdrawEntity::getState, newState)
                         .set(JWithdrawEntity::getStateexplain, response.getStateexplain())
-                        .set(JWithdrawEntity::getSecurityamount, response.getSecurityamount())
+                        .set(response.getSecurityamount() != null, JWithdrawEntity::getSecurityamount, response.getSecurityamount())
                 );
                 ledger.ledgeCardWithdraw(entity, subEntity);
             });
@@ -123,8 +116,15 @@ public class JWithdrawManager {
                     .eq(JWithdrawEntity::getState, oldState)
                     .set(JWithdrawEntity::getState, newState)
                     .set(JWithdrawEntity::getStateexplain, response.getStateexplain())
-                    .set(JWithdrawEntity::getSecurityamount, response.getSecurityamount())
+                    .set(response.getSecurityamount() != null , JWithdrawEntity::getSecurityamount, response.getSecurityamount())
             );
+        }
+
+        // 需要通知商户的话
+        if (entity.getApi() == 1 && notify) {
+            JMerchantEntity merchant = jMerchantDao.selectById(entity.getMerchantId());
+            JWithdrawEntity freshEntity = jWithdrawDao.selectById(entity.getId());
+            apiNotify.cardWithdrawNotify(freshEntity, merchant);
         }
     }
 
@@ -141,7 +141,7 @@ public class JWithdrawManager {
 
         // 立即查询通联
         entity.setApplyid(response.getApplyid());
-        this.query(entity);
+        this.query(entity, false);
     }
 
     /**

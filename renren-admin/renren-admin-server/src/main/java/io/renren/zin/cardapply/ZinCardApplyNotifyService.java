@@ -86,7 +86,8 @@ public class ZinCardApplyNotifyService {
         if (jCardEntity.getState().equals(notify.getState())) {
             return;
         }
-        jCardManager.query(jCardEntity);
+        // 查询通联, 并通知商户
+        jCardManager.query(jCardEntity, true);
     }
 
     // CP450 开卡申请开卡
@@ -117,14 +118,18 @@ public class ZinCardApplyNotifyService {
         // 查询下申请单
         String applyid = notify.getApplyid();
         JDepositEntity entity = jDepositDao.selectOne(Wrappers.<JDepositEntity>lambdaQuery().eq(JDepositEntity::getApplyid, applyid));
-        jDepositManager.query(entity);
+
+        // 查询通联并通知商户
+        jDepositManager.query(entity, true);
     }
 
     //CP452	保证金提现
     public void handleCP452(TCardApplyNotify notify) {
         String applyid = notify.getApplyid();
         JWithdrawEntity entity = jWithdrawDao.selectOne(Wrappers.<JWithdrawEntity>lambdaQuery().eq(JWithdrawEntity::getApplyid, applyid));
-        jWithdrawManager.query(entity);
+
+        // 查询通联并通知商户
+        jWithdrawManager.query(entity, true);
     }
 
     // CP462: 释放担保金

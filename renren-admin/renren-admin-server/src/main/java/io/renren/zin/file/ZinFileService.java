@@ -20,14 +20,10 @@ public class ZinFileService {
 
     /**
      * 7000-文件上传
-     *
-     * @param fid
-     * @return
+     * 文件名格式: yyyy-mm-dd-12312312312313.pdf
      */
     public String upload(String fid) {
-        String reqId = CommonUtils.newRequestId();
-
-        // yyyy-mm-dd-12312312312313.pdf
+        String reqId = CommonUtils.uniqueId();
         String[] split = fid.split("-");
         String dateDir = String.format("%s/%s/%s", split[0], split[1], split[2]);
         String filename = zestConfig.getUploadDir() + "/" + dateDir + "/" + fid;

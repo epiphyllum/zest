@@ -1,50 +1,136 @@
 package io.renren.zapi.cardmoney;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.commons.tools.utils.Result;
+import io.renren.zadmin.dao.JCardDao;
+import io.renren.zadmin.dao.JDepositDao;
+import io.renren.zadmin.dao.JWithdrawDao;
+import io.renren.zadmin.entity.JCardEntity;
+import io.renren.zadmin.entity.JDepositEntity;
+import io.renren.zadmin.entity.JMerchantEntity;
+import io.renren.zadmin.entity.JWithdrawEntity;
 import io.renren.zapi.ApiContext;
 import io.renren.zapi.cardmoney.dto.*;
-import io.renren.zin.cardmoney.ZinCardMoneyService;
-import io.renren.zin.cardmoney.dto.TDepositRequest;
-import io.renren.zin.cardmoney.dto.TDepositResponse;
-import io.renren.zin.cardmoney.dto.TWithdrawRequest;
-import io.renren.zin.cardmoney.dto.TWithdrawResponse;
+import io.renren.zcommon.ZestConfig;
+import io.renren.zmanager.JDepositManager;
+import io.renren.zmanager.JWithdrawManager;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ApiCardMoneyService {
-
     @Resource
-    private ZinCardMoneyService zinCardMoneyService;
+    private JDepositManager jDepositManager;
+    @Resource
+    private JWithdrawManager jWithdrawManager;
+    @Resource
+    private JDepositDao jDepositDao;
+    @Resource
+    private JWithdrawDao jWithdrawDao;
+    @Resource
+    private JCardDao jCardDao;
+    @Resource
+    private ZestConfig zestConfig;
 
-    // 卡保证金充值
+    // 卡充值
     public Result<CardChargeRes> cardCharge(CardChargeReq request, ApiContext context) {
-        TDepositRequest tDepositRequest = ConvertUtils.sourceToTarget(request, TDepositRequest.class);
-        TDepositResponse deposit = zinCardMoneyService.deposit(tDepositRequest);
-        CardChargeRes cardChargeRes = ConvertUtils.sourceToTarget(deposit, CardChargeRes.class);
 
+        JCardEntity card = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
+                .eq(JCardEntity::getCardno, request.getCardno())
+        );
+        if(card == null) {
+            throw new RenException("cardno does not exists");
+        }
+
+        JMerchantEntity merchant = context.getMerchant();
+
+        Long subId = request.getSubId();
+        JDepositEntity entity = ConvertUtils.sourceToTarget(request, JDepositEntity.class);
+        entity.setMerchantId(merchant.getId());
+        entity.setSubId(subId);
+        entity.setCurrency(card.getCurrency());
+
+        // 保存
+        jDepositManager.saveAndSubmit(entity);
+
+        // 应答
+        entity = jDepositDao.selectById(entity.getId());
         Result<CardChargeRes> result = new Result<>();
-        result.setData(cardChargeRes);
+        CardChargeRes res = new CardChargeRes(entity.getApplyid());
+        result.setData(res);
         return result;
     }
+
+    // 卡充值查询
     public Result<CardChargeQueryRes> cardChargeQuery(CardChargeQuery request, ApiContext context) {
-        return null;
+        JDepositEntity entity = jDepositDao.selectOne(Wrappers.<JDepositEntity>lambdaQuery()
+                .eq(request.getApplyid() != null, JDepositEntity::getApplyid, request.getApplyid())
+                .eq(request.getMeraplid() != null, JDepositEntity::getMeraplid, request.getMeraplid())
+        );
+        if(entity == null) {
+            throw new RenException("no record");
+        }
+
+        // 调用渠道, 更新数据库
+        jDepositManager.query(entity, false);
+
+        // 应答
+        entity = jDepositDao.selectById(entity.getId());
+        CardChargeQueryRes res = ConvertUtils.sourceToTarget(entity, CardChargeQueryRes.class);
+        Result<CardChargeQueryRes> result = new Result<>();
+        result.setData(res);
+        return result;
     }
 
-    // 卡保证金提现
+    // 卡提现
     public Result<CardWithdrawRes> cardWithdraw(CardWithdrawReq request, ApiContext context) {
 
-        TWithdrawRequest tWithdrawRequest = ConvertUtils.sourceToTarget(request, TWithdrawRequest.class);
-        TWithdrawResponse withdraw = zinCardMoneyService.withdraw(tWithdrawRequest);
-        CardWithdrawRes cardWithdrawRes = ConvertUtils.sourceToTarget(withdraw, CardWithdrawRes.class);
+        JCardEntity card = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
+                .eq(JCardEntity::getCardno, request.getCardno())
+        );
+        if(card == null) {
+            throw new RenException("cardno does not exists");
+        }
 
+        JMerchantEntity merchant = context.getMerchant();
+        Long subId = request.getSubId();
+        JWithdrawEntity entity = ConvertUtils.sourceToTarget(request, JWithdrawEntity.class);
+        entity.setMerchantId(merchant.getId());
+        entity.setSubId(subId);
+        entity.setCurrency(card.getCurrency());
+
+        // 保存
+        jWithdrawManager.save(entity);
+
+        // 应答: 为空对象
         Result<CardWithdrawRes> result = new Result<>();
-        result.setData(cardWithdrawRes);
+        CardWithdrawRes res = new CardWithdrawRes(request.getMeraplid());
+        result.setData(res);
         return result;
     }
 
+    // 卡提现查询
     public Result<CardWithdrawQueryRes> cardWithdrawQuery(CardWithdrawQuery request, ApiContext context) {
-        return null;
+        JWithdrawEntity entity = jWithdrawDao.selectOne(Wrappers.<JWithdrawEntity>lambdaQuery()
+                .eq(request.getApplyid() != null, JWithdrawEntity::getApplyid, request.getApplyid())
+                .eq(request.getMeraplid() != null, JWithdrawEntity::getMeraplid, request.getMeraplid())
+        );
+        if(entity == null) {
+            throw new RenException("no record");
+        }
+
+        if (entity.getApplyid() != null) {
+            // 调用渠道查询, 并更新数据库
+            jWithdrawManager.query(entity, false);
+        }
+
+        // 应答
+        entity = jWithdrawDao.selectById(entity.getId());
+        CardWithdrawQueryRes cardWithdrawQueryRes = ConvertUtils.sourceToTarget(entity, CardWithdrawQueryRes.class);
+        Result<CardWithdrawQueryRes> result = new Result<>();
+        result.setData(cardWithdrawQueryRes);
+        return result;
     }
 }

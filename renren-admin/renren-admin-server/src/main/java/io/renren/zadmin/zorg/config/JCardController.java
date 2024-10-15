@@ -93,7 +93,7 @@ public class JCardController {
 
         JCardEntity entity = ConvertUtils.sourceToTarget(dto, JCardEntity.class);
         entity.setApi(0);
-        entity.setMeraplid(CommonUtils.newRequestId());
+        entity.setMeraplid(CommonUtils.uniqueId());
         jCardManager.save(entity);
         return new Result();
     }
@@ -152,7 +152,7 @@ public class JCardController {
     @PreAuthorize("hasAuthority('zorg:jcard:query')")
     public Result query(@RequestParam("id") Long id) {
         JCardEntity jCardEntity = jCardDao.selectById(id);
-        jCardManager.query(jCardEntity);
+        jCardManager.query(jCardEntity, false);
         return Result.ok;
     }
 

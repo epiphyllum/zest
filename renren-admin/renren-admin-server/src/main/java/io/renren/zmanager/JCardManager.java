@@ -86,6 +86,9 @@ public class JCardManager {
 
     // 保存发卡信息
     public void save(JCardEntity entity) {
+        String currency = ZinConstant.productCurrencyMap.get(entity.getProducttype());
+        entity.setCurrency(currency);
+
         // 查询开卡费用配置
         List<JCardFeeConfigEntity> cardFeeConfigList = jCardFeeConfigDao.selectList(Wrappers.emptyWrapper());
         BigDecimal fee = null;
@@ -139,7 +142,7 @@ public class JCardManager {
         }
 
         // 发卡收费
-        entity.setMerchantFee(fee);
+        entity.setMerchantfee(fee);
 
         // 将文件上传到通联
         this.uploadFiles(entity);
@@ -163,10 +166,13 @@ public class JCardManager {
         update.setId(entity.getId());
         update.setApplyid(response.getApplyid());
         jCardDao.updateById(update);
+
+        // 带入下
+        entity.setApplyid(response.getApplyid());
     }
 
     // 查询发卡状态
-    public void query(JCardEntity jCardEntity) {
+    public void query(JCardEntity jCardEntity, boolean notify) {
         TCardApplyQuery query = new TCardApplyQuery();
         query.setMeraplid(jCardEntity.getId().toString());
         TCardApplyResponse response = zinCardApplyService.cardApplyQuery(query);
@@ -199,9 +205,11 @@ public class JCardManager {
                 ledger.ledgeOpenCard(jCardEntity);
             });
 
-            if (jCardEntity.getApi().equals(1)) {
+            if (jCardEntity.getApi().equals(1) && notify) {
                 // 发卡状态更新
-                apiNotify.cardNewNotify();
+                JCardEntity entity = jCardDao.selectById(jCardEntity.getId());
+                JMerchantEntity merchant = jMerchantDao.selectById(jCardEntity.getMerchantId());
+                apiNotify.cardNewNotify(entity, merchant);
             }
 
             // 发卡成功, 查询更新状态
@@ -219,9 +227,11 @@ public class JCardManager {
                 ledger.ledgeOpenCardUnFreeze(jCardEntity);
             });
             // 通知商户
-            if (jCardEntity.getApi().equals(1)) {
+            if (jCardEntity.getApi().equals(1) && notify) {
                 // 发卡状态更新
-                apiNotify.cardTxnNotify();
+                JCardEntity entity = jCardDao.selectById(jCardEntity.getId());
+                JMerchantEntity merchant = jMerchantDao.selectById(jCardEntity.getMerchantId());
+                apiNotify.cardChangeNotify(entity, merchant);
             }
         }
         // 其他情况
@@ -235,7 +245,11 @@ public class JCardManager {
         String photofront2 = cardEntity.getPhotofront2();
         String photoback2 = cardEntity.getPhotoback2();
 
-        List<String> fids = List.of(photofront, photoback, photofront2, photoback2);
+        List<String> fids =  new ArrayList<>();
+        if (photofront != null) { fids.add(photofront); }
+        if (photoback != null) { fids.add(photoback); }
+        if (photofront2 != null) { fids.add(photofront2); }
+        if (photoback2 != null) { fids.add(photoback2); }
         Map<String, CompletableFuture<String>> jobs = new HashMap<>();
         for (String fid : fids) {
             if (StringUtils.isBlank(fid)) {
@@ -314,6 +328,7 @@ public class JCardManager {
         JCardEntity update = new JCardEntity();
         update.setId(jCardEntity.getId());
         update.setCardState(response.getCardstate());
+        jCardEntity.setCardState(response.getCardstate());
         jCardDao.updateById(update);
     }
 
@@ -325,6 +340,7 @@ public class JCardManager {
         JCardEntity update = new JCardEntity();
         update.setId(jCardEntity.getId());
         update.setBalance(response.getBalance());
+        jCardEntity.setBalance(response.getBalance());
         jCardDao.updateById(update);
     }
 

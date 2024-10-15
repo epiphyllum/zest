@@ -90,7 +90,7 @@ public class JCardEntity extends BaseEntity {
 
     // 大吉设计
     private String currency;
-    private BigDecimal merchantFee;
+    private BigDecimal merchantfee;
     private Integer notifyStatus;
     private Integer notifyCount;
 

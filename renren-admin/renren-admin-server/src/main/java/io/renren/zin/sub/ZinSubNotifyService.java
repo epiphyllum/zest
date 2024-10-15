@@ -14,7 +14,7 @@ public class ZinSubNotifyService {
     @Resource
     private JMerchantDao jMerchantDao;
     @Resource
-    private JMerchantManager manager;
+    private JMerchantManager jMerchantManager;
 
     // 子商户创建审核通知: 5002
     public void handle(TSubStatusNotify notify) {
@@ -24,6 +24,6 @@ public class ZinSubNotifyService {
         if (jMerchantEntity == null) {
             throw new RenException("can not find merchant");
         }
-        manager.query(jMerchantEntity);
+        jMerchantManager.query(jMerchantEntity);
     }
 }
