@@ -23,8 +23,6 @@ create table j_auth
     trxaddr       varchar(160) comment '交易地点',            -- 交易地点	trxaddr	String	160	O
     authcode      varchar(50) comment '授权码',               -- 授权码	authcode	String	50	O
     time          varchar(25),
-
-    state         varchar(2),
     stateexplain  varchar(200),
 
     -- basic
