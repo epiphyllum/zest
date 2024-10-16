@@ -22,7 +22,6 @@ create table j_auth
     mcc           varchar(20) comment '商户类别代码',         -- 商户类别代码	mcc	String	20	O
     trxaddr       varchar(160) comment '交易地点',            -- 交易地点	trxaddr	String	160	O
     authcode      varchar(50) comment '授权码',               -- 授权码	authcode	String	50	O
-    mcc           varchar(20),
     time          varchar(25),
 
     state         varchar(2),

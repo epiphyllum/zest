@@ -50,4 +50,4 @@ create index idx_j_deposit_2 on j_deposit (merchant_id, create_date);
 create index idx_j_deposit_3 on j_deposit (sub_id, create_date);
 create index idx_j_deposit_4 on j_deposit (merchant_id, meraplid);
 -- 唯一索引
-create unique index  idx_j_deposit_1 on j_deposit (applyid);
+create unique index  uidx_j_deposit_1 on j_deposit (applyid);
