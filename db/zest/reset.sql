@@ -11,5 +11,8 @@ delete from sys_user where username not in ('dj', 'admin');
 delete from sys_role where  name not in ('大吉管理员');
 delete from j_exchange;
 delete from j_money;
+delete from sys_log_error;
+delete from sys_log_login;
+delete from sys_log_operation;
 
 

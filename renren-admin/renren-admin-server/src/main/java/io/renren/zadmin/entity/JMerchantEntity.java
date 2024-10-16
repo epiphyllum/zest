@@ -96,4 +96,5 @@ public class JMerchantEntity extends BaseEntity {
     private BigDecimal disputeFee;
     private String publicKey;
     private String webhook;
+    private String whiteIp;
 }

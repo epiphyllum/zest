@@ -89,9 +89,8 @@ public class ApiService {
     @Resource
     private ApiCardApplyService apiCardApplyService;
 
-
-
     public static Map<String, ApiMeta> metaMap = new HashMap<>();
+
     public void initService(Object object) {
         Method[] methods = object.getClass().getMethods();
         for (Method method : methods) {
@@ -103,8 +102,9 @@ public class ApiService {
             }
         }
     }
+
     /**
-     *  初始化服务
+     * 初始化服务
      */
     @PostConstruct
     public void init() {
@@ -120,6 +120,7 @@ public class ApiService {
 
     /**
      * 商户签名验证器
+     *
      * @param merchant
      * @return
      */
@@ -143,7 +144,8 @@ public class ApiService {
 
 
     /**
-     *  调用服务
+     * 调用服务
+     *
      * @param body
      * @param merchantId
      * @param sign
@@ -152,7 +154,8 @@ public class ApiService {
      * @return
      */
     public Result<?> invokeService(String body, Long merchantId, String sign, String reqId, String name) {
-        log.info("body: {}", body);
+        String ip = CommonUtils.getIp();
+        log.info("body: {}, ip: {}", body, ip);
         ApiMeta apiMeta = metaMap.get(name);
         JMerchantEntity merchant = jMerchantDao.selectById(merchantId);
         if (merchant == null) {
@@ -160,11 +163,15 @@ public class ApiService {
         }
 
         // 开发环境不验证签名
-        if (!zestConfig.isDev()) {
-            verify(body, reqId, merchant, sign);
-        } else {
+        if (zestConfig.isDev()) {
             // 测试暂时不验证签名
             log.debug("开发环境, 不校验签名");
+        } else {
+            if (merchant.getWhiteIp().indexOf(ip) == -1) {
+                log.error("{} is forbidden from {}", merchant.getCusname(), ip);
+                throw new RenException("forbidden ip: " + ip);
+            }
+            verify(body, reqId, merchant, sign);
         }
 
         // 记录日志准备
@@ -184,7 +191,7 @@ public class ApiService {
             // ValidatorUtils.validateEntity(req);
             Logger logger = CommonUtils.getLogger(merchant.getCusname());
             ApiContext context = new ApiContext(merchant, logger);
-            Result<?> result = (Result)apiMeta.getMethod().invoke(apiMeta.getInstance(), req, context);
+            Result<?> result = (Result) apiMeta.getMethod().invoke(apiMeta.getInstance(), req, context);
             apiLogger.logPacketSuccess(packetEntity, result);
             return result;
         } catch (JsonProcessingException e) {
