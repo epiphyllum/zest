@@ -68,6 +68,7 @@ create table j_mcard
 
     -- 大吉设计
     currency         varchar(3) comment '币种',
+    balance          decimal(18,2),
 
     -- response
     applyid          varchar(32) comment '申请ID',                           --
@@ -77,6 +78,9 @@ create table j_mcard
     feecurrency      varchar(3) comment '申请费用币种',                      -- 	feecurrency	String	3	O
     cardno           varchar(30) comment '卡号',                             -- 	cardno	String	30	O	申请成功后返回
     state            varchar(2)           default '00' comment '卡申请状态', --
+
+    cvv              varchar(20),
+    expiredate       varchar(20),
 
     -- basic
     creator          bigint comment '创建者',

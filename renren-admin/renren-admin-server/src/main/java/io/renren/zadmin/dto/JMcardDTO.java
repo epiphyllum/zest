@@ -122,6 +122,8 @@ public class JMcardDTO implements Serializable {
     // 大吉设计
     @Schema(description = "币种ID")
     private String currency;
+    @Schema(description = "balance")
+    private BigDecimal balance;
 
     // 通联返回
     @Schema(description = "申请ID")
@@ -138,8 +140,6 @@ public class JMcardDTO implements Serializable {
     private String state; //            varchar(2)  comment '卡申请状态',        --
     @Schema(description = "cardState")
     private String cardState; //            varchar(2)  comment '卡申请状态',        --
-    @Schema(description = "balance")
-    private BigDecimal balance; //            varchar(2)  comment '卡申请状态',        --
 
     @Schema(description = "cvv")
     private String cvv;
