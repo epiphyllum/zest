@@ -83,6 +83,12 @@ public class SysUserDTO implements Serializable {
     @Range(min = 0, max = 1, message = "{sysuser.status.range}", groups = DefaultGroup.class)
     private Integer status;
 
+    @Schema(description = "绑定状态")
+    private Integer totpStatus;
+
+    @Schema(description = "密钥")
+    private String totpKey;
+
     @Schema(description = "备注")
     private String remark;
 

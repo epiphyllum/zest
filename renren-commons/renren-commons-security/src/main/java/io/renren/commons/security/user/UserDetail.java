@@ -42,6 +42,8 @@ public class UserDetail implements UserDetails {
     private String deptName;
 
     private String userType;
+    private Integer totpStatus;
+    private String totpKey;
 
     /**
      * 部门数据权限

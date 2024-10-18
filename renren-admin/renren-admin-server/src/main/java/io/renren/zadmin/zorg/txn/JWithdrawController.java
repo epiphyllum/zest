@@ -1,7 +1,11 @@
 package io.renren.zadmin.zorg.txn;
 
+import com.warrenstrange.googleauth.GoogleAuthenticator;
 import io.renren.commons.log.annotation.LogOperation;
+import io.renren.commons.security.user.SecurityUser;
+import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.constant.Constant;
+import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.page.PageData;
 import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.commons.tools.utils.Result;
@@ -76,6 +80,14 @@ public class JWithdrawController {
     @LogOperation("保存")
     @PreAuthorize("hasAuthority('zorg:jwithdraw:save')")
     public Result<Long> save(@RequestBody JWithdrawDTO dto) {
+        // 验证google
+        UserDetail user = SecurityUser.getUser();
+        GoogleAuthenticator gAuth = new GoogleAuthenticator();
+        boolean authorized = gAuth.authorize(user.getTotpKey(), Integer.parseInt(dto.getOtp()));
+        if (!authorized) {
+            throw new RenException("谷歌验证码错误");
+        }
+
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
         JWithdrawEntity jWithdrawEntity = ConvertUtils.sourceToTarget(dto, JWithdrawEntity.class);

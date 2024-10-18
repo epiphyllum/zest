@@ -61,4 +61,7 @@ public class JWithdrawDTO implements Serializable {
     private String stateexplain;
     @Schema(description = "担保金额")
     private String securityamount;
+
+    // 提取otp
+    private String otp;
 }

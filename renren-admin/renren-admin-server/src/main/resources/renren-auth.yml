@@ -1,6 +1,7 @@
 ignore_urls:
   - /auth/captcha
   - /auth/login
+  - /auth/totpKey
   - /auth/access-token
   - /monitor/**
   - /user/getRealNameList

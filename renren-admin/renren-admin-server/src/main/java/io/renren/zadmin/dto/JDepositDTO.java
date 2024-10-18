@@ -79,4 +79,8 @@ public class JDepositDTO implements Serializable {
     private BigDecimal securityamount;
     @Schema(description = "通联手续费")
     private BigDecimal fee;
+
+    //
+    private String otp;
+
 }

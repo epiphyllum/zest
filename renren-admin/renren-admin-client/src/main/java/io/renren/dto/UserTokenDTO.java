@@ -25,4 +25,7 @@ public class UserTokenDTO implements Serializable {
     @Schema(description = "refresh_token")
     @JsonProperty(value = "refresh_token")
     private String refreshToken;
+
+    @Schema(description = "totpStatus")
+    private Integer totpStatus;
 }

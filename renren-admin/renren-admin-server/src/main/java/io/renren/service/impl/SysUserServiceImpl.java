@@ -8,7 +8,9 @@
 
 package io.renren.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.mybatis.service.impl.BaseServiceImpl;
 import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
@@ -244,4 +246,14 @@ public class SysUserServiceImpl extends BaseServiceImpl<SysUserDao, SysUserEntit
         return baseDao.getLeaderIdListByUserId(userId);
     }
 
+    @Override
+    public void updateTotp(Long id, String totpKey, Integer totpStatus) {
+        LambdaUpdateWrapper<SysUserEntity> update = Wrappers.lambdaUpdate(SysUserEntity.class);
+        update.eq(SysUserEntity::getId, id);
+        update.set(SysUserEntity::getTotpKey, totpKey);
+        update.set(SysUserEntity::getTotpStatus, totpStatus);
+
+        SysUserEntity entity = new SysUserEntity();
+        baseDao.update(entity, update);
+    }
 }

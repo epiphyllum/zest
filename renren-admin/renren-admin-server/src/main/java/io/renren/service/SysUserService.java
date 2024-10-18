@@ -91,4 +91,5 @@ public interface SysUserService extends BaseService<SysUserEntity> {
     Long getLeaderIdListByUserId(Long userId);
 
 
+    public void updateTotp(Long id, String totpKey, Integer totpStatus);
 }
