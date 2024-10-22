@@ -51,6 +51,10 @@ public class LedgerConstant {
     public static final int FACT_CARD_WITHDRAW_IN = 70003;         // 3. 子商户VA       +100HKD(va退回)
     // 商户VA提现
     public static final int ORIGIN_TYPE_VA_WITHDRAW = 800;         // 商户VA提现
-    // todo
+    // 释放商户担保金
+    public static final int ORIGIN_TYPE_MFREE = 900;               // 释放担保金
+    public static final int FACT_MFREE_OUT = 90001;           // 1. 商户保证账户 -100HKD
+    public static final int FACT_MFREE_IN = 90002;            // 2. 商户账户  +100HKD
+
 
 }

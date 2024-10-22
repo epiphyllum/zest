@@ -20,6 +20,7 @@ import io.renren.commons.mybatis.entity.BaseEntity;
 public class JChannelLogEntity extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
+    private String ip;
     private String reqId;
     private String apiName;
     private String recv;

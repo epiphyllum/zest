@@ -324,4 +324,15 @@ public class Ledger {
         // 记账2: 子商户Va+
         ledgerUtil.ledgeUpdate(subVa, LedgerConstant.ORIGIN_TYPE_CARD_WITHDRAW, LedgerConstant.FACT_CARD_WITHDRAW_IN, entity.getId(), factMemo, factAmount);
     }
+
+    // 释放商户担保金
+    public void ledgeMfree(JMfreeEntity entity) {
+        JBalanceEntity mVa = ledgerUtil.getVaAccount(entity.getMerchantId(), entity.getCurrency());
+        JBalanceEntity depVa = ledgerUtil.getDepositAccount(entity.getMerchantId(), entity.getCurrency());
+        String factMemo = String.format("释放担保金:%s", BigDecimal.ZERO.add(entity.getAmount()).setScale(2, RoundingMode.HALF_UP));
+        // 记账1: 商户担保金-
+        ledgerUtil.ledgeUpdate(depVa, LedgerConstant.ORIGIN_TYPE_MFREE, LedgerConstant.FACT_MFREE_OUT, entity.getId(), factMemo, entity.getAmount().negate());
+        // 记账2: 商户Va+
+        ledgerUtil.ledgeUpdate(mVa, LedgerConstant.ORIGIN_TYPE_MFREE, LedgerConstant.FACT_MFREE_IN, entity.getId(), factMemo, entity.getAmount());
+    }
 }

@@ -125,7 +125,7 @@ public class LoginController {
     @ResponseBody
     @GetMapping("unbind")
     @Operation(summary = "解绑google")
-    @PreAuthorize("hasAuthority('sys:auth:unbind')")
+    @PreAuthorize("hasAuthority('sys:user:unbind')")
     public Result googleUnbind(Long userId) {
         if (userId == null) {
             UserDetail user = SecurityUser.getUser();

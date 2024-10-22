@@ -6,32 +6,27 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
-* j_channel_log
+* j_free
 *
 * @author epiphyllum epiphyllum.zhou@gmail.com
-* @since 3.0 2024-10-15
+* @since 3.0 2024-10-21
 */
 @Data
-@Schema(description = "j_channel_log")
-public class JChannelLogDTO implements Serializable {
+@Schema(description = "j_free")
+public class JFreeDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private Long id;
-    @Schema(description = "IP")
-    private String ip;
-    @Schema(description = "请求ID")
-    private String reqId;
-    @Schema(description = "接口名称")
-    private String apiName;
-    @Schema(description = "收到")
-    private String recv;
-    @Schema(description = "发送")
-    private String send;
-    @Schema(description = "签名")
-    private String sign;
+    @Schema(description = "金额")
+    private BigDecimal amount;
+    @Schema(description = "币种")
+    private String currency;
+    @Schema(description = "唯一ID")
+    private String applyid;
     @Schema(description = "创建者")
     private Long creator;
     @Schema(description = "创建时间")
