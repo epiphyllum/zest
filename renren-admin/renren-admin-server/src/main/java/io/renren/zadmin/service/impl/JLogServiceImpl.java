@@ -79,6 +79,10 @@ public class JLogServiceImpl extends CrudServiceImpl<JLogDao, JLogEntity, JLogDT
         }
 
         //
+        String originType = (String) params.get("originType");
+        wrapper.eq(StringUtils.isNotBlank(originType), "origin_type", originType);
+
+        //
         String factType = (String) params.get("factType");
         wrapper.eq(StringUtils.isNotBlank(factType), "fact_type", factType);
 

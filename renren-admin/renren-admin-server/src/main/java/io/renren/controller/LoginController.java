@@ -187,9 +187,13 @@ public class LoginController {
     @PostMapping("access-token")
     @Operation(summary = "刷新 access_token")
     public Result<UserTokenDTO> getAccessToken(String refreshToken) {
-        UserTokenDTO token = sysUserTokenService.refreshToken(refreshToken);
-
-        return new Result<UserTokenDTO>().ok(token);
+        try {
+            UserTokenDTO token = sysUserTokenService.refreshToken(refreshToken);
+            return new Result<UserTokenDTO>().ok(token);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw ex;
+        }
     }
 
     @ResponseBody

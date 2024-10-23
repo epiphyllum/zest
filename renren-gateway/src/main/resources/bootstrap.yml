@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 9090
 
 spring:
   application:
@@ -26,7 +26,7 @@ spring:
             context-path: /actuator
         server-addr: ${nacos_host:nacos-host}:${nacos_port:8848}
         #nacos的命名空间ID，默认是public
-        namespace: ${nacos_namespace:}
+        namespace: zest
       config:
         server-addr: ${spring.cloud.nacos.discovery.server-addr}
         namespace: ${spring.cloud.nacos.discovery.namespace}
