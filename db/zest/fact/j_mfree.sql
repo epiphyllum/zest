@@ -4,6 +4,11 @@ create table j_free
 (
     id            bigint         not null,
 
+    agent_id     bigint not null,
+    agent_name varchar(50) not null,
+    merchant_id bigitn not null,
+    merchant_name varchar(50) not null,
+
     -- basic
     creator       bigint comment '创建者',
     create_date   datetime comment '创建时间',
