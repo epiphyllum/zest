@@ -83,6 +83,9 @@ public class JMerchantManager {
         jMerchantEntity.setAgentId(agentId);
         jMerchantEntity.setAgentName(agentName);
 
+        // daji initial state!!!
+        jMerchantEntity.setState(ZinConstant.MERCHANT_STATE_TO_VERIFY);
+
         return tx.execute(st -> {
             sysDeptDao.insert(deptEntity);
             // 商户部门参数
@@ -163,13 +166,27 @@ public class JMerchantManager {
         String organfid = jMerchantEntity.getOrganfid();
 
         List<String> fids = new ArrayList<>();
-        if (agreementfid != null) { fids.add(agreementfid); }
-        if (buslicensefid != null) { fids.add(buslicensefid); }
-        if (creditfid != null) { fids.add(agreementfid); }
-        if (legalphotobackfid != null) { fids.add(legalphotobackfid); }
-        if (legalphotofrontfid != null) { fids.add(legalphotofrontfid); }
-        if (taxfid != null) { fids.add(taxfid); }
-        if (organfid != null) { fids.add(organfid); }
+        if (agreementfid != null) {
+            fids.add(agreementfid);
+        }
+        if (buslicensefid != null) {
+            fids.add(buslicensefid);
+        }
+        if (creditfid != null) {
+            fids.add(agreementfid);
+        }
+        if (legalphotobackfid != null) {
+            fids.add(legalphotobackfid);
+        }
+        if (legalphotofrontfid != null) {
+            fids.add(legalphotofrontfid);
+        }
+        if (taxfid != null) {
+            fids.add(taxfid);
+        }
+        if (organfid != null) {
+            fids.add(organfid);
+        }
 
         Map<String, CompletableFuture<String>> jobs = new HashMap<>();
         for (String fid : fids) {
