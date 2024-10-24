@@ -247,7 +247,6 @@ public class JMerchantManager {
                 jSubEntity.setMerchantId(entity.getId());
                 jSubEntity.setApi(0);
                 jSubManager.save(jSubEntity);
-                jSubManager.openSubVa(jSubEntity);
             }
         });
     }

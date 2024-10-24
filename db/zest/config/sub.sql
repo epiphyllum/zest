@@ -2,11 +2,11 @@
 drop table if exists j_sub;
 create table j_sub
 (
-    id                 bigint      not null comment '商户ID | 子商户ID',
+    id                 bigint not null comment '商户ID | 子商户ID',
 
     agent_id           bigint,
     agent_name         varchar(50),
-    merchant_id        bigint      not null comment '父商户ID',
+    merchant_id        bigint not null comment '父商户ID',
     merchant_name      varchar(50) null comment '父商户名',
 
     -- 入网信息
@@ -48,11 +48,13 @@ create table j_sub
 
     -- extra management:
     state              varchar(2) comment '状态',                                           -- state	String	2	Y	04：审核成功; 05：审核失败; 其他情况为空;
-    enabled            int         not null default 1 comment '启用',
+    enabled            int    not null default 1 comment '启用',
     mcc                varchar(16) comment 'mcc',
+    api                int    not null default 1,
 
     -- basic
-    creator            bigint comment '创建者',
+    creator
+                       bigint comment '创建者',
     create_date        datetime comment '创建时间',
     updater            bigint comment '更新者',
     update_date        datetime comment '更新时间',
