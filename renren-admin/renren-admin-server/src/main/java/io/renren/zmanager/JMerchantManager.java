@@ -222,7 +222,7 @@ public class JMerchantManager {
 
     public void changeState(JMerchantEntity entity, String newState, String cusid) {
         String oldState = entity.getState();
-        System.out.println(oldState + "->"  + newState);
+        System.out.println(oldState + "->" + newState);
 
         // 状态没有变化
         if (oldState.equals(newState)) {
@@ -238,7 +238,7 @@ public class JMerchantManager {
                     .set(cusid != null, JMerchantEntity::getCusid, cusid)
             );
             // 状态又变化， 且新状态是成功
-            if (newState == ZinConstant.MERCHANT_STATE_VERIFIED || newState == ZinConstant.MERCHANT_STATE_REGISTER) {
+            if (newState.equals(ZinConstant.MERCHANT_STATE_VERIFIED) || newState.equals(ZinConstant.MERCHANT_STATE_REGISTER)) {
                 this.openVa(entity);
             }
         });
