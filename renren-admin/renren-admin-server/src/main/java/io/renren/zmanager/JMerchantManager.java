@@ -8,6 +8,7 @@ import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.dao.SysDeptDao;
 import io.renren.entity.SysDeptEntity;
+import io.renren.zadmin.entity.JSubEntity;
 import io.renren.zcommon.ZestConstant;
 import io.renren.zadmin.dao.JBalanceDao;
 import io.renren.zadmin.dao.JMerchantDao;
@@ -49,6 +50,8 @@ public class JMerchantManager {
     private ZinSubService zinSubService;
     @Resource
     private SysDeptDao sysDeptDao;
+    @Resource
+    private JSubManager jSubManager;
 
     public JMerchantEntity save(JMerchantDTO dto) {
 
@@ -101,14 +104,12 @@ public class JMerchantManager {
      */
     public void openVa(JMerchantEntity entity) {
         // 15 * 5 = 75个账户
-        tx.executeWithoutResult(st -> {
-            for (String currency : BalanceType.CURRENCY_LIST) {
-                newBalance(entity, BalanceType.getDepositAccount(currency), currency);  //  预收保证金
-                newBalance(entity, BalanceType.getChargeFeeAccount(currency), currency); // 充值到卡手续费
-                newBalance(entity, BalanceType.getTxnFeeAccount(currency), currency);  // 预收交易手续费
-                newBalance(entity, BalanceType.getVaAccount(currency), currency);  // 创建va账户
-            }
-        });
+        for (String currency : BalanceType.CURRENCY_LIST) {
+            newBalance(entity, BalanceType.getDepositAccount(currency), currency);  //  预收保证金
+            newBalance(entity, BalanceType.getChargeFeeAccount(currency), currency); // 充值到卡手续费
+            newBalance(entity, BalanceType.getTxnFeeAccount(currency), currency);  // 预收交易手续费
+            newBalance(entity, BalanceType.getVaAccount(currency), currency);  // 创建va账户
+        }
     }
 
     /**
@@ -240,6 +241,11 @@ public class JMerchantManager {
             // 状态又变化， 且新状态是成功
             if (newState.equals(ZinConstant.MERCHANT_STATE_VERIFIED) || newState.equals(ZinConstant.MERCHANT_STATE_REGISTER)) {
                 this.openVa(entity);
+                // new default sub merchant
+                JSubEntity jSubEntity = ConvertUtils.sourceToTarget(entity, JSubEntity.class);
+                jSubEntity.setState(ZinConstant.MERCHANT_STATE_REGISTER);
+                jSubManager.save(jSubEntity);
+                jSubManager.openSubVa(jSubEntity);
             }
         });
     }

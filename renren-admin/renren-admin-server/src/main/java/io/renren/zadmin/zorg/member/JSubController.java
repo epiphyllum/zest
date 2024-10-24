@@ -103,7 +103,8 @@ public class JSubController {
         }
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
-        jSubManager.save(dto);
+        JSubEntity jSubEntity = ConvertUtils.sourceToTarget(dto, JSubEntity.class);
+        jSubManager.save(jSubEntity);
         return new Result();
     }
 

@@ -107,7 +107,7 @@ public class JSubManager {
         return djId;
     }
 
-    public void save(JSubDTO dto) {
+    public void save(JSubEntity dto) {
         // 属性copy
         JSubEntity jSubEntity = ConvertUtils.sourceToTarget(dto, JSubEntity.class);
         jSubEntity.setState(ZinConstant.MERCHANT_STATE_TO_VERIFY);
