@@ -222,7 +222,7 @@ public class JMerchantManager {
 
     public void changeState(JMerchantEntity entity, String newState, String cusid) {
         String oldState = entity.getState();
-        System.out.println(oldState + "->" + newState);
+        log.info("{}: state {} -> {}", entity.getCusname(), oldState, newState);
 
         // 状态没有变化
         if (oldState.equals(newState)) {
