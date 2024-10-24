@@ -244,6 +244,8 @@ public class JMerchantManager {
                 // new default sub merchant
                 JSubEntity jSubEntity = ConvertUtils.sourceToTarget(entity, JSubEntity.class);
                 jSubEntity.setState(ZinConstant.MERCHANT_STATE_REGISTER);
+                jSubEntity.setMerchantId(entity.getId());
+                jSubEntity.setApi(0);
                 jSubManager.save(jSubEntity);
                 jSubManager.openSubVa(jSubEntity);
             }
