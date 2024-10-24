@@ -65,8 +65,9 @@ public class ZinConstant {
     public static final int STATE_FAIL = 3;       // 失败
 
     // 商户状态
-    public static final String MERCHANT_STATE_TO_VERIFY = "NA";
+    public static final String MERCHANT_STATE_TO_VERIFY = "00";
     public static final String MERCHANT_STATE_VERIFIED = "04";
+    public static final String MERCHANT_STATE_REGISTER = "01";
     public static final String MERCHANT_STATE_FAIL = "05";
 
 
