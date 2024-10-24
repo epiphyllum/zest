@@ -236,6 +236,7 @@ public class JMerchantManager {
                     .set(JMerchantEntity::getState, newState)
                     .set(cusid != null, JMerchantEntity::getCusid, cusid)
             );
+            log.info("{} -> {}", oldState, newState);
             // 状态又变化， 且新状态是成功
             if (ZinConstant.payApplyStateMap.get(newState) == ZinConstant.STATE_SUCCESS) {
                 this.openVa(entity);
