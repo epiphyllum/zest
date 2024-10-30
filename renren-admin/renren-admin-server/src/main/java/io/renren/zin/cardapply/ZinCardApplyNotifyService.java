@@ -74,7 +74,7 @@ public class ZinCardApplyNotifyService {
         if (jMcardEntity.getState().equals(notify.getState())) {
             return;
         }
-        jMcardManager.query(jMcardEntity);
+        jMcardManager.query(jMcardEntity, false);
     }
 
     // 收到子卡申请通知
