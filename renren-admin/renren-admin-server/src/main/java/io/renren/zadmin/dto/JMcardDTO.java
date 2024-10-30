@@ -34,10 +34,16 @@ public class JMcardDTO implements Serializable {
     private Long agentId;
     @Schema(description = "代理")
     private String agentName;
+
     @Schema(description = "商户ID")
     private Long merchantId;
     @Schema(description = "商户")
     private String merchantName;
+    @Schema(description = "子商户ID")
+    private Long subId;
+    @Schema(description = "子商户")
+    private String subName;
+
     private Integer api;
 
     // 业务字段

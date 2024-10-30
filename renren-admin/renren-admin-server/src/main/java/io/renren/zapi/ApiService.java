@@ -163,7 +163,7 @@ public class ApiService {
         }
 
         // 开发环境不验证签名
-        if (zestConfig.isDev()) {
+        if (zestConfig.isDev() && sign.equals("dev-sign")) {
             // 测试暂时不验证签名
             log.debug("开发环境, 不校验签名");
         } else {

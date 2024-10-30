@@ -1,5 +1,6 @@
 package io.renren.zadmin.service.impl;
 
+import com.alibaba.cloud.commons.lang.StringUtils;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -14,6 +15,7 @@ import io.renren.zadmin.dto.JMcardDTO;
 import io.renren.zadmin.entity.JMcardEntity;
 import io.renren.zadmin.entity.JVaEntity;
 import io.renren.zadmin.service.JMcardService;
+import io.renren.zcommon.ZinConstant;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
@@ -50,6 +52,15 @@ public class JMcardServiceImpl extends CrudServiceImpl<JMcardDao, JMcardEntity, 
     public QueryWrapper<JMcardEntity> getWrapper(Map<String, Object> params) {
         QueryWrapper<JMcardEntity> wrapper = new QueryWrapper<>();
         commonFilter.setFilterMerchant(wrapper, params);
+
+        String normal = (String) params.get("normal");
+        if (StringUtils.isNotBlank(normal)) {
+            // 卡片管理: 需要卡状态是新的, 发卡成功后，
+            wrapper.eq("state", ZinConstant.CARD_APPLY_SUCCESS);
+        } else {
+            // 发卡管理
+        }
+
         return wrapper;
     }
 

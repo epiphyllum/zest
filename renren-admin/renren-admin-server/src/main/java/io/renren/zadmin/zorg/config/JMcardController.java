@@ -1,6 +1,5 @@
 package io.renren.zadmin.zorg.config;
 
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import io.renren.commons.log.annotation.LogOperation;
 import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
@@ -15,6 +14,7 @@ import io.renren.commons.tools.validator.ValidatorUtils;
 import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
+import io.renren.zadmin.entity.JCardEntity;
 import io.renren.zcommon.ZestConstant;
 import io.renren.zadmin.dao.JMcardDao;
 import io.renren.zadmin.dto.JMcardDTO;
@@ -27,6 +27,7 @@ import io.renren.zin.cardapply.dto.TCardApplyResponse;
 import io.renren.zin.cardapply.dto.TCardMainApplyRequest;
 import io.renren.zin.cardapply.dto.TCardMainApplyResponse;
 import io.renren.zin.file.ZinFileService;
+import io.renren.zmanager.JMcardManager;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -34,6 +35,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -60,7 +62,8 @@ public class JMcardController {
     private ZinFileService zinFileService;
     @Resource
     private JMcardDao jMcardDao;
-
+    @Resource
+    private JMcardManager jMcardManager;
     @Resource
     private ZinCardApplyService zinCardApplyService;
 
@@ -100,7 +103,8 @@ public class JMcardController {
         }
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
-        jmcardService.save(dto);
+        JMcardEntity entity = ConvertUtils.sourceToTarget(dto, JMcardEntity.class);
+        jMcardManager.save(entity);
 
         return new Result();
     }
@@ -145,74 +149,132 @@ public class JMcardController {
     }
 
     @GetMapping("submit")
-    @Operation(summary = "提交通联")
-    @LogOperation("提交通联")
+    @Operation(summary = "开卡提交通联")
+    @LogOperation("开卡提交通联")
     @PreAuthorize("hasAuthority('zorg:jmcard:update')")
     public Result submit(@RequestParam("id") Long id) {
-        JMcardEntity jMcardEntity = jMcardDao.selectById(id);
-        this.uploadFiles(jMcardEntity);
-        TCardMainApplyRequest request = ConvertUtils.sourceToTarget(jMcardEntity, TCardMainApplyRequest.class);
-        request.setMeraplid(jMcardEntity.getId().toString());
-        TCardMainApplyResponse response = zinCardApplyService.cardMainApply(request);
-
-        // 更新applyid
-        JMcardEntity update = new JMcardEntity();
-        update.setId(jMcardEntity.getId());
-        update.setApplyid(response.getApplyid());
-        jMcardDao.updateById(update);
+        JMcardEntity entity = jMcardDao.selectById(id);
+        jMcardManager.submit(entity);
         return Result.ok;
     }
 
     @GetMapping("query")
-    @Operation(summary = "查询通联")
-    @LogOperation("查询通联")
-    @PreAuthorize("hasAuthority('zorg:jmcard:update')")
+    @Operation(summary = "开卡查询通联")
+    @LogOperation("开卡查询通联")
+    @PreAuthorize("hasAuthority('zorg:jmcard:query')")
     public Result query(@RequestParam("id") Long id) {
-        JMcardEntity jMcardEntity = jMcardDao.selectById(id);
-        TCardApplyQuery query = new TCardApplyQuery();
-//        query.setApplyid(jMcardEntity.getApplyid());
-        query.setMeraplid(jMcardEntity.getId().toString());
-        TCardApplyResponse response = zinCardApplyService.cardApplyQuery(query);
-
-        JMcardEntity update = new JMcardEntity();
-        update.setId(jMcardEntity.getId());
-        update.setState(response.getState());
-        update.setFeecurrency(response.getFeecurrency());
-        update.setFee(response.getFee());
-        update.setCardno(response.getCardno());
-
-
-        jMcardDao.updateById(update);
+        JMcardEntity entity = jMcardDao.selectById(id);
+        jMcardManager.query(entity, false);
         return Result.ok;
     }
 
-    private void uploadFiles(JMcardEntity mcardEntity) {
-        // 拿到所有文件fid
-        String photofront = mcardEntity.getPhotofront();
-        String photoback = mcardEntity.getPhotoback();
-        String photofront2 = mcardEntity.getPhotofront2();
-        String photoback2 = mcardEntity.getPhotoback2();
 
-        List<String> fids = List.of(photofront, photoback, photofront2, photoback2);
-        Map<String, CompletableFuture<String>> jobs = new HashMap<>();
-        for (String fid : fids) {
-            if (StringUtils.isBlank(fid)) {
-                continue;
-            }
-            jobs.put(fid, CompletableFuture.supplyAsync(() -> {
-                return zinFileService.upload(fid);
-            }));
-        }
-        jobs.forEach((j, f) -> {
-            log.info("wait {}...", j);
-            try {
-                f.get();
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new RenException("can not upload file:" + j);
-            }
-        });
-        log.info("文件上传完毕, 开始请求创建商户...");
+    //////////////////////////////////////////////////////////////////////////////
+    // 开卡后的操作
+    //////////////////////////////////////////////////////////////////////////////
+    @GetMapping("queryCard")
+    @Operation(summary = "卡状态查询通联卡")
+    @LogOperation("卡状态查询通联卡")
+    @PreAuthorize("hasAuthority('zorg:jmcard:queryCard')")
+    public Result queryCard(@RequestParam("id") Long id) {
+        JMcardEntity entity = jMcardDao.selectById(id);
+        jMcardManager.queryCard(entity);
+        return Result.ok;
     }
 
+    @GetMapping("cancelCard")
+    @Operation(summary = "销卡")
+    @LogOperation("销卡")
+    @PreAuthorize("hasAuthority('zorg:jmcard:cancel')")
+    public Result cancelCard(@RequestParam("id") String id) {
+        if (org.apache.commons.lang.StringUtils.isBlank(id)) {
+            throw new RenException("invalid parameter");
+        }
+        jMcardManager.runList(id, jMcardManager::cancelCard);
+        return Result.ok;
+    }
+
+    @GetMapping("uncancelCard")
+    @Operation(summary = "取消销卡")
+    @LogOperation("取消销卡")
+    @PreAuthorize("hasAuthority('zorg:jmcard:uncancel')")
+    public Result uncancelCard(@RequestParam("id") String id) {
+        if (org.apache.commons.lang.StringUtils.isBlank(id)) {
+            throw new RenException("invalid parameter");
+        }
+        jMcardManager.runList(id, jMcardManager::uncancelCard);
+        return Result.ok;
+    }
+
+    @GetMapping("freezeCard")
+    @Operation(summary = "止付")
+    @LogOperation("止付")
+    @PreAuthorize("hasAuthority('zorg:jmcard:freeze')")
+    public Result freezeCard(@RequestParam("id") String id) {
+        if (org.apache.commons.lang.StringUtils.isBlank(id)) {
+            throw new RenException("invalid parameter");
+        }
+        jMcardManager.runList(id, jMcardManager::freezeCard);
+        return Result.ok;
+    }
+
+    @GetMapping("unfreezeCard")
+    @Operation(summary = "取消止付")
+    @LogOperation("取消止付")
+    @PreAuthorize("hasAuthority('zorg:jmcard:unfreeze')")
+    public Result unfreezeCard(@RequestParam("id") String id) {
+        if (org.apache.commons.lang.StringUtils.isBlank(id)) {
+            throw new RenException("invalid parameter");
+        }
+        jMcardManager.runList(id, jMcardManager::unfreezeCard);
+        return Result.ok;
+    }
+
+    @GetMapping("lossCard")
+    @Operation(summary = "挂失")
+    @LogOperation("挂失")
+    @PreAuthorize("hasAuthority('zorg:jmcard:loss')")
+    public Result lossCard(@RequestParam("id") String id) {
+        if (org.apache.commons.lang.StringUtils.isBlank(id)) {
+            throw new RenException("invalid parameter");
+        }
+        jMcardManager.runList(id, jMcardManager::lossCard);
+        return Result.ok;
+    }
+
+    @GetMapping("unlossCard")
+    @Operation(summary = "取消挂失")
+    @LogOperation("取消挂失")
+    @PreAuthorize("hasAuthority('zorg:jmcard:unloss')")
+    public Result unlossCard(@RequestParam("id") String id) {
+        if (org.apache.commons.lang.StringUtils.isBlank(id)) {
+            throw new RenException("invalid parameter");
+        }
+        jMcardManager.runList(id, jMcardManager::uncancelCard);
+        return Result.ok;
+    }
+
+    @GetMapping("activateCard")
+    @Operation(summary = "激活")
+    @LogOperation("激活")
+    @PreAuthorize("hasAuthority('zorg:jmcard:activate')")
+    public Result activateCard(@RequestParam("id") String id) {
+        if (org.apache.commons.lang.StringUtils.isBlank(id)) {
+            throw new RenException("invalid parameter");
+        }
+        jMcardManager.runList(id, jMcardManager::activateCard);
+        return Result.ok;
+    }
+
+    @GetMapping("balanceCard")
+    @Operation(summary = "卡余额")
+    @LogOperation("卡余额")
+    @PreAuthorize("hasAuthority('zorg:jmcard:balance')")
+    public Result balanceCard(@RequestParam("id") String id) {
+        if (StringUtils.isBlank(id)) {
+            throw new RenException("invalid parameter");
+        }
+        jMcardManager.runList(id, jMcardManager::balanceCard);
+        return Result.ok;
+    }
 }

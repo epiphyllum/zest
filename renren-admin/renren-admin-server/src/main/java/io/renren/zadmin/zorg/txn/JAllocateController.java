@@ -10,6 +10,8 @@ import io.renren.commons.tools.validator.AssertUtils;
 import io.renren.commons.tools.validator.ValidatorUtils;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
+import io.renren.zadmin.service.impl.CommonFilter;
+import io.renren.zcommon.CommonUtils;
 import io.renren.zmanager.JAllocateManager;
 import io.renren.zcommon.ZestConstant;
 import io.renren.zadmin.dao.JMerchantDao;
@@ -80,6 +82,8 @@ public class JAllocateController {
     @LogOperation("保存")
     @PreAuthorize("hasAuthority('zorg:jallocate:save')")
     public Result save(@RequestBody JAllocateDTO dto) {
+        dto.setApi(0);
+        dto.setMeraplid(CommonUtils.uniqueId());
         jAllocateManager.handleAllocation(dto);
         return new Result();
     }

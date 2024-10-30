@@ -63,6 +63,10 @@ public class JMcardManager {
         entity.setAgentId(agentDept.getId());
         entity.setAgentName(agentDept.getName());
         entity.setMerchantName(merchantDept.getName());
+
+        // 填充subName
+        SysDeptEntity subDept = sysDeptDao.selectById(entity.getSubId());
+        entity.setSubName(subDept.getName());
     }
 
     // 保存发卡信息
@@ -103,11 +107,11 @@ public class JMcardManager {
 
         entity.setApplyid(response.getApplyid());
 
-        this.query(entity);
+        this.query(entity, false);
     }
 
     // 查询通联
-    public void query(JMcardEntity jCardEntity) {
+    public void query(JMcardEntity jCardEntity, boolean notify) {
         TCardApplyQuery query = new TCardApplyQuery();
         query.setMeraplid(jCardEntity.getId().toString());
         TCardApplyResponse response = zinCardApplyService.cardApplyQuery(query);
@@ -121,6 +125,10 @@ public class JMcardManager {
         update.setCardno(response.getCardno());
 
         jMcardDao.updateById(update);
+
+        if (notify) {
+            // todo
+        }
     }
 
     public void uploadFiles(JMcardEntity cardEntity) {

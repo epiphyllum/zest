@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.renren.commons.mybatis.entity.BaseEntity;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -28,11 +29,13 @@ public class JMcardEntity extends BaseEntity {
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date updateDate;
 
-    // 4
+    // 7
     private Long agentId;
     private String agentName;
     private Long merchantId;
     private String merchantName;
+    private Long subId;
+    private String subName;
     private Integer api;
 
     // 申请单流水(1)

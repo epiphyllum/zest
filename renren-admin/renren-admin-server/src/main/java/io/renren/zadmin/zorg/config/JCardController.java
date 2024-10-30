@@ -1,7 +1,9 @@
 package io.renren.zadmin.zorg.config;
 
+import dm.jdbc.util.StringUtil;
 import io.renren.commons.log.annotation.LogOperation;
 import io.renren.commons.tools.constant.Constant;
+import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.page.PageData;
 import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.commons.tools.utils.Result;
@@ -24,6 +26,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
@@ -133,7 +136,7 @@ public class JCardController {
                     }
             );
         }
-        ExcelUtils.exportExcelToTarget(response, null, "j_card", list, JCardExcel.class);
+        ExcelUtils.exportExcelToTarget(response, null, "card", list, JCardExcel.class);
     }
 
     @GetMapping("submit")
@@ -175,6 +178,9 @@ public class JCardController {
     @LogOperation("销卡")
     @PreAuthorize("hasAuthority('zorg:jcard:cancel')")
     public Result cancelCard(@RequestParam("id") String id) {
+        if (StringUtils.isBlank(id)) {
+            throw new RenException("invalid parameter");
+        }
         jCardManager.runList(id, jCardManager::cancelCard);
         return Result.ok;
     }
@@ -184,6 +190,9 @@ public class JCardController {
     @LogOperation("取消销卡")
     @PreAuthorize("hasAuthority('zorg:jcard:uncancel')")
     public Result uncancelCard(@RequestParam("id") String id) {
+        if (StringUtils.isBlank(id)) {
+            throw new RenException("invalid parameter");
+        }
         jCardManager.runList(id, jCardManager::uncancelCard);
         return Result.ok;
     }
@@ -193,6 +202,9 @@ public class JCardController {
     @LogOperation("止付")
     @PreAuthorize("hasAuthority('zorg:jcard:freeze')")
     public Result freezeCard(@RequestParam("id") String id) {
+        if (StringUtils.isBlank(id)) {
+            throw new RenException("invalid parameter");
+        }
         jCardManager.runList(id, jCardManager::freezeCard);
         return Result.ok;
     }
@@ -202,6 +214,9 @@ public class JCardController {
     @LogOperation("取消止付")
     @PreAuthorize("hasAuthority('zorg:jcard:unfreeze')")
     public Result unfreezeCard(@RequestParam("id") String id) {
+        if (StringUtils.isBlank(id)) {
+            throw new RenException("invalid parameter");
+        }
         jCardManager.runList(id, jCardManager::unfreezeCard);
         return Result.ok;
     }
@@ -211,6 +226,9 @@ public class JCardController {
     @LogOperation("挂失")
     @PreAuthorize("hasAuthority('zorg:jcard:loss')")
     public Result lossCard(@RequestParam("id") String id) {
+        if (StringUtils.isBlank(id)) {
+            throw new RenException("invalid parameter");
+        }
         jCardManager.runList(id, jCardManager::lossCard);
         return Result.ok;
     }
@@ -220,6 +238,9 @@ public class JCardController {
     @LogOperation("取消挂失")
     @PreAuthorize("hasAuthority('zorg:jcard:unloss')")
     public Result unlossCard(@RequestParam("id") String id) {
+        if (StringUtils.isBlank(id)) {
+            throw new RenException("invalid parameter");
+        }
         jCardManager.runList(id, jCardManager::uncancelCard);
         return Result.ok;
     }
@@ -229,6 +250,9 @@ public class JCardController {
     @LogOperation("激活")
     @PreAuthorize("hasAuthority('zorg:jcard:activate')")
     public Result activateCard(@RequestParam("id") String id) {
+        if (StringUtils.isBlank(id)) {
+            throw new RenException("invalid parameter");
+        }
         jCardManager.runList(id, jCardManager::activateCard);
         return Result.ok;
     }
@@ -238,6 +262,9 @@ public class JCardController {
     @LogOperation("卡余额")
     @PreAuthorize("hasAuthority('zorg:jcard:balance')")
     public Result balanceCard(@RequestParam("id") String id) {
+        if (StringUtils.isBlank(id)) {
+            throw new RenException("invalid parameter");
+        }
         jCardManager.runList(id, jCardManager::balanceCard);
         return Result.ok;
     }

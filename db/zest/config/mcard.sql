@@ -7,14 +7,16 @@ create table j_mcard
     agent_id         bigint      not null comment '代理id',
     agent_name       varchar(50) not null comment '代理',
     merchant_id      bigint      not null comment '商户ID',                  -- 商户ID
-    merchant_name    varchar(32) not null comment '商户',                    -- 商户
+    merchant_name    varchar(50) not null comment '商户',                    -- 商户
+    sub_id           bigint      not null comment '子商户ID',
+    sub_name         varchar(50) not null comment '子商户',
     api              int         not null default 1,
 
     -- request
     meraplid         varchar(32) comment '申请单流水',                       -- 	meraplid	String	32	Y	客户自己生成，保持唯一
 
     --
-    producttype      varchar(6) comment '产品类型',                          -- 001001:通华金服VISA公务卡011001 : 万商义乌VISA商务卡001201 : 通华金服VISA虚拟卡021201 : 通华VPA电子卡
+    producttype      varchar(6) comment '产品类型',                          -- 001001:通华金服VISA公务卡011001 : 万商义乌VISA商务卡001201 : 通华金服VISA虚拟卡, 021201 : 通华VPA电子卡
     cardtype         varchar(2) comment '卡片种类',                          --	cardtype	String	2	Y	1：虚拟卡，（产品类型为：通华金服VISA虚拟卡、通华VPA电子卡）4：虚实同发，（产品类型为：通华金服VISA公务卡、万商义乌VISA商务卡）
     cardholdertype   varchar(3) comment '持卡人身份',                        -- 1：法人持有 0：其他管理员
 
@@ -78,6 +80,7 @@ create table j_mcard
     feecurrency      varchar(3) comment '申请费用币种',                      -- 	feecurrency	String	3	O
     cardno           varchar(30) comment '卡号',                             -- 	cardno	String	30	O	申请成功后返回
     state            varchar(2)           default '00' comment '卡申请状态', --
+    card_state       varchar(2) comment '',
 
     cvv              varchar(20),
     expiredate       varchar(20),
