@@ -14,7 +14,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 /**
  * 管理后台
  * @SpringBootApplication(scanBasePackages = {"org.jeecg.modules.jmreport", "io.renren"})
- *
  * @author Mark sunlightcs@gmail.com
  */
 @SpringBootApplication

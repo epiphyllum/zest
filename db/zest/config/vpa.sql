@@ -82,8 +82,8 @@ create table j_mcard
     state            varchar(2)           default '00' comment '卡申请状态', --
     card_state       varchar(2) comment '',
 
-    cvv              varchar(20),
-    expiredate       varchar(20),
+    cvv              varchar(32),
+    expiredate       varchar(32),
 
     -- basic
     creator          bigint comment '创建者',

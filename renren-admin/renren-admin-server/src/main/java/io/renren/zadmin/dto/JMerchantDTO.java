@@ -124,6 +124,26 @@ public class JMerchantDTO implements Serializable {
     private BigDecimal gef50;
     @Schema(description = "争议处理费")
     private BigDecimal disputeFee;
+
+    // 开卡收费
+    @Schema(description = "visa实体卡开卡收费")
+    private BigDecimal vccRealFee;
+    @Schema(description = "visa虚拟卡开卡收费")
+    private BigDecimal vccVirtualFee;
+    @Schema(description = "共享主卡开卡收费")
+    private BigDecimal vpaMainFee;
+    @Schema(description = "共享子卡开卡收费")
+    private BigDecimal vpaShareFee;
+    @Schema(description = "预付费卡开卡收费")
+    private BigDecimal vpaPrepaidFee;
+
+    @Schema(description = "预付费卡退收费rate")
+    private BigDecimal prepaidRefundRate;
+    @Schema(description = "预付费卡退收费保底")
+    private BigDecimal prepaidRefundCeil;
+    @Schema(description = "预付费卡退收费封顶")
+    private BigDecimal prepaidRefundFloor;
+
     @Schema(description = "商户公钥")
     private String publicKey;
     @Schema(description = "webhook")

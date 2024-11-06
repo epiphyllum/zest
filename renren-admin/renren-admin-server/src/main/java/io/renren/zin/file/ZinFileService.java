@@ -4,12 +4,18 @@ import io.renren.commons.tools.exception.RenException;
 import io.renren.zcommon.CommonUtils;
 import io.renren.zcommon.ZestConfig;
 import io.renren.zin.ZinRequester;
+import io.renren.zin.file.dto.DownloadVpaRequest;
+import io.renren.zin.file.dto.VpaInfoItem;
 import jakarta.annotation.Resource;
 import org.apache.commons.io.FileUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import static io.renren.zcommon.CommonUtils.uniqueId;
 
 @Service
 public class ZinFileService {
@@ -57,12 +63,22 @@ public class ZinFileService {
      * 7004-VPA子卡信息下载(deprecated)
      */
     public void downloadVpaInfo() {
-
     }
 
     /**
      * 7005-VPA子卡信息下载(加密文件)
      */
-    public void downloadVapInfoAes() {
+    public List<VpaInfoItem> downloadVapInfoAes(DownloadVpaRequest request) {
+        byte[] download = requester.download(uniqueId(), "/gcpapi/file/downvapinfoaes", request);
+        String raw = CommonUtils.decryptSensitiveBytes(download, zestConfig.getAccessConfig().getSensitiveKey());
+        String[] split = raw.split("\n");
+        List<VpaInfoItem> items  = new ArrayList<>();
+        for (int i = 1; i < split.length; i++) {
+            String line = split[i].replaceAll("\"", "");
+            String[] fields = line.split(",");
+            VpaInfoItem item = new VpaInfoItem(fields[0], fields[1], fields[2]);
+            items.add(item);
+        }
+        return items;
     }
 }

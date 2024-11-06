@@ -6,22 +6,16 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.renren.commons.mybatis.service.impl.CrudServiceImpl;
 import io.renren.commons.tools.constant.Constant;
 import io.renren.commons.tools.page.PageData;
-import io.renren.dao.SysDeptDao;
 import io.renren.zadmin.dao.JCardDao;
-import io.renren.zadmin.dao.JMcardDao;
-import io.renren.zadmin.dao.JMerchantDao;
-import io.renren.zadmin.dao.JVaDao;
 import io.renren.zadmin.dto.JCardDTO;
-import io.renren.zadmin.entity.*;
+import io.renren.zadmin.entity.JCardEntity;
 import io.renren.zadmin.service.JCardService;
-import io.renren.zbalance.Ledger;
-import io.renren.zbalance.LedgerUtil;
-import io.renren.zcommon.ZestConfig;
 import io.renren.zcommon.ZinConstant;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,22 +28,6 @@ import java.util.Map;
 @Slf4j
 public class JCardServiceImpl extends CrudServiceImpl<JCardDao, JCardEntity, JCardDTO> implements JCardService {
 
-    @Resource
-    private SysDeptDao sysDeptDao;
-    @Resource
-    private JVaDao jVaDao;
-    @Resource
-    private JMcardDao jMcardDao;
-    @Resource
-    private JCardDao jCardDao;
-    @Resource
-    private JMerchantDao jMerchantDao;
-    @Resource
-    private Ledger ledger;
-    @Resource
-    private LedgerUtil ledgerUtil;
-    @Resource
-    private ZestConfig zestConfig;
     @Resource
     private CommonFilter commonFilter;
 
@@ -67,6 +45,11 @@ public class JCardServiceImpl extends CrudServiceImpl<JCardDao, JCardEntity, JCa
         QueryWrapper<JCardEntity> wrapper = new QueryWrapper<>();
         commonFilter.setFilterAll(wrapper, params);
 
+        String maincardno = (String) params.get("maincardno");
+        if (StringUtils.isNotBlank(maincardno)) {
+            wrapper.eq("maincardno", maincardno);
+        }
+
         String cardno = (String) params.get("cardno");
         if (StringUtils.isNotBlank(cardno)) {
             wrapper.eq("cardno", cardno);
@@ -77,9 +60,21 @@ public class JCardServiceImpl extends CrudServiceImpl<JCardDao, JCardEntity, JCa
             wrapper.eq("producttype", producttype);
         }
 
+        String marketproduct = (String) params.get("marketproduct");
+        if (StringUtils.isNotBlank(marketproduct)) {
+            wrapper.eq("marketproduct", marketproduct);
+        }
+
         String surname = (String) params.get("surname");
         if (StringUtils.isNotBlank(surname)) {
             wrapper.eq("surname", surname);
+        }
+
+        // 0:主卡， 1:子卡,  2:vpa子卡
+        String cardclass = (String) params.get("cardclass");
+        if (StringUtils.isNotBlank(cardclass)) {
+            String[] split = cardclass.split(",");
+            wrapper.in("cardclass", List.of(split));
         }
 
         String name = (String) params.get("name");

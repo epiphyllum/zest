@@ -1,9 +1,13 @@
 package io.renren.zin.cardapply.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 // 3008 - 变更VPA子卡场景信息
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class TCardUpdateScene {
     String currency;  // 允许交易币种 currencyString100O支持多币种，多币种时以逗号(,)隔开；为空时，默认全币种 ；见附录【币种信息】
     String cardno; //

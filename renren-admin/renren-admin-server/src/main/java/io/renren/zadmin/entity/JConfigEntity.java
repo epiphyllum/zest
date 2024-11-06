@@ -34,6 +34,7 @@ public class JConfigEntity extends BaseEntity {
     private BigDecimal l50;
     private BigDecimal gef50;
     private BigDecimal disputeFee;
+    private Integer quotaLimit;
 
     /**
      * 更新者

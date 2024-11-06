@@ -1,15 +1,23 @@
 package io.renren.zapi.cardapply;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.bstek.ureport.console.cache.ObjectMap;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.commons.tools.utils.Result;
 import io.renren.zadmin.dao.JCardDao;
+import io.renren.zadmin.dao.JVpaJobDao;
 import io.renren.zadmin.entity.JCardEntity;
 import io.renren.zadmin.entity.JMerchantEntity;
+import io.renren.zadmin.entity.JVpaJobEntity;
 import io.renren.zapi.ApiContext;
 import io.renren.zapi.cardapply.dto.*;
 
+import io.renren.zcommon.CommonUtils;
+import io.renren.zcommon.ZestConfig;
+import io.renren.zcommon.ZinConstant;
 import io.renren.zin.cardapply.dto.TCardApplyQuery;
 import io.renren.zin.cardapply.dto.TCardApplyResponse;
 import io.renren.zin.cardapply.dto.TCardSubApplyRequest;
@@ -21,6 +29,9 @@ import io.renren.zin.cardapply.ZinCardApplyService;
 import io.renren.zmanager.JCardManager;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Service
@@ -35,6 +46,12 @@ public class ApiCardApplyService {
     private JCardManager jCardManager;
     @Resource
     private JCardDao jCardDao;
+    @Resource
+    private JVpaJobDao jVpaJobDao;
+    @Resource
+    private ZestConfig zestConfig;
+    @Resource
+    private ObjectMapper objectMapper;
 
     // 开卡
     public Result<CardNewRes> cardNew(CardNewReq request, ApiContext context) {
@@ -63,7 +80,7 @@ public class ApiCardApplyService {
                 .eq(request.getApplyid() != null, JCardEntity::getApplyid, request.getApplyid())
                 .eq(request.getMeraplid() != null, JCardEntity::getMeraplid, request.getMeraplid())
         );
-        if(entity == null) {
+        if (entity == null) {
             throw new RenException("no record");
         }
 
@@ -93,5 +110,57 @@ public class ApiCardApplyService {
         // 空对象
         CardNewActivateRes res = new CardNewActivateRes();
         return new Result<CardNewActivateRes>().ok(res);
+    }
+
+    // vpa卡查询
+    public Result<String> vpaNewQuery(VpaNewQuery request, ApiContext context) {
+        if (request.getApplyid() == null && request.getMeraplid() == null) {
+            throw new RenException("invalid request");
+        }
+        JVpaJobEntity entity = jVpaJobDao.selectOne(Wrappers.<JVpaJobEntity>lambdaQuery()
+                .eq(request.getApplyid() != null, JVpaJobEntity::getApplyid, request.getApplyid())
+                .eq(request.getMeraplid() != null, JVpaJobEntity::getMeraplid, request.getMeraplid())
+        );
+
+        VpaNewQueryRes res = new VpaNewQueryRes();
+
+        // 成功的
+        if (ZinConstant.isCardApplySuccess(entity.getState())) {
+            List<JCardEntity> vpaCardList = jCardDao.selectList(Wrappers.<JCardEntity>lambdaQuery()
+                    .eq(JCardEntity::getMerchantId, context.getMerchant().getId())
+                    .eq(JCardEntity::getVpaJob, entity.getId())
+                    .select(JCardEntity::getCvv, JCardEntity::getExpiredate, JCardEntity::getCardno)
+            );
+            String sensitiveKey = zestConfig.getAccessConfig().getSensitiveKey();
+
+            List<VpaNewQueryRes.Item> items = new ArrayList<>(vpaCardList.size());
+
+            for (JCardEntity cardEntity : vpaCardList) {
+                String cvv = CommonUtils.decryptSensitiveString(cardEntity.getCvv(), sensitiveKey, "UTF-8");
+                String expiredate = CommonUtils.decryptSensitiveString(cardEntity.getExpiredate(), sensitiveKey, "UTF-8");
+                String cardno = cardEntity.getCardno();
+                VpaNewQueryRes.Item item = new VpaNewQueryRes.Item(cvv, expiredate, cardno);
+                items.add(item);
+            }
+            res.setItems(items);
+//            res.setFeecurrency(entity.getFixedamountflag());
+            res.setMerchantfee(entity.getMerchantfee());
+            res.setState(entity.getState());
+        } else {
+            res.setState(entity.getState());
+        }
+
+        Result<String> result = new Result<>();
+        String rawStr = null;
+        try {
+            rawStr = objectMapper.writeValueAsString(res);
+
+//            String encrypted = CommonUtils.encryptSenstiveString(rawStr, "key", );
+//            result.setData(encrypted);
+
+            return result;
+        } catch (JsonProcessingException e) {
+            throw new RenException("加密失败");
+        }
     }
 }

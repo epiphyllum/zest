@@ -1,5 +1,6 @@
 package io.renren.zadmin.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import com.baomidou.mybatisplus.annotation.*;
@@ -94,6 +95,19 @@ public class JMerchantEntity extends BaseEntity {
     private BigDecimal l50;
     private BigDecimal gef50;
     private BigDecimal disputeFee;
+
+    // 开卡收费
+    private BigDecimal vccRealFee;
+    private BigDecimal vccVirtualFee;
+    private BigDecimal vpaMainFee;
+    private BigDecimal vpaShareFee;
+    private BigDecimal vpaPrepaidFee;
+
+    // 预付费卡退款收费
+    private BigDecimal prepaidRefundRate;
+    private BigDecimal prepaidRefundCeil;
+    private BigDecimal prepaidRefundFloor;
+
     private String publicKey;
     private String webhook;
     private String whiteIp;

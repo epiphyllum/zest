@@ -9,7 +9,7 @@ import io.renren.zadmin.dto.JDepositDTO;
 import io.renren.zadmin.entity.*;
 import io.renren.zadmin.service.JDepositService;
 import io.renren.zapi.ApiNotify;
-import io.renren.zbalance.Ledger;
+import io.renren.zbalance.ledgers.LedgerCardCharge;
 import io.renren.zcommon.ZinConstant;
 import io.renren.zin.cardapply.ZinCardApplyService;
 import io.renren.zin.cardapply.dto.TCardApplyQuery;
@@ -38,7 +38,7 @@ public class JDepositManager {
     @Resource
     private TransactionTemplate tx;
     @Resource
-    private Ledger ledger;
+    private LedgerCardCharge ledgerCardCharge;
     @Resource
     private ZinCardMoneyService zinCardMoneyService;
     @Resource
@@ -57,6 +57,8 @@ public class JDepositManager {
     private JDepositService jDepositService;
     @Resource
     private JConfigDao jConfigDao;
+    @Resource
+    private JCardDao jCardDao;
 
     // 填充信息
     public JSubEntity fillInfo(JDepositEntity entity) {
@@ -69,6 +71,13 @@ public class JDepositManager {
         entity.setMerchantName(subEntity.getMerchantName());
         entity.setMerchantId(subEntity.getMerchantId());
         entity.setSubName(subEntity.getCusname());
+
+        JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
+                .eq(JCardEntity::getCardno, entity.getCardno())
+        );
+        entity.setMarketproduct(cardEntity.getMarketproduct());
+        entity.setMaincardno(cardEntity.getMaincardno());
+
         return subEntity;
     }
 
@@ -107,7 +116,7 @@ public class JDepositManager {
         // 入库
         tx.executeWithoutResult(st -> {
             jDepositDao.insert(entity);
-            ledger.ledgeCardChargeFreeze(entity, subEntity);
+            ledgerCardCharge.ledgeCardChargeFreeze(entity, subEntity);
         });
 
         try {
@@ -172,7 +181,7 @@ public class JDepositManager {
                         .set(JDepositEntity::getFee, response.getFee())
                         .set(JDepositEntity::getState, newState)
                 );
-                ledger.ledgeCardCharge(entity, subEntity);
+                ledgerCardCharge.ledgeCardCharge(entity, subEntity);
             });
         } else {
             jDepositDao.update(null, Wrappers.<JDepositEntity>lambdaUpdate()
@@ -236,7 +245,7 @@ public class JDepositManager {
                     .eq(JDepositEntity::getId, entity.getId())
                     .set(JDepositEntity::getState, "07")
             );
-            ledger.ledgeCardChargeUnFreeze(entity, subEntity);
+            ledgerCardCharge.ledgeCardChargeUnFreeze(entity, subEntity);
         });
     }
 }

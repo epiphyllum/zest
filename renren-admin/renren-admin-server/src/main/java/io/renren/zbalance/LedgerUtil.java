@@ -256,4 +256,12 @@ public class LedgerUtil {
                 .eq(JBalanceEntity::getBalanceType, BalanceType.getSubFeeAccount(currency))
         );
     }
+
+    // 预付费主卡账户
+    public JBalanceEntity getPrepaidAccount(Long ownerId, String currency) {
+        return jBalanceDao.selectOne(Wrappers.<JBalanceEntity>lambdaQuery()
+                .eq(JBalanceEntity::getOwnerId, ownerId)
+                .eq(JBalanceEntity::getBalanceType, BalanceType.getPrepaidAccount(currency))
+        );
+    }
 }

@@ -38,6 +38,8 @@ public class JWithdrawEntity extends BaseEntity {
 
     // (8) 业务字段
     private String meraplid;
+    private String marketproduct;
+    private String maincardno;
     private String cardno;
     private String payeeid;      // 提现到哪个账户
     private BigDecimal amount;

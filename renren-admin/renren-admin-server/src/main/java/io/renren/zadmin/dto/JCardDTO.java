@@ -31,6 +31,13 @@ public class JCardDTO implements Serializable {
     @Schema(description = "更新时间")
     private Date updateDate;
 
+    @Schema(description = "对外卡产品")
+    private String marketproduct;
+    @Schema(description = "主卡")
+    private String maincardno;
+    @Schema(description = "卡类别")
+    private String cardclass;
+
     // ID相关
     @Schema(description = "代理ID")
     private Long agentId;
@@ -49,8 +56,6 @@ public class JCardDTO implements Serializable {
     // 业务字段(7)
     @Schema(description = "申请单流水")
     private String meraplid;
-    @Schema(description = "主卡")
-    private String maincardno;
     @Schema(description = "卡产品")
     private String producttype;
     @Schema(description = "卡片种类")
@@ -129,6 +134,13 @@ public class JCardDTO implements Serializable {
     @Schema(description = "邮寄城市")
     private String deliveryaddress;
 
+    @Schema(description = "交易对手")
+    private String payeeaccount;
+    @Schema(description = "采购内容")
+    private String procurecontent;
+    @Schema(description = "保证金合同")
+    private String agmfid;
+
     // 大吉设计
     @Schema(description = "币种ID")
     private String currency;
@@ -145,23 +157,51 @@ public class JCardDTO implements Serializable {
 
     // 结果
     @Schema(description = "fee")
-    private BigDecimal fee; //              decimal(18, 2) comment '申请费用',       -- fee	Number	18,2	O
+    private BigDecimal fee;           // 申请费用
     @Schema(description = "feecurrency")
-    private String feecurrency; //      varchar(3) comment '申请费用币种',       -- 	feecurrency	String	3	O
+    private String feecurrency;       // 申请费用币种
     @Schema(description = "cardno")
-    private String cardno; //           varchar(30) comment '卡号',              -- 	cardno	String	30	O	申请成功后返回
+    private String cardno;            // 卡号
     @Schema(description = "state")
-    private String state; //            varchar(2)  comment '卡申请状态',        --
+    private String state;             // 卡申请状态
     @Schema(description = "cardState")
-    private String cardState; //            varchar(2)  comment '卡申请状态',        --
+    private String cardState;         // 卡申请状态
 
+    // 卡余额
     @Schema(description = "balance")
-    private BigDecimal balance; //
+    private BigDecimal balance;
 
     @Schema(description = "cvv")
     private String cvv;
     @Schema(description = "expiredate")
     private String expiredate;
 
+    // 共享卡相关信息
+    @Schema(description = "场景ID")
+    private String sceneid;
+    @Schema(description = "场景名称")
+    private String scenename;
 
+    @Schema(description = "使用场景")
+    private String cycle;
+    @Schema(description = "最大消费笔数")
+    private Integer authmaxcount;
+    @Schema(description = "最大消费金额")
+    private BigDecimal authmaxamount;
+    @Schema(description = "仅限香港")
+    private String onlhkflag;
+    @Schema(description = "起始日期")
+    private String begindate;
+    @Schema(description = "结束日期")
+    private String enddate;
+    @Schema(description = "自然月标志")
+    private String naturalmonthflag;
+    @Schema(description = "非自然月是起始日期")
+    private String naturalmonthstartday;
+    @Schema(description = "单次固定金额")
+    private String fixedamountflag;
+    @Schema(description = "允许币种")
+    private String permitCurrency;
+    @Schema(description = "那个vpa任务创建的卡")
+    private Long vpaJob;
 }

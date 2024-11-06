@@ -2,6 +2,8 @@ package io.renren.zin.cardapply.dto;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 // 3008 - 变更VPA子卡场景信息
 @Data
 public class TCardAddScene {
@@ -12,14 +14,14 @@ public class TCardAddScene {
     String onlhkflag; // 是否仅支持香港地区交易onlhkflagString1OY:是，N：否
 
     //
-    String authmaxcount; //    最大授权笔数authmaxcountString10C使用场景为期限时填入，填入数字字符串，为“0”时默认不限制
-    String authmaxamount; //    最大交易授权金额authmaxamountString10C使用场景为期限时填入，填入数字字符串，保留2位小数点
+    Integer authmaxcount; //    最大授权笔数authmaxcountString10C使用场景为期限时填入，填入数字字符串，为“0”时默认不限制
+    BigDecimal authmaxamount; //    最大交易授权金额authmaxamountString10C使用场景为期限时填入，填入数字字符串，保留2位小数点
 
     /**
      * 以下字段使用场景为期限时填入
      */
     String begindate; //    使用期限起始begindateString10C使用场景为期限时填入，YYYY-MM-DD
-    String endate; //    使用期限结束enddateString10C使用场景为期限时填入，YYYY-MM-DD
+    String enddate; //    使用期限结束enddateString10C使用场景为期限时填入，YYYY-MM-DD
 
     /**
      * 以下字段使用场景为周期时填入

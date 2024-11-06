@@ -24,6 +24,8 @@ import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletResponse;
+
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -64,8 +66,16 @@ public class JConfigController {
     @PreAuthorize("hasAuthority('zorg:jconfig:info')")
     public Result<JConfigDTO> get(@PathVariable("id") Long id){
         JConfigDTO data = jConfigService.get(id);
-
         return new Result<JConfigDTO>().ok(data);
+    }
+
+    @GetMapping("single")
+    @Operation(summary = "信息")
+//    @PreAuthorize("hasAuthority('zorg:jconfig:single')")
+    public Result<JConfigDTO> get(){
+        List<JConfigDTO> cfgList = jConfigService.list(new HashMap<>());
+        JConfigDTO jConfigDTO = cfgList.get(0);
+        return new Result<JConfigDTO>().ok(jConfigDTO);
     }
 
     @PostMapping

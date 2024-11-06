@@ -75,6 +75,7 @@ public class CommonUtils {
     }
 
     private static ConcurrentHashMap<String, Logger> loggerCache = new ConcurrentHashMap<>();
+
     public static Logger getLogger(String name) {
         Logger cache = loggerCache.get(name);
         if (cache != null) {
@@ -105,16 +106,50 @@ public class CommonUtils {
     }
 
     // 唯一ID生成器
-    public static  String uniqueId() {
+    public static String uniqueId() {
         return DefaultIdentifierGenerator.getInstance().nextId(null).toString();
     }
 
-    public String decryptSensitive(String sensitiveData, String key) {
+    // 解密cvv 有效期
+    public static String decryptSensitiveString(String sensitiveData, String key, String charset) {
         try {
-            return AESUtil.decrypt(sensitiveData,key, false, AESUtil.ECB_PKCS5, "UTF-8");
+            return AESUtil.decrypt(sensitiveData, key, false, AESUtil.ECB_PKCS5, charset);
         } catch (GeneralSecurityException e) {
             throw new RenException("解密敏感数据失败");
         } catch (UnsupportedEncodingException e) {
+            throw new RenException("解密敏感数据失败");
+        }
+    }
+
+    // 加密cvv 有效期
+    public static String encryptSensitiveString(String rawData, String key, String charset) {
+        try {
+            return AESUtil.encrypt(rawData, key, false, AESUtil.ECB_PKCS5, charset);
+        } catch (GeneralSecurityException e) {
+            throw new RenException("加密敏感数据失败");
+        } catch (UnsupportedEncodingException e) {
+            throw new RenException("加密敏感数据失败");
+        }
+    }
+
+    // 解密字节流数据
+    public static String decryptSensitiveBytes(byte[] sensitiveData, String key) {
+        try {
+            byte[] decrypt = AESUtil.decrypt(sensitiveData, key.getBytes(), AESUtil.ECB_PKCS5);
+            return new String(decrypt, "UTF-8");
+        } catch (GeneralSecurityException e) {
+            throw new RenException("解密敏感数据失败");
+        } catch (UnsupportedEncodingException e) {
+            throw new RenException("字符集错误");
+        }
+    }
+
+    // 加密密字节流数据
+    public static byte[] encryptSensitiveBytes(byte[] rawBytes, String key) {
+        try {
+            byte[] encrypted = AESUtil.encrypt(rawBytes, key.getBytes(), AESUtil.ECB_PKCS5);
+            return encrypted;
+        } catch (GeneralSecurityException e) {
             throw new RenException("解密敏感数据失败");
         }
     }

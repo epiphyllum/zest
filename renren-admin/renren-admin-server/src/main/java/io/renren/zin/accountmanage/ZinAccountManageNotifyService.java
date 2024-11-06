@@ -8,7 +8,7 @@ import io.renren.zadmin.dao.JMoneyDao;
 import io.renren.zadmin.entity.JMaccountEntity;
 import io.renren.zadmin.entity.JMoneyEntity;
 import io.renren.zapi.ApiNotify;
-import io.renren.zbalance.Ledger;
+import io.renren.zbalance.ledgers.LedgerMoneyIn;
 import io.renren.zin.accountmanage.dto.TMoneyInNotify;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -27,12 +27,13 @@ public class ZinAccountManageNotifyService {
     @Resource
     private TransactionTemplate tx;
     @Resource
-    private Ledger ledger;
+    private LedgerMoneyIn ledgerMoneyIn;
     @Resource
     private ApiNotify apiNotify;
 
-    public void withApply(TMoneyInNotify notify) {
-       // 直接去匹配申请单
+    // 有申请单的情况
+    private void withApply(TMoneyInNotify notify) {
+        // 直接去匹配申请单
         JMoneyEntity jMoneyEntity = jMoneyDao.selectOne(Wrappers.<JMoneyEntity>lambdaQuery()
                 .eq(JMoneyEntity::getApplyid, notify.getApplyid())
         );
@@ -51,7 +52,7 @@ public class ZinAccountManageNotifyService {
         tx.executeWithoutResult(status -> {
             jMoneyDao.updateById(updateEntity);
             JMoneyEntity entity = jMoneyDao.selectById(jMoneyEntity.getId());
-            ledger.ledgeMoneyIn(entity);
+            ledgerMoneyIn.ledgeMoneyIn(entity);
         });
 
         // 是接口操作, 需要通知商户: todo
@@ -111,7 +112,7 @@ public class ZinAccountManageNotifyService {
             );
             entity.setMerchantId(finalMerchantId);
             entity.setMerchantName(finalMerchantName);
-            ledger.ledgeMoneyIn(entity);
+            ledgerMoneyIn.ledgeMoneyIn(entity);
         });
         return true;
     }

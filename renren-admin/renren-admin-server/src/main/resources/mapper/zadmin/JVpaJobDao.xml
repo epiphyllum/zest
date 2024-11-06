@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.zadmin.dao.JVpaJobDao">
+
+    <resultMap type="io.renren.zadmin.entity.JVpaJobEntity" id="jVpaJobMap">
+        <result property="id" column="id"/>
+        <result property="agentId" column="agent_id"/>
+        <result property="agentName" column="agent_name"/>
+        <result property="merchantId" column="merchant_id"/>
+        <result property="merchantName" column="merchant_name"/>
+        <result property="subId" column="sub_id"/>
+        <result property="subName" column="sub_name"/>
+        <result property="api" column="api"/>
+        <result property="sceneid" column="sceneid"/>
+        <result property="scenename" column="scenename"/>
+        <result property="cycle" column="cycle"/>
+        <result property="authmaxcount" column="authmaxcount"/>
+        <result property="authmaxamount" column="authmaxamount"/>
+        <result property="onlhkflag" column="onlhkflag"/>
+        <result property="begindate" column="begindate"/>
+        <result property="endate" column="endate"/>
+        <result property="naturalmonthflag" column="naturalmonthflag"/>
+        <result property="naturalmonthstartday" column="naturalmonthstartday"/>
+        <result property="fixedamountflag" column="fixedamountflag"/>
+        <result property="state" column="state"/>
+        <result property="maincardno" column="maincardno"/>
+        <result property="num" column="num"/>
+        <result property="email" column="email"/>
+        <result property="cardexpiredate" column="cardexpiredate"/>
+        <result property="meraplid" column="meraplid"/>
+        <result property="applyid" column="applyid"/>
+        <result property="creator" column="creator"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updater" column="updater"/>
+        <result property="updateDate" column="update_date"/>
+    </resultMap>
+
+</mapper>

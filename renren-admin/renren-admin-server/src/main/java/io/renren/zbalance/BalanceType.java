@@ -9,6 +9,11 @@ public class BalanceType {
             , "AUD", "SGD", "SEK", "CHF", "DKK"
             , "NOK", "ZAR", "EUR", "NZD", "CNY"
     );
+
+    public static String getPrepaidAccount(String currency) {
+        return "PREPAID_" + currency;
+    }
+
     // 商户VA
     public static String getVaAccount(String currency) {
         return "VA_" + currency;

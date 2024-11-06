@@ -126,8 +126,38 @@ public class ZinRequester {
         return new HeaderInfo(toSign, headers, sign);
     }
 
+    // 下载文件
+    public byte[] download(String reqId, String uri, Object object) {
+        String body = null;
+        try {
+            body = this.objectMapper.writeValueAsString(object);
+        } catch (JsonProcessingException e) {
+            throw new RenException("invalid request, can not convert to json");
+        }
+        HeaderInfo headerInfo = getHeaders(reqId, body, uri, null);
+        HttpHeaders headers = headerInfo.getHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        RequestEntity requestEntity = RequestEntity.post("")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.ALL)
+                .acceptCharset(StandardCharsets.UTF_8)
+                .headers(headers)
+                .body(body);
+        String url = zestConfig.getAccessConfig().getBaseUrl() + uri + "?" + commonQueryParams + "&" + "reqid=" + reqId;
+
+        try {
+            ResponseEntity<byte[]> responseEntity = restTemplate.postForEntity(url, requestEntity, byte[].class);
+            byte[] bodyBytes = responseEntity.getBody();
+            return bodyBytes;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RenException("request to allinpay failed");
+        }
+    }
+
     // 传对象过来
     public <T extends TResult> T request(String reqId, String uri, Object map, Class<T> clazz) {
+
         String body = null;
         try {
             body = this.objectMapper.writeValueAsString(map);

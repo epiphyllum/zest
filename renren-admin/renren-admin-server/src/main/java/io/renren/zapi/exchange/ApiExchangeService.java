@@ -9,22 +9,17 @@ import io.renren.zadmin.entity.JExchangeEntity;
 import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zapi.ApiContext;
 import io.renren.zapi.exchange.dto.*;
-import io.renren.zbalance.Ledger;
-import io.renren.zcommon.ZinConstant;
-import io.renren.zin.exchange.ZinExchangeService;
-import io.renren.zin.exchange.dto.*;
 import io.renren.zmanager.JExchangeManager;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionTemplate;
 
 
 @Service
 @Slf4j
 public class ApiExchangeService {
     @Resource
-    private  JExchangeDao jExchangeDao;
+    private JExchangeDao jExchangeDao;
     @Resource
     private JExchangeManager jExchangeManager;
 
@@ -97,7 +92,7 @@ public class ApiExchangeService {
 
         // 必须提供LK / MT
         String extype = request.getExtype();
-        if("LK".equals(extype)) {
+        if ("LK".equals(extype)) {
             throw new RenException("extype must be either of LK");  // 暂时写死
         }
 

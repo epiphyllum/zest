@@ -7,7 +7,7 @@ import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.entity.JExchangeEntity;
 import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zapi.ApiNotify;
-import io.renren.zbalance.Ledger;
+import io.renren.zbalance.ledgers.LedgerExchange;
 import io.renren.zcommon.ZinConstant;
 import io.renren.zin.exchange.ZinExchangeService;
 import io.renren.zin.exchange.dto.*;
@@ -27,7 +27,7 @@ public class JExchangeManager {
     @Resource
     private TransactionTemplate tx;
     @Resource
-    private Ledger ledger;
+    private LedgerExchange ledgerExchange;
     @Resource
     private ApiNotify apiNotify;
 
@@ -38,7 +38,7 @@ public class JExchangeManager {
         entity.setState(ZinConstant.PAY_APPLY_NA_DJ);  // 内部状态新建
         tx.executeWithoutResult(status -> {
             jExchangeDao.insert(entity);
-            ledger.ledgeExchangeFreeze(entity);
+            ledgerExchange.ledgeExchangeFreeze(entity);
         });
     }
 
@@ -84,7 +84,7 @@ public class JExchangeManager {
                 );
                 jExchangeEntity.setExfee(response.getFee());
                 jExchangeEntity.setExfxrate(response.getFxrate());
-                ledger.ledgeExchange(jExchangeEntity);
+                ledgerExchange.ledgeExchange(jExchangeEntity);
             });
         } else {
             // 其他情况,  只是简单更新
@@ -137,7 +137,7 @@ public class JExchangeManager {
                     .eq(JExchangeEntity::getId, entity.getId())
                     .set(JExchangeEntity::getState, ZinConstant.PAY_APPLY_CC_DJ)   // 内部取消
             );
-            ledger.ledgeExchangeUnFreeze(entity);
+            ledgerExchange.ledgeExchangeUnFreeze(entity);
         });
     }
 

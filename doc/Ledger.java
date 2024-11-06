@@ -1,7 +1,11 @@
 package io.renren.zbalance;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import io.renren.commons.tools.exception.RenException;
+import io.renren.zadmin.dao.JCardDao;
 import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.entity.*;
+import io.renren.zcommon.ZinConstant;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,6 +20,8 @@ public class Ledger {
     private JMerchantDao jMerchantDao;
     @Resource
     private LedgerUtil ledgerUtil;
+    @Resource
+    private JCardDao jCardDao;
 
     // 原始凭证(100):  收到商户入金
     public void ledgeMoneyIn(JMoneyEntity entity) {
@@ -233,6 +239,135 @@ public class Ledger {
         ledgerUtil.ledgeUpdate(mVa, LedgerConstant.ORIGIN_TYPE_ALLOCATE_S2M, LedgerConstant.FACT_S2M_IN, entity.getId(), factMemo, entity.getAmount());
     }
 
+    // VPA子卡开卡费
+    public void ledgeOpenVpaFreeze(JVpaJobEntity entity) {
+
+        // 子商户va扣除费用冻结
+        JBalanceEntity subVa = ledgerUtil.getSubVaAccount(entity.getSubId(), entity.getFeecurrency());
+        String factMemo = "冻结vpa开卡费用:" + BigDecimal.ZERO.add(entity.getMerchantfee()).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal factAmount = entity.getMerchantfee();
+        ledgerUtil.freezeUpdate(subVa, LedgerConstant.ORIGIN_VPA_OPEN, LedgerConstant.FACT_VPA_OPEN_FREEZE, entity.getId(), factMemo, factAmount);
+
+        // 如果发行的是预防子卡, 需要冻结预付费主卡
+        if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_PREPAID)) {
+            BigDecimal totalAuth = entity.getAuthmaxamount().multiply(new BigDecimal(entity.getNum()));
+            BigDecimal requiredAmount = totalAuth.add(entity.getMerchantfee());
+            JBalanceEntity subVaAccount = ledgerUtil.getSubVaAccount(entity.getSubId(), entity.getFeecurrency());
+            if (subVaAccount.getBalance().compareTo(requiredAmount) < 0) {
+                String msg = "账户余额不足, 当前账户余额:" + subVaAccount.getBalance() + ",发卡需要资金:" + totalAuth + ",发卡费用:" + entity.getMerchantfee();
+                throw new RenException(msg);
+            }
+            this.ledgePrepaidOpenChargeFreeze(entity);
+        }
+    }
+
+    // 解冻VPA子卡开通
+    public void ledgeOpenVpaUnFreeze(JVpaJobEntity entity) {
+        JBalanceEntity subVa = ledgerUtil.getSubVaAccount(entity.getSubId(), entity.getFeecurrency());
+        String factMemo = "解冻vpa开卡费用:" + BigDecimal.ZERO.add(entity.getMerchantfee()).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal factAmount = entity.getMerchantfee();
+        ledgerUtil.unFreezeUpdate(subVa, LedgerConstant.ORIGIN_VPA_OPEN, LedgerConstant.FACT_VPA_OPEN_UN_FREEZE, entity.getId(), factMemo, factAmount);
+
+        // 发行的预付费子卡
+        if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_PREPAID)) {
+            this.ledgePrepaidOpenChargeUnFreeze(entity);
+        }
+
+    }
+
+    // 确认VPA子卡开通
+    public void ledgeOpenVpa(JVpaJobEntity entity) {
+        // 子商户va
+        JBalanceEntity subVa = ledgerUtil.getSubVaAccount(entity.getSubId(), entity.getFeecurrency());
+        // 开卡费用账户
+        JBalanceEntity feeAccount = ledgerUtil.getSubFeeAccount(entity.getSubId(), entity.getFeecurrency());
+        BigDecimal showMerchantFee = BigDecimal.ZERO.add(entity.getMerchantfee()).setScale(2, RoundingMode.HALF_UP);
+        String factMemo = "确认vpa开卡费用:" + showMerchantFee;
+        BigDecimal merchantFee = entity.getMerchantfee();
+        // 子商户va扣除费用
+        ledgerUtil.confirmUpdate(subVa, LedgerConstant.ORIGIN_VPA_OPEN, LedgerConstant.FACT_VPA_OPEN_CONFIRM, entity.getId(), factMemo, merchantFee);
+        // 子商户开卡费用账户
+        ledgerUtil.ledgeUpdate(feeAccount, LedgerConstant.ORIGIN_VPA_OPEN, LedgerConstant.FACT_VPA_OPEN_FEE_IN, entity.getId(), factMemo, merchantFee);
+        // 发行的预付费子卡
+        if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_PREPAID)) {
+            this.ledgePrepaidOpenCharge(entity);
+        }
+    }
+
+    // 预付费卡-批量开卡充值(调整主卡可以额度)
+    public void ledgePrepaidOpenChargeFreeze(JVpaJobEntity entity) {
+        String maincardno = entity.getMaincardno();
+        JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
+                .eq(JCardEntity::getCardno, maincardno)
+        );
+        JBalanceEntity prepaidBalance = ledgerUtil.getPrepaidAccount(cardEntity.getId(), cardEntity.getCurrency());
+        BigDecimal factAmount = entity.getAuthmaxamount().multiply(new BigDecimal(entity.getNum()));
+        String factMemo = String.format("冻结-批量开通%s张预付费卡, 每张充值%s, 总充值:%s", entity.getNum(), entity.getAuthmaxamount(), factAmount);
+        ledgerUtil.freezeUpdate(prepaidBalance, LedgerConstant.ORIGIN_TYPE_PREPAID_OPEN_CHARGE, LedgerConstant.FACT_PREPAID_OPEN_CHARGE_FREEZE, entity.getId(), factMemo, factAmount);
+
+    }
+
+    // 预付费卡 批量充值解冻(调整主卡可用额度)
+    public void ledgePrepaidOpenChargeUnFreeze(JVpaJobEntity entity) {
+        String maincardno = entity.getMaincardno();
+        JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
+                .eq(JCardEntity::getCardno, maincardno)
+        );
+        JBalanceEntity prepaidBalance = ledgerUtil.getPrepaidAccount(cardEntity.getId(), cardEntity.getCurrency());
+        BigDecimal factAmount = entity.getAuthmaxamount().multiply(new BigDecimal(entity.getNum()));
+        String factMemo = String.format("解冻-批量开通%s张预付费卡, 每张充值%s, 总充值:%s", entity.getNum(), entity.getAuthmaxamount(), factAmount);
+        ledgerUtil.unFreezeUpdate(prepaidBalance, LedgerConstant.ORIGIN_TYPE_PREPAID_OPEN_CHARGE, LedgerConstant.FACT_PREPAID_OPEN_CHARGE_UN_FREEZE, entity.getId(), factMemo, factAmount);
+    }
+
+    // 预付费卡 批量开卡充值确认(调整主卡可用额度)
+    public void ledgePrepaidOpenCharge(JVpaJobEntity entity) {
+        String maincardno = entity.getMaincardno();
+        JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
+                .eq(JCardEntity::getCardno, maincardno)
+        );
+        JBalanceEntity prepaidBalance = ledgerUtil.getPrepaidAccount(cardEntity.getId(), cardEntity.getCurrency());
+        BigDecimal factAmount = entity.getAuthmaxamount().multiply(new BigDecimal(entity.getNum()));
+        String factMemo = String.format("确认-批量开通%s张预付费卡, 每张充值%s, 总充值:%s", entity.getNum(), entity.getAuthmaxamount(), factAmount);
+        ledgerUtil.unFreezeUpdate(prepaidBalance, LedgerConstant.ORIGIN_TYPE_PREPAID_OPEN_CHARGE, LedgerConstant.FACT_PREPAID_OPEN_CHARGE_CONFIRM, entity.getId(), factMemo, factAmount);
+    }
+
+
+    // 预付费卡-批量开卡充值(调整主卡可以额度)
+    public void ledgePrepaidChargeFreeze(JDepositEntity entity) {
+        String maincardno = entity.getMaincardno();
+        JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
+                .eq(JCardEntity::getCardno, maincardno)
+        );
+        JBalanceEntity prepaidBalance = ledgerUtil.getPrepaidAccount(cardEntity.getId(), cardEntity.getCurrency());
+        BigDecimal factAmount = entity.getAmount();
+        String factMemo = String.format("冻结-单笔充值:%s", factAmount);
+        ledgerUtil.freezeUpdate(prepaidBalance, LedgerConstant.ORIGIN_TYPE_PREPAID_CHARGE, LedgerConstant.FACT_PREPAID_CHARGE_FREEZE, entity.getId(), factMemo, factAmount);
+    }
+
+    // 预付费卡 批量充值解冻(调整主卡可用额度)
+    public void ledgePrepaidChargeUnFreeze(JDepositEntity entity) {
+        String maincardno = entity.getMaincardno();
+        JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
+                .eq(JCardEntity::getCardno, maincardno)
+        );
+        JBalanceEntity prepaidBalance = ledgerUtil.getPrepaidAccount(cardEntity.getId(), cardEntity.getCurrency());
+        BigDecimal factAmount = entity.getAmount();
+        String factMemo = String.format("解冻-单笔充值:%s", factAmount);
+        ledgerUtil.unFreezeUpdate(prepaidBalance, LedgerConstant.ORIGIN_TYPE_PREPAID_CHARGE, LedgerConstant.FACT_PREPAID_CHARGE_UN_FREEZE, entity.getId(), factMemo, factAmount);
+    }
+
+    // 预付费卡 单笔开卡充值确认(调整主卡可用额度)
+    public void ledgePrepaidCharge(JDepositEntity entity) {
+        String maincardno = entity.getMaincardno();
+        JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
+                .eq(JCardEntity::getCardno, maincardno)
+        );
+        JBalanceEntity prepaidBalance = ledgerUtil.getPrepaidAccount(cardEntity.getId(), cardEntity.getCurrency());
+        BigDecimal factAmount = entity.getAmount();
+        String factMemo = String.format("确认-单笔充值:%s", factAmount);
+        ledgerUtil.unFreezeUpdate(prepaidBalance, LedgerConstant.ORIGIN_TYPE_PREPAID_CHARGE, LedgerConstant.FACT_PREPAID_CHARGE_CONFIRM, entity.getId(), factMemo, factAmount);
+    }
+
     // 开卡冻结
     public void ledgeOpenCardFreeze(JCardEntity entity) {
         // 子商户va扣除费用冻结
@@ -293,6 +428,8 @@ public class Ledger {
         ledgerUtil.confirmUpdate(subVa, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_CONFIRM, entity.getId(), factMemo, factAmount);
         // 记账2: 子商户subSum+
         ledgerUtil.ledgeUpdate(subSum, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_IN, entity.getId(), factMemo, factAmount);
+
+        // 如果是给预付费主卡充值: todo
     }
 
     // 卡资金退回: 冻结
@@ -323,6 +460,7 @@ public class Ledger {
         ledgerUtil.confirmUpdate(subSum, LedgerConstant.ORIGIN_TYPE_CARD_WITHDRAW, LedgerConstant.FACT_CARD_WITHDRAW_CONFIRM, entity.getId(), factMemo, factAmount);
         // 记账2: 子商户Va+
         ledgerUtil.ledgeUpdate(subVa, LedgerConstant.ORIGIN_TYPE_CARD_WITHDRAW, LedgerConstant.FACT_CARD_WITHDRAW_IN, entity.getId(), factMemo, factAmount);
+        // 预付费主卡提现: todo
     }
 
     // 释放商户担保金
@@ -335,4 +473,5 @@ public class Ledger {
         // 记账2: 商户Va+
         ledgerUtil.ledgeUpdate(mVa, LedgerConstant.ORIGIN_TYPE_MFREE, LedgerConstant.FACT_MFREE_IN, entity.getId(), factMemo, entity.getAmount());
     }
+
 }

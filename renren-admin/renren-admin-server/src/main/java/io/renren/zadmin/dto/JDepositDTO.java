@@ -47,6 +47,10 @@ public class JDepositDTO implements Serializable {
     // fact
     @Schema(description = "申请单")
     private String meraplid;
+    @Schema(description = "卡产品")
+    private String marketproduct;
+    @Schema(description = "主卡号")
+    private String maincardno;
     @Schema(description = "卡号")
     private String cardno;
     @Schema(description = "付款id")

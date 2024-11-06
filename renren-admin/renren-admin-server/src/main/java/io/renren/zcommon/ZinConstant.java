@@ -38,16 +38,6 @@ public class ZinConstant {
     public static final String CARD_STATE_TO_ACTIVATE = "14";       // 待激活
     public static final String CARD_STATE_NEW_DJ = "00";            // 开卡成功后的初始状态:  我方添加的
 
-    // 卡申请单状态
-    public static final String CARD_APPLY_TO_VERIFY = "01";         //
-    public static final String CARD_APPLY_VERIFY_FAIL = "02";       //
-    public static final String CARD_APPLY_PROCESSING = "03";        //
-    public static final String CARD_APPLY_SUCCESS = "04";           //
-    public static final String CARD_APPLY_FAIL = "05";              //
-    public static final String CARD_APPLY_REFUND = "06";            //
-    public static final String CARD_APPLY_CLOSE = "07";             //
-    public static final String CARD_APPLY_TO_VERIFY_AGAIN = "08";   //
-    public static final String CARD_APPLY_NEW_DJ = "00";            // 新建卡的状态的状态: 我方新增状态
 
     // 入金账户状态
     public static final String MONEY_ACCOUNT_TO_VERIFY = "0";       // 待审核；
@@ -96,6 +86,17 @@ public class ZinConstant {
         }
     };
 
+    // 卡申请单状态
+    public static final String CARD_APPLY_TO_VERIFY = "01";         //
+    public static final String CARD_APPLY_VERIFY_FAIL = "02";       //
+    public static final String CARD_APPLY_PROCESSING = "03";        //
+    public static final String CARD_APPLY_SUCCESS = "04";           //
+    public static final String CARD_APPLY_FAIL = "05";              //
+    public static final String CARD_APPLY_REFUND = "06";            //
+    public static final String CARD_APPLY_CLOSE = "07";             //
+    public static final String CARD_APPLY_TO_VERIFY_AGAIN = "08";   //
+    public static final String CARD_APPLY_NEW_DJ = "00";            // 新建卡的状态的状态: 我方新增状态
+
     public static boolean isCardApplyFail(String state) {
         return state.equals(CARD_APPLY_VERIFY_FAIL) ||
                 state.equals(CARD_APPLY_FAIL) ||
@@ -116,37 +117,92 @@ public class ZinConstant {
     public static final String CP220 = "CP220";                    // 金退款	入金审核不通过，资金退回
     public static final String CP109 = "CP109";                    // 岸下发	资金提现
     public static final String CP211 = "CP211";                    // 岸换汇	充值其他币种的资金，可以兑换成HKD
+    public static final String CP462 = "CP462";                    // 释放担保金
     // 卡申请交易类型
     public static final String CP450 = "CP450";                    // 申请开卡
     public static final String CP453 = "CP453";                    // 卡的注销/撤回注销
     public static final String CP458 = "CP458";                    // 销撤回
     public static final String CP451 = "CP451";                    // 保证金缴纳|卡片资金充值
     public static final String CP452 = "CP452";                    // 保证金提现|卡片资金提现
-    public static final String CP462 = "CP462";                    // 放担保金
+    public static final String CP460 = "CP460";                    // 通华金服共享卡子卡开卡
     // 主体类型:
     public static final String BELONG_TYPE_EMPLOYEE = "1";  // 员工
     public static final String BELONG_TYPE_COOP = "2";      // 合作企业
+
     // 卡产品类型
-    public static final String CARD_PRODUCT_ALL = "001001";         // 通华金服VISA公务卡 -- 虚实同发
+    public static final String CARD_PRODUCT_REAL = "001001";        // 通华金服VISA公务卡 -- 虚实同发
     public static final String CARD_PRODUCT_VIRTUAL = " 001201";    // 通华金服VISA虚拟卡 -- 虚拟卡
+    public static final String CARD_PRODUCT_VPA = "021201";         // vpa卡
+
     // 卡类型
     public static final String CARD_TYPE_VIRTUAL = "1";      // 虚拟卡
     public static final String CARD_TYPE_BOTH = "4";         // 虚实同发
-    //
+
+    //  虚拟实体卡类别
     public static final Map<String, List<String>> cardTypeMap = new HashMap<>() {{
         put(CARD_TYPE_VIRTUAL, List.of(CARD_PRODUCT_VIRTUAL));
-        put(CARD_TYPE_BOTH, List.of(CARD_PRODUCT_ALL));
-    }};
-    // 产品币种映射:
-    public static final Map<String, String> productCurrencyMap = new HashMap<>() {{
-        put("001001", "HKD");
-        put("001201", "HKD");
+        put(CARD_TYPE_BOTH, List.of(CARD_PRODUCT_REAL));
     }};
 
+    // 卡产品币种映射:
+    public static final Map<String, String> productCurrencyMap = new HashMap<>() {{
+        put("001001", "HKD");  // VCC实体卡
+        put("001201", "HKD");  // VCC虚拟卡
+        put("021201", "HKD");  // 共享卡
+    }};
+
+    // 对外卡产品
+    public static final String MP_VCC_REAL = "VccReal";                  // VCC实体卡
+    public static final String MP_VCC_VIRTUAL = "VccVirtual";            // VCC虚拟卡
+    public static final String MP_VPA_MAIN = "VpaMain";                  // 共享主卡
+    public static final String MP_VPA_MAIN_PREPAID = "VpaMainPrepaid";   // 预付费主卡
+    public static final String MP_VPA_SHARE = "VpaShare";                // 共享卡 ： VPA通联标准功能
+    public static final String MP_VPA_PREPAID = "VpaPrepaid";            // 预付费卡
+
+    // 市场产品到对外产品的映射
+    public static Map<String, String> marketProdcutMap = new HashMap<>() {{
+        put(MP_VCC_REAL, "001001");
+        put(MP_VCC_VIRTUAL, "001201");
+
+        put(MP_VPA_MAIN, "021201");
+        put(MP_VPA_MAIN_PREPAID, "021201");
+        put(MP_VPA_SHARE, "021201");
+        put(MP_VPA_PREPAID, "021201");
+    }};
+
+    // 市场产品的卡类别
+    public static Map<String, String> marketProductClassMap = new HashMap<>() {{
+        put(MP_VCC_REAL, CC_VCC_SUB);
+        put(MP_VCC_VIRTUAL, CC_VCC_SUB);
+        put(MP_VPA_MAIN, CC_VPA_MAIN);
+        put(MP_VPA_SHARE, CC_VPA_SUB);
+        put(MP_VPA_PREPAID, CC_VPA_SUB);
+    }};
 
     // 持卡人身份
     public static final String CARD_HOLDER_TYPE_LEGAL = "1";        // 法人持有
     public static final String CARD_HOLDER_TYPE_OTHER = "0";        // 其他管理员
+
+    // vpa场景类型
+    public static final String VPA_CYCLE_DEADLINE = "1";      // 期限
+    public static final String VPA_CYCLE_PERIODICAL = "2";    // 周期
+    public static final String VPA_CYCLE_ONCE = "3";          // 期限
+
+    // 是否flag
+    public static final String YES_FLAG = "Y";     // 通用FLAG
+    public static final String NO_FLAG = "N";      // 通用FLAG
+
+    // 卡表里的卡类别
+    public static final String CC_VPA_MAIN = "VpaMain";  // 共享主卡
+    public static final String CC_VPA_SUB = "VpaSub";    // 共享子卡
+    public static final String CC_VCC_MAIN = "VccMain";  // VCC主卡
+    public static final String CC_VCC_SUB = "VccSub";    // VCC子卡
+
+    // VPA卡场景变更结果
+    public static final String VPA_ADJUST_SUCCESS = "55"; //
+    public static final String VPA_ADJUST_UNKNOWN = "00"; //
+    public static final Object VPA_ADJUST_FAIL = "99";
+
 }
 
 

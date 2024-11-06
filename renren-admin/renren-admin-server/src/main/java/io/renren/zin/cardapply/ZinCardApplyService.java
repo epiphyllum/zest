@@ -29,7 +29,7 @@ public class ZinCardApplyService {
         return requester.request(uniqueId(), "/gcpapi/card/addcardscene", request, TCardAddSceneResponse.class);
     }
 
-    // VPA场景查询: 3003 todo
+    // VPA场景查询: 3003 依据场景ID
     public TCardQuerySceneResponse cardQueryScene(TCardQueryScene request) {
         return requester.request(uniqueId(), "/gcpapi/card/qrycardscene", request, TCardQuerySceneResponse.class);
     }
@@ -38,7 +38,6 @@ public class ZinCardApplyService {
     public TCardVpaApplyResponse cardVpaApply(TCardVpaApply request) {
         return requester.request(uniqueId(), "/gcpapi/card/vpaopen", request, TCardVpaApplyResponse.class);
     }
-
 
     // 卡申请单查询:  3006
     // 1. 主卡/子卡申请
@@ -54,8 +53,8 @@ public class ZinCardApplyService {
         return requester.request(uniqueId(), "/gcpapi/card/getpayinfo", request, TCardPayInfoResponse.class);
     }
 
-    // 变更VPA子卡场景: 3008 todo
-    public TCardUpdateSceneResponse cardQueryScene(TCardUpdateScene request) {
+    // 变更单张VPA子卡场景:
+    public TCardUpdateSceneResponse cardUpdateScene(TCardUpdateScene request) {
         return requester.request(uniqueId(), "/gcpapi/card/cardupdatescene", request, TCardUpdateSceneResponse.class);
     }
 }

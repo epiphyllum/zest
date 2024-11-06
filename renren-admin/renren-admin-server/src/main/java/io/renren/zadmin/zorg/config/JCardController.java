@@ -1,6 +1,5 @@
 package io.renren.zadmin.zorg.config;
 
-import dm.jdbc.util.StringUtil;
 import io.renren.commons.log.annotation.LogOperation;
 import io.renren.commons.tools.constant.Constant;
 import io.renren.commons.tools.exception.RenException;
@@ -14,6 +13,7 @@ import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
 import io.renren.zcommon.CommonUtils;
+import io.renren.zcommon.ZinConstant;
 import io.renren.zmanager.JCardManager;
 import io.renren.zcommon.ZestConstant;
 import io.renren.zadmin.dao.JCardDao;
@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletResponse;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -44,8 +45,8 @@ import java.util.Map;
  * @since 3.0 2024-08-18
  */
 @RestController
-@RequestMapping("zorg/jscard")
-@Tag(name = "j_scard")
+@RequestMapping("zorg/jcard")
+@Tag(name = "j_card")
 @Slf4j
 public class JCardController {
     @Resource
@@ -66,14 +67,19 @@ public class JCardController {
     @PreAuthorize("hasAuthority('zorg:jcard:page')")
     public Result<PageData<JCardDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
         PageData<JCardDTO> page = jCardService.page(params);
-
         if (!ZestConstant.isOperation()) {
             page.getList().forEach(e -> {
                 e.setCvv(null);
                 e.setExpiredate(null);
             });
         }
-
+        // 查询更新余额
+        List<String> list = page.getList().stream().filter(c -> c.getState().equals(ZinConstant.CARD_APPLY_SUCCESS))
+                .map(JCardDTO::getCardno).toList();
+        Map<String, BigDecimal> balanceMap = jCardManager.batchBalance(list);
+        for (JCardDTO jCardDTO : page.getList()) {
+            jCardDTO.setBalance(balanceMap.get(jCardDTO.getCardno()));
+        }
         return new Result<PageData<JCardDTO>>().ok(page);
     }
 
@@ -93,7 +99,6 @@ public class JCardController {
     @PreAuthorize("hasAuthority('zorg:jcard:save')")
     public Result save(@RequestBody JCardDTO dto) {
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
-
         JCardEntity entity = ConvertUtils.sourceToTarget(dto, JCardEntity.class);
         entity.setApi(0);
         entity.setMeraplid(CommonUtils.uniqueId());
@@ -268,4 +273,41 @@ public class JCardController {
         jCardManager.runList(id, jCardManager::balanceCard);
         return Result.ok;
     }
+
+    @GetMapping("updateCard")
+    @Operation(summary = "更新卡状态以及余额")
+    @LogOperation("更新卡状态和卡余额")
+    @PreAuthorize("hasAuthority('zorg:jcard:updateCard')")
+    public Result updateCard(@RequestParam("id") Long id) {
+        jCardManager.updateCard(id);
+        return Result.ok;
+    }
+
+    @GetMapping("prepaidCharge")
+    @Operation(summary = "预付费卡充值")
+    @LogOperation("预付费卡充值")
+    @PreAuthorize("hasAuthority('zorg:jcard:prepaidCharge')")
+    public Result prepaidCharge(@RequestParam("id") Long id, @RequestParam("amount") BigDecimal amount) {
+        jCardManager.prepaidCharge(id, amount);
+        return Result.ok;
+    }
+
+    @GetMapping("prepaidWithdraw")
+    @Operation(summary = "预付费卡提现")
+    @LogOperation("预付费卡提现")
+    @PreAuthorize("hasAuthority('zorg:jcard:prepaidWithdraw')")
+    public Result prepaidWithdraw(@RequestParam("id") Long id, @RequestParam("amount") BigDecimal amount) {
+        jCardManager.prepaidWithdraw(id, amount);
+        return Result.ok;
+    }
+
+    @GetMapping("setQuota")
+    @Operation(summary = "共享卡设置额度")
+    @LogOperation("共享卡设置额度")
+    @PreAuthorize("hasAuthority('zorg:jcard:setQuota')")
+    public Result setQuota(@RequestParam("id") Long id, @RequestParam("amount") BigDecimal amount) {
+        jCardManager.setQuota(id, amount);
+        return Result.ok;
+    }
+
 }

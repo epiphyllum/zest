@@ -1,5 +1,6 @@
 package io.renren.zadmin.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import com.baomidou.mybatisplus.annotation.*;
@@ -36,9 +37,13 @@ public class JCardEntity extends BaseEntity {
     private String subName;
     private Integer api;
 
-    // 请求数据(6)
-    private String meraplid;
+    //
+    private String marketproduct;
+    private String cardclass;
     private String maincardno;
+
+    // 请求数据(5)
+    private String meraplid;
     private String cusid;
     private String producttype;
     private String cardtype;
@@ -88,6 +93,11 @@ public class JCardEntity extends BaseEntity {
     private String deliverycity;
     private String deliveryaddress;
 
+    // 共享卡要求字段
+    private String payeeaccount;
+    private String procurecontent;
+    private String agmfid;
+
     // 大吉设计
     private String currency;
     private BigDecimal merchantfee;
@@ -109,4 +119,18 @@ public class JCardEntity extends BaseEntity {
     private String cvv;
     private String expiredate;
 
+    // 共享卡相关信息
+    private String sceneid;
+    private String scenename;
+    private String cycle;
+    private Integer authmaxcount;
+    private BigDecimal authmaxamount;
+    private String onlhkflag;
+    private String begindate;
+    private String enddate;
+    private String naturalmonthflag;
+    private String naturalmonthstartday;
+    private String fixedamountflag;
+    private String permitCurrency;
+    private Long vpaJob;  // 对应到哪个job
 }

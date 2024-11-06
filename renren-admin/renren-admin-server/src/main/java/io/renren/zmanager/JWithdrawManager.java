@@ -3,13 +3,10 @@ package io.renren.zmanager;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.ConvertUtils;
-import io.renren.zadmin.dao.JMerchantDao;
-import io.renren.zadmin.dao.JSubDao;
-import io.renren.zadmin.dao.JVaDao;
-import io.renren.zadmin.dao.JWithdrawDao;
+import io.renren.zadmin.dao.*;
 import io.renren.zadmin.entity.*;
 import io.renren.zapi.ApiNotify;
-import io.renren.zbalance.Ledger;
+import io.renren.zbalance.ledgers.LedgerCardWithdraw;
 import io.renren.zcommon.ZinConstant;
 import io.renren.zin.cardapply.ZinCardApplyService;
 import io.renren.zin.cardapply.dto.TCardApplyQuery;
@@ -36,7 +33,7 @@ public class JWithdrawManager {
     @Resource
     private ApiNotify apiNotify;
     @Resource
-    private Ledger ledger;
+    private LedgerCardWithdraw ledgerCardWithdraw;
     @Resource
     private ZinCardMoneyService zinCardMoneyService;
     @Resource
@@ -49,6 +46,8 @@ public class JWithdrawManager {
     private JSubDao jSubDao;
     @Resource
     private JWithdrawDao jWithdrawDao;
+    @Resource
+    private JCardDao jCardDao;
 
 
     // 填充信息
@@ -62,6 +61,12 @@ public class JWithdrawManager {
         entity.setMerchantName(subEntity.getMerchantName());
         entity.setMerchantId(subEntity.getMerchantId());
         entity.setSubName(subEntity.getCusname());
+
+        JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
+                .eq(JCardEntity::getCardno, entity.getCardno())
+        );
+        entity.setMarketproduct(cardEntity.getMarketproduct());
+        entity.setMaincardno(cardEntity.getMaincardno());
         return subEntity;
     }
 
@@ -78,7 +83,7 @@ public class JWithdrawManager {
 
         tx.executeWithoutResult(st -> {
             jWithdrawDao.insert(entity);
-            ledger.ledgeCardWithdrawFreeze(entity, subEntity);
+            ledgerCardWithdraw.ledgeCardWithdrawFreeze(entity, subEntity);
         });
     }
 
@@ -108,7 +113,7 @@ public class JWithdrawManager {
                         .set(JWithdrawEntity::getStateexplain, response.getStateexplain())
                         .set(response.getSecurityamount() != null, JWithdrawEntity::getSecurityamount, response.getSecurityamount())
                 );
-                ledger.ledgeCardWithdraw(entity, subEntity);
+                ledgerCardWithdraw.ledgeCardWithdraw(entity, subEntity);
             });
         } else {
             jWithdrawDao.update(null, Wrappers.<JWithdrawEntity>lambdaUpdate()
@@ -116,7 +121,7 @@ public class JWithdrawManager {
                     .eq(JWithdrawEntity::getState, oldState)
                     .set(JWithdrawEntity::getState, newState)
                     .set(JWithdrawEntity::getStateexplain, response.getStateexplain())
-                    .set(response.getSecurityamount() != null , JWithdrawEntity::getSecurityamount, response.getSecurityamount())
+                    .set(response.getSecurityamount() != null, JWithdrawEntity::getSecurityamount, response.getSecurityamount())
             );
         }
 
@@ -146,6 +151,7 @@ public class JWithdrawManager {
 
     /**
      * 作废
+     *
      * @param entity
      */
     public void cancel(JWithdrawEntity entity) {
@@ -156,7 +162,7 @@ public class JWithdrawManager {
                     .isNull(JWithdrawEntity::getApplyid)
                     .set(JWithdrawEntity::getState, "07")
             );
-            ledger.ledgeCardWithdrawUnFreeze(entity,subEntity);
+            ledgerCardWithdraw.ledgeCardWithdrawUnFreeze(entity, subEntity);
         });
     }
 }

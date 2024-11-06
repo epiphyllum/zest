@@ -6,6 +6,10 @@ server:
 spring:
   application:
     name: renren-admin-server
+  servlet:
+    multipart:
+      max-file-size: 15MB
+      max-request-size: 15MB
 
   #环境 dev|test|prod
   profiles:

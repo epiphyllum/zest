@@ -1,9 +1,11 @@
 package io.renren.zadmin.zorg.config;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.log.annotation.LogOperation;
 import io.renren.commons.tools.constant.Constant;
 import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.page.PageData;
+import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.commons.tools.utils.Result;
 import io.renren.commons.tools.utils.ExcelUtils;
 import io.renren.commons.tools.validator.AssertUtils;
@@ -11,6 +13,8 @@ import io.renren.commons.tools.validator.ValidatorUtils;
 import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
+import io.renren.zadmin.dao.JCardFeeConfigDao;
+import io.renren.zadmin.entity.JCardFeeConfigEntity;
 import io.renren.zcommon.ZestConstant;
 import io.renren.zadmin.dto.JCardFeeConfigDTO;
 import io.renren.zadmin.excel.JCardFeeConfigExcel;
@@ -42,6 +46,9 @@ public class JCardFeeConfigController {
     @Resource
     private JCardFeeConfigService jCardFeeConfigService;
 
+    @Resource
+    private JCardFeeConfigDao jCardFeeConfigDao;
+
     @GetMapping("page")
     @Operation(summary = "分页")
     @Parameters({
@@ -65,7 +72,6 @@ public class JCardFeeConfigController {
     @PreAuthorize("hasAuthority('zorg:jcardfeeconfig:info')")
     public Result<JCardFeeConfigDTO> get(@PathVariable("id") Long id) {
         JCardFeeConfigDTO data = jCardFeeConfigService.get(id);
-
         return new Result<JCardFeeConfigDTO>().ok(data);
     }
 
@@ -118,4 +124,17 @@ public class JCardFeeConfigController {
         ExcelUtils.exportExcelToTarget(response, null, "j_card_fee_config", list, JCardFeeConfigExcel.class);
     }
 
+
+    // 开卡收费参数
+    @GetMapping("config")
+    @Operation(summary = "开卡收费参数")
+    public Result<JCardFeeConfigDTO> get(@RequestParam("producttype") String producttype) {
+        JCardFeeConfigEntity feeConfig = jCardFeeConfigDao.selectOne(Wrappers.<JCardFeeConfigEntity>lambdaQuery()
+                .eq(JCardFeeConfigEntity::getProducttype, producttype)
+        );
+        JCardFeeConfigDTO dto = ConvertUtils.sourceToTarget(feeConfig, JCardFeeConfigDTO.class);
+        Result<JCardFeeConfigDTO> result = new Result<>();
+        result.setData(dto);
+        return result;
+    }
 }

@@ -35,6 +35,8 @@ public class JConfigDTO implements Serializable {
     private BigDecimal failFee;
     @Schema(description = "争议处理费")
     private BigDecimal disputeFee;
+    @Schema(description = "发卡限量")
+    private Integer quotaLimit;
 
     @Schema(description = "创建者")
     private Long creator;

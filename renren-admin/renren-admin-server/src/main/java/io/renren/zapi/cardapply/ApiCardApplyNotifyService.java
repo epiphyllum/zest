@@ -22,4 +22,11 @@ public class ApiCardApplyNotifyService {
         CardNewNotify notify = ConvertUtils.sourceToTarget(entity, CardNewNotify.class);
         apiNotifyService.notifyMerchant(notify, merchant, "cardNewNotify");
     }
+
+    /**
+     * vpa卡发卡
+     */
+    public void cardVpaNewNotify() {
+
+    }
 }
