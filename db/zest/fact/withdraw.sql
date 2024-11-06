@@ -13,6 +13,7 @@ create table j_withdraw
     api            int            not null default 1,
 
     meraplid       varchar(32)    not null comment '申请单流水',
+    marketproduct  varchar(16)    not null comment '产品',
     cardno         varchar(30)    not null comment '卡号',
     payeeid        varchar(30) comment '交易对手',
     currency       varchar(3) comment '币种',

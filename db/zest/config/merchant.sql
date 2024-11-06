@@ -52,12 +52,25 @@ create table j_merchant
 
     -- 商户接入参数
     mcc                varchar(6)     not null comment '商户类型',                          -- dict
+    -- typeclass          varchar(16) comment '商户功能分类',
     deposit_rate       decimal(10, 3) comment '保证金比例',
     charge_rate        decimal(10, 3) comment '充值费率',                                   --
     l50                decimal(10, 2) not null,
     gef50              decimal(10, 2) not null,
     fail_fee           decimal(10, 2) comment '失败费',
     dispute_fee        decimal(10, 2) comment '争议处理费',
+
+    -- 开卡收费项
+    vcc_real_fee       decimal(10, 2) comment 'visa实体卡',
+    vcc_virtual_fee    decimal(10, 2) comment 'visa虚拟卡',
+    vpa_main_fee       decimal(10, 2) comment '共享主卡',
+    vpa_share_fee      decimal(10, 2) comment '共享子卡',
+    vpa_prepaid_fee    decimal(10, 2) comment '预付费卡',
+
+    -- 预付费卡退款收费
+    prepaid_refund_rate    decimal(10, 2) comment '预付费卡退卡扣费',
+    prepaid_refund_ceil    decimal(10, 2) comment '预付费卡退卡扣费',
+    prepaid_refund_floor    decimal(10, 2) comment '预付费卡退卡扣费',
 
     txn_rate           decimal(10, 3) comment '交易费率',
     public_key         varchar(1024)  null comment '商户公钥',

@@ -9,6 +9,7 @@ create table j_config
     gef50        decimal(18,2) not null comment '>=50 fail 手续费',
     fail_fee     decimal(18,2) not null comment '失败费/笔, faiL_rate > 15%',
     dispute_fee  decimal(18,2) not null comment '争议处理费',
+    quota_limit  int           not null default 10 comment '批量开卡的最大数量',
 
     -- basic
     creator      bigint comment '创建者',

@@ -7,7 +7,7 @@ create table j_balance
     -- 余额基本信息: merchant_id / sub_id
     owner_id     bigint         not null comment '属主ID',
     owner_name   varchar(50)    not null comment '属主',
-    owner_type   varchar(16)    not null comment '用户类型',
+    owner_type   varchar(16)    not null comment '属主类型',
 
     balance_type varchar(16)    not null comment '余额类型',
     currency     varchar(3)     not null comment '币种',
@@ -35,7 +35,7 @@ create table j_log
     -- 余额基本信息
     owner_id     bigint         not null comment '属主ID',
     owner_name   varchar(50)    not null comment '属主',
-    owner_type   varchar(16)    not null comment '用户类型',
+    owner_type   varchar(16)    not null comment '属主类型',
 
     -- 余额基本信息
     balance_id   bigint         not null comment '余额ID',
