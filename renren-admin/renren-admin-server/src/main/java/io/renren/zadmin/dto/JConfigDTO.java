@@ -38,6 +38,11 @@ public class JConfigDTO implements Serializable {
     @Schema(description = "发卡限量")
     private Integer quotaLimit;
 
+    @Schema(description = "vcc实体主卡")
+    private String vccMainReal ;    //
+    @Schema(description = "vcc虚拟主卡")
+    private String vccMainVirtual ; //
+
     @Schema(description = "创建者")
     private Long creator;
     @Schema(description = "创建时间")

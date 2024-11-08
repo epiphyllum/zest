@@ -57,6 +57,8 @@ public class JMerchantDTO implements Serializable {
     private String legalidtype;
     @Schema(description = "法人证件号")
     private String legalidno;
+    @Schema(description = "法人证件有效期")
+    private String legalidexpire;
     @Schema(description = "法人代表住址")
     private String legaladdress;
     @Schema(description = "是否三证合一")
@@ -90,11 +92,9 @@ public class JMerchantDTO implements Serializable {
     @Schema(description = "子卡商户合作协议")
     private String agreementfid;
     @Schema(description = "统一社会信用证及影印件")
-    private String creditfid;
+    private String credifid;
     @Schema(description = "营业执照")
     private String buslicensefid;
-    @Schema(description = "税务登记证及影印件")
-    private String taxfid;
     @Schema(description = "组织机构代码及影印件")
     private String organfid;
 

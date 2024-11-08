@@ -41,9 +41,13 @@ public class JVpaAdjustDTO implements Serializable {
     @Schema(description = "调整金额")
     private BigDecimal adjustAmount;
     @Schema(description = "调整期额度")
-    private BigDecimal oldQuote;
+    private BigDecimal oldQuota;
     @Schema(description = "调整后额度")
-    private BigDecimal newQuote;
+    private BigDecimal newQuota;
+
+    @Schema(description = "状态")
+    private String state;
+
     @Schema(description = "创建者")
     private Long creator;
     @Schema(description = "创建时间")

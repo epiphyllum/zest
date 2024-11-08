@@ -76,7 +76,6 @@ public class JDepositManager {
                 .eq(JCardEntity::getCardno, entity.getCardno())
         );
         entity.setMarketproduct(cardEntity.getMarketproduct());
-        entity.setMaincardno(cardEntity.getMaincardno());
 
         return subEntity;
     }
@@ -105,7 +104,6 @@ public class JDepositManager {
         List<JVaEntity> jVaEntities = jVaDao.selectList(Wrappers.emptyWrapper());
         JVaEntity jVaEntity = jVaEntities.stream().filter(e -> e.getCurrency().equals(entity.getCurrency())).findFirst().get();
         entity.setPayerid(jVaEntity.getTid());
-        this.uploadFiles(entity);
 
         BigDecimal txnAmount = calcTxnAmount(entity.getAmount());
         entity.setTxnAmount(txnAmount);

@@ -19,6 +19,10 @@ import io.renren.commons.mybatis.entity.BaseEntity;
 @TableName("j_packet")
 public class JPacketEntity extends BaseEntity {
     private static final long serialVersionUID = 1L;
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private Long updater;
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private Date updateDate;
 
     private Long agentId;
     private String agentName;
@@ -31,9 +35,4 @@ public class JPacketEntity extends BaseEntity {
     private String recv;
     private String send;
     private String sign;
-
-    @TableField(fill = FieldFill.INSERT_UPDATE)
-    private Long updater;
-    @TableField(fill = FieldFill.INSERT_UPDATE)
-    private Date updateDate;
 }

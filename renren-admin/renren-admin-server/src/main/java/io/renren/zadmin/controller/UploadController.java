@@ -4,6 +4,7 @@ package io.renren.zadmin.controller;
 import cn.hutool.core.date.DateUtil;
 import io.renren.commons.tools.utils.Result;
 import io.renren.zcommon.ZestConfig;
+import io.renren.zin.file.ZinFileService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +32,8 @@ import java.util.UUID;
 public class UploadController {
     @Resource
     private ZestConfig zestConfig;
+    @Resource
+    private ZinFileService zinFileService;
 
     @PostMapping()
     public Result<String> upload(@RequestParam("file") MultipartFile file) {
@@ -62,6 +65,9 @@ public class UploadController {
             log.info("save file to {}", filePath);
 
             Result<String> result = new Result<>();
+
+            log.info("上传文件到通联: {}", filename);
+            zinFileService.upload(filename);
 
             // 文件id
             result.setData(filename);

@@ -21,8 +21,6 @@ import io.renren.commons.mybatis.entity.BaseEntity;
 @TableName("j_money")
 public class JMoneyEntity extends BaseEntity {
     private static final long serialVersionUID = 1L;
-
-    // (3+2) 通用字段
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updater;
     @TableField(fill = FieldFill.INSERT_UPDATE)
@@ -67,7 +65,6 @@ public class JMoneyEntity extends BaseEntity {
     private String state;
 
     // 转而通知下游商户(3)
-    private Integer status;
     private Integer notifyStatus;
     private Integer notifyCount;
 }

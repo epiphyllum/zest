@@ -6,6 +6,7 @@ import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.zadmin.dao.*;
 import io.renren.zadmin.entity.*;
 import io.renren.zapi.ApiNotify;
+import io.renren.zbalance.LedgerUtil;
 import io.renren.zbalance.ledgers.LedgerOpenVpa;
 import io.renren.zcommon.CommonUtils;
 import io.renren.zcommon.ZestConfig;
@@ -31,6 +32,8 @@ import java.util.regex.Pattern;
 @Slf4j
 public class JVpaManager {
 
+    @Resource
+    private LedgerUtil ledgerUtil;
     @Resource
     private JSubDao jSubDao;
     @Resource
@@ -92,7 +95,6 @@ public class JVpaManager {
         if (subId == null) {
             throw new RenException("invalid request");
         }
-        JSubEntity sub = jSubDao.selectById(entity.getSubId());
 
         // 查询主卡
         JCardEntity mainCard = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
@@ -109,18 +111,13 @@ public class JVpaManager {
             throw new RenException("单批次最大发卡数量:" + gConfig.getQuotaLimit());
         }
 
-        // 调用通联创建模板
-        entity.setScenename(CommonUtils.uniqueId());
-        TCardAddScene request = ConvertUtils.sourceToTarget(entity, TCardAddScene.class);
-        TCardAddSceneResponse response = zinCardApplyService.cardAddScene(request);
-
-        entity.setSceneid(response.getSceneid());
+        // 关联ID
+        JSubEntity sub = jSubDao.selectById(entity.getSubId());
         entity.setAgentId(sub.getAgentId());
         entity.setAgentName(sub.getAgentName());
         entity.setMerchantId(sub.getMerchantId());
         entity.setMerchantName(sub.getMerchantName());
         entity.setSubName(sub.getCusname());
-        entity.setState(ZinConstant.CARD_APPLY_NEW_DJ);
 
         // 计算批次发卡手续费
         JMerchantEntity merchant = jMerchantDao.selectById(entity.getMerchantId());
@@ -136,8 +133,27 @@ public class JVpaManager {
         BigDecimal totalMerchantFee = price.multiply(new BigDecimal(entity.getNum()));
         entity.setFeecurrency(feecurrency);
         entity.setMerchantfee(totalMerchantFee);
-        log.info("vpa open card, fee:{}", totalMerchantFee);
 
+        // 发行预付费子卡, 需要判断主卡是否有足额
+        if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_PREPAID)) {
+            BigDecimal totalAuth = entity.getAuthmaxamount().multiply(new BigDecimal(entity.getNum()));
+            JBalanceEntity prepaidAccount = ledgerUtil.getPrepaidAccount(mainCard.getId(), mainCard.getCurrency());
+            if (prepaidAccount.getBalance().compareTo(totalAuth) < 0) {
+                throw new RenException("余额不足");
+            }
+        }
+
+        // 调用通联创建模板
+        entity.setScenename(CommonUtils.uniqueId());
+        TCardAddScene request = ConvertUtils.sourceToTarget(entity, TCardAddScene.class);
+        TCardAddSceneResponse response = zinCardApplyService.cardAddScene(request);
+
+        entity.setSceneid(response.getSceneid());
+
+
+        entity.setState(ZinConstant.CARD_APPLY_NEW_DJ);
+
+        log.info("vpa open card, fee:{}", totalMerchantFee);
 
         // 记账 + 入库
         tx.executeWithoutResult(st -> {
@@ -180,7 +196,6 @@ public class JVpaManager {
             //
             jCardEntity.setState(ZinConstant.CARD_APPLY_SUCCESS);
             jCardEntity.setCardState(ZinConstant.CARD_STATE_SUCCESS);
-            jCardEntity.setCardclass(ZinConstant.CC_VPA_SUB);
             jCardEntity.setProducttype(ZinConstant.CARD_PRODUCT_VPA);
             jCardEntity.setMarketproduct(entity.getMarketproduct());
             jCardEntity.setCurrency(mainCard.getCurrency());  // 卡的币种为主卡的币种
@@ -212,9 +227,11 @@ public class JVpaManager {
             adjustItem.setSubId(entity.getSubId());
             adjustItem.setSubName(entity.getSubName());
 
-            adjustItem.setOldQuote(BigDecimal.ZERO);
-            adjustItem.setNewQuote(entity.getAuthmaxamount());
+            adjustItem.setOldQuota(BigDecimal.ZERO);
+            adjustItem.setNewQuota(entity.getAuthmaxamount());
             adjustItem.setAdjustAmount(entity.getAuthmaxamount());
+            adjustItem.setState(ZinConstant.VPA_ADJUST_SUCCESS);
+
             adjustItem.setCardno(jCardEntity.getCardno());
             adjustItem.setMaincardno(jCardEntity.getMaincardno());
             log.info("adjustItem:{}", adjustItem);
@@ -233,7 +250,7 @@ public class JVpaManager {
         String nextState = response.getState();
         log.info("vpa发卡查询结果:{}, prevState:{}, nextState:{}", response, prevState, nextState);
 
-        JCardEntity mainCard = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery());
+        JCardEntity mainCard = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery().eq(JCardEntity::getCardno, entity.getMaincardno()));
 
         // 不成功 -> 成功
         if (!ZinConstant.isCardApplySuccess(prevState) && ZinConstant.isCardApplySuccess(nextState)) {
@@ -256,7 +273,7 @@ public class JVpaManager {
                 vpaInitFill(entity, jCardEntities, adjustEntities, mainCard);
             }
 
-            // 插入卡表， 记账扣费, 更新任务状态
+            // 插入卡表， 记账扣费, 更新任务状态:  200
             tx.executeWithoutResult(st -> {
                 // 插入卡数据
                 for (JCardEntity jCardEntity : jCardEntities) {
@@ -274,7 +291,6 @@ public class JVpaManager {
                         .eq(JVpaJobEntity::getState, prevState)
                         .set(JVpaJobEntity::getState, ZinConstant.CARD_APPLY_SUCCESS)
                 );
-
                 // 记账
                 ledgerOpenVpa.ledgeOpenVpa(entity);
             });

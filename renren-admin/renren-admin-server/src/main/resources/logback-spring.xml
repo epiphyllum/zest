@@ -9,6 +9,7 @@
         <logger name="org.springframework.web" level="DEBUG"/>
         <logger name="org.springboot.sample" level="DEBUG" />
         <logger name="io.renren" level="DEBUG" />
+        <logger name="org.springframework.web.client.RestClient" level="INFO" />
     </springProfile>
 
     <!-- 生产环境 -->

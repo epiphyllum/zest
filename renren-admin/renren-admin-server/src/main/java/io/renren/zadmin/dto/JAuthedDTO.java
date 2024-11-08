@@ -44,8 +44,6 @@ public class JAuthedDTO implements Serializable {
     private String authcode;
     private String logkv;
     private String mcc;
-    @Schema(description = "乐观锁版本号")
-    private Integer version;
     @Schema(description = "创建者")
     private Long creator;
     @Schema(description = "创建时间")
@@ -54,5 +52,4 @@ public class JAuthedDTO implements Serializable {
     private Long updater;
     @Schema(description = "更新时间")
     private Date updateDate;
-
 }

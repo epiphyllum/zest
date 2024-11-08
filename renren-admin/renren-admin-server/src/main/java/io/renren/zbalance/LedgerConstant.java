@@ -45,11 +45,12 @@ public class LedgerConstant {
     public static final int FACT_VPA_OPEN_FEE_IN = 50103;          // 4. 子商户费用账户 冻结
 
     // 卡充值
-    public static final int ORIGIN_TYPE_CARD_CHARGE = 600;          // 卡充值
-    public static final int FACT_CARD_CHARGE_FREEZE = 60000;        // 1. 子商户VA        -100HKD(冻结)
-    public static final int FACT_CARD_CHARGE_UN_FREEZE = 60001;     // 2. 子商户VA        -100HKD(解冻)
-    public static final int FACT_CARD_CHARGE_CONFIRM = 60002;       // 3. 子商户VA        -100HKD(确认成功)
-    public static final int FACT_CARD_CHARGE_IN = 60003;            // 4. 子商户卡资金账户  +100HKD(卡汇总增加)
+    public static final int ORIGIN_TYPE_CARD_CHARGE = 600;             // 卡充值
+    public static final int FACT_CARD_CHARGE_FREEZE = 60000;           // 1. 子商户VA        -100HKD(冻结)
+    public static final int FACT_CARD_CHARGE_UN_FREEZE = 60001;        // 2. 子商户VA        -100HKD(解冻)
+    public static final int FACT_CARD_CHARGE_CONFIRM = 60002;          // 3. 子商户VA        -100HKD(确认成功)
+    public static final int FACT_CARD_CHARGE_IN = 60003;               // 4. 子商户卡资金账户  +100HKD(卡汇总增加)
+    public static final int FACT_CARD_CHARGE_IN_PREPAID_MAIN = 60004;  // 5. 如果是给预付费主卡充值， 需要增加预付费主卡可分配额
 
     // 预付费卡-批量开卡充值: 需要操作对应主卡
     public static final int ORIGIN_TYPE_PREPAID_OPEN_CHARGE = 601;       // 预付费卡充值
@@ -67,17 +68,15 @@ public class LedgerConstant {
 
     // 预付费卡提现: 操作对应主卡
     public static final int ORIGIN_TYPE_PREPAID_WITHDRAW = 603;     // 预付费卡提现
-    public static final int FACT_PREPAID_WITHDRAW_FREEZE = 60300;   // 1.
-    public static final int FACT_PREPAID_WITHDRAW_UN_FREEZE = 60301;// 1.
-    public static final int FACT_PREPAID_WITHDRAW_CONFIRM = 60302;  // 1.
-    public static final int FACT_PREPAID_WITHDRAW_IN = 60303;       // 1.
+    public static final int FACT_PREPAID_WITHDRAW_UP = 60300;       // 1: 调增主卡剩余额度
 
     // 卡提现
-    public static final int ORIGIN_TYPE_CARD_WITHDRAW = 700;        // 卡提现
-    public static final int FACT_CARD_WITHDRAW_FREEZE = 70000;      // 0. 子商户卡资金账户 -100HKD(冻结)
-    public static final int FACT_CARD_WITHDRAW_UN_FREEZE = 70001;   // 1. 子商户卡资金账户 -100HKD(解冻)
-    public static final int FACT_CARD_WITHDRAW_CONFIRM = 70002;     // 2. 子商户卡资金账户 -100HKD(确认成功)
-    public static final int FACT_CARD_WITHDRAW_IN = 70003;          // 3. 子商户VA       +100HKD(va退回)
+    public static final int ORIGIN_TYPE_CARD_WITHDRAW = 700;               // 卡提现
+    public static final int FACT_CARD_WITHDRAW_FREEZE = 70000;             // 0. 子商户卡资金账户 -100HKD(冻结)
+    public static final int FACT_CARD_WITHDRAW_UN_FREEZE = 70001;          // 1. 子商户卡资金账户 -100HKD(解冻)
+    public static final int FACT_CARD_WITHDRAW_CONFIRM = 70002;            // 2. 子商户卡资金账户 -100HKD(确认成功)
+    public static final int FACT_CARD_WITHDRAW_IN = 70003;                 // 3. 子商户VA       +100HKD(va退回)
+    public static final int FACT_CARD_WITHDRAW_OUT_PREPAID_MAIN = 70004;   // 4. 如果是预防费主卡: 预付费主卡可以余额减少
 
     // 商户VA提现
     public static final int ORIGIN_TYPE_VA_WITHDRAW = 800;         // 商户VA提现

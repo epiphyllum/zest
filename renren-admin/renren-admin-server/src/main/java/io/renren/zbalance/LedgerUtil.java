@@ -95,7 +95,6 @@ public class LedgerUtil {
 
     /**
      * 冻结
-     *
      * @return
      */
     public void freezeUpdate(JBalanceEntity balance, int originType, int factType, Long factId, String factMemo, BigDecimal factAmount) {

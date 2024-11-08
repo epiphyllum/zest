@@ -21,7 +21,6 @@ import java.util.Date;
 @TableName("j_vpa_job")
 public class JVpaJobEntity extends BaseEntity {
     private static final long serialVersionUID = 1L;
-
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updater;
     @TableField(fill = FieldFill.INSERT_UPDATE)
@@ -63,6 +62,7 @@ public class JVpaJobEntity extends BaseEntity {
     private String email;
     private String cardexpiredate;
 
+    // 商户单号, 申请单号
     private String meraplid;
     private String applyid;
 }

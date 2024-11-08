@@ -1,13 +1,11 @@
 package io.renren.zbalance.ledgers;
 
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import io.renren.commons.tools.exception.RenException;
 import io.renren.zadmin.dao.JCardDao;
 import io.renren.zadmin.dao.JMerchantDao;
-import io.renren.zadmin.entity.*;
+import io.renren.zadmin.entity.JAllocateEntity;
+import io.renren.zadmin.entity.JBalanceEntity;
 import io.renren.zbalance.LedgerConstant;
 import io.renren.zbalance.LedgerUtil;
-import io.renren.zcommon.ZinConstant;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

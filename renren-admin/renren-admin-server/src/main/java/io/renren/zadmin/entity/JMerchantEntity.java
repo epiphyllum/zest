@@ -21,8 +21,6 @@ import io.renren.commons.mybatis.entity.BaseEntity;
 @TableName("j_merchant")
 public class JMerchantEntity extends BaseEntity {
     private static final long serialVersionUID = 1L;
-
-    // 基本(3+2)
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updater;
     @TableField(fill = FieldFill.INSERT_UPDATE)
@@ -53,6 +51,7 @@ public class JMerchantEntity extends BaseEntity {
     private String legal;
     private String legalarea;
     private String legalidtype;
+    private String legalidexpire;
     private String legalidno;
     private String legaladdress;
 
@@ -74,9 +73,8 @@ public class JMerchantEntity extends BaseEntity {
     private String legalphotofrontfid;
     private String legalphotobackfid;
     private String agreementfid;
-    private String creditfid;
+    private String credifid;
     private String buslicensefid;
-    private String taxfid;
     private String organfid;
 
     // (2) 通联返回

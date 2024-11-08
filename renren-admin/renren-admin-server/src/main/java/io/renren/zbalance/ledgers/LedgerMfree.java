@@ -34,5 +34,4 @@ public class LedgerMfree {
         // 记账2: 商户Va+
         ledgerUtil.ledgeUpdate(mVa, LedgerConstant.ORIGIN_TYPE_MFREE, LedgerConstant.FACT_MFREE_IN, entity.getId(), factMemo, entity.getAmount());
     }
-
 }

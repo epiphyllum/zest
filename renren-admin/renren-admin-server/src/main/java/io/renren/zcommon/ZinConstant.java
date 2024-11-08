@@ -5,6 +5,19 @@ import java.util.List;
 import java.util.Map;
 
 public class ZinConstant {
+    // 持卡人身份
+    public static final String CARD_HOLDER_TYPE_LEGAL = "1";        // 法人持有
+    public static final String CARD_HOLDER_TYPE_OTHER = "0";        // 其他管理员
+
+    // 是否flag
+    public static final String YES_FLAG = "Y";     // 通用FLAG
+    public static final String NO_FLAG = "N";      // 通用FLAG
+
+    public static final String MONEY_IN_NEW = "00";
+    public static final String MONEY_IN_CONFIRMED = "01";
+    public static final String MONEY_IN_SUCCESS = "02";
+
+
     // 支付申请单状态:
     public static final String PAY_APPLY_MIDDLE_1 = "01";           // 处理中提交申报明细成功后的状态，此时需要运营人员初审通过。
     public static final String PAY_APPLY_MIDDLE_5 = "05";           // 交易处理渠道处理中间过程。
@@ -17,7 +30,8 @@ public class ZinConstant {
     public static final String PAY_APPLY_SUCCESS = "06";            // 处理成功
     public static final String PAY_APPLY_FAIL = "07";               // 处理失败申请单处理失败，具体原因根据提示了解。
     public static final String PAY_APPLY_CLOSE = "11";              // 交易已关闭申请单流程中登录商户平台手动关闭，或由运营人员手动关闭申请单。
-    public static final String PAY_APPLY_NA_DJ = "NA";              // 大吉状态: 新建
+
+    public static final String PAY_APPLY_NEW_DJ = "00";             // 大吉状态: 新建
     public static final String PAY_APPLY_CF_DJ = "CF";              // 大吉状态: 确认
     public static final String PAY_APPLY_CC_DJ = "CC";              // 大吉状态: 取消
 
@@ -38,7 +52,6 @@ public class ZinConstant {
     public static final String CARD_STATE_TO_ACTIVATE = "14";       // 待激活
     public static final String CARD_STATE_NEW_DJ = "00";            // 开卡成功后的初始状态:  我方添加的
 
-
     // 入金账户状态
     public static final String MONEY_ACCOUNT_TO_VERIFY = "0";       // 待审核；
     public static final String MONEY_ACCOUNT_VERIFIED = "1";        // 审核通过；
@@ -46,7 +59,7 @@ public class ZinConstant {
     public static final String MONEY_ACCOUNT_FROZEN = "4";          // 冻结；
     public static final String MONEY_ACCOUNT_CLOSE = "5";           // 关闭；
     public static final String MONEY_ACCOUNT_TO_REVIEW = "6";       // 待复审
-    public static final String MONEY_ACCOUNT_NEW_DJ = "NA";         // 大吉状态: 新建
+    public static final String MONEY_ACCOUNT_NEW_DJ = "00";         // 大吉状态: 新建
 
     // 通用状态管理
     public static final int STATE_PROCESSING = 0; // 处理中
@@ -80,7 +93,7 @@ public class ZinConstant {
             put("07", STATE_FAIL);        // 处理失败申请单处理失败，具体原因根据提示了解。
             put("11", STATE_FAIL);        // 交易已关闭申请单流程中登录商户平台手动关闭，或由运营人员手动关闭申请单。
             ////////////////////////////////////////////////////////////////
-            put("NA", STATE_PROCESSING);  // 大吉增加状态
+            put("00", STATE_PROCESSING);  // 大吉增加状态
             put("CF", STATE_PROCESSING);  // 大吉增加状态
             put("CC", STATE_FAIL);        // 大吉增加状态
         }
@@ -151,53 +164,49 @@ public class ZinConstant {
         put("021201", "HKD");  // 共享卡
     }};
 
+    // 市场卡产品币种映射:
+    public static final Map<String, String> marketproductCurrencyMap = new HashMap<>() {{
+        put(MP_VCC_MAIN_REAL, "HKD");  // VCC实体卡
+        put(MP_VCC_MAIN_VIRTUAL, "HKD");  // VCC实体卡
+        put(MP_VCC_REAL, "HKD");  // VCC实体卡
+        put(MP_VCC_VIRTUAL, "HKD");  // VCC实体卡
+
+        put(MP_VPA_MAIN, "HKD");  // VCC实体卡
+        put(MP_VPA_MAIN_PREPAID, "HKD");  // VCC实体卡
+        put(MP_VPA_SHARE, "HKD");  // VCC实体卡
+        put(MP_VPA_PREPAID, "HKD");  // VCC实体卡
+    }};
+
+    // 不对外卡产品
+    public static final String MP_VCC_MAIN_REAL = "VccMainReal";         // VCC实体主卡
+    public static final String MP_VCC_MAIN_VIRTUAL = "VccMainVirtual";   // VCC虚拟主卡
     // 对外卡产品
     public static final String MP_VCC_REAL = "VccReal";                  // VCC实体卡
     public static final String MP_VCC_VIRTUAL = "VccVirtual";            // VCC虚拟卡
     public static final String MP_VPA_MAIN = "VpaMain";                  // 共享主卡
     public static final String MP_VPA_MAIN_PREPAID = "VpaMainPrepaid";   // 预付费主卡
-    public static final String MP_VPA_SHARE = "VpaShare";                // 共享卡 ： VPA通联标准功能
+    public static final String MP_VPA_SHARE = "VpaShare";                // 共享子卡 ： VPA通联标准功能
     public static final String MP_VPA_PREPAID = "VpaPrepaid";            // 预付费卡
 
     // 市场产品到对外产品的映射
     public static Map<String, String> marketProdcutMap = new HashMap<>() {{
+        put(MP_VCC_MAIN_REAL, "001001");
+        put(MP_VCC_MAIN_VIRTUAL, "001201");
+
         put(MP_VCC_REAL, "001001");
         put(MP_VCC_VIRTUAL, "001201");
 
         put(MP_VPA_MAIN, "021201");
         put(MP_VPA_MAIN_PREPAID, "021201");
+
         put(MP_VPA_SHARE, "021201");
         put(MP_VPA_PREPAID, "021201");
     }};
-
-    // 市场产品的卡类别
-    public static Map<String, String> marketProductClassMap = new HashMap<>() {{
-        put(MP_VCC_REAL, CC_VCC_SUB);
-        put(MP_VCC_VIRTUAL, CC_VCC_SUB);
-        put(MP_VPA_MAIN, CC_VPA_MAIN);
-        put(MP_VPA_SHARE, CC_VPA_SUB);
-        put(MP_VPA_PREPAID, CC_VPA_SUB);
-    }};
-
-    // 持卡人身份
-    public static final String CARD_HOLDER_TYPE_LEGAL = "1";        // 法人持有
-    public static final String CARD_HOLDER_TYPE_OTHER = "0";        // 其他管理员
 
     // vpa场景类型
     public static final String VPA_CYCLE_DEADLINE = "1";      // 期限
     public static final String VPA_CYCLE_PERIODICAL = "2";    // 周期
     public static final String VPA_CYCLE_ONCE = "3";          // 期限
-
-    // 是否flag
-    public static final String YES_FLAG = "Y";     // 通用FLAG
-    public static final String NO_FLAG = "N";      // 通用FLAG
-
-    // 卡表里的卡类别
-    public static final String CC_VPA_MAIN = "VpaMain";  // 共享主卡
-    public static final String CC_VPA_SUB = "VpaSub";    // 共享子卡
-    public static final String CC_VCC_MAIN = "VccMain";  // VCC主卡
-    public static final String CC_VCC_SUB = "VccSub";    // VCC子卡
-
     // VPA卡场景变更结果
     public static final String VPA_ADJUST_SUCCESS = "55"; //
     public static final String VPA_ADJUST_UNKNOWN = "00"; //

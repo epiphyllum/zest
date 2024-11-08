@@ -20,30 +20,19 @@ import io.renren.commons.mybatis.entity.BaseEntity;
 @TableName("j_config")
 public class JConfigEntity extends BaseEntity {
     private static final long serialVersionUID = 1L;
-
-    /**
-     * 保证金扣率
-     */
-    private BigDecimal depositRate;
-    /**
-     * 手续费扣率
-     */
-    private BigDecimal chargeRate;
-
-    private BigDecimal failFee;
-    private BigDecimal l50;
-    private BigDecimal gef50;
-    private BigDecimal disputeFee;
-    private Integer quotaLimit;
-
-    /**
-     * 更新者
-     */
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updater;
-    /**
-     * 更新时间
-     */
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date updateDate;
+
+    private BigDecimal depositRate; // 保证金扣率
+    private BigDecimal chargeRate;  // 充值手续费扣率
+    private BigDecimal failFee;     // 失败费
+    private BigDecimal l50;         //
+    private BigDecimal gef50;       //
+    private BigDecimal disputeFee;  //
+    private Integer quotaLimit;     //
+
+    private String vccMainReal ;    //
+    private String vccMainVirtual ; //
 }

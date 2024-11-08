@@ -20,7 +20,6 @@ import io.renren.commons.mybatis.entity.BaseEntity;
 @TableName("j_free")
 public class JFreeEntity extends BaseEntity {
     private static final long serialVersionUID = 1L;
-
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updater;
     @TableField(fill = FieldFill.INSERT_UPDATE)

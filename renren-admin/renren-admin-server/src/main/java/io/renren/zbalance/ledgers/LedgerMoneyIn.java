@@ -28,7 +28,6 @@ public class LedgerMoneyIn {
     // 原始凭证(100):  收到商户入金
     public void ledgeMoneyIn(JMoneyEntity entity) {
         JMerchantEntity merchant = jMerchantDao.selectById(entity.getMerchantId());
-        String currency = entity.getCurrency();
 
         // 商户va账户, 保证金预收账户, 手续费预收账户
         JBalanceEntity vaAccount = ledgerUtil.getVaAccount(entity.getMerchantId(), entity.getCurrency());

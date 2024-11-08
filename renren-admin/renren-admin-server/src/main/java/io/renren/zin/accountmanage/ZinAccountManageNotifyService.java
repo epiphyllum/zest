@@ -9,6 +9,7 @@ import io.renren.zadmin.entity.JMaccountEntity;
 import io.renren.zadmin.entity.JMoneyEntity;
 import io.renren.zapi.ApiNotify;
 import io.renren.zbalance.ledgers.LedgerMoneyIn;
+import io.renren.zcommon.ZinConstant;
 import io.renren.zin.accountmanage.dto.TMoneyInNotify;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,9 @@ public class ZinAccountManageNotifyService {
 
     // 有申请单的情况
     private void withApply(TMoneyInNotify notify) {
+
+        log.debug("入金申请, 申请单号: {}", notify.getApplyid());
+
         // 直接去匹配申请单
         JMoneyEntity jMoneyEntity = jMoneyDao.selectOne(Wrappers.<JMoneyEntity>lambdaQuery()
                 .eq(JMoneyEntity::getApplyid, notify.getApplyid())
@@ -44,15 +48,34 @@ public class ZinAccountManageNotifyService {
         if (!notify.getPayeraccountno().equals(jMoneyEntity.getCardno())) {
             throw new RenException("入金通知, applyid=" + notify.getApplyid() + ", 来账账号不匹配, notify:" + notify.getPayeraccountno() + "db:" + jMoneyEntity.getCardno());
         }
+        log.debug("匹配入金申请单成功, 记账...");
+
         // 更新入金通知
         JMoneyEntity updateEntity = ConvertUtils.sourceToTarget(notify, JMoneyEntity.class);
         updateEntity.setId(jMoneyEntity.getId());
 
         // 记账 + 更新记录
         tx.executeWithoutResult(status -> {
-            jMoneyDao.updateById(updateEntity);
+            int cnt = jMoneyDao.update(null, Wrappers.<JMoneyEntity>lambdaUpdate()
+                    .eq(JMoneyEntity::getId, jMoneyEntity.getId())
+                    .eq(JMoneyEntity::getState, ZinConstant.MONEY_IN_CONFIRMED)
+                    .set(JMoneyEntity::getState, ZinConstant.MONEY_IN_SUCCESS)
+                    .set(JMoneyEntity::getPayeraccountno, notify.getPayeraccountno())
+                    .set(JMoneyEntity::getPayeraccountbank, notify.getPayeraccountbank())
+                    .set(JMoneyEntity::getPayeraccountcountry, notify.getPayeraccountcountry())
+                    .set(JMoneyEntity::getBid, notify.getBid())
+                    .set(JMoneyEntity::getNid, notify.getNid())
+                    .set(JMoneyEntity::getAmount, notify.getAmount())
+            );
+            if (cnt != 1) {
+                throw new RenException("如今通知处理失败");
+            }
             JMoneyEntity entity = jMoneyDao.selectById(jMoneyEntity.getId());
-            ledgerMoneyIn.ledgeMoneyIn(entity);
+            try {
+                ledgerMoneyIn.ledgeMoneyIn(entity);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         });
 
         // 是接口操作, 需要通知商户: todo
@@ -64,16 +87,25 @@ public class ZinAccountManageNotifyService {
 
     // 入账通知: 6003:
     public void handle(TMoneyInNotify notify) {
-        // 没有申请单
-        if (notify.getApplyid() == null) {
-            JMoneyEntity notifyInsert = ConvertUtils.sourceToTarget(notify, JMoneyEntity.class);
-            jMoneyDao.insert(notifyInsert);
-            // 匹配到商户
-            this.match(notifyInsert);
+        // CP213
+        if (notify.getTrxcod().equals(ZinConstant.CP213)) {
+            // 没有申请单
+            if (notify.getApplyid() == null) {
+                JMoneyEntity notifyInsert = ConvertUtils.sourceToTarget(notify, JMoneyEntity.class);
+                jMoneyDao.insert(notifyInsert);
+                // 匹配到商户
+                this.match(notifyInsert);
+                return;
+            }
+            // 有申请单
+            this.withApply(notify);
             return;
         }
-        // 有申请单
-        this.withApply(notify);
+
+        if (notify.getTrxcod().equals(ZinConstant.CP201)) {
+            log.info("CP201 todo");
+            throw new RenException("cp201尚未实现");
+        }
     }
 
     // 账户匹配来账到子商户

@@ -1,10 +1,12 @@
 package io.renren.zbalance.ledgers;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.zadmin.dao.JCardDao;
 import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.entity.*;
 import io.renren.zbalance.LedgerConstant;
 import io.renren.zbalance.LedgerUtil;
+import io.renren.zcommon.ZinConstant;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -50,17 +52,16 @@ public class LedgerCardWithdraw {
         ledgerUtil.confirmUpdate(subSum, LedgerConstant.ORIGIN_TYPE_CARD_WITHDRAW, LedgerConstant.FACT_CARD_WITHDRAW_CONFIRM, entity.getId(), factMemo, factAmount);
         // 记账2: 子商户Va+
         ledgerUtil.ledgeUpdate(subVa, LedgerConstant.ORIGIN_TYPE_CARD_WITHDRAW, LedgerConstant.FACT_CARD_WITHDRAW_IN, entity.getId(), factMemo, factAmount);
-        // 预付费主卡提现: todo
+
+        // 预付费主卡提现
+        if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_PREPAID)) {
+            JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
+                    .eq(JCardEntity::getCardno, entity.getCardno())
+            );
+            JBalanceEntity ppMain = ledgerUtil.getPrepaidAccount(cardEntity.getId(), cardEntity.getCurrency());
+            ledgerUtil.ledgeUpdate(ppMain, LedgerConstant.ORIGIN_TYPE_CARD_WITHDRAW, LedgerConstant.FACT_CARD_WITHDRAW_OUT_PREPAID_MAIN, entity.getId(), factMemo, factAmount);
+        }
     }
 
-    // 释放商户担保金
-    public void ledgeMfree(JMfreeEntity entity) {
-        JBalanceEntity mVa = ledgerUtil.getVaAccount(entity.getMerchantId(), entity.getCurrency());
-        JBalanceEntity depVa = ledgerUtil.getDepositAccount(entity.getMerchantId(), entity.getCurrency());
-        String factMemo = String.format("释放担保金:%s", BigDecimal.ZERO.add(entity.getAmount()).setScale(2, RoundingMode.HALF_UP));
-        // 记账1: 商户担保金-
-        ledgerUtil.ledgeUpdate(depVa, LedgerConstant.ORIGIN_TYPE_MFREE, LedgerConstant.FACT_MFREE_OUT, entity.getId(), factMemo, entity.getAmount().negate());
-        // 记账2: 商户Va+
-        ledgerUtil.ledgeUpdate(mVa, LedgerConstant.ORIGIN_TYPE_MFREE, LedgerConstant.FACT_MFREE_IN, entity.getId(), factMemo, entity.getAmount());
-    }
+
 }

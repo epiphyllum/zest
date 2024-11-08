@@ -1,7 +1,5 @@
 package io.renren.zadmin.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import io.renren.commons.tools.utils.DateUtils;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -10,11 +8,11 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 /**
-* j_withdraw
-*
-* @author epiphyllum epiphyllum.zhou@gmail.com
-* @since 3.0 2024-08-19
-*/
+ * j_withdraw
+ *
+ * @author epiphyllum epiphyllum.zhou@gmail.com
+ * @since 3.0 2024-08-19
+ */
 @Data
 @Schema(description = "j_withdraw")
 public class JWithdrawDTO implements Serializable {

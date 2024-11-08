@@ -20,7 +20,6 @@ import io.renren.commons.mybatis.entity.BaseEntity;
 @TableName("j_mfree")
 public class JMfreeEntity extends BaseEntity {
     private static final long serialVersionUID = 1L;
-
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updater;
     @TableField(fill = FieldFill.INSERT_UPDATE)
@@ -33,6 +32,4 @@ public class JMfreeEntity extends BaseEntity {
     private String merchantName;
     private BigDecimal amount;
     private String currency;
-
-
 }

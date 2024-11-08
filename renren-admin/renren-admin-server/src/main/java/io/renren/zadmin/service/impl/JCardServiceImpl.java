@@ -62,19 +62,13 @@ public class JCardServiceImpl extends CrudServiceImpl<JCardDao, JCardEntity, JCa
 
         String marketproduct = (String) params.get("marketproduct");
         if (StringUtils.isNotBlank(marketproduct)) {
-            wrapper.eq("marketproduct", marketproduct);
+            String[] split = marketproduct.split(",");
+            wrapper.in("marketproduct", List.of(split));
         }
 
         String surname = (String) params.get("surname");
         if (StringUtils.isNotBlank(surname)) {
             wrapper.eq("surname", surname);
-        }
-
-        // 0:主卡， 1:子卡,  2:vpa子卡
-        String cardclass = (String) params.get("cardclass");
-        if (StringUtils.isNotBlank(cardclass)) {
-            String[] split = cardclass.split(",");
-            wrapper.in("cardclass", List.of(split));
         }
 
         String name = (String) params.get("name");
@@ -87,10 +81,9 @@ public class JCardServiceImpl extends CrudServiceImpl<JCardDao, JCardEntity, JCa
             // 卡片管理: 需要卡状态是新的, 发卡成功后，
             wrapper.eq("state", ZinConstant.CARD_APPLY_SUCCESS);
         } else {
-            // 发卡管理
-            // wrapper.ne("state", ZinConstant.CARD_APPLY_SUCCESS);
+            // 发卡管理: 不展示VPA子卡， 因为vpa子卡不是这里发行的
+            wrapper.notIn("marketproduct", List.of(ZinConstant.MP_VPA_SHARE, ZinConstant.MP_VPA_PREPAID));
         }
-
         return wrapper;
     }
 

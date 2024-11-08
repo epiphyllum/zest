@@ -74,11 +74,13 @@ public class JCardController {
             });
         }
         // 查询更新余额
-        List<String> list = page.getList().stream().filter(c -> c.getState().equals(ZinConstant.CARD_APPLY_SUCCESS))
-                .map(JCardDTO::getCardno).toList();
-        Map<String, BigDecimal> balanceMap = jCardManager.batchBalance(list);
-        for (JCardDTO jCardDTO : page.getList()) {
-            jCardDTO.setBalance(balanceMap.get(jCardDTO.getCardno()));
+        if (params.get("normal") != null) {
+            List<String> list = page.getList().stream().filter(c -> c.getState().equals(ZinConstant.CARD_APPLY_SUCCESS))
+                    .map(JCardDTO::getCardno).toList();
+            Map<String, BigDecimal> balanceMap = jCardManager.batchBalance(list);
+            for (JCardDTO jCardDTO : page.getList()) {
+                jCardDTO.setBalance(balanceMap.get(jCardDTO.getCardno()));
+            }
         }
         return new Result<PageData<JCardDTO>>().ok(page);
     }
@@ -287,8 +289,8 @@ public class JCardController {
     @Operation(summary = "预付费卡充值")
     @LogOperation("预付费卡充值")
     @PreAuthorize("hasAuthority('zorg:jcard:prepaidCharge')")
-    public Result prepaidCharge(@RequestParam("id") Long id, @RequestParam("amount") BigDecimal amount) {
-        jCardManager.prepaidCharge(id, amount);
+    public Result prepaidCharge(@RequestParam("id") Long id, @RequestParam("adjustAmount") BigDecimal adjustAmount) {
+        jCardManager.prepaidCharge(id, adjustAmount);
         return Result.ok;
     }
 
@@ -296,8 +298,8 @@ public class JCardController {
     @Operation(summary = "预付费卡提现")
     @LogOperation("预付费卡提现")
     @PreAuthorize("hasAuthority('zorg:jcard:prepaidWithdraw')")
-    public Result prepaidWithdraw(@RequestParam("id") Long id, @RequestParam("amount") BigDecimal amount) {
-        jCardManager.prepaidWithdraw(id, amount);
+    public Result prepaidWithdraw(@RequestParam("id") Long id, @RequestParam("adjustAmount") BigDecimal adjustAmount) {
+        jCardManager.prepaidWithdraw(id, adjustAmount);
         return Result.ok;
     }
 
@@ -305,8 +307,11 @@ public class JCardController {
     @Operation(summary = "共享卡设置额度")
     @LogOperation("共享卡设置额度")
     @PreAuthorize("hasAuthority('zorg:jcard:setQuota')")
-    public Result setQuota(@RequestParam("id") Long id, @RequestParam("amount") BigDecimal amount) {
-        jCardManager.setQuota(id, amount);
+    public Result setQuota(@RequestParam("id") Long id,
+                           @RequestParam("authmaxamount") BigDecimal authmaxamount,
+                           @RequestParam(value = "authmaxcount", required = false) Integer authmaxcount
+    ) {
+        jCardManager.setQuota(id, authmaxamount, authmaxcount);
         return Result.ok;
     }
 

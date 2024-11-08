@@ -1,10 +1,12 @@
 package io.renren.zbalance.ledgers;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.zadmin.dao.JCardDao;
 import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.entity.*;
 import io.renren.zbalance.LedgerConstant;
 import io.renren.zbalance.LedgerUtil;
+import io.renren.zcommon.ZinConstant;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -50,7 +52,15 @@ public class LedgerCardCharge {
         // 记账2: 子商户subSum+
         ledgerUtil.ledgeUpdate(subSum, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_IN, entity.getId(), factMemo, factAmount);
 
-        // 如果是给预付费主卡充值: todo
+        // 预付费主卡充值
+        if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_PREPAID)) {
+            JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
+                    .eq(JCardEntity::getCardno, entity.getCardno())
+            );
+            JBalanceEntity ppMain = ledgerUtil.getPrepaidAccount(cardEntity.getId(), cardEntity.getCurrency());
+            ledgerUtil.ledgeUpdate(ppMain, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_IN_PREPAID_MAIN, entity.getId(), factMemo, factAmount);
+        }
+
     }
 
 }

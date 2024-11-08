@@ -20,8 +20,6 @@ import io.renren.commons.mybatis.entity.BaseEntity;
 @TableName("j_withdraw")
 public class JWithdrawEntity extends BaseEntity {
     private static final long serialVersionUID = 1L;
-
-    // (3+2)
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updater;
     @TableField(fill = FieldFill.INSERT_UPDATE)
@@ -48,5 +46,4 @@ public class JWithdrawEntity extends BaseEntity {
     private String state;
     private String stateexplain;
     private BigDecimal securityamount;
-    private Integer version;
 }

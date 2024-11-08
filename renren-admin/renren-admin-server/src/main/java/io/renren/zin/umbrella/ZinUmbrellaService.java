@@ -1,17 +1,22 @@
 package io.renren.zin.umbrella;
 
+import io.renren.zcommon.ZestConfig;
 import io.renren.zin.ZinRequester;
 import io.renren.zin.umbrella.dto.*;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.CompletableFuture;
 
 import static io.renren.zcommon.CommonUtils.uniqueId;
 
 @Service
+@Slf4j
 public class ZinUmbrellaService {
-
     @Resource
-    ZinRequester requester;
+    private ZinRequester requester;
+
 
     /**
      * 8000-入金申请
@@ -32,6 +37,8 @@ public class ZinUmbrellaService {
     public TMoneyConfirmResponse depositConfirm(TMoneyConfirm confirm) {
         String requestId = uniqueId();
         TMoneyConfirmResponse response = requester.request(requestId, "/gcpapi/card/vadepositconfirm", confirm, TMoneyConfirmResponse.class);
+
+
         return response;
     }
 

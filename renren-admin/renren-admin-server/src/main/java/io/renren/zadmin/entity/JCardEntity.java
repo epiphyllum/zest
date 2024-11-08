@@ -39,7 +39,6 @@ public class JCardEntity extends BaseEntity {
 
     //
     private String marketproduct;
-    private String cardclass;
     private String maincardno;
 
     // 请求数据(5)

@@ -1,13 +1,12 @@
 package io.renren.zbalance.ledgers;
 
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import io.renren.commons.tools.exception.RenException;
 import io.renren.zadmin.dao.JCardDao;
 import io.renren.zadmin.dao.JMerchantDao;
-import io.renren.zadmin.entity.*;
+import io.renren.zadmin.entity.JBalanceEntity;
+import io.renren.zadmin.entity.JExchangeEntity;
+import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zbalance.LedgerConstant;
 import io.renren.zbalance.LedgerUtil;
-import io.renren.zcommon.ZinConstant;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -136,7 +135,6 @@ public class LedgerExchange {
         log.debug("reverse in:     {} = (100 * {}) / {}", total, entity.getAmount(), vaShare);
         log.debug("reverse deposit:{} = {} * {}", depositAmount, total, merchant.getDepositRate());
         log.debug("reverse fee:    {} = {} - {} - {}", feeAmount, total, depositAmount, vaAmount);
-
 
         // 反算实际目标账户的入金
         BigDecimal targetTotal = hundred.multiply(entity.getStlamount()).divide(vaShare, 2, RoundingMode.HALF_UP);

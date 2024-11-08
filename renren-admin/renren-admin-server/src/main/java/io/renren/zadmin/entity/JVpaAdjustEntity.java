@@ -30,8 +30,8 @@ public class JVpaAdjustEntity extends BaseEntity {
     private String maincardno;
     private String cardno;
     private BigDecimal adjustAmount;
-    private BigDecimal oldQuote;
-    private BigDecimal newQuote;
+    private BigDecimal oldQuota;
+    private BigDecimal newQuota;
     private String state;
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updater;

@@ -38,7 +38,6 @@ public class JDepositEntity extends BaseEntity {
     // 卡充值信息
     private String meraplid;
     private String marketproduct;
-    private String maincardno;
     private String cardno;
     private String payerid;
     private BigDecimal amount;

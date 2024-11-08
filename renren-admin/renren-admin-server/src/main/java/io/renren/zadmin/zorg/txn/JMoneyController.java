@@ -101,7 +101,7 @@ public class JMoneyController {
         entity.setApi(0);
         entity.setMeraplid(CommonUtils.uniqueId());
         JMerchantEntity merchant = jMerchantDao.selectById(dto.getMerchantId());
-        jMoneyManager.saveAndSubmit(entity, merchant, dto.getCardId());
+        jMoneyManager.saveAndSubmit(entity, merchant, dto.getCardid());
         return new Result();
     }
 
@@ -158,19 +158,32 @@ public class JMoneyController {
 
     /**
      * 匹配来账
+     *
      * @param id
      * @return
      */
     @GetMapping("match")
     @Operation(summary = "匹配来账")
     @LogOperation("匹配来账")
-    @PreAuthorize("hasAuthority('zorg:jmoney:update')")
+    @PreAuthorize("hasAuthority('zorg:jmoney:match')")
     public Result match(@RequestParam("id") Long id) {
         UserDetail user = SecurityUser.getUser();
         if (!user.getUserType().equals("operation") && !user.getUserType().equals("agent") && !user.getUserType().equals("merchant")) {
             return Result.fail(9999, "not authorized, you are " + user.getUserType());
         }
         // todo
+        return new Result();
+    }
+
+    //////////////////////////////////////////
+    @GetMapping("mockMoneyInNotify")
+    @Operation(summary = "模拟入账通知")
+    @LogOperation("模拟入账通知")
+    @PreAuthorize("hasAuthority('zorg:jmoney:mockNotify')")
+    public Result mockMoneyInNotify(@RequestParam("id") Long id) {
+        // 查询出来
+        JMoneyEntity jMoneyEntity = jMoneyDao.selectById(id);
+        jMoneyManager.mockMoneyInNotify(jMoneyEntity);
         return new Result();
     }
 }

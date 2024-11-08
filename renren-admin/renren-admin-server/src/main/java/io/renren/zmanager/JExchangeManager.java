@@ -35,7 +35,7 @@ public class JExchangeManager {
      * 保存
      */
     public void save(JExchangeEntity entity) {
-        entity.setState(ZinConstant.PAY_APPLY_NA_DJ);  // 内部状态新建
+        entity.setState(ZinConstant.PAY_APPLY_NEW_DJ);  // 内部状态新建
         tx.executeWithoutResult(status -> {
             jExchangeDao.insert(entity);
             ledgerExchange.ledgeExchangeFreeze(entity);

@@ -90,11 +90,6 @@ public class JMoneyDTO implements Serializable {
     @Schema(description = "通联状态")
     private String state;
 
-
-    // 匹配状态(1)
-    @Schema(description = "状态")
-    private Integer status;
-
     // 通知下游(3)
     @Schema(description = "通知状态")
     private Integer notifyStatus;
@@ -102,5 +97,5 @@ public class JMoneyDTO implements Serializable {
     private Integer notifyCount;
 
     // 通联来账白名单卡id
-    private String cardId;
+    private String cardid;
 }

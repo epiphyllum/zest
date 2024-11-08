@@ -70,7 +70,7 @@ public class JMerchantManager {
         }
 
         // 上传商户附件
-        this.uploadFiles(jMerchantEntity);
+        // this.uploadFiles(jMerchantEntity);
 
         SysDeptEntity agentDept = sysDeptDao.selectById(agentId);
         String agentName = agentDept.getName();
@@ -160,10 +160,9 @@ public class JMerchantManager {
         // 拿到所有文件fid
         String agreementfid = jMerchantEntity.getAgreementfid();
         String buslicensefid = jMerchantEntity.getBuslicensefid();
-        String creditfid = jMerchantEntity.getCreditfid();
+        String credifid = jMerchantEntity.getCredifid();
         String legalphotobackfid = jMerchantEntity.getLegalphotobackfid();
         String legalphotofrontfid = jMerchantEntity.getLegalphotofrontfid();
-        String taxfid = jMerchantEntity.getTaxfid();
         String organfid = jMerchantEntity.getOrganfid();
 
         List<String> fids = new ArrayList<>();
@@ -173,17 +172,14 @@ public class JMerchantManager {
         if (buslicensefid != null) {
             fids.add(buslicensefid);
         }
-        if (creditfid != null) {
-            fids.add(agreementfid);
+        if (credifid != null) {
+            fids.add(credifid);
         }
         if (legalphotobackfid != null) {
             fids.add(legalphotobackfid);
         }
         if (legalphotofrontfid != null) {
             fids.add(legalphotofrontfid);
-        }
-        if (taxfid != null) {
-            fids.add(taxfid);
         }
         if (organfid != null) {
             fids.add(organfid);
@@ -198,6 +194,7 @@ public class JMerchantManager {
                 return zinFileService.upload(fid);
             }));
         }
+
         jobs.forEach((j, f) -> {
             log.info("wait {}...", j);
             try {

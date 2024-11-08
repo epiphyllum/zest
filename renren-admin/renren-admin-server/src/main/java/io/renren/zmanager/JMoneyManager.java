@@ -4,18 +4,18 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.tools.exception.RenException;
 import io.renren.zadmin.dao.JMaccountDao;
-import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.dao.JMoneyDao;
 import io.renren.zadmin.entity.JMaccountEntity;
 import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zadmin.entity.JMoneyEntity;
 import io.renren.zcommon.CommonUtils;
+import io.renren.zcommon.ZestConfig;
+import io.renren.zcommon.ZinConstant;
+import io.renren.zin.accountmanage.ZinAccountManageNotifyService;
+import io.renren.zin.accountmanage.dto.TMoneyInNotify;
 import io.renren.zin.file.ZinFileService;
 import io.renren.zin.umbrella.ZinUmbrellaService;
-import io.renren.zin.umbrella.dto.TMoneyApply;
-import io.renren.zin.umbrella.dto.TMoneyApplyResponse;
-import io.renren.zin.umbrella.dto.TMoneyConfirm;
-import io.renren.zin.umbrella.dto.TMoneyConfirmResponse;
+import io.renren.zin.umbrella.dto.*;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,7 +28,10 @@ import java.util.concurrent.CompletableFuture;
 @Service
 @Slf4j
 public class JMoneyManager {
-
+    @Resource
+    private ZestConfig zestConfig;
+    @Resource
+    private ZinAccountManageNotifyService zinAccountManageNotifyService;
     @Resource
     private ZinFileService zinFileService;
     @Resource
@@ -45,8 +48,15 @@ public class JMoneyManager {
         entity.setAgentName(merchant.getAgentName());
         entity.setAgentId(merchant.getAgentId());
 
+        // 初始状态
+        entity.setState(ZinConstant.MONEY_IN_NEW);
+
         // 填充来账账户信息
         JMaccountEntity jMaccountEntity = jMaccountDao.selectOne(Wrappers.<JMaccountEntity>lambdaQuery().eq(JMaccountEntity::getCardid, cardId));
+        if (jMaccountEntity == null) {
+            log.error("找不到来账账户: {}", cardId);
+            throw new RenException("账户不存在");
+        }
         entity.setCardname(jMaccountEntity.getCardname());
         entity.setCardno(jMaccountEntity.getCardno());
 
@@ -89,17 +99,6 @@ public class JMoneyManager {
 
     // confirm
     public void confirm(JMoneyEntity entity) {
-        // 更新
-        JMoneyEntity updateEntity = new JMoneyEntity();
-        updateEntity.setId(entity.getId());
-        updateEntity.setTransferfid(entity.getTransferfid());
-        updateEntity.setOtherfid(entity.getOtherfid());
-        updateEntity.setApplyAmount(entity.getApplyAmount());
-        jMoneyDao.updateById(updateEntity);
-
-        // 上传文件到通联
-        this.uploadFiles(entity);
-
         // 提交通联
         TMoneyConfirm confirm = new TMoneyConfirm();
         confirm.setApplyid(entity.getApplyid());
@@ -108,11 +107,31 @@ public class JMoneyManager {
         confirm.setTransferfid(entity.getTransferfid());
         TMoneyConfirmResponse response = zinUmbrellaService.depositConfirm(confirm);
 
-        // 更新为待匹配
-        jMoneyDao.update(null, Wrappers.<JMoneyEntity>lambdaUpdate()
-                .eq(JMoneyEntity::getId, entity.getId())
-                .set(JMoneyEntity::getStatus, 0)
-        );
+        // 更新
+        JMoneyEntity updateEntity = new JMoneyEntity();
+        updateEntity.setId(entity.getId());
+        updateEntity.setTransferfid(entity.getTransferfid());
+        updateEntity.setOtherfid(entity.getOtherfid());
+        updateEntity.setApplyAmount(entity.getApplyAmount());
+        updateEntity.setState(ZinConstant.MONEY_IN_CONFIRMED);
+        jMoneyDao.updateById(updateEntity);
+    }
+
+    public void mockMoneyInNotify(JMoneyEntity entity) {
+        TMoneyInNotify notify = new TMoneyInNotify();
+        notify.setAmount(entity.getApplyAmount());
+        notify.setApplyid(entity.getApplyid());
+        notify.setPs(entity.getReferencecode());
+        notify.setTrxcod(ZinConstant.CP213);
+        notify.setNid(CommonUtils.uniqueId());
+        notify.setBid(CommonUtils.uniqueId());
+        notify.setPayeraccountno(entity.getCardno());
+        notify.setPayeraccountbank("未知银行");
+        notify.setPayeraccountcountry("CHN");
+        notify.setPayeraccountname("未知名称");
+        log.info("模拟通联入金通知: {}", notify);
+        zinAccountManageNotifyService.handle(notify);
+
     }
 
 }

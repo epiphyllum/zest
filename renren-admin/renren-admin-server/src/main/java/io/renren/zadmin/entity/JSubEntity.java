@@ -20,8 +20,6 @@ import java.util.Date;
 @TableName("j_sub")
 public class JSubEntity extends BaseEntity {
     private static final long serialVersionUID = 1L;
-
-    // (3+2) 通用
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updater;
     @TableField(fill = FieldFill.INSERT_UPDATE)

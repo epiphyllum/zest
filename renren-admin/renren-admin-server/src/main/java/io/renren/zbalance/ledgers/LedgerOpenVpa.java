@@ -29,22 +29,14 @@ public class LedgerOpenVpa {
 
     // VPA子卡开卡费
     public void ledgeOpenVpaFreeze(JVpaJobEntity entity) {
-
         // 子商户va扣除费用冻结
         JBalanceEntity subVa = ledgerUtil.getSubVaAccount(entity.getSubId(), entity.getFeecurrency());
         String factMemo = "冻结vpa开卡费用:" + BigDecimal.ZERO.add(entity.getMerchantfee()).setScale(2, RoundingMode.HALF_UP);
         BigDecimal factAmount = entity.getMerchantfee();
         ledgerUtil.freezeUpdate(subVa, LedgerConstant.ORIGIN_VPA_OPEN, LedgerConstant.FACT_VPA_OPEN_FREEZE, entity.getId(), factMemo, factAmount);
 
-        // 如果发行的是预防子卡, 需要冻结预付费主卡
+        // 如果发行的是预付费子卡, 需要冻结预付费主卡总授权额度
         if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_PREPAID)) {
-            BigDecimal totalAuth = entity.getAuthmaxamount().multiply(new BigDecimal(entity.getNum()));
-            BigDecimal requiredAmount = totalAuth.add(entity.getMerchantfee());
-            JBalanceEntity subVaAccount = ledgerUtil.getSubVaAccount(entity.getSubId(), entity.getFeecurrency());
-            if (subVaAccount.getBalance().compareTo(requiredAmount) < 0) {
-                String msg = "账户余额不足, 当前账户余额:" + subVaAccount.getBalance() + ",发卡需要资金:" + totalAuth + ",发卡费用:" + entity.getMerchantfee();
-                throw new RenException(msg);
-            }
             ledgerPrepaidOpenCharge.ledgePrepaidOpenChargeFreeze(entity);
         }
     }
@@ -60,7 +52,6 @@ public class LedgerOpenVpa {
         if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_PREPAID)) {
             ledgerPrepaidOpenCharge.ledgePrepaidOpenChargeUnFreeze(entity);
         }
-
     }
 
     // 确认VPA子卡开通

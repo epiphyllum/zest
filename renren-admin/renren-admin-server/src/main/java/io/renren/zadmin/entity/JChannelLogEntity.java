@@ -19,6 +19,10 @@ import io.renren.commons.mybatis.entity.BaseEntity;
 @TableName("j_channel_log")
 public class JChannelLogEntity extends BaseEntity {
     private static final long serialVersionUID = 1L;
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private Long updater;
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private Date updateDate;
 
     private String ip;
     private String reqId;
@@ -26,9 +30,4 @@ public class JChannelLogEntity extends BaseEntity {
     private String recv;
     private String send;
     private String sign;
-    @TableField(fill = FieldFill.INSERT_UPDATE)
-    private Long updater;
-    @TableField(fill = FieldFill.INSERT_UPDATE)
-    private Date updateDate;
-
 }

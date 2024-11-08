@@ -20,7 +20,7 @@ public class JMaccountManager {
     private ZinUmbrellaService zinUmbrellaService;
 
     public void save(JMaccountEntity entity) {
-        entity.setState(ZinConstant.MONEY_ACCOUNT_NEW_DJ);  // todo:  T: 待提交
+        entity.setState(ZinConstant.MONEY_ACCOUNT_NEW_DJ);
         entity.setApi(1);
         jMaccountDao.insert(entity);
     }
