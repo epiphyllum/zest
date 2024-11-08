@@ -13,7 +13,7 @@ create table j_withdraw
     api            int            not null default 1,
 
     meraplid       varchar(32)    not null comment '申请单流水',
-    marketproduct  varchar(16)    not null comment '产品',
+    marketproduct  varchar(17)    not null comment '产品',
     cardno         varchar(30)    not null comment '卡号',
     payeeid        varchar(30) comment '交易对手',
     currency       varchar(3) comment '币种',
@@ -26,7 +26,6 @@ create table j_withdraw
     securityamount decimal(18, 2) null,
 
     -- basic
-    version        int            not null default 0 comment '乐观锁版本号',
     creator        bigint comment '创建者',
     create_date    datetime comment '创建时间',
     updater        bigint comment '更新者',
@@ -39,6 +38,6 @@ create index idx_j_withdraw_1 on j_withdraw (agent_id, create_date);
 create index idx_j_withdraw_2 on j_withdraw (merchant_id, create_date);
 create index idx_j_withdraw_3 on j_withdraw (sub_id, create_date);
 create index idx_j_withdraw_4 on j_withdraw (merchant_id, meraplid);
-create unique index  uidx_j_withdraw_1 on j_withdraw(applyid);
+create unique index uidx_j_withdraw_1 on j_withdraw (applyid);
 
 

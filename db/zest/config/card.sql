@@ -14,12 +14,9 @@ create table j_card
     api                  int            not null default 1,
 
     --
-    marketproduct       varchar(16) comment '对外卡产品',
-
+    marketproduct        varchar(16) comment '对外卡产品',
     --
-    cardclass            varchar(16) comment 'VccMain, VccSub, VpaMain, VpaSub',
     maincardno           varchar(30) comment 'vpa main card no',                    --
-
     -- request
     meraplid             varchar(32) comment '申请单流水',                          -- 	meraplid	String	32	Y	客户自己生成，保持唯一
     cardtype             varchar(2) comment '卡片种类',                             --	cardtype	String	2	Y	1：虚拟卡，（产品类型为：通华金服VISA虚拟卡、通华VPA电子卡）4：虚实同发，（产品类型为：通华金服VISA公务卡、万商义乌VISA商务卡）
@@ -27,16 +24,14 @@ create table j_card
     belongtype           varchar(2) comment '主体类型',                             --	belongtype	String	2	Y	1：员工 2：合作企业
     producttype          varchar(6) comment '卡产品',                               --	cardtype	String	2	Y	1：虚拟卡，（产品类型为：通华金服VISA虚拟卡、通华VPA电子卡）4：虚实同发，（产品类型为：通华金服VISA公务卡、万商义乌VISA商务卡）
     cusid                varchar(30) comment '通联子商id',                          --   主体类型为合作企业时必填，【子商户创建】结果返回的cusid
-
     -- 2
     nationality          varchar(3) comment '国籍',                                 --	nationality	String	3	Y	见附录【国别信息】中的CODE,如中国：CHN
     companyposition      varchar(50) comment '公司职位',                            --	companyposition	String	50	Y	1：法人代表2：董事3：高级管理员4：经理5：职员
-
     -- 3
     surname              varchar(20) comment '姓氏',                                --	surname	String	20	Y
     `name`               varchar(30) comment '名字',                                --	name	String	30	Y
     birthday             varchar(10) comment '出生日期',                            --	birthday	String	10	Y	YYYYMMDD
-
+    -- 4
     idtype               varchar(2) comment '证件1类型',                            -- idtype	String	2	Y	01：居民身份证（国籍为中国）04：护照（国籍为非中国）
     idnumber             varchar(30) comment '证件1号码',                           -- idnumber	String	30	Y
     idtype2              varchar(2) comment '证件2类型',                            --	国籍不为中国时必填01：居民身份证02：军人或武警身份证03：港澳台通行证04：护照05：其他有效旅行证件06：其他类个人有效证件
@@ -101,18 +96,20 @@ create table j_card
     onlhkflag            varchar(1),
     -- 期限卡
     begindate            varchar(10),
-    enddate               varchar(10),
+    enddate              varchar(10),
     -- 周期卡
     naturalmonthflag     varchar(1),
     naturalmonthstartday varchar(2),
     -- 单次卡
     fixedamountflag      varchar(1),
+    -- 允许币种
+    permit_currency      varchar(60),
 
     -- vpa子卡字段
-    vpa_job              bigint comment '那个vpa的卡',
+    vpa_job              bigint comment '那个vpa的卡ID',
 
     -- 可用授权额度:
-    prepaid_available    decimal(18,2),
+    prepaid_available    decimal(18, 2),
 
     -- basic
     creator              bigint comment '创建者',

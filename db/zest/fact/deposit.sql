@@ -15,6 +15,7 @@ create table j_deposit
 
     -- 请求字段(7)
     meraplid       varchar(32)    not null,                -- 申请单流水	meraplid	String	32	Y
+    marketproduct  varchar(16)    not null,                --
     cardno         varchar(30)    not null,                -- 卡号	cardno	String	30	Y
     payerid        varchar(30)    not null,                -- 出账账户	payerid	String	30	Y
     amount         decimal(18, 2) not null,                -- 缴纳金额	amount	Number	18,2	Y

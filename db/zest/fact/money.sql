@@ -43,7 +43,6 @@ create table j_money
     state               varchar(2) comment '通联状态',
 
     -- 匹配情况
-    `status`            int         not null default 0 comment '2: 匹配失败, 1: 匹配成功, 0: 待匹配',
     notify_status       int         not null default 0 comment '',
     notify_count        int         not null default 0,
 

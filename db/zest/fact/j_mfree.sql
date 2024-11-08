@@ -1,12 +1,11 @@
 -- j_free: 全部是子商户的: 担保金释放
-drop table if exists j_free;
-create table j_free
+drop table if exists j_mfree;
+create table j_mfree
 (
-    id            bigint         not null,
-
-    agent_id     bigint not null,
-    agent_name varchar(50) not null,
-    merchant_id bigitn not null,
+    id            bigint      not null,
+    agent_id      bigint      not null,
+    agent_name    varchar(50) not null,
+    merchant_id   bigint      not null,
     merchant_name varchar(50) not null,
 
     -- basic
@@ -18,5 +17,5 @@ create table j_free
 ) ENGINE = InnoDB
   collate utf8mb4_bin
   DEFAULT CHARACTER SET utf8mb4 COMMENT ='j_free';
-create index idx_j_free_1 on j_free (agent_id, create_date);
-create index idx_j_free_2 on j_free (merchant_id, create_date);
+create index idx_j_mfree_1 on j_mfree (agent_id, create_date);
+create index idx_j_mfree_2 on j_mfree (merchant_id, create_date);

@@ -37,6 +37,8 @@ create table j_vpa_job
     num                  int            not null comment '开卡数量',
     email                varchar(30)    not null comment '邮箱',
     cardexpiredate       varchar(10)    not null comment '卡有效期',
+
+    marketproduct        varchar(16)    not null comment '产品',
     -- 接口
     meraplid             varchar(32)    not null comment '商户发起的meraplid, 我们用id',
     applyid              varchar(32)    null comment '通联返回',
@@ -67,9 +69,10 @@ create table j_vpa_adjust
     maincardno    varchar(30)    not null comment '主卡卡号',
     cardno        varchar(30)    not null comment 'vpa子卡',
     adjust_amount decimal(18, 2) not null comment '调整金额',
-    old_quota     decimal(18, 2) not null comment '调整期额度',
+    old_quota     decimal(18, 2) not null comment '调整前额度',
     new_quota     decimal(18, 2) not null comment '调整后额度',
     state         varchar(2)     not null default '00' comment '调整状态',
+
     -- basic
     creator       bigint comment '创建者',
     create_date   datetime comment '创建时间',

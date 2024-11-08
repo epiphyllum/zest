@@ -24,26 +24,33 @@ create table j_merchant
     legalarea          varchar(10) comment '法人国籍',                                      --	legalarea	String	10	Y	见附录【国别信息】中的CODE,如中国：CHN
     legalidtype        varchar(10) comment '法人证件类型',                                  --	legalidtype	String	10	Y	01：居民身份证 02：军人或武警身份证, 03：港澳台通行证, 4：护照, 05：其他有效旅行证件 06：其他类个人有效证件
     legalidno          varchar(30) comment '法人证件号',                                    --	legalidno	String	30	Y legalidexpire varchar(30) not null, -- 法人证件有效期	legalidexpire	String	30	Y	YYYYMMDD
+    legalidexpire      varchar(30) comment '法人证件有效期',                                    --	legalidexpire	String	30	Y legalidexpire varchar(30) not null, -- 法人证件有效期	legalidexpire	String	30	Y	YYYYMMDD
     legaladdress       varchar(200) comment '法人代表住址',                                 --	legaladdress	String	200	Y
     threcertflag       varchar(2) comment '是否三证合一',                                   --	threcertflag	String	2	C	0-否、1-是 注册国家/地区areacode为CHN时必填
+
     buslicense         varchar(10) comment '营业执照代码',                                  --	buslicense	String	10	C	注册国家/地区areacode不为CHN时，或者注册国家/地区areacode为CHN，三证不合一时，填营业执照代码
     buslicenseexpire   varchar(30) comment '营业执照有效期',                                --	buslicenseexpire	String	30	C	YYYYMMDD，注册国家/地区areacode不为CHN时，或者注册国家/地区areacode为CHN，三证不合一时，填营业执照有效期
+
     creditcode         varchar(30) comment '统一社会信用证代码/税务登记证代码',             --	creditcode	String	30	C	注册国家/地区areacode为CHN，三证合一时，填入统一社会信用证代码；三证不合一时，填入税务登记证代码有效期
     creditcodeexpire   varchar(30) comment '统一社会信用证代码有效期/税务登记证代码有效期', --	creditcodeexpire	String	30	C	YYYYMMDD，注册国家/地区areacode为CHN，三证合一时，填入统一社会信用证代码有效期；三证不合一时，填入税务登记证代码有效期
+
     organcode          varchar(30) comment '组织机构代码/公司注册证书(CR)编号',             --	organcode	String	30	C	注册国家/地区areacode为CHN，三证不合一时，填入组织机构代码
     organcodeexpire    varchar(30) comment '组织机构代码/公司注册证书(CR)编号有效期',       --	organcodeexpire	String	30	C	注册国家/地区areacode为CHN，三证不合一时，填入组织机构代码有效期
+
     legaloccop         varchar(30) comment '法人代表职业',                                  --	legaloccop	String	30	O
     legaltel           varchar(30) comment '法人代表手机号码',                              --	legaltel	String	30	O
+
     holdername         varchar(30) comment '控股股东或实际控制人姓名',                      --	holdername	String	30	O
     holderidno         varchar(30) comment '控股股东或实际控制人证件号',                    --	holderidno	String	30	O
     holderexpire       varchar(30) comment '控股股东或实际控制人证件有效期',                --	holderexpire	String	30	O	YYYYMMDD
+
     legalphotofrontfid varchar(200) comment '法人身份证正面',                               --	legalphotofrontfid	String	200	Y	附件fid
     legalphotobackfid  varchar(200) comment '法人身份证正面',                               --	legalphotobackfid	String	200	Y	附件fid
     agreementfid       varchar(200) comment '子卡商户合作协议',                             --	agreementfid	String	200	Y	附件fid
-    creditfid          varchar(200) comment '统一社会信用证及影印件',                       --	credifid	String	200	C	注册国家/地区areacode为CHN，三证合一时，填入统一社会信用证及影印件上传文件fid
+    credifid           varchar(200) comment '统一社会信用证及影印件',                       --	credifid	String	200	C	注册国家/地区areacode为CHN，三证合一时，填入统一社会信用证及影印件上传文件fid
     buslicensefid      varchar(200) comment '营业执照',                                     --	buslicensefid	String	200	C	附件fid
-    taxfid             varchar(200) comment '税务登记证及影印件',                           --	taxfid	String	200	C	注册国家/地区areacode为CHN，三证不合一时，填入税务登记证及影印件上传文件fid
     organfid           varchar(200) comment '组织机构代码及影印件',                         --	organfid	String	200	C	注册国家/地区areacode为CHN，三证不合一时，填入组织机构代码及影印件上传文件fid
+
     -- 通联应答:response
     cusid              varchar(15) comment '通联子商户号: 会从零时商户号变正式商户号',      --	cusid	String	15	A	状态为审核成功时返回
     state              varchar(2) comment '状态',                                           -- state	String	2	Y	04：审核成功; 05：审核失败; 其他情况为空;

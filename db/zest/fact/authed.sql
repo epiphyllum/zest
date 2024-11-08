@@ -3,14 +3,13 @@ drop table if exists j_authed;
 create table j_authed
 (
     id            bigint         not null,
-
+    -- ids
     agent_id      bigint,
     agent_name    varchar(50),
     merchant_id   bigint         not null comment '商户ID',
     merchant_name varchar(50)    not null comment '商户名称',
     sub_id        bigint,
     sub_name      varchar(50),
-
     -- info
     cardno        varchar(16)    not null, -- 卡号	cardno	String	16	Y
     trxtype       varchar(25)    not null, -- 交易类型	trxtype	String	25	Y	见附录【授权交易类型】
@@ -27,9 +26,7 @@ create table j_authed
     authcode      varchar(50),             -- 授权码	authcode	String	50	O
     logkv         varchar(50),             -- 流水号	logkv	String	50	O
     mcc           varchar(20),             -- 商户类别代码	mcc	String	20	O
-
     -- basic
-    version       int            not null default 0 comment '乐观锁版本号',
     creator       bigint comment '创建者',
     create_date   datetime comment '创建时间',
     updater       bigint comment '更新者',

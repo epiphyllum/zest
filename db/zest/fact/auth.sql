@@ -38,4 +38,4 @@ create index idx_j_auth_1 on j_auth (agent_id, create_date);
 create index idx_j_auth_2 on j_auth (merchant_id, create_date);
 create index idx_j_auth_3 on j_auth (sub_id, create_date);
 create index idx_j_auth_4 on j_auth (cardno, create_date);
-create unique index uidx_jauth_1 on j_auth(cardno, logkv);
+create unique index uidx_j_auth_1 on j_auth(cardno, logkv);
