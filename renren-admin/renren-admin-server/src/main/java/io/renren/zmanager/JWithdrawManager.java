@@ -62,7 +62,7 @@ public class JWithdrawManager {
                 .eq(JCardEntity::getCardno, entity.getCardno())
         );
         entity.setMarketproduct(cardEntity.getMarketproduct());
-        entity.setMaincardno(cardEntity.getMaincardno());
+//        entity.setMaincardno(cardEntity.getMaincardno());
         return subEntity;
     }
 
@@ -71,11 +71,11 @@ public class JWithdrawManager {
      */
     public void save(JWithdrawEntity entity) {
         JSubEntity subEntity = fillInfo(entity);
-
         // 填充payerid, 什么币种的卡， 就用哪个通联va
         List<JVaEntity> jVaEntities = jVaDao.selectList(Wrappers.emptyWrapper());
         JVaEntity jVaEntity = jVaEntities.stream().filter(e -> e.getCurrency().equals(entity.getCurrency())).findFirst().get();
         entity.setPayeeid(jVaEntity.getTid());
+        entity.setState("00");
 
         tx.executeWithoutResult(st -> {
             jWithdrawDao.insert(entity);

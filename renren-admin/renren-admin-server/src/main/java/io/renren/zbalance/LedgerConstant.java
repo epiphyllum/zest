@@ -76,7 +76,9 @@ public class LedgerConstant {
     public static final int FACT_CARD_WITHDRAW_UN_FREEZE = 70001;          // 1. 子商户卡资金账户 -100HKD(解冻)
     public static final int FACT_CARD_WITHDRAW_CONFIRM = 70002;            // 2. 子商户卡资金账户 -100HKD(确认成功)
     public static final int FACT_CARD_WITHDRAW_IN = 70003;                 // 3. 子商户VA       +100HKD(va退回)
-    public static final int FACT_CARD_WITHDRAW_OUT_PREPAID_MAIN = 70004;   // 4. 如果是预防费主卡: 预付费主卡可以余额减少
+    public static final int FACT_CARD_WITHDRAW_FREEZE_PREPAID_MAIN = 70004;   // 4. 如果是预防费主卡: 预付费主卡可以余额减少
+    public static final int FACT_CARD_WITHDRAW_UN_FREEZE_PREPAID_MAIN = 70005;   // 4. 如果是预防费主卡: 预付费主卡可以余额减少
+    public static final int FACT_CARD_WITHDRAW_OUT_PREPAID_MAIN = 70006;   // 4. 如果是预防费主卡: 预付费主卡可以余额减少
 
     // 商户VA提现
     public static final int ORIGIN_TYPE_VA_WITHDRAW = 800;         // 商户VA提现
