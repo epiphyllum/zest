@@ -705,7 +705,13 @@ public class JCardManager {
         if (authmaxcount == null) {
             authmaxcount = cardEntity.getAuthmaxcount();
         }
-        TCardUpdateScene request = new TCardUpdateScene(cardEntity.getCurrency(), cardEntity.getCardno(), authmaxamount, authmaxcount);
+
+        TCardUpdateScene request = null;
+        if (oldAuth.compareTo(newAuth) == 0) {
+            request = new TCardUpdateScene(cardEntity.getCurrency(), cardEntity.getCardno(), null, authmaxcount);
+        } else {
+            request = new TCardUpdateScene(cardEntity.getCurrency(), cardEntity.getCardno(), authmaxamount, authmaxcount);
+        }
         try {
             TCardUpdateSceneResponse response = zinCardApplyService.cardUpdateScene(request);
             // 调整成功
