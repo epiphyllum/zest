@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 public class TAuthTxnNotify {
     private String logkv;        //	流水号
     private String trxtype;      //	交易类型
+    private String trxcode;      // trxcode
     private String cardno;       //	卡号
     private String state;        //	状态
     private String stateexplain; //	状态说明
