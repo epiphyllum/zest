@@ -105,13 +105,15 @@ public class JCardEntity extends BaseEntity {
 
     // resp
     private String applyid;
+    private String txnid;
 
     // notify
     private BigDecimal fee;     // 申请费用
     private String feecurrency; // 申请费用币种
     private String cardno;      // 卡号
+    private String cardstate;   //            varchar(2)  comment '卡申请状态',        --
     private String state;       // 卡申请状态
-    private String cardState;   //            varchar(2)  comment '卡申请状态',        --
+    private String stateexplain;       // 卡申请状态
     private BigDecimal balance; //            varchar(2)  comment '卡申请状态',        --
 
     // cvv + expire date

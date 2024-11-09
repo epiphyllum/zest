@@ -18,7 +18,6 @@ create table j_card
     --
     maincardno           varchar(30) comment 'vpa main card no',                    --
     -- request
-    meraplid             varchar(32) comment '申请单流水',                          -- 	meraplid	String	32	Y	客户自己生成，保持唯一
     cardtype             varchar(2) comment '卡片种类',                             --	cardtype	String	2	Y	1：虚拟卡，（产品类型为：通华金服VISA虚拟卡、通华VPA电子卡）4：虚实同发，（产品类型为：通华金服VISA公务卡、万商义乌VISA商务卡）
     cardholdertype       varchar(3) comment '持卡人身份',                           -- 1：法人持有 0：其他管理员
     belongtype           varchar(2) comment '主体类型',                             --	belongtype	String	2	Y	1：员工 2：合作企业
@@ -72,15 +71,17 @@ create table j_card
     notify_count         int            not null default 0,
     notify_status        int            not null default 0 comment '0: 待通知, 1: 通知成功, 2: 通知失败',
 
-    -- response
     applyid              varchar(32) comment '申请ID',                              --
+    meraplid             varchar(32) comment '申请单流水',                          -- 	meraplid	String	32	Y	客户自己生成，保持唯一
+    txnid                varchar(32) comment '平台流水号',
 
     -- notify:
     fee                  decimal(18, 2) comment '申请费用(通联收费)',               -- fee	Number	18,2	O
     feecurrency          varchar(3) comment '申请费用币种',                         -- 	feecurrency	String	3	O
     cardno               varchar(30) comment '卡号',                                -- 	cardno	String	30	O	申请成功后返回
     state                varchar(2)              default '00' comment '卡申请状态', --
-    card_state           varchar(2)              default '00' comment '',           -- '卡状态'
+    stateexplain          varchar(200) comment '解释',
+    cardstate           varchar(2)              default '00' comment '',           -- '卡状态'
     balance              decimal(18, 2) comment '卡余额',                           -- 可以收到授权通知后查询
 
     --

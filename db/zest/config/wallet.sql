@@ -10,9 +10,7 @@ create table j_wallet
     sub_id        bigint      not null comment '子商户ID',
     sub_name      varchar(50) not null comment '子商户',
 
-    api           int         not null default 1,
-    wallet_name   varchar(50) not null comment '钱包名称',
-    maincardno    varchar(30) not null comment '在哪个主卡下',
+    wallet_name   varchar(50) not null comment '钱包名称: sys_user.username',
 
     -- basic
     creator       bigint comment '创建者',
@@ -40,6 +38,7 @@ create table j_wallet_txn
     sub_name      varchar(50)    not null comment '子商户',
     api           int            not null default 1,
 
+    maincardno    varchar(30)    not null comment '预付费主卡',
     amount        decimal(18, 2) not null comment '金额',
     txn_code      varchar(16)    not null comment 'charge | withdraw',
     meraplid      varchar(30)    not null comment '申请id',
@@ -52,7 +51,7 @@ create table j_wallet_txn
     primary key (id)
 ) ENGINE = InnoDB
   collate utf8mb4_bin
-  DEFAULT CHARACTER SET utf8mb4 COMMENT ='j_wallet';
+  DEFAULT CHARACTER SET utf8mb4 COMMENT ='j_wallet_txn';
 create index idx_j_wallet_txn_1 on j_wallet_txn (agent_id, merchant_id, sub_id, create_date);
 create index idx_j_wallet_txn_2 on j_wallet_txn (merchant_id, sub_id, create_date);
 create index idx_j_wallet_txn_3 on j_wallet_txn (sub_id, create_date);

@@ -104,6 +104,7 @@ public class JCardController {
         JCardEntity entity = ConvertUtils.sourceToTarget(dto, JCardEntity.class);
         entity.setApi(0);
         entity.setMeraplid(CommonUtils.uniqueId());
+        entity.setTxnid(CommonUtils.uniqueId());
         jCardManager.save(entity);
         return new Result();
     }
@@ -115,6 +116,9 @@ public class JCardController {
     public Result update(@RequestBody JCardDTO dto) {
         //效验数据
         ValidatorUtils.validateEntity(dto, UpdateGroup.class, DefaultGroup.class);
+        dto.setApplyid("");
+        dto.setTxnid(CommonUtils.uniqueId());
+        dto.setState(ZinConstant.CARD_APPLY_NEW_DJ);
         jCardService.update(dto);
         return new Result();
     }

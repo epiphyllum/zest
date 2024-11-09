@@ -186,4 +186,17 @@ public class JMoneyController {
         jMoneyManager.mockMoneyInNotify(jMoneyEntity);
         return new Result();
     }
+
+    //////////////////////////////////////////
+    @GetMapping("manualNotify")
+    @Operation(summary = "模拟入账通知")
+    @LogOperation("模拟入账通知")
+    @PreAuthorize("hasAuthority('zorg:jmoney:manual')")
+    public Result manualNotify(@RequestParam("id") Long id) {
+        // 查询出来
+        JMoneyEntity jMoneyEntity = jMoneyDao.selectById(id);
+        jMoneyManager.mockMoneyInNotify(jMoneyEntity);
+        return new Result();
+    }
+
 }

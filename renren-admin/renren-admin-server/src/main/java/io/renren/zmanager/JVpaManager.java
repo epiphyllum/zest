@@ -195,7 +195,7 @@ public class JVpaManager {
 
             //
             jCardEntity.setState(ZinConstant.CARD_APPLY_SUCCESS);
-            jCardEntity.setCardState(ZinConstant.CARD_STATE_SUCCESS);
+            jCardEntity.setCardstate(ZinConstant.CARD_STATE_SUCCESS);
             jCardEntity.setProducttype(ZinConstant.CARD_PRODUCT_VPA);
             jCardEntity.setMarketproduct(entity.getMarketproduct());
             jCardEntity.setCurrency(mainCard.getCurrency());  // 卡的币种为主卡的币种

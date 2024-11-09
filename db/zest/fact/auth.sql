@@ -11,6 +11,9 @@ create table j_auth
     sub_id        bigint not null,
     sub_name      varchar(50) not null,
 
+    wallet_id     bigint comment '钱包id',
+    wallet_name   varchar(50) comment '钱包用户',
+
     cardno        varchar(16)  not null comment '卡号',     -- 卡号	cardno	String	16	Y
     logkv         varchar(50)  comment '流水号',               -- 流水号	logkv	String	50	O
     trxcode       varchar(25) comment '交易代码',

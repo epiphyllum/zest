@@ -10,6 +10,11 @@ create table j_authed
     merchant_name varchar(50)    not null comment '商户名称',
     sub_id        bigint,
     sub_name      varchar(50),
+
+    wallet_id     bigint comment '钱包id',
+    wallet_name   varchar(50) comment '钱包用户',
+
+
     -- info
     cardno        varchar(16)    not null, -- 卡号	cardno	String	16	Y
     trxtype       varchar(25)    not null, -- 交易类型	trxtype	String	25	Y	见附录【授权交易类型】

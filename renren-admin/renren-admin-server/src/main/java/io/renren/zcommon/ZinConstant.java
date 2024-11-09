@@ -210,8 +210,11 @@ public class ZinConstant {
     // VPA卡场景变更结果
     public static final String VPA_ADJUST_SUCCESS = "55"; //
     public static final String VPA_ADJUST_UNKNOWN = "00"; //
-    public static final Object VPA_ADJUST_FAIL = "99";
+    public static final String VPA_ADJUST_FAIL = "99";
 
+    // 钱包交易: 给钱包充值, 给钱包提现
+    public static final String WALLET_CHARGE = "charge";
+    public static final String WALLET_WITHDRAW = "withdraw";
 }
 
 

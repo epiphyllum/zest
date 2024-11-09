@@ -152,6 +152,8 @@ public class JCardDTO implements Serializable {
     // 通联返回
     @Schema(description = "申请ID")
     private String applyid;
+    @Schema(description = "平台ID")
+    private String txnid;
 
     // 结果
     @Schema(description = "fee")
@@ -162,8 +164,10 @@ public class JCardDTO implements Serializable {
     private String cardno;            // 卡号
     @Schema(description = "state")
     private String state;             // 卡申请状态
-    @Schema(description = "cardState")
-    private String cardState;         // 卡申请状态
+    @Schema(description = "stateexplain")
+    private String stateexplain;      // 卡申请状态
+    @Schema(description = "cardstate")
+    private String cardstate;         // 卡申请状态
 
     // 卡余额
     @Schema(description = "balance")

@@ -27,7 +27,7 @@ create table j_money
 
     -- 通知过来的内容
     nid                 varchar(32) comment '通知id',         -- 	相同id表示同一个通知
-    bid                 varchar(18) comment '业务关联id',     --	业务关联id
+    bid                 varchar(32) comment '业务关联id',     --	业务关联id
     acctno              varchar(15) comment '账号',           -- 通联内部虚拟账号
     amount              decimal(18, 2) comment '变动金额',    --  变动金额
     currency            varchar(16) comment '币种',           --

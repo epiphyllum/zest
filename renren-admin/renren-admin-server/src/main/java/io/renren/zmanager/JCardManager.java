@@ -147,7 +147,7 @@ public class JCardManager {
 
         // 卡状态与卡申请状态
         entity.setState(ZinConstant.CARD_APPLY_NEW_DJ);
-        entity.setCardState(ZinConstant.CARD_STATE_NEW_DJ);
+        entity.setCardstate(ZinConstant.CARD_STATE_NEW_DJ);
 
         // 什么币种的卡， 就用那个va作为payerid
         JVaEntity jVaEntity = jVaDao.selectOne(Wrappers.<JVaEntity>lambdaQuery().eq(JVaEntity::getCurrency, currency));
@@ -275,13 +275,13 @@ public class JCardManager {
         ) {
             // 主卡申请
             TCardMainApplyRequest request = ConvertUtils.sourceToTarget(entity, TCardMainApplyRequest.class);
-            request.setMeraplid(entity.getId().toString());  // 需要换成我们的ID!!!
+            request.setMeraplid(entity.getTxnid());  // 需要换成我们的ID!!!
             TCardMainApplyResponse response = zinCardApplyService.cardMainApply(request);
             applyid = response.getApplyid();
         } else {
             // 子卡申请
             TCardSubApplyRequest request = ConvertUtils.sourceToTarget(entity, TCardSubApplyRequest.class);
-            request.setMeraplid(entity.getId().toString());  // 需要换成我们的ID!!!
+            request.setMeraplid(entity.getTxnid());  // 需要换成我们的ID!!!
             TCardSubApplyResponse response = zinCardApplyService.cardSubApply(request);
             applyid = response.getApplyid();
         }
@@ -301,6 +301,7 @@ public class JCardManager {
     public void query(JCardEntity jCardEntity, boolean notify) {
         TCardApplyQuery query = new TCardApplyQuery();
         query.setApplyid(jCardEntity.getApplyid());
+        query.setMeraplid(jCardEntity.getTxnid());
         TCardApplyResponse response = zinCardApplyService.cardApplyQuery(query);
 
         // 从非失败  -> 失败,  处理退款
@@ -314,7 +315,8 @@ public class JCardManager {
                 .set(JCardEntity::getState, nextState)
                 .set(response.getFeecurrency() != null, JCardEntity::getFeecurrency, response.getFeecurrency())
                 .set(response.getFee() != null, JCardEntity::getFee, response.getFee())
-                .set(response.getCardno() != null, JCardEntity::getCardno, response.getCardno());
+                .set(response.getCardno() != null, JCardEntity::getCardno, response.getCardno())
+                .set(response.getState() != null, JCardEntity::getStateexplain, response.getStateexplain());
 
         // 不成功 -> 成功
         if (!ZinConstant.isCardApplySuccess(prevState) && ZinConstant.isCardApplySuccess(nextState)) {
@@ -493,8 +495,8 @@ public class JCardManager {
         TCardStatusResponse response = zinCardStateService.cardStatusQuery(request);
         JCardEntity update = new JCardEntity();
         update.setId(jCardEntity.getId());
-        update.setCardState(response.getCardstate());
-        jCardEntity.setCardState(response.getCardstate());
+        update.setCardstate(response.getCardstate());
+        jCardEntity.setCardstate(response.getCardstate());
 
         jCardDao.updateById(update);
     }
@@ -577,7 +579,7 @@ public class JCardManager {
         // 更新
         JCardEntity update = new JCardEntity();
         update.setId(cardEntity.getId());
-        update.setCardState(response.getCardstate());
+        update.setCardstate(response.getCardstate());
         update.setBalance(balanceResponse.getBalance());
         jCardDao.updateById(update);
     }

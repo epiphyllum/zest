@@ -87,10 +87,12 @@ public class SysUserDetailServiceImpl implements SysUserDetailService {
     }
 
     private void setUserType(UserDetail userDetail) {
+        // 超级管理员
         if (userDetail.getSuperAdmin().equals(1)) {
             return;
         }
 
+        // 用户部门
         SysDeptEntity deptEntity = sysDeptDao.selectById(userDetail.getDeptId());
         if (deptEntity == null) {
             return;
