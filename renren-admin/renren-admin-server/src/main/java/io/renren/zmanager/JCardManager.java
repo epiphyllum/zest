@@ -690,6 +690,11 @@ public class JCardManager {
         BigDecimal adjustAmount = newAuth.subtract(oldAuth);
 
         JVpaAdjustEntity adjustEntity = ConvertUtils.sourceToTarget(cardEntity, JVpaAdjustEntity.class);
+        adjustEntity.setId(null);
+        adjustEntity.setCreateDate(null);
+        adjustEntity.setUpdateDate(null);
+        adjustEntity.setCreator(null);
+        adjustEntity.setUpdater(null);
         adjustEntity.setAdjustAmount(adjustAmount);
         adjustEntity.setOldQuota(oldAuth);
         adjustEntity.setNewQuota(newAuth);
