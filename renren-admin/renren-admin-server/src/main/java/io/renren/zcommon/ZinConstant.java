@@ -13,11 +13,6 @@ public class ZinConstant {
     public static final String YES_FLAG = "Y";     // 通用FLAG
     public static final String NO_FLAG = "N";      // 通用FLAG
 
-    public static final String MONEY_IN_NEW = "00";
-    public static final String MONEY_IN_CONFIRMED = "01";
-    public static final String MONEY_IN_SUCCESS = "02";
-
-
     // 支付申请单状态:
     public static final String PAY_APPLY_MIDDLE_1 = "01";           // 处理中提交申报明细成功后的状态，此时需要运营人员初审通过。
     public static final String PAY_APPLY_MIDDLE_5 = "05";           // 交易处理渠道处理中间过程。
@@ -34,6 +29,7 @@ public class ZinConstant {
     public static final String PAY_APPLY_NEW_DJ = "00";             // 大吉状态: 新建
     public static final String PAY_APPLY_CF_DJ = "CF";              // 大吉状态: 确认
     public static final String PAY_APPLY_CC_DJ = "CC";              // 大吉状态: 取消
+    public static final String PAY_APPLY_LG_DJ = "LG";              // 大吉状态: 已记账
 
     // 卡状态
     public static final String CARD_STATE_TO_VERIFY = "01";         // 待审核
@@ -68,11 +64,10 @@ public class ZinConstant {
     public static final int STATE_FAIL = 3;       // 失败
 
     // 商户状态
-    public static final String MERCHANT_STATE_TO_VERIFY = "00";
-    public static final String MERCHANT_STATE_VERIFIED = "04";
-    public static final String MERCHANT_STATE_REGISTER = "01";
-    public static final String MERCHANT_STATE_FAIL = "05";
-
+    public static final String MERCHANT_STATE_TO_VERIFY = "00";  // 待审核
+    public static final String MERCHANT_STATE_VERIFIED = "04";   // 已审核
+    public static final String MERCHANT_STATE_REGISTER = "01";   // 已注册
+    public static final String MERCHANT_STATE_FAIL = "05";       // 失败
 
     // 支付申请单状态映射
     public static final Map<String, Integer> payApplyStateMap = new HashMap<>() {
@@ -93,9 +88,9 @@ public class ZinConstant {
             put("07", STATE_FAIL);        // 处理失败申请单处理失败，具体原因根据提示了解。
             put("11", STATE_FAIL);        // 交易已关闭申请单流程中登录商户平台手动关闭，或由运营人员手动关闭申请单。
             ////////////////////////////////////////////////////////////////
-            put("00", STATE_PROCESSING);  // 大吉增加状态
-            put("CF", STATE_PROCESSING);  // 大吉增加状态
-            put("CC", STATE_FAIL);        // 大吉增加状态
+            put("00", STATE_PROCESSING);  // 大吉增加状态: 新建
+            put("CF", STATE_PROCESSING);  // 大吉增加状态: 确认
+            put("CC", STATE_FAIL);        // 大吉增加状态: 取消
         }
     };
 

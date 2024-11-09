@@ -61,8 +61,9 @@ public class JMoneyEntity extends BaseEntity {
     private String payeraccountcountry;
     private String ps;
 
-    //
+    // 状态
     private String state;
+    private String stateexplain;
 
     // 转而通知下游商户(3)
     private Integer notifyStatus;

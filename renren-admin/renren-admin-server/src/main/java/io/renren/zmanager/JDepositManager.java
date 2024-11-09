@@ -99,28 +99,27 @@ public class JDepositManager {
         return amount.divide(mul, 2, RoundingMode.HALF_UP);
     }
 
-    public void saveAndSubmit(JDepositEntity entity) {
+    public void saveAndSubmit(JDepositEntity entity, boolean submit) {
         // 填充payerid, 什么币种的卡， 就用哪个通联va
         List<JVaEntity> jVaEntities = jVaDao.selectList(Wrappers.emptyWrapper());
         JVaEntity jVaEntity = jVaEntities.stream().filter(e -> e.getCurrency().equals(entity.getCurrency())).findFirst().get();
         entity.setPayerid(jVaEntity.getTid());
-
         BigDecimal txnAmount = calcTxnAmount(entity.getAmount());
         entity.setTxnAmount(txnAmount);
-
         // 填充其他ID
         JSubEntity subEntity = fillInfo(entity);
-
         // 入库
         tx.executeWithoutResult(st -> {
             jDepositDao.insert(entity);
             ledgerCardCharge.ledgeCardChargeFreeze(entity, subEntity);
         });
 
-        try {
-            this.submit(entity);
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        if (submit) {
+            try {
+                this.submit(entity);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
 

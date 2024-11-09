@@ -33,6 +33,7 @@ public class ZinAccountManageNotifyService {
     private ApiNotify apiNotify;
 
     // 有申请单的情况
+    // body:[{"acctno":"80000000369966","amount":100000,"applyid":"461809","bid":"2024110903652310","currency":"USD","nid":"20241109000000489344","payeraccountname":"自营商户","payeraccountno":"12312113","time":"2024-11-09T11:07:10Z","trxcod":"CP213"}]
     private void withApply(TMoneyInNotify notify) {
 
         log.debug("入金申请, 申请单号: {}", notify.getApplyid());
@@ -58,8 +59,8 @@ public class ZinAccountManageNotifyService {
         tx.executeWithoutResult(status -> {
             int cnt = jMoneyDao.update(null, Wrappers.<JMoneyEntity>lambdaUpdate()
                     .eq(JMoneyEntity::getId, jMoneyEntity.getId())
-                    .eq(JMoneyEntity::getState, ZinConstant.MONEY_IN_CONFIRMED)
-                    .set(JMoneyEntity::getState, ZinConstant.MONEY_IN_SUCCESS)
+                    .ne(JMoneyEntity::getState, ZinConstant.PAY_APPLY_LG_DJ)
+                    .set(JMoneyEntity::getState, ZinConstant.PAY_APPLY_LG_DJ)
                     .set(JMoneyEntity::getPayeraccountno, notify.getPayeraccountno())
                     .set(JMoneyEntity::getPayeraccountbank, notify.getPayeraccountbank())
                     .set(JMoneyEntity::getPayeraccountcountry, notify.getPayeraccountcountry())
@@ -68,7 +69,7 @@ public class ZinAccountManageNotifyService {
                     .set(JMoneyEntity::getAmount, notify.getAmount())
             );
             if (cnt != 1) {
-                throw new RenException("如今通知处理失败");
+                throw new RenException("入金通知处理失败");
             }
             JMoneyEntity entity = jMoneyDao.selectById(jMoneyEntity.getId());
             try {

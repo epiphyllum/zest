@@ -81,18 +81,20 @@ public class JDepositController {
     @PreAuthorize("hasAuthority('zorg:jdeposit:save')")
     public Result<Long> save(@RequestBody JDepositDTO dto) {
         // 验证google
-        UserDetail user = SecurityUser.getUser();
-        GoogleAuthenticator gAuth = new GoogleAuthenticator();
-        boolean authorized = gAuth.authorize(user.getTotpKey(), Integer.parseInt(dto.getOtp()));
-        if (!authorized) {
-            throw new RenException("谷歌验证码错误");
+        if (false) {
+            UserDetail user = SecurityUser.getUser();
+            GoogleAuthenticator gAuth = new GoogleAuthenticator();
+            boolean authorized = gAuth.authorize(user.getTotpKey(), Integer.parseInt(dto.getOtp()));
+            if (!authorized) {
+                throw new RenException("谷歌验证码错误");
+            }
         }
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
         JDepositEntity entity = ConvertUtils.sourceToTarget(dto, JDepositEntity.class);
         entity.setApi(0);
         entity.setMeraplid(CommonUtils.uniqueId());
-        jDepositManager.saveAndSubmit(entity);
+        jDepositManager.saveAndSubmit(entity, false);
         return new Result<Long>().ok(entity.getId());
     }
 

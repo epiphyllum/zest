@@ -49,7 +49,7 @@ public class JMoneyManager {
         entity.setAgentId(merchant.getAgentId());
 
         // 初始状态
-        entity.setState(ZinConstant.MONEY_IN_NEW);
+        entity.setState(ZinConstant.PAY_APPLY_NEW_DJ);
 
         // 填充来账账户信息
         JMaccountEntity jMaccountEntity = jMaccountDao.selectOne(Wrappers.<JMaccountEntity>lambdaQuery().eq(JMaccountEntity::getCardid, cardId));
@@ -113,7 +113,7 @@ public class JMoneyManager {
         updateEntity.setTransferfid(entity.getTransferfid());
         updateEntity.setOtherfid(entity.getOtherfid());
         updateEntity.setApplyAmount(entity.getApplyAmount());
-        updateEntity.setState(ZinConstant.MONEY_IN_CONFIRMED);
+        updateEntity.setState(ZinConstant.PAY_APPLY_CF_DJ);
         jMoneyDao.updateById(updateEntity);
     }
 

@@ -18,6 +18,7 @@ public class CP213 {
         jMoneyDao.update(null, Wrappers.<JMoneyEntity>lambdaUpdate()
                 .eq(JMoneyEntity::getApplyid, notify.getApplyid())
                 .set(JMoneyEntity::getState, notify.getState())
+                .set(JMoneyEntity::getStateexplain, notify.getStateexplain())
         );
     }
 }

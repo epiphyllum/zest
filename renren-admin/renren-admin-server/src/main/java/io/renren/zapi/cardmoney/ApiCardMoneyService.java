@@ -53,7 +53,7 @@ public class ApiCardMoneyService {
         entity.setCurrency(card.getCurrency());
 
         // 保存
-        jDepositManager.saveAndSubmit(entity);
+        jDepositManager.saveAndSubmit(entity, true);
 
         // 应答
         entity = jDepositDao.selectById(entity.getId());

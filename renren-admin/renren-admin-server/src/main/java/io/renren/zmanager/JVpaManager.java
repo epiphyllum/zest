@@ -96,11 +96,21 @@ public class JVpaManager {
             throw new RenException("invalid request");
         }
 
+        // 不限制交易笔数
+        if (entity.getAuthmaxcount() == null) {
+            entity.setAuthmaxcount(0);
+        }
+
         // 查询主卡
         JCardEntity mainCard = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
                 .eq(JCardEntity::getCardno, entity.getMaincardno())
         );
         String mainCardExpiredate = mainCard.getExpiredate();
+
+        // 预付费卡有效期设置为活动截止日期
+        if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_PREPAID)) {
+            entity.setCardexpiredate(entity.getEnddate());
+        }
 
         // 检查卡有效期设置
         checkExpiredate(entity, mainCardExpiredate);
@@ -148,9 +158,9 @@ public class JVpaManager {
         TCardAddScene request = ConvertUtils.sourceToTarget(entity, TCardAddScene.class);
         TCardAddSceneResponse response = zinCardApplyService.cardAddScene(request);
 
+        // 填充场景信息
         entity.setSceneid(response.getSceneid());
-
-
+        // 初始状态
         entity.setState(ZinConstant.CARD_APPLY_NEW_DJ);
 
         log.info("vpa open card, fee:{}", totalMerchantFee);

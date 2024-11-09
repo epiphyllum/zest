@@ -89,6 +89,8 @@ public class JMoneyDTO implements Serializable {
     //
     @Schema(description = "通联状态")
     private String state;
+    @Schema(description = "状态描述")
+    private String stateexplain;
 
     // 通知下游(3)
     @Schema(description = "通知状态")

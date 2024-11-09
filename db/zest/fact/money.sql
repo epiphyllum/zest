@@ -41,6 +41,7 @@ create table j_money
 
     -- state
     state               varchar(2) comment '通联状态',
+    stateexplain        varchar(200) comment '状态说明',
 
     -- 匹配情况
     notify_status       int         not null default 0 comment '',
