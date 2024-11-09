@@ -730,6 +730,7 @@ public class JCardManager {
 
             this.balanceCard(cardEntity);
         } catch (Exception ex) {
+            ex.printStackTrace();
             // 查询下， 如果明确失败
             jVpaAdjustDao.update(null, Wrappers.<JVpaAdjustEntity>lambdaUpdate()
                     .eq(JVpaAdjustEntity::getId, adjustEntity.getId())
