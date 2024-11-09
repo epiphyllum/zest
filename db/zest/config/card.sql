@@ -126,3 +126,5 @@ create index idx_j_card_2 on j_card (sub_id, create_date);
 create index idx_j_card_3 on j_card (agent_id, create_date);
 create index idx_j_card_4 on j_card (applyid);
 create index idx_j_card_5 on j_card (merchant_id, meraplid);
+-- 唯一索引
+create unique index uidx_j_card_0 on j_card (txnid);
