@@ -99,6 +99,7 @@ public class JMoneyManager {
 
     // confirm
     public void confirm(JMoneyEntity entity) {
+
         // 提交通联
         TMoneyConfirm confirm = new TMoneyConfirm();
         confirm.setApplyid(entity.getApplyid());
@@ -106,7 +107,6 @@ public class JMoneyManager {
         confirm.setOtherfid(entity.getOtherfid());
         confirm.setTransferfid(entity.getTransferfid());
         TMoneyConfirmResponse response = zinUmbrellaService.depositConfirm(confirm);
-
         // 更新
         JMoneyEntity updateEntity = new JMoneyEntity();
         updateEntity.setId(entity.getId());
@@ -115,6 +115,7 @@ public class JMoneyManager {
         updateEntity.setApplyAmount(entity.getApplyAmount());
         updateEntity.setState(ZinConstant.PAY_APPLY_CF_DJ);
         jMoneyDao.updateById(updateEntity);
+
     }
 
     public void mockMoneyInNotify(JMoneyEntity entity) {
@@ -134,4 +135,22 @@ public class JMoneyManager {
 
     }
 
+    // 补充材料
+    public void makeup(JMoneyEntity entity) {
+        // 提交通联
+        TMaterialSubmit submit = new TMaterialSubmit();
+        submit.setApplyid(entity.getApplyid());
+        submit.setOtherfid(entity.getOtherfid());
+        submit.setTransferfid(entity.getTransferfid());
+        TMaterialSubmitResponse response = zinUmbrellaService.submitMaterial(submit);
+
+        // 更新
+        JMoneyEntity updateEntity = new JMoneyEntity();
+        updateEntity.setId(entity.getId());
+        updateEntity.setTransferfid(entity.getTransferfid());
+        updateEntity.setOtherfid(entity.getOtherfid());
+        updateEntity.setApplyAmount(entity.getApplyAmount());
+        updateEntity.setState(ZinConstant.PAY_APPLY_CF_DJ);
+        jMoneyDao.updateById(updateEntity);
+    }
 }

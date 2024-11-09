@@ -156,6 +156,24 @@ public class JMoneyController {
         return new Result();
     }
 
+    //////////////////////////////////////////
+    @GetMapping("makeup")
+    @Operation(summary = "补充材料")
+    @LogOperation("补充材料")
+    @PreAuthorize("hasAuthority('zorg:jmoney:makeup')")
+    public Result confirm(
+            @RequestParam("id") Long id,
+            @RequestParam("transferfid") String transferfid,
+            @RequestParam("otherfid") String otherfid
+    ) {
+        // 查询出来
+        JMoneyEntity jMoneyEntity = jMoneyDao.selectById(id);
+        jMoneyEntity.setTransferfid(transferfid);
+        jMoneyEntity.setOtherfid(otherfid);
+        jMoneyManager.makeup(jMoneyEntity);
+        return new Result();
+    }
+
     /**
      * 匹配来账
      *

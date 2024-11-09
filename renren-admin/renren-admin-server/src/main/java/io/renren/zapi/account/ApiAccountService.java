@@ -156,8 +156,6 @@ public class ApiAccountService {
      */
     public Result<VaSubAccountRes> vaSubAccountQuery(VaSubAccountQuery request, ApiContext context) {
         Result<VaSubAccountRes> result = new Result<>();
-        // todo: 确保他的parent是 merchantid
-
         List<JBalanceEntity> balanceEntities = jBalanceDao.selectList(Wrappers.<JBalanceEntity>lambdaQuery()
                 .likeRight(JBalanceEntity::getBalanceType, "SUB_VA_")
                 .eq(request.getCurrency() != null, JBalanceEntity::getCurrency, request.getCurrency())

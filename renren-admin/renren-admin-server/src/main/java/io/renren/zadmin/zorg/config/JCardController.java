@@ -73,13 +73,16 @@ public class JCardController {
                 e.setExpiredate(null);
             });
         }
+
         // 查询更新余额
-        if (params.get("normal") != null) {
-            List<String> list = page.getList().stream().filter(c -> c.getState().equals(ZinConstant.CARD_APPLY_SUCCESS))
-                    .map(JCardDTO::getCardno).toList();
-            Map<String, BigDecimal> balanceMap = jCardManager.batchBalance(list);
-            for (JCardDTO jCardDTO : page.getList()) {
-                jCardDTO.setBalance(balanceMap.get(jCardDTO.getCardno()));
+        if (false) {
+            if (params.get("normal") != null) {
+                List<String> list = page.getList().stream().filter(c -> c.getState().equals(ZinConstant.CARD_APPLY_SUCCESS))
+                        .map(JCardDTO::getCardno).toList();
+                Map<String, BigDecimal> balanceMap = jCardManager.batchBalance(list);
+                for (JCardDTO jCardDTO : page.getList()) {
+                    jCardDTO.setBalance(balanceMap.get(jCardDTO.getCardno()));
+                }
             }
         }
         return new Result<PageData<JCardDTO>>().ok(page);

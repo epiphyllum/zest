@@ -229,8 +229,7 @@ public class JCardManager {
         JConfigEntity jConfigEntity = jConfigDao.selectOne(Wrappers.emptyWrapper());
         if (entity.getMarketproduct().equals(ZinConstant.MP_VCC_REAL)) {
             entity.setMaincardno(jConfigEntity.getVccMainReal());
-        }
-        else if (entity.getMarketproduct().equals(ZinConstant.MP_VCC_VIRTUAL)) {
+        } else if (entity.getMarketproduct().equals(ZinConstant.MP_VCC_VIRTUAL)) {
             entity.setMaincardno(jConfigEntity.getVccMainVirtual());
         } else {
             throw new RenException("请求非法");
@@ -626,6 +625,7 @@ public class JCardManager {
                 // confirm记账
                 ledgerPrepaidCharge.ledgePrepaidCharge(adjustEntity);
             });
+            this.balanceCard(cardEntity);
         } catch (Exception ex) {
             // 查询通联修改是否成功， 再确定是否解冻释放, 更新调整失败
             ledgerPrepaidCharge.ledgePrepaidChargeUnFreeze(adjustEntity);
@@ -675,6 +675,7 @@ public class JCardManager {
                 // confirm记账
                 ledgerPrepaidWithdraw.ledgePrepaidWithdraw(adjustEntity);
             });
+            this.balanceCard(cardEntity);
         } catch (Exception ex) {
             ex.printStackTrace();
             log.error("failed");
@@ -715,6 +716,8 @@ public class JCardManager {
                         .set(JCardEntity::getAuthmaxamount, newAuth)
                 );
             });
+
+            this.balanceCard(cardEntity);
         } catch (Exception ex) {
             // 查询下， 如果明确失败
             jVpaAdjustDao.update(null, Wrappers.<JVpaAdjustEntity>lambdaUpdate()
@@ -725,4 +728,5 @@ public class JCardManager {
             throw new RenException("调整失败");
         }
     }
+
 }

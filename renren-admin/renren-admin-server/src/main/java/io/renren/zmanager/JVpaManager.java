@@ -25,6 +25,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -58,6 +59,8 @@ public class JVpaManager {
     private JConfigDao jConfigDao;
     @Resource
     private ZestConfig zestConfig;
+    @Resource
+    private JCardManager jCardManager;
 
     //
     private void checkExpiredate(JVpaJobEntity entity, String mainCardExpiredate) {
@@ -304,6 +307,13 @@ public class JVpaManager {
                 // 记账
                 ledgerOpenVpa.ledgeOpenVpa(entity);
             });
+
+            // 更新所有余额账号余额
+            for (JCardEntity jCardEntity : jCardEntities) {
+                CompletableFuture.runAsync(() -> {
+                    jCardManager.balanceCard(jCardEntity);
+                });
+            }
         }
         // 非失败 -> 失败
         else if (!ZinConstant.isCardApplyFail(prevState) && ZinConstant.isCardApplyFail(nextState)) {

@@ -31,7 +31,7 @@ public class LedgerOpenVpa {
     public void ledgeOpenVpaFreeze(JVpaJobEntity entity) {
         // 子商户va扣除费用冻结
         JBalanceEntity subVa = ledgerUtil.getSubVaAccount(entity.getSubId(), entity.getFeecurrency());
-        String factMemo = "冻结vpa开卡费用:" + BigDecimal.ZERO.add(entity.getMerchantfee()).setScale(2, RoundingMode.HALF_UP);
+        String factMemo = "冻结-共享子卡开卡费用:" + BigDecimal.ZERO.add(entity.getMerchantfee()).setScale(2, RoundingMode.HALF_UP);
         BigDecimal factAmount = entity.getMerchantfee();
         ledgerUtil.freezeUpdate(subVa, LedgerConstant.ORIGIN_VPA_OPEN, LedgerConstant.FACT_VPA_OPEN_FREEZE, entity.getId(), factMemo, factAmount);
 
@@ -44,7 +44,7 @@ public class LedgerOpenVpa {
     // 解冻VPA子卡开通
     public void ledgeOpenVpaUnFreeze(JVpaJobEntity entity) {
         JBalanceEntity subVa = ledgerUtil.getSubVaAccount(entity.getSubId(), entity.getFeecurrency());
-        String factMemo = "解冻vpa开卡费用:" + BigDecimal.ZERO.add(entity.getMerchantfee()).setScale(2, RoundingMode.HALF_UP);
+        String factMemo = "解冻-共享子卡开卡费用:" + BigDecimal.ZERO.add(entity.getMerchantfee()).setScale(2, RoundingMode.HALF_UP);
         BigDecimal factAmount = entity.getMerchantfee();
         ledgerUtil.unFreezeUpdate(subVa, LedgerConstant.ORIGIN_VPA_OPEN, LedgerConstant.FACT_VPA_OPEN_UN_FREEZE, entity.getId(), factMemo, factAmount);
 
@@ -61,7 +61,7 @@ public class LedgerOpenVpa {
         // 开卡费用账户
         JBalanceEntity feeAccount = ledgerUtil.getSubFeeAccount(entity.getSubId(), entity.getFeecurrency());
         BigDecimal showMerchantFee = BigDecimal.ZERO.add(entity.getMerchantfee()).setScale(2, RoundingMode.HALF_UP);
-        String factMemo = "确认vpa开卡费用:" + showMerchantFee;
+        String factMemo = "确认-共享子卡开卡费用:" + showMerchantFee;
         BigDecimal merchantFee = entity.getMerchantfee();
         // 子商户va扣除费用
         ledgerUtil.confirmUpdate(subVa, LedgerConstant.ORIGIN_VPA_OPEN, LedgerConstant.FACT_VPA_OPEN_CONFIRM, entity.getId(), factMemo, merchantFee);
