@@ -21,6 +21,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.logging.LoggersEndpoint;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
@@ -59,6 +61,8 @@ public class ZinRequester {
     private String commonQueryParams;
     private Sign signer;
     private Sign verifier;
+    @Autowired
+    private LoggersEndpoint loggersEndpoint;
 
     @Data
     @AllArgsConstructor
@@ -297,6 +301,14 @@ public class ZinRequester {
             log.error("verify signature failed\ntoSign:{}", toSign);
             throw new RenException("verify failed");
         }
+        String reqid = request.getParameter("reqid");
+        JChannelLogEntity logEntity = new JChannelLogEntity();
+        logEntity.setApiName(uri);
+        logEntity.setSign(signature);
+        logEntity.setSend("");
+        logEntity.setRecv(body);
+        logEntity.setReqId(reqid);
+        zinLogger.logPacketSuccess(logEntity);
         try {
             return objectMapper.readValue(body, clazz);
         } catch (JsonProcessingException e) {

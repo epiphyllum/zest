@@ -126,10 +126,20 @@ public class JVpaJobController {
     @GetMapping("submit")
     @Operation(summary = "开卡提交通联")
     @LogOperation("vpa开卡提交通联")
-    @PreAuthorize("hasAuthority('zorg:jcard:update')")
+    @PreAuthorize("hasAuthority('zorg:jcard:submit')")
     public Result submit(@RequestParam("id") Long id) {
         JVpaJobEntity entity = jVpaJobDao.selectById(id);
         jVpaManager.submit(entity);
+        return Result.ok;
+    }
+
+    @GetMapping("cancel")
+    @Operation(summary = "取消任务")
+    @LogOperation("vpa开卡任务取消")
+    @PreAuthorize("hasAuthority('zorg:jcard:cancel')")
+    public Result cancel(@RequestParam("id") Long id) {
+        JVpaJobEntity entity = jVpaJobDao.selectById(id);
+        jVpaManager.cancel(entity);
         return Result.ok;
     }
 

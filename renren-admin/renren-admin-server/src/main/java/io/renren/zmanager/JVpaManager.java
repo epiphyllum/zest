@@ -314,4 +314,17 @@ public class JVpaManager {
         if (entity.getApi().equals(1) && notify) {
         }
     }
+
+    public void cancel(JVpaJobEntity entity) {
+        tx.executeWithoutResult(status -> {
+            int update = jVpaJobDao.update(null, Wrappers.<JVpaJobEntity>lambdaUpdate()
+                    .eq(JVpaJobEntity::getId, entity.getId())
+                    .set(JVpaJobEntity::getState, ZinConstant.CARD_APPLY_CLOSE)
+            );
+            if (update != 1) {
+                throw new RenException("取消失败");
+            }
+            ledgerOpenVpa.ledgeOpenVpaUnFreeze(entity);
+        });
+    }
 }

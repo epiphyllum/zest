@@ -14,7 +14,6 @@ import io.renren.zin.cardapply.dto.TCardApplyResponse;
 import io.renren.zin.cardmoney.ZinCardMoneyService;
 import io.renren.zin.cardmoney.dto.TWithdrawRequest;
 import io.renren.zin.cardmoney.dto.TWithdrawResponse;
-import io.renren.zin.file.ZinFileService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,8 +27,6 @@ public class JWithdrawManager {
 
     @Resource
     private JMerchantDao jMerchantDao;
-    @Resource
-    private ZinFileService zinFileService;
     @Resource
     private ApiNotify apiNotify;
     @Resource
@@ -48,7 +45,6 @@ public class JWithdrawManager {
     private JWithdrawDao jWithdrawDao;
     @Resource
     private JCardDao jCardDao;
-
 
     // 填充信息
     public JSubEntity fillInfo(JWithdrawEntity entity) {

@@ -17,7 +17,7 @@ public class ZinLogger {
     private JChannelLogDao jChannelLogDao;
 
     /**
-     * 记录正常日志
+     * 记录异常日志
      * @param logEntity
      * @param result
      */
