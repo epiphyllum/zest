@@ -28,6 +28,7 @@ public class JVpaAdjustEntity extends BaseEntity {
     private Long subId;
     private String subName;
     private String maincardno;
+    private String marketproduct;
     private String cardno;
     private BigDecimal adjustAmount;
     private BigDecimal oldQuota;

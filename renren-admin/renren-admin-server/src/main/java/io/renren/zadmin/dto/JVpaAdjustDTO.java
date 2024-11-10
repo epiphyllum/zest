@@ -34,6 +34,8 @@ public class JVpaAdjustDTO implements Serializable {
     private Long subId;
     @Schema(description = "子商户")
     private String subName;
+    @Schema(description = "卡产品")
+    private String marketproduct;
     @Schema(description = "vpa子卡")
     private String cardno;
     @Schema(description = "vpa主卡")

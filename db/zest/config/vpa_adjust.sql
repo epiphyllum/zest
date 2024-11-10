@@ -11,6 +11,7 @@ create table j_vpa_adjust
     sub_name      varchar(50)    not null comment '子商户',
     -- 业务字段
     maincardno    varchar(30)    not null comment '主卡卡号',
+    marketproduct varchar(16)    not null comment '卡产品',
     cardno        varchar(30)    not null comment 'vpa子卡',
     adjust_amount decimal(18, 2) not null comment '调整金额',
     old_quota     decimal(18, 2) not null comment '调整前额度',

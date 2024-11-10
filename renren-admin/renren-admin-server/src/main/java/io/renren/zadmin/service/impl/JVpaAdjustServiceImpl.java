@@ -56,6 +56,9 @@ public class JVpaAdjustServiceImpl extends CrudServiceImpl<JVpaAdjustDao, JVpaAd
         String cardno = (String) params.get("cardno");
         wrapper.eq(StringUtils.isNotBlank(cardno), "cardno", cardno);
 
+        String marketproduct = (String) params.get("marketproduct");
+        wrapper.eq(StringUtils.isNotBlank(marketproduct), "marketproduct", marketproduct);
+
         return wrapper;
     }
 

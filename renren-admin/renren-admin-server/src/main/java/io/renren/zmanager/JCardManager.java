@@ -594,6 +594,7 @@ public class JCardManager {
         adjustEntity.setUpdateDate(null);
         adjustEntity.setCreator(null);
         adjustEntity.setUpdater(null);
+        adjustEntity.setMarketproduct(ZinConstant.MP_VPA_PREPAID);
         adjustEntity.setAdjustAmount(adjustAmount);
         adjustEntity.setOldQuota(oldAuth);
         adjustEntity.setNewQuota(newAuth);
@@ -649,6 +650,7 @@ public class JCardManager {
         adjustEntity.setUpdateDate(null);
         adjustEntity.setCreator(null);
         adjustEntity.setUpdater(null);
+        adjustEntity.setMarketproduct(ZinConstant.MP_VPA_PREPAID);
         adjustEntity.setAdjustAmount(adjustAmount.negate());
         adjustEntity.setOldQuota(oldAuth);
         adjustEntity.setNewQuota(newAuth);
@@ -691,6 +693,7 @@ public class JCardManager {
 
         JVpaAdjustEntity adjustEntity = ConvertUtils.sourceToTarget(cardEntity, JVpaAdjustEntity.class);
         adjustEntity.setId(null);
+        adjustEntity.setMarketproduct(ZinConstant.MP_VPA_SHARE);
         adjustEntity.setCreateDate(null);
         adjustEntity.setUpdateDate(null);
         adjustEntity.setCreator(null);
