@@ -109,18 +109,19 @@ public class LedgerUtil {
      * 冻结确认
      */
     public LambdaUpdateWrapper<JBalanceEntity> confirm(JBalanceEntity balance, int originType, int factType, Long factId, String factMemo, BigDecimal factAmount) {
-        JLogEntity logEntity = getFreezeConfirmLogEntity(balance, originType, factType, factId, factMemo, factAmount);
-        try {
-            jLogDao.insert(logEntity);
-        } catch (DuplicateKeyException ex) {
-            ex.printStackTrace();
-            throw new RenException("重复记账");
-        }
+
+//        JLogEntity logEntity = getFreezeConfirmLogEntity(balance, originType, factType, factId, factMemo, factAmount);
+//        try {
+//            jLogDao.insert(logEntity);
+//        } catch (DuplicateKeyException ex) {
+//            ex.printStackTrace();
+//            throw new RenException("重复记账");
+//        }
         LambdaUpdateWrapper<JBalanceEntity> wrapper = Wrappers.<JBalanceEntity>lambdaUpdate()
                 .eq(JBalanceEntity::getId, balance.getId())
                 .eq(JBalanceEntity::getVersion, balance.getVersion())
                 .set(JBalanceEntity::getVersion, balance.getVersion() + 1)
-                .set(JBalanceEntity::getBalance, logEntity.getNewBalance())
+//                .set(JBalanceEntity::getBalance, logEntity.getNewBalance())
                 .set(JBalanceEntity::getFrozen, balance.getFrozen().subtract(factAmount))
                 .set(JBalanceEntity::getUpdateDate, new Date());
         return wrapper;
@@ -261,6 +262,14 @@ public class LedgerUtil {
         return jBalanceDao.selectOne(Wrappers.<JBalanceEntity>lambdaQuery()
                 .eq(JBalanceEntity::getOwnerId, ownerId)
                 .eq(JBalanceEntity::getBalanceType, BalanceType.getPrepaidAccount(currency))
+        );
+    }
+
+    // 预付费主卡发卡总额
+    public JBalanceEntity getPrepaidSumAccount(Long ownerId, String currency) {
+        return jBalanceDao.selectOne(Wrappers.<JBalanceEntity>lambdaQuery()
+                .eq(JBalanceEntity::getOwnerId, ownerId)
+                .eq(JBalanceEntity::getBalanceType, BalanceType.getPrepaidSumAccount(currency))
         );
     }
 }

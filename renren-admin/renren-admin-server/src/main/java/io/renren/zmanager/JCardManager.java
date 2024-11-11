@@ -252,7 +252,7 @@ public class JCardManager {
     }
 
     /**
-     * 创建预付费卡主账户
+     * 创建预付费卡额度主账户
      */
     private void newPrepaidBalance(JCardEntity entity) {
         JBalanceEntity jBalanceEntity = new JBalanceEntity();
@@ -260,6 +260,19 @@ public class JCardManager {
         jBalanceEntity.setOwnerName(entity.getCardno());
         jBalanceEntity.setOwnerType(ZestConstant.USER_TYPE_PREPAID);
         jBalanceEntity.setBalanceType(BalanceType.getPrepaidAccount(entity.getCurrency()));
+        jBalanceEntity.setCurrency(entity.getCurrency());
+        jBalanceDao.insert(jBalanceEntity);
+    }
+
+    /**
+     * 创建预付费卡发卡额
+     */
+    private void newPrepaidSumBalance(JCardEntity entity) {
+        JBalanceEntity jBalanceEntity = new JBalanceEntity();
+        jBalanceEntity.setOwnerId(entity.getId());
+        jBalanceEntity.setOwnerName(entity.getCardno());
+        jBalanceEntity.setOwnerType(ZestConstant.USER_TYPE_PREPAID);
+        jBalanceEntity.setBalanceType(BalanceType.getPrepaidSumAccount(entity.getCurrency()));
         jBalanceEntity.setCurrency(entity.getCurrency());
         jBalanceDao.insert(jBalanceEntity);
     }
@@ -350,6 +363,7 @@ public class JCardManager {
                     // 预付费主卡, 需要做剩余额度账户管理, 建立预付费主卡, 剩余额度管理账户
                     if (jCardEntity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_PREPAID)) {
                         this.newPrepaidBalance(jCardEntity);
+                        this.newPrepaidSumBalance(jCardEntity);
                     }
                     jCardDao.update(null, updateWrapper);
                     ledgerOpenCard.ledgeOpenCard(jCardEntity);

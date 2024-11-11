@@ -10,9 +10,6 @@ public class BalanceType {
             , "NOK", "ZAR", "EUR", "NZD", "CNY"
     );
 
-    public static String getPrepaidAccount(String currency) {
-        return "PREPAID_" + currency;
-    }
 
     // 商户VA
     public static String getVaAccount(String currency) {
@@ -41,5 +38,13 @@ public class BalanceType {
     // 子商户开卡费用
     public static String getSubFeeAccount(String currency) {
         return "SUB_FEE_" + currency;
+    }
+    // 预付费卡主卡额度
+    public static String getPrepaidAccount(String currency) {
+        return "PREPAID_" + currency;
+    }
+    // 预付费卡主卡发卡总额
+    public static String getPrepaidSumAccount(String currency) {
+        return "PREPAID_SUM_" + currency;
     }
 }

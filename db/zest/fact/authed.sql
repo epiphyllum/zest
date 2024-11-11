@@ -14,10 +14,9 @@ create table j_authed
     wallet_id     bigint comment '钱包id',
     wallet_name   varchar(50) comment '钱包用户',
 
-
     -- info
     cardno        varchar(16)    not null, -- 卡号	cardno	String	16	Y
-    trxtype       varchar(25)    not null, -- 交易类型	trxtype	String	25	Y	见附录【授权交易类型】
+    trxcode       varchar(25)    not null, -- 交易类型	trxtype	String	25	Y	见附录【授权交易类型】
     trxdir        varchar(6),              -- 交易方向	trxdir	String	6	O	付款：101014 收款：101013
     state         varchar(10),             -- 交易状态	state	String	10	O	见附录【授权交易状态】
     amount        decimal(18, 6) not null, -- 交易金额	amount	Number	18,6	Y
@@ -31,6 +30,7 @@ create table j_authed
     authcode      varchar(50),             -- 授权码	authcode	String	50	O
     logkv         varchar(50),             -- 流水号	logkv	String	50	O
     mcc           varchar(20),             -- 商户类别代码	mcc	String	20	O
+
     -- basic
     creator       bigint comment '创建者',
     create_date   datetime comment '创建时间',

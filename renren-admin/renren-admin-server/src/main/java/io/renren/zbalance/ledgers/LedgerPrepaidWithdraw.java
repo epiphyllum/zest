@@ -34,6 +34,11 @@ public class LedgerPrepaidWithdraw {
         JBalanceEntity prepaidBalance = ledgerUtil.getPrepaidAccount(cardEntity.getId(), cardEntity.getCurrency());
         BigDecimal factAmount = entity.getAdjustAmount().negate();
         String factMemo = String.format("预付费卡提现:%s", factAmount);
+
+        // 主卡额度+
         ledgerUtil.ledgeUpdate(prepaidBalance, LedgerConstant.ORIGIN_TYPE_PREPAID_WITHDRAW, LedgerConstant.FACT_PREPAID_WITHDRAW_UP, entity.getId(), factMemo, factAmount);
+
+        // 发卡总额-
+        ledgerUtil.ledgeUpdate(prepaidBalance, LedgerConstant.ORIGIN_TYPE_PREPAID_WITHDRAW, LedgerConstant.FACT_PREPAID_WITHDRAW_DOWN, entity.getId(), factMemo, factAmount.negate());
     }
 }

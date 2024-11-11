@@ -25,5 +25,14 @@ public class ZinCardTxnService {
         return requester.request(uniqueId(), "/gcpapi/card/qrytrans", query, TAuthSettledResponse.class);
     }
 
-
+    public void syncSettledAuth(String date) {
+        TAuthSettledQuery request = new TAuthSettledQuery();
+        request.setEntrydate(date);
+        request.setPagesize(100);
+        int pageIndex = 1;
+        request.setPageindex(pageIndex);
+        while(true) {
+            TAuthSettledResponse response = this.settledQuery(request);
+        }
+    }
 }

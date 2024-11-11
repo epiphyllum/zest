@@ -37,12 +37,20 @@ public class LedgerConstant {
     public static final int FACT_CARD_OPEN_UN_FREEZE = 50001;     // 2. 子商户费用账户 解冻
     public static final int FACT_CARD_OPEN_CONFIRM = 50002;       // 3. 子商户费用账户 确认
     public static final int FACT_CARD_OPEN_FEE_IN = 50003;        // 4. 子商户费用账户
-    // vpa子卡开卡
-    public static final int ORIGIN_VPA_OPEN = 501;                 // 开卡
-    public static final int FACT_VPA_OPEN_FREEZE = 50100;          // 1. 子商户费用账户 冻结
-    public static final int FACT_VPA_OPEN_UN_FREEZE = 50101;       // 2. 子商户费用账户 冻结
-    public static final int FACT_VPA_OPEN_CONFIRM = 50102;         // 3. 子商户费用账户 冻结
-    public static final int FACT_VPA_OPEN_FEE_IN = 50103;          // 4. 子商户费用账户 冻结
+
+    // vpa共享子卡开卡
+    public static final int ORIGIN_VPA_OPEN_SHARE = 501;                 // 开卡
+    public static final int FACT_VPA_OPEN_SHARE_FREEZE = 50100;          // 1. 子商户费用账户 冻结
+    public static final int FACT_VPA_OPEN_SHARE_UN_FREEZE = 50101;       // 2. 子商户费用账户 冻结
+    public static final int FACT_VPA_OPEN_SHARE_CONFIRM = 50102;         // 3. 子商户费用账户 冻结
+    public static final int FACT_VPA_OPEN_SHARE_FEE_IN = 50103;          // 4. 子商户费用账户 冻结
+
+    // vpa共享子卡开卡
+    public static final int ORIGIN_VPA_OPEN_PREPAID = 502;                 // 开卡
+    public static final int FACT_VPA_OPEN_PREPAID_FREEZE = 50200;          // 1. 子商户费用账户 冻结
+    public static final int FACT_VPA_OPEN_PREPAID_UN_FREEZE = 50201;       // 2. 子商户费用账户 冻结
+    public static final int FACT_VPA_OPEN_PREPAID_CONFIRM = 50202;         // 3. 子商户费用账户 冻结
+    public static final int FACT_VPA_OPEN_PREPAID_FEE_IN = 50203;          // 4. 子商户费用账户 冻结
 
     // 卡充值
     public static final int ORIGIN_TYPE_CARD_CHARGE = 600;             // 卡充值
@@ -69,6 +77,7 @@ public class LedgerConstant {
     // 预付费卡提现: 操作对应主卡
     public static final int ORIGIN_TYPE_PREPAID_WITHDRAW = 603;     // 预付费卡提现
     public static final int FACT_PREPAID_WITHDRAW_UP = 60300;       // 1: 调增主卡剩余额度
+    public static final int FACT_PREPAID_WITHDRAW_DOWN = 60301;     // 2: 发卡总额减
 
     // 卡提现
     public static final int ORIGIN_TYPE_CARD_WITHDRAW = 700;               // 卡提现

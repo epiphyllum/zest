@@ -55,9 +55,17 @@ public class LedgerPrepaidCharge {
         JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
                 .eq(JCardEntity::getCardno, maincardno)
         );
+
+        // 金额
         JBalanceEntity prepaidBalance = ledgerUtil.getPrepaidAccount(cardEntity.getId(), cardEntity.getCurrency());
         BigDecimal factAmount = entity.getAdjustAmount();
+
+        // 主卡额度
         String factMemo = String.format("确认-单笔充值:%s", factAmount);
-        ledgerUtil.unFreezeUpdate(prepaidBalance, LedgerConstant.ORIGIN_TYPE_PREPAID_CHARGE, LedgerConstant.FACT_PREPAID_CHARGE_CONFIRM, entity.getId(), factMemo, factAmount);
+        ledgerUtil.confirmUpdate(prepaidBalance, LedgerConstant.ORIGIN_TYPE_PREPAID_CHARGE, LedgerConstant.FACT_PREPAID_CHARGE_CONFIRM, entity.getId(), factMemo, factAmount);
+
+        // 发卡总额
+        JBalanceEntity prepaidSumBalance = ledgerUtil.getPrepaidSumAccount(cardEntity.getId(), cardEntity.getCurrency());
+        ledgerUtil.confirmUpdate(prepaidSumBalance, LedgerConstant.ORIGIN_TYPE_PREPAID_CHARGE, LedgerConstant.FACT_PREPAID_CHARGE_IN, entity.getId(), factMemo, factAmount);
     }
 }
