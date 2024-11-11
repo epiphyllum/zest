@@ -255,7 +255,7 @@ public class JCardController {
         if (StringUtils.isBlank(id)) {
             throw new RenException("invalid parameter");
         }
-        jCardManager.runList(id, jCardManager::uncancelCard);
+        jCardManager.runList(id, jCardManager::unlossCard);
         return Result.ok;
     }
 

@@ -238,8 +238,9 @@ public class JMerchantManager {
             // 状态又变化， 且新状态是成功
             if (newState.equals(ZinConstant.MERCHANT_STATE_VERIFIED) || newState.equals(ZinConstant.MERCHANT_STATE_REGISTER)) {
                 this.openVa(entity);
-                // new default sub merchant
+                // 新增加默认子商户
                 JSubEntity jSubEntity = ConvertUtils.sourceToTarget(entity, JSubEntity.class);
+                jSubEntity.setCusname(jSubEntity.getCusname() + "-默认");
                 jSubEntity.setState(ZinConstant.MERCHANT_STATE_REGISTER);
                 jSubEntity.setMerchantId(entity.getId());
                 jSubEntity.setApi(0);
