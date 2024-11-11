@@ -66,6 +66,6 @@ public class LedgerPrepaidCharge {
 
         // 发卡总额
         JBalanceEntity prepaidSumBalance = ledgerUtil.getPrepaidSumAccount(cardEntity.getId(), cardEntity.getCurrency());
-        ledgerUtil.confirmUpdate(prepaidSumBalance, LedgerConstant.ORIGIN_TYPE_PREPAID_CHARGE, LedgerConstant.FACT_PREPAID_CHARGE_IN, entity.getId(), factMemo, factAmount);
+        ledgerUtil.ledgeUpdate(prepaidSumBalance, LedgerConstant.ORIGIN_TYPE_PREPAID_CHARGE, LedgerConstant.FACT_PREPAID_CHARGE_IN, entity.getId(), factMemo, factAmount);
     }
 }

@@ -24,7 +24,6 @@ public class LedgerPrepaidWithdraw {
     @Resource
     private JCardDao jCardDao;
 
-
     // 预付费卡 单笔提现(调整主卡可用额度)
     public void ledgePrepaidWithdraw(JVpaAdjustEntity entity) {
         String maincardno = entity.getMaincardno();
@@ -35,10 +34,12 @@ public class LedgerPrepaidWithdraw {
         BigDecimal factAmount = entity.getAdjustAmount().negate();
         String factMemo = String.format("预付费卡提现:%s", factAmount);
 
+        JBalanceEntity prepaidSumBalance = ledgerUtil.getPrepaidSumAccount(cardEntity.getId(), cardEntity.getCurrency());
+
         // 主卡额度+
         ledgerUtil.ledgeUpdate(prepaidBalance, LedgerConstant.ORIGIN_TYPE_PREPAID_WITHDRAW, LedgerConstant.FACT_PREPAID_WITHDRAW_UP, entity.getId(), factMemo, factAmount);
 
         // 发卡总额-
-        ledgerUtil.ledgeUpdate(prepaidBalance, LedgerConstant.ORIGIN_TYPE_PREPAID_WITHDRAW, LedgerConstant.FACT_PREPAID_WITHDRAW_DOWN, entity.getId(), factMemo, factAmount.negate());
+        ledgerUtil.ledgeUpdate(prepaidSumBalance, LedgerConstant.ORIGIN_TYPE_PREPAID_WITHDRAW, LedgerConstant.FACT_PREPAID_WITHDRAW_DOWN, entity.getId(), factMemo, factAmount.negate());
     }
 }

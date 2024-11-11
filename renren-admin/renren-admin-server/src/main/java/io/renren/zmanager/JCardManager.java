@@ -687,7 +687,6 @@ public class JCardManager {
                         .eq(JCardEntity::getId, cardEntity.getId())
                         .set(JCardEntity::getAuthmaxamount, newAuth)
                 );
-
                 // confirm记账
                 ledgerPrepaidWithdraw.ledgePrepaidWithdraw(adjustEntity);
             });

@@ -2,38 +2,40 @@
 drop table if exists j_auth;
 create table j_auth
 (
-    id            bigint      not null,
+    id             bigint      not null,
 
-    agent_id      bigint      not null,
-    agent_name    varchar(50) not null,
-    merchant_id   bigint      not null comment '子商户ID',
-    merchant_name varchar(32) not null comment '子商户',
-    sub_id        bigint      not null,
-    sub_name      varchar(50) not null,
+    agent_id       bigint      not null,
+    agent_name     varchar(50) not null,
+    merchant_id    bigint      not null comment '子商户ID',
+    merchant_name  varchar(32) not null comment '子商户',
+    sub_id         bigint      not null,
+    sub_name       varchar(50) not null,
 
     -- todo: 钱包
-    wallet_id     bigint comment '钱包id',
-    wallet_name   varchar(50) comment '钱包用户',
+    wallet_id      bigint comment '钱包id',
+    wallet_name    varchar(50) comment '钱包用户',
 
-    cardno        varchar(16) not null comment '卡号',
-    logkv         varchar(50) comment '流水号',
-    trxcode       varchar(25) comment '交易代码',
-    trxdir        varchar(6) comment '交易方向',
-    state         varchar(10) comment '交易状态',
-    amount        decimal(18, 2) comment '交易金额',
-    currency      varchar(3) comment '币种',
-    trxtime       varchar(20) comment '交易时间',
-    mcc           varchar(20) comment '商户类别代码',
-    trxaddr       varchar(160) comment '交易地点',
-    authcode      varchar(50) comment '授权码',
-    time          varchar(25),
-    stateexplain  varchar(200),
+    cardno         varchar(16) not null comment '卡号',
+    logkv          varchar(50) comment '流水号',
+    trxcode        varchar(25) comment '交易代码',
+    trxdir         varchar(6) comment '交易方向',
+    state          varchar(10) comment '交易状态',
+    amount         decimal(18, 2) comment '交易金额',
+    currency       varchar(3) comment '币种',
+    settleamount   decimal(18, 2),
+    settlecurrency varchar(3),
+    trxtime        varchar(20) comment '交易时间',
+    mcc            varchar(20) comment '商户类别代码',
+    trxaddr        varchar(160) comment '交易地点',
+    authcode       varchar(50) comment '授权码',
+    time           varchar(25),
+    stateexplain   varchar(200),
 
     -- basic
-    creator       bigint comment '创建者',
-    create_date   datetime comment '创建时间',
-    updater       bigint comment '更新者',
-    update_date   datetime comment '更新时间',
+    creator        bigint comment '创建者',
+    create_date    datetime comment '创建时间',
+    updater        bigint comment '更新者',
+    update_date    datetime comment '更新时间',
     primary key (id)
 ) ENGINE = InnoDB
   collate utf8mb4_bin

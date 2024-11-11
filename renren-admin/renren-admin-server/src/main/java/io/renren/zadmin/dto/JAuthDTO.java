@@ -63,6 +63,12 @@ public class JAuthDTO implements Serializable {
     private BigDecimal amount;
     @Schema(description = "币种")
     private String currency;
+
+    @Schema(description = "结算金额")
+    private BigDecimal settleamount;
+    @Schema(description = "结算币种")
+    private String settlecurrency;
+
     @Schema(description = "交易时间")
     private String trxtime;
     @Schema(description = "交易方向")
