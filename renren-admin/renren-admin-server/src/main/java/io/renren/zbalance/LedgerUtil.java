@@ -272,4 +272,29 @@ public class LedgerUtil {
                 .eq(JBalanceEntity::getBalanceType, BalanceType.getPrepaidSumAccount(currency))
         );
     }
+
+    // 累计通联发起充值金额
+    public JBalanceEntity getChargeSumAccount(Long ownerId, String currency) {
+        return jBalanceDao.selectOne(Wrappers.<JBalanceEntity>lambdaQuery()
+                .eq(JBalanceEntity::getOwnerId, ownerId)
+                .eq(JBalanceEntity::getBalanceType, BalanceType.getChargeSumAccount(currency))
+        );
+    }
+
+    // 累计通联保证金金额
+    public JBalanceEntity getDepositSumAccount(Long ownerId, String currency) {
+        return jBalanceDao.selectOne(Wrappers.<JBalanceEntity>lambdaQuery()
+                .eq(JBalanceEntity::getOwnerId, ownerId)
+                .eq(JBalanceEntity::getBalanceType, BalanceType.getDepositSumAccount(currency))
+        );
+    }
+
+    // 累计通联手续费金额
+    public JBalanceEntity getFeeSumAccount(Long ownerId, String currency) {
+        return jBalanceDao.selectOne(Wrappers.<JBalanceEntity>lambdaQuery()
+                .eq(JBalanceEntity::getOwnerId, ownerId)
+                .eq(JBalanceEntity::getBalanceType, BalanceType.getFeeSumAccount(currency))
+        );
+    }
+
 }

@@ -25,14 +25,8 @@ public class JConfigEntity extends BaseEntity {
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date updateDate;
 
-    private BigDecimal depositRate; // 保证金扣率
-    private BigDecimal chargeRate;  // 充值手续费扣率
-    private BigDecimal failFee;     // 失败费
-    private BigDecimal l50;         //
-    private BigDecimal gef50;       //
-    private BigDecimal disputeFee;  //
-    private Integer quotaLimit;     //
 
+    private Integer quotaLimit;     //
     private String vccMainReal ;    //
     private String vccMainVirtual ; //
 }

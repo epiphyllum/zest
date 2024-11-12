@@ -94,7 +94,7 @@ public class JDepositController {
         JDepositEntity entity = ConvertUtils.sourceToTarget(dto, JDepositEntity.class);
         entity.setApi(0);
         entity.setMeraplid(CommonUtils.uniqueId());
-        jDepositManager.saveAndSubmit(entity, false);
+        jDepositManager.saveAndSubmit(entity, false);  // 不提交
         return new Result<Long>().ok(entity.getId());
     }
 

@@ -20,11 +20,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @Slf4j
 public class JWithdrawManager {
 
+    @Resource
+    private JCardManager jCardManager;
     @Resource
     private JMerchantDao jMerchantDao;
     @Resource
@@ -107,17 +110,28 @@ public class JWithdrawManager {
                         .eq(JWithdrawEntity::getState, oldState)
                         .set(JWithdrawEntity::getState, newState)
                         .set(JWithdrawEntity::getStateexplain, response.getStateexplain())
-                        .set(response.getSecurityamount() != null, JWithdrawEntity::getSecurityamount, response.getSecurityamount())
+                        .set(JWithdrawEntity::getSecurityamount, response.getSecurityamount())
+                        .set(JWithdrawEntity::getSecuritycurrency, response.getSecuritycurrency())
+                        .set(JWithdrawEntity::getFee, response.getFee())
+                        .set(JWithdrawEntity::getFeecurrency, response.getFeecurrency())
                 );
+                entity.setSecurityamount(response.getSecurityamount());
+                entity.setSecuritycurrency(response.getSecuritycurrency());
+                entity.setFee(response.getFee());
+                entity.setFeecurrency(response.getFeecurrency());
                 ledgerCardWithdraw.ledgeCardWithdraw(entity, subEntity);
             });
+            CompletableFuture.runAsync(() -> {
+                JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery().eq(JCardEntity::getCardno, entity.getCardno()));
+                jCardManager.balanceCard(cardEntity);
+            });
+
         } else {
             jWithdrawDao.update(null, Wrappers.<JWithdrawEntity>lambdaUpdate()
                     .eq(JWithdrawEntity::getId, entity.getId())
                     .eq(JWithdrawEntity::getState, oldState)
                     .set(JWithdrawEntity::getState, newState)
                     .set(JWithdrawEntity::getStateexplain, response.getStateexplain())
-                    .set(response.getSecurityamount() != null, JWithdrawEntity::getSecurityamount, response.getSecurityamount())
             );
         }
 
@@ -156,7 +170,7 @@ public class JWithdrawManager {
             jWithdrawDao.update(null, Wrappers.<JWithdrawEntity>lambdaUpdate()
                     .eq(JWithdrawEntity::getId, entity.getId())
                     .isNull(JWithdrawEntity::getApplyid)
-                    .set(JWithdrawEntity::getState, "07")
+                    .set(JWithdrawEntity::getState, ZinConstant.PAY_APPLY_FAIL)
             );
             ledgerCardWithdraw.ledgeCardWithdrawUnFreeze(entity, subEntity);
         });

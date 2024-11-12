@@ -79,8 +79,12 @@ public class JDepositDTO implements Serializable {
     private String stateexplain;
     @Schema(description = "担保金")
     private BigDecimal securityamount;
+    @Schema(description = "担保金币种")
+    private String securitycurrency;
     @Schema(description = "通联手续费")
     private BigDecimal fee;
+    @Schema(description = "费用币种")
+    private String feecurrency;
 
     //
     private String otp;

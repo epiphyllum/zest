@@ -20,7 +20,6 @@ import io.renren.commons.mybatis.entity.BaseEntity;
 @TableName("j_agent")
 public class JAgentEntity extends BaseEntity {
     private static final long serialVersionUID = 1L;
-
     // 3+2
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updater;

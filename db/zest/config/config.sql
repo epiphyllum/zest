@@ -3,12 +3,14 @@ drop table if exists j_config;
 create table j_config
 (
     id               bigint         not null comment 'ID', -- 这个就是商户ID/子商户ID,  同时也是商户/子商户的VA
-    deposit_rate     decimal(3, 3)  not null comment '保证金扣率',
-    charge_rate      decimal(3, 3)  not null comment '手续费扣率',
-    l50              decimal(18, 2) not null comment '小金额手续费每笔',
-    gef50            decimal(18, 2) not null comment '>=50 fail 手续费',
-    fail_fee         decimal(18, 2) not null comment '失败费/笔, faiL_rate > 15%',
-    dispute_fee      decimal(18, 2) not null comment '争议处理费',
+
+--     deposit_rate     decimal(3, 3)  not null comment '保证金扣率',
+--     charge_rate      decimal(3, 3)  not null comment '手续费扣率',
+--     l50              decimal(18, 2) not null comment '小金额手续费每笔',
+--     gef50            decimal(18, 2) not null comment '>=50 fail 手续费',
+--     fail_fee         decimal(18, 2) not null comment '失败费/笔, faiL_rate > 15%',
+--     dispute_fee      decimal(18, 2) not null comment '争议处理费',
+
     quota_limit      int            not null default 10 comment '批量开卡的最大数量',
     vcc_main_real    varchar(30)    not null,
     vcc_main_virtual varchar(30)    not null,

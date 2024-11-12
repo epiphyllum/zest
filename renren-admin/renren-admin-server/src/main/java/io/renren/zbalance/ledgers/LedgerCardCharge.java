@@ -42,16 +42,28 @@ public class LedgerCardCharge {
 
     // 卡充值
     public void ledgeCardCharge(JDepositEntity entity, JSubEntity sub) {
-        JBalanceEntity subVa = ledgerUtil.getSubVaAccount(sub.getId(), entity.getCurrency());
-        JBalanceEntity subSum = ledgerUtil.getSubSumAccount(sub.getId(), entity.getCurrency());
         BigDecimal showAmount = BigDecimal.ZERO.add(entity.getAmount()).setScale(2, RoundingMode.HALF_UP);
-        String factMemo = "确认卡充值:" + showAmount;
+        String factMemo = "确认卡充值:" + showAmount + ", 发起金额:" + entity.getTxnAmount() + ",担保金:" + entity.getSecurityamount() + ",手续费:" + entity.getFee();
         BigDecimal factAmount = entity.getAmount();
         // 记账1: 子商户subVa-
+        JBalanceEntity subVa = ledgerUtil.getSubVaAccount(sub.getId(), entity.getCurrency());
         ledgerUtil.confirmUpdate(subVa, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_CONFIRM, entity.getId(), factMemo, factAmount);
 
         // 记账2: 子商户subSum+
+        JBalanceEntity subSum = ledgerUtil.getSubSumAccount(sub.getId(), entity.getCurrency());
         ledgerUtil.ledgeUpdate(subSum, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_IN, entity.getId(), factMemo, factAmount);
+
+        // 累计充值金额
+        JBalanceEntity chargeSum = ledgerUtil.getChargeSumAccount(0L, entity.getCurrency());
+        ledgerUtil.ledgeUpdate(chargeSum, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_IN_CHARGE_SUM, entity.getId(), factMemo, entity.getTxnAmount());
+
+        // 累计保证金额
+        JBalanceEntity depositSum = ledgerUtil.getDepositSumAccount(0L, entity.getCurrency());
+        ledgerUtil.ledgeUpdate(depositSum, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_IN_DEPOSIT_SUM, entity.getId(), factMemo, entity.getSecurityamount());
+
+        // 累计手续费金额
+        JBalanceEntity feeSum = ledgerUtil.getFeeSumAccount(0L, entity.getCurrency());
+        ledgerUtil.ledgeUpdate(feeSum, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_IN_FEE_SUM, entity.getId(), factMemo, entity.getFee());
 
         // 预付费主卡充值
         if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_PREPAID)) {

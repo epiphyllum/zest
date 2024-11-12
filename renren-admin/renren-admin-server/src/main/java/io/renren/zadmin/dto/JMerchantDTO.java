@@ -114,35 +114,10 @@ public class JMerchantDTO implements Serializable {
     private BigDecimal depositRate;
     @Schema(description = "充值费率")
     private BigDecimal chargeRate;
-    @Schema(description = "交易费率")
-    private BigDecimal txnRate;
-    @Schema(description = "失败费")
-    private BigDecimal failFee;
-    @Schema(description = "L50")
-    private BigDecimal l50;
-    @Schema(description = "Gef50")
-    private BigDecimal gef50;
-    @Schema(description = "争议处理费")
-    private BigDecimal disputeFee;
-
-    // 开卡收费
-    @Schema(description = "visa实体卡开卡收费")
-    private BigDecimal vccRealFee;
-    @Schema(description = "visa虚拟卡开卡收费")
-    private BigDecimal vccVirtualFee;
-    @Schema(description = "共享主卡开卡收费")
-    private BigDecimal vpaMainFee;
-    @Schema(description = "共享子卡开卡收费")
-    private BigDecimal vpaShareFee;
-    @Schema(description = "预付费卡开卡收费")
-    private BigDecimal vpaPrepaidFee;
-
-    @Schema(description = "预付费卡退收费rate")
-    private BigDecimal prepaidRefundRate;
-    @Schema(description = "预付费卡退收费保底")
-    private BigDecimal prepaidRefundCeil;
-    @Schema(description = "预付费卡退收费封顶")
-    private BigDecimal prepaidRefundFloor;
+    @Schema(description = "充值费率成本")
+    private BigDecimal costChargeRate;
+    @Schema(description = "保证金比例成本")
+    private BigDecimal costDepositRate;
 
     @Schema(description = "商户公钥")
     private String publicKey;
@@ -150,7 +125,6 @@ public class JMerchantDTO implements Serializable {
     private String webhook;
     @Schema(description = "whiteIp")
     private String whiteIp;
-
     // 基本
     @Schema(description = "创建者")
     private Long creator;

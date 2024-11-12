@@ -72,8 +72,6 @@ public class JCardManager {
     @Resource
     private ZestConfig zestConfig;
     @Resource
-    private JCardFeeConfigDao jCardFeeConfigDao;
-    @Resource
     private JSubDao jSubDao;
     @Resource
     private JBalanceDao jBalanceDao;
@@ -85,6 +83,8 @@ public class JCardManager {
     private JVpaAdjustDao jVpaAdjustDao;
     @Resource
     private JConfigDao jConfigDao;
+    @Resource
+    private JFeeConfigDao jFeeConfigDao;
 
     // 补充agentId, agentName, merchantName
     public void fillBySub(JCardEntity entity) {
@@ -100,38 +100,22 @@ public class JCardManager {
     }
 
     public void fillMerchantFee(JCardEntity entity, JMerchantEntity merchant) {
-        // 查询开卡费用配置
-        List<JCardFeeConfigEntity> cardFeeConfigList = jCardFeeConfigDao.selectList(Wrappers.emptyWrapper());
-        BigDecimal fee = null;
-        for (JCardFeeConfigEntity cfg : cardFeeConfigList) {
-            if (cfg.getCardtype().equals(entity.getCardtype()) &&
-                    cfg.getProducttype().equals(entity.getProducttype()) &&
-                    cfg.getCurrency().equals(entity.getCurrency())) {
-                fee = cfg.getFee();
-                break;
-            }
-        }
-        if (fee == null) {
-            throw new RenException("can not find open card fee config");
-        }
 
-        // 成本
-        entity.setFee(fee);
-
-        // 收入
-        if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN)) {
-            entity.setMerchantfee(merchant.getVpaMainFee());
-        } else if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_SHARE)) {
-            entity.setMerchantfee(merchant.getVpaShareFee());
-        } else if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_PREPAID)) {
-            entity.setMerchantfee(merchant.getVpaPrepaidFee());
-        } else if (entity.getMarketproduct().equals(ZinConstant.MP_VCC_REAL)) {
-            entity.setMerchantfee(merchant.getVccRealFee());
-        } else if (entity.getMarketproduct().equals(ZinConstant.MP_VCC_VIRTUAL)) {
-            entity.setMerchantfee(merchant.getVccVirtualFee());
-        } else {
-            entity.setMerchantfee(BigDecimal.ZERO);
+        JFeeConfigEntity feeConfig = jFeeConfigDao.selectOne(Wrappers.<JFeeConfigEntity>lambdaQuery()
+                .eq(JFeeConfigEntity::getMerchantId, merchant.getId())
+                .eq(JFeeConfigEntity::getMarketproduct, entity.getMarketproduct())
+        );
+        if (feeConfig == null) {
+            feeConfig = jFeeConfigDao.selectOne(Wrappers.<JFeeConfigEntity>lambdaQuery()
+                    .eq(JFeeConfigEntity::getMerchantId, 0L)
+                    .eq(JFeeConfigEntity::getMarketproduct, entity.getMarketproduct())
+            );
         }
+        if (feeConfig == null) {
+            throw new RenException("没有配置");
+        }
+        entity.setFee(feeConfig.getCostCardFee());
+        entity.setMerchantfee(feeConfig.getCardFee());
     }
 
     public void save(JCardEntity entity) {

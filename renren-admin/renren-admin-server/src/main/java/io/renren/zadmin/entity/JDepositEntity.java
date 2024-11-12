@@ -54,6 +54,8 @@ public class JDepositEntity extends BaseEntity {
     private String state;
     private String stateexplain;
     private BigDecimal securityamount;
+    private String securitycurrency;
     private BigDecimal fee;
+    private String feecurrency;
 
 }

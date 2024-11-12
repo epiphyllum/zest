@@ -2,7 +2,7 @@
 drop table if exists j_merchant;
 create table j_merchant
 (
-    id                 bigint         not null comment '商户ID',
+    id                 bigint        not null comment '商户ID',
 
     -- 所属代理
     agent_id           bigint,
@@ -24,7 +24,7 @@ create table j_merchant
     legalarea          varchar(10) comment '法人国籍',                                      --	legalarea	String	10	Y	见附录【国别信息】中的CODE,如中国：CHN
     legalidtype        varchar(10) comment '法人证件类型',                                  --	legalidtype	String	10	Y	01：居民身份证 02：军人或武警身份证, 03：港澳台通行证, 4：护照, 05：其他有效旅行证件 06：其他类个人有效证件
     legalidno          varchar(30) comment '法人证件号',                                    --	legalidno	String	30	Y legalidexpire varchar(30) not null, -- 法人证件有效期	legalidexpire	String	30	Y	YYYYMMDD
-    legalidexpire      varchar(30) comment '法人证件有效期',                                    --	legalidexpire	String	30	Y legalidexpire varchar(30) not null, -- 法人证件有效期	legalidexpire	String	30	Y	YYYYMMDD
+    legalidexpire      varchar(30) comment '法人证件有效期',                                --	legalidexpire	String	30	Y legalidexpire varchar(30) not null, -- 法人证件有效期	legalidexpire	String	30	Y	YYYYMMDD
     legaladdress       varchar(200) comment '法人代表住址',                                 --	legaladdress	String	200	Y
     threcertflag       varchar(2) comment '是否三证合一',                                   --	threcertflag	String	2	C	0-否、1-是 注册国家/地区areacode为CHN时必填
 
@@ -55,37 +55,23 @@ create table j_merchant
     cusid              varchar(15) comment '通联子商户号: 会从零时商户号变正式商户号',      --	cusid	String	15	A	状态为审核成功时返回
     state              varchar(2) comment '状态',                                           -- state	String	2	Y	04：审核成功; 05：审核失败; 其他情况为空;
     -- extra management:
-    enabled            int            not null default 1 comment '启用',
+    enabled            int           not null default 1 comment '启用',
 
     -- 商户接入参数
-    mcc                varchar(6)     not null comment '商户类型',                          -- dict
-    -- typeclass          varchar(16) comment '商户功能分类',
-    deposit_rate       decimal(10, 3) comment '保证金比例',
-    charge_rate        decimal(10, 3) comment '充值费率',                                   --
-    l50                decimal(10, 2) not null,
-    gef50              decimal(10, 2) not null,
-    fail_fee           decimal(10, 2) comment '失败费',
-    dispute_fee        decimal(10, 2) comment '争议处理费',
+    mcc                varchar(6)    not null comment '商户类型',                           -- dict
 
-    -- 开卡收费项
-    vcc_real_fee       decimal(10, 2) comment 'visa实体卡',
-    vcc_virtual_fee    decimal(10, 2) comment 'visa虚拟卡',
-    vpa_main_fee       decimal(10, 2) comment '共享主卡',
-    vpa_share_fee      decimal(10, 2) comment '共享子卡',
-    vpa_prepaid_fee    decimal(10, 2) comment '预付费卡',
-
-    -- 预付费卡退款收费
-    prepaid_refund_rate    decimal(10, 2) comment '预付费卡退卡扣费',
-    prepaid_refund_ceil    decimal(10, 2) comment '预付费卡退卡扣费',
-    prepaid_refund_floor    decimal(10, 2) comment '预付费卡退卡扣费',
-
-    txn_rate           decimal(10, 3) comment '交易费率',
-    public_key         varchar(1024)  null comment '商户公钥',
+    public_key         varchar(1024) null comment '商户公钥',
     webhook            varchar(128) comment '商户通知地址',
     white_ip           varchar(256) comment '接口IP白名单',
 
+    cost_deposit_rate  decimal(18, 2),
+    cost_charge_rate   decimal(18, 2),
+
+    deposit_rate       decimal(18, 2),
+    charge_rate        decimal(18, 2),
+
     -- 接口权限
-    permissions        varchar(256)   not null default '{"payInfo":1,"cardWithdraw":1}',
+    permissions        varchar(256)  not null default '{"payInfo":1,"cardWithdraw":1}',
 
     -- basic
     creator            bigint comment '创建者',

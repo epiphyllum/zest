@@ -11,43 +11,36 @@ import java.util.Date;
 import io.renren.commons.mybatis.entity.BaseEntity;
 
 /**
- * j_withdraw
+ * j_fee_config
  *
  * @author epiphyllum epiphyllum.zhou@gmail.com
- * @since 3.0 2024-08-19
+ * @since 3.0 2024-11-12
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-@TableName("j_withdraw")
-public class JWithdrawEntity extends BaseEntity {
+@TableName("j_fee_config")
+public class JFeeConfigEntity extends BaseEntity {
     private static final long serialVersionUID = 1L;
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updater;
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date updateDate;
 
-    // (6) ID相关
     private Long agentId;
     private String agentName;
     private Long merchantId;
     private String merchantName;
-    private Long subId;
-    private String subName;
-    private Integer api;
-
-    // (8) 业务字段
-    private String meraplid;
     private String marketproduct;
-    private String cardno;
-    private String payeeid;      // 提现到哪个账户
-    private BigDecimal amount;
-    private String currency;
-    private String applyid;
-    private String state;
-    private String stateexplain;
-    private BigDecimal securityamount;
-    private String securitycurrency;
 
-    private BigDecimal fee;
-    private String feecurrency;
+    private BigDecimal costCardFee;
+    private BigDecimal costL50;
+    private BigDecimal costGef50;
+    private BigDecimal costFailFee;
+    private BigDecimal costDisputeFee;
+
+    private BigDecimal cardFee;
+    private BigDecimal l50;
+    private BigDecimal gef50;
+    private BigDecimal failFee;
+    private BigDecimal disputeFee;
 }

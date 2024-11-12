@@ -86,27 +86,13 @@ public class JMerchantEntity extends BaseEntity {
 
     // (7)商户接入参数, 只有商户有， 子商户没有
     private String mcc;
-    private BigDecimal depositRate;
     private BigDecimal chargeRate;
-    private BigDecimal txnRate;
-    private BigDecimal failFee;
-    private BigDecimal l50;
-    private BigDecimal gef50;
-    private BigDecimal disputeFee;
-
-    // 开卡收费
-    private BigDecimal vccRealFee;
-    private BigDecimal vccVirtualFee;
-    private BigDecimal vpaMainFee;
-    private BigDecimal vpaShareFee;
-    private BigDecimal vpaPrepaidFee;
-
-    // 预付费卡退款收费
-    private BigDecimal prepaidRefundRate;
-    private BigDecimal prepaidRefundCeil;
-    private BigDecimal prepaidRefundFloor;
+    private BigDecimal depositRate;
+    private BigDecimal costChargeRate;
+    private BigDecimal costDepositRate;
 
     private String publicKey;
+    private String sensitiveKey;
     private String webhook;
     private String whiteIp;
 }

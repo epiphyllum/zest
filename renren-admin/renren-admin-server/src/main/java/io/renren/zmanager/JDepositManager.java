@@ -56,9 +56,9 @@ public class JDepositManager {
     @Resource
     private JDepositService jDepositService;
     @Resource
-    private JConfigDao jConfigDao;
-    @Resource
     private JCardDao jCardDao;
+    @Resource
+    private JCardManager jCardManager;
 
     // 填充信息
     public JSubEntity fillInfo(JDepositEntity entity) {
@@ -87,16 +87,14 @@ public class JDepositManager {
      * 充值手续费=（100-2）*0.01=0.98 HKD
      * 到账金额 = 100-2-0.98=97.02 HKD
      */
-    public BigDecimal calcTxnAmount(BigDecimal amount) {
-        JConfigEntity jConfigEntity = jConfigDao.selectOne(Wrappers.emptyWrapper());
-        if (jConfigEntity == null) {
-            throw new RenException("请配置全局参数");
-        }
+    public BigDecimal calcTxnAmount(BigDecimal amount, JMerchantEntity merchant) {
         // 计算发起金额
-        BigDecimal rate1 = BigDecimal.ONE.subtract(jConfigEntity.getChargeRate());
-        BigDecimal rate2 = BigDecimal.ONE.subtract(jConfigEntity.getDepositRate());
-        BigDecimal mul = rate1.multiply(rate2);
-        return amount.divide(mul, 2, RoundingMode.HALF_UP);
+        BigDecimal rate1 = BigDecimal.ONE.subtract(merchant.getCostChargeRate());
+        BigDecimal rate2 = BigDecimal.ONE.subtract(merchant.getCostDepositRate());
+
+        BigDecimal middle = amount.divide(rate1, 2, RoundingMode.HALF_UP);
+        BigDecimal out = middle.divide(rate2, 2, RoundingMode.HALF_UP);
+        return out;
     }
 
     public void saveAndSubmit(JDepositEntity entity, boolean submit) {
@@ -104,12 +102,14 @@ public class JDepositManager {
         List<JVaEntity> jVaEntities = jVaDao.selectList(Wrappers.emptyWrapper());
         JVaEntity jVaEntity = jVaEntities.stream().filter(e -> e.getCurrency().equals(entity.getCurrency())).findFirst().get();
         entity.setPayerid(jVaEntity.getTid());
-        BigDecimal txnAmount = calcTxnAmount(entity.getAmount());
-        entity.setTxnAmount(txnAmount);
-        // 填充其他ID
+
         JSubEntity subEntity = fillInfo(entity);
+        JMerchantEntity merchant = jMerchantDao.selectById(subEntity.getMerchantId());
+        BigDecimal txnAmount = calcTxnAmount(entity.getAmount(), merchant);
+        entity.setTxnAmount(txnAmount);
         // 入库
         tx.executeWithoutResult(st -> {
+            log.info("insert deposit: {}", entity);
             jDepositDao.insert(entity);
             ledgerCardCharge.ledgeCardChargeFreeze(entity, subEntity);
         });
@@ -175,16 +175,29 @@ public class JDepositManager {
                         .eq(JDepositEntity::getId, entity.getId())
                         .eq(JDepositEntity::getState, oldState)
                         .set(JDepositEntity::getSecurityamount, response.getSecurityamount())
+                        .set(JDepositEntity::getSecuritycurrency, response.getSecuritycurrency())
                         .set(JDepositEntity::getFee, response.getFee())
+                        .set(JDepositEntity::getFeecurrency, response.getFeecurrency())
                         .set(JDepositEntity::getState, newState)
                 );
+
+                entity.setSecurityamount(response.getSecurityamount());
+                entity.setSecuritycurrency(response.getSecuritycurrency());
+                entity.setFee(response.getFee());
+                entity.setFeecurrency(response.getFeecurrency());
+
                 ledgerCardCharge.ledgeCardCharge(entity, subEntity);
             });
+
+            CompletableFuture.runAsync(() -> {
+                JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery().eq(JCardEntity::getCardno, entity.getCardno()));
+                jCardManager.balanceCard(cardEntity);
+            });
+
         } else {
             jDepositDao.update(null, Wrappers.<JDepositEntity>lambdaUpdate()
                     .eq(JDepositEntity::getId, entity.getId())
                     .eq(JDepositEntity::getState, oldState)
-                    .set(JDepositEntity::getSecurityamount, response.getSecurityamount())
                     .set(JDepositEntity::getState, newState)
             );
         }
@@ -216,6 +229,7 @@ public class JDepositManager {
 
     /**
      * 修改了金额， 需要重新设置发起金额
+     *
      * @param dto
      */
     public void update(JDepositDTO dto) {
@@ -223,7 +237,8 @@ public class JDepositManager {
         log.info("oldAmount: {}, newAmount: {}", entity.getAmount(), dto.getAmount());
         // 如果修改了金额: 需要重新计算发起金额
         if (entity.getAmount().compareTo(dto.getAmount()) != 0) {
-            BigDecimal txnAmount = calcTxnAmount(dto.getAmount());
+            JMerchantEntity merchant = jMerchantDao.selectById(entity.getMerchantId());
+            BigDecimal txnAmount = calcTxnAmount(dto.getAmount(), merchant);
             dto.setTxnAmount(txnAmount);
         }
         jDepositService.update(dto);
@@ -231,6 +246,7 @@ public class JDepositManager {
 
     /**
      * 作废, 需要解冻
+     *
      * @param entity
      */
     public void cancel(JDepositEntity entity) {

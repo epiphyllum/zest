@@ -64,15 +64,24 @@ public class LedgerCardWithdraw {
     // 卡资金提取: 将卡资金退回到子商户va
     public void ledgeCardWithdraw(JWithdrawEntity entity, JSubEntity sub) {
         // 子商户va, 卡汇总充值资金账号
-        JBalanceEntity subVa = ledgerUtil.getSubVaAccount(sub.getId(), entity.getCurrency());
-        JBalanceEntity subSum = ledgerUtil.getSubSumAccount(sub.getId(), entity.getCurrency());
         BigDecimal showAmount = entity.getAmount().add(BigDecimal.ZERO).setScale(2, RoundingMode.HALF_UP);
         String factMemo = "确认-卡资金提取:" + showAmount;
         BigDecimal factAmount = entity.getAmount();
         // 记账1: 子商户Va-confirm
+        JBalanceEntity subSum = ledgerUtil.getSubSumAccount(sub.getId(), entity.getCurrency());
         ledgerUtil.confirmUpdate(subSum, LedgerConstant.ORIGIN_TYPE_CARD_WITHDRAW, LedgerConstant.FACT_CARD_WITHDRAW_CONFIRM, entity.getId(), factMemo, factAmount);
+
         // 记账2: 子商户Va+
+        JBalanceEntity subVa = ledgerUtil.getSubVaAccount(sub.getId(), entity.getCurrency());
         ledgerUtil.ledgeUpdate(subVa, LedgerConstant.ORIGIN_TYPE_CARD_WITHDRAW, LedgerConstant.FACT_CARD_WITHDRAW_IN, entity.getId(), factMemo, factAmount);
+
+        // 手续费汇总-
+        JBalanceEntity feeSum = ledgerUtil.getFeeSumAccount(0L, entity.getCurrency());
+        ledgerUtil.ledgeUpdate(feeSum, LedgerConstant.ORIGIN_TYPE_CARD_WITHDRAW, LedgerConstant.FACT_CARD_WITHDRAW_OUT_FEE_SUM, entity.getId(), factMemo, entity.getFee());
+
+        // 充值资金-
+        JBalanceEntity chargeSum = ledgerUtil.getChargeSumAccount(0L, entity.getCurrency());
+        ledgerUtil.ledgeUpdate(chargeSum, LedgerConstant.ORIGIN_TYPE_CARD_WITHDRAW, LedgerConstant.FACT_CARD_WITHDRAW_OUT_CHARGE_SUM, entity.getId(), factMemo, entity.getAmount().negate());
 
         // 预付费主卡提现
         if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_PREPAID)) {
@@ -82,7 +91,6 @@ public class LedgerCardWithdraw {
             JBalanceEntity ppMain = ledgerUtil.getPrepaidAccount(cardEntity.getId(), cardEntity.getCurrency());
             ledgerUtil.confirmUpdate(ppMain, LedgerConstant.ORIGIN_TYPE_CARD_WITHDRAW, LedgerConstant.FACT_CARD_WITHDRAW_OUT_PREPAID_MAIN, entity.getId(), factMemo, factAmount);
         }
-
     }
 
 }

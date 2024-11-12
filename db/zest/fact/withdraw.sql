@@ -20,10 +20,14 @@ create table j_withdraw
     amount         decimal(18, 2) not null comment '缴纳金额',
     applyid        varchar(32)    null comment '申请单号',
 
+    feecurrency    varchar(3) comment '币种',
+    fee            decimal(18, 2) not null comment '缴纳金额',
+    securityamount decimal(18, 2) null,
+    securitycurrency varchar(3) comment '币种',
+
     -- extra
     `state`        varchar(2)     not null default 0 comment '状态',
     stateexplain   varchar(200),
-    securityamount decimal(18, 2) null,
 
     -- basic
     creator        bigint comment '创建者',

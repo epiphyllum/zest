@@ -19,25 +19,11 @@ import java.util.Date;
 @Schema(description = "j_config")
 public class JConfigDTO implements Serializable {
     private static final long serialVersionUID = 1L;
-
     @Schema(description = "ID")
     private Long id;
-    @Schema(description = "保证金扣率")
-    private BigDecimal depositRate;
-    @Schema(description = "手续费扣率")
-    private BigDecimal chargeRate;
 
-    @Schema(description = "L50")
-    private BigDecimal l50;
-    @Schema(description = "Gef50")
-    private BigDecimal gef50;
-    @Schema(description = "失败手续费")
-    private BigDecimal failFee;
-    @Schema(description = "争议处理费")
-    private BigDecimal disputeFee;
     @Schema(description = "发卡限量")
     private Integer quotaLimit;
-
     @Schema(description = "vcc实体主卡")
     private String vccMainReal ;    //
     @Schema(description = "vcc虚拟主卡")

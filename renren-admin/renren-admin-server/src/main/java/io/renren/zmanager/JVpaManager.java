@@ -65,6 +65,8 @@ public class JVpaManager {
     private ZestConfig zestConfig;
     @Resource
     private JCardManager jCardManager;
+    @Resource
+    private JFeeConfigDao jFeeConfigDao;
 
     //
     private void checkExpiredate(JVpaJobEntity entity, String mainCardExpiredate) {
@@ -136,19 +138,24 @@ public class JVpaManager {
         entity.setMerchantName(sub.getMerchantName());
         entity.setSubName(sub.getCusname());
 
-        // 计算批次发卡手续费
-        JMerchantEntity merchant = jMerchantDao.selectById(entity.getMerchantId());
-        BigDecimal price = null;
-        String feecurrency = "HKD";
-        if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_SHARE)) {
-            price = merchant.getVpaShareFee();
-        } else if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_PREPAID)) {
-            price = merchant.getVpaPrepaidFee();
-        } else {
-            throw new RenException("非法请求");
+        JFeeConfigEntity feeConfig = jFeeConfigDao.selectOne(Wrappers.<JFeeConfigEntity>lambdaQuery()
+                .eq(JFeeConfigEntity::getMarketproduct, entity.getMarketproduct())
+                .eq(JFeeConfigEntity::getMerchantId, entity.getMerchantId())
+        );
+        if (feeConfig == null) {
+            feeConfig = jFeeConfigDao.selectOne(Wrappers.<JFeeConfigEntity>lambdaQuery()
+                    .eq(JFeeConfigEntity::getMarketproduct, entity.getMarketproduct())
+                    .eq(JFeeConfigEntity::getMerchantId, 0L)
+            );
         }
+        if (feeConfig == null) {
+            throw new RenException("配置不存在");
+        }
+
+        // 计算批次发卡手续费
+        BigDecimal price = feeConfig.getCardFee();
         BigDecimal totalMerchantFee = price.multiply(new BigDecimal(entity.getNum()));
-        entity.setFeecurrency(feecurrency);
+        entity.setFeecurrency(entity.getFeecurrency());
         entity.setMerchantfee(totalMerchantFee);
 
         // 发行预付费子卡, 需要判断主卡是否有足额

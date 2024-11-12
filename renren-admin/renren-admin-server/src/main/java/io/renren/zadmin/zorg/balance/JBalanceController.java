@@ -16,6 +16,7 @@ import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
 import io.renren.dao.SysDeptDao;
 import io.renren.entity.SysDeptEntity;
+import io.renren.zbalance.BalanceType;
 import io.renren.zcommon.ZestConstant;
 import io.renren.zadmin.dao.JBalanceDao;
 import io.renren.zadmin.dto.JBalanceDTO;
@@ -31,6 +32,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -57,6 +59,8 @@ public class JBalanceController {
     private JBalanceDao jBalanceDao;
     @Resource
     private SysDeptDao sysDeptDao;
+    @Resource
+    private TransactionTemplate tx;
 
     @GetMapping("page")
     @Operation(summary = "分页")
@@ -75,11 +79,9 @@ public class JBalanceController {
 
         if (ZestConstant.isMerchant()) {
             params.put("merchantId", SecurityUser.getDeptId().toString());
-        }
-        else if (ZestConstant.isSub()) {
+        } else if (ZestConstant.isSub()) {
             params.put("subId", SecurityUser.getDeptId().toString());
-        }
-        else if (ZestConstant.isAgent()) {
+        } else if (ZestConstant.isAgent()) {
             params.put("agentId", SecurityUser.getDeptId().toString());
         }
 
@@ -88,7 +90,8 @@ public class JBalanceController {
     }
 
     /**
-     *  这里是按组展示商户的账户。 必须要有ownerId
+     * 这里是按组展示商户的账户。 必须要有ownerId
+     *
      * @param params
      * @return
      */
