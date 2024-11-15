@@ -19,7 +19,6 @@ import io.renren.zin.file.dto.DownloadVpaRequest;
 import io.renren.zin.file.dto.VpaInfoItem;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -151,17 +150,17 @@ public class JVpaManager {
         if (feeConfig == null) {
             throw new RenException("配置不存在");
         }
+        entity.setProductcurrency(feeConfig.getCurrency());
 
         // 计算批次发卡手续费
         BigDecimal price = feeConfig.getCardFee();
         BigDecimal totalMerchantFee = price.multiply(new BigDecimal(entity.getNum()));
-        entity.setFeecurrency(entity.getFeecurrency());
         entity.setMerchantfee(totalMerchantFee);
 
         // 发行预付费子卡, 需要判断主卡是否有足额
         if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_PREPAID)) {
             BigDecimal totalAuth = entity.getAuthmaxamount().multiply(new BigDecimal(entity.getNum()));
-            JBalanceEntity prepaidAccount = ledgerUtil.getPrepaidAccount(mainCard.getId(), mainCard.getCurrency());
+            JBalanceEntity prepaidAccount = ledgerUtil.getPrepaidQuotaAccount(mainCard.getId(), mainCard.getCurrency());
             if (prepaidAccount.getBalance().compareTo(totalAuth) < 0) {
                 throw new RenException("余额不足");
             }

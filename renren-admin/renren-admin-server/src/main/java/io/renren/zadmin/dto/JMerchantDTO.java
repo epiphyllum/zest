@@ -110,14 +110,18 @@ public class JMerchantDTO implements Serializable {
     // 接入参数
     @Schema(description = "商户类型")
     private String mcc;
-    @Schema(description = "保证金比例")
-    private BigDecimal depositRate;
-    @Schema(description = "充值费率")
-    private BigDecimal chargeRate;
-    @Schema(description = "充值费率成本")
-    private BigDecimal costChargeRate;
-    @Schema(description = "保证金比例成本")
-    private BigDecimal costDepositRate;
+
+    @Schema(description = "支持币种")
+    private String currencyList;
+
+//    @Schema(description = "保证金比例")
+//    private BigDecimal depositRate;
+//    @Schema(description = "充值费率")
+//    private BigDecimal chargeRate;
+//    @Schema(description = "充值费率成本")
+//    private BigDecimal costChargeRate;
+//    @Schema(description = "保证金比例成本")
+//    private BigDecimal costDepositRate;
 
     @Schema(description = "商户公钥")
     private String publicKey;

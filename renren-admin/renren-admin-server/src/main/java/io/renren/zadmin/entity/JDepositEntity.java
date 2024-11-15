@@ -45,17 +45,22 @@ public class JDepositEntity extends BaseEntity {
     private String procurecontent;
     private String agmfid;
 
-    // 冗余添加的
+    //
     private String currency;
-    private BigDecimal txnAmount;
+    private BigDecimal txnAmount;        // 发起充值金额
+    private BigDecimal merchantDeposit;  // 商户担保金
+    private BigDecimal merchantCharge;   // 商户充值手续费
+    private BigDecimal depositRate;     // 商户保证金比例
+    private BigDecimal chargeRate;      // 商户充值手续费比例
+    private BigDecimal costDepositRate; // 成本-保证金比例
+    private BigDecimal costChargeRate;  // 成本-充值手续费比例
 
     // 记录返回
+    private BigDecimal securityamount;   // 通联保证金
+    private BigDecimal fee;              // 通联手续费
     private String applyid;
     private String state;
     private String stateexplain;
-    private BigDecimal securityamount;
     private String securitycurrency;
-    private BigDecimal fee;
     private String feecurrency;
-
 }

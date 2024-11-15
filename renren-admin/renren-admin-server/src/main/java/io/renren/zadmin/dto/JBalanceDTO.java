@@ -52,25 +52,18 @@ public class JBalanceDTO implements Serializable {
     private Integer version;
 
     /////////////////////////////////////////
-    // 商户3个管理账户
-    /////////////////////////////////////////
-    @Schema(description = "保证金")
-    private BigDecimal balanceDeposit;
-
-    @Schema(description = "充值手续费")
-    private BigDecimal balanceChargeFee;
-
-    @Schema(description = "交易费用")
-    private BigDecimal balanceTxnFee;
-
-    /////////////////////////////////////////
     // 子商户管理账户
     /////////////////////////////////////////
     @Schema(description = "发卡汇总")
-    private BigDecimal balanceSubSum;
-
+    private BigDecimal balanceCardSum;
     @Schema(description = "开卡费用")
-    private BigDecimal balanceSubFee;
+    private BigDecimal balanceCardFee;
+    @Schema(description = "保证金")
+    private BigDecimal balanceDeposit;
+    @Schema(description = "充值手续费")
+    private BigDecimal balanceCharge;
+    @Schema(description = "交易费用")
+    private BigDecimal balanceTxn;
 
     /////////////////////////////////////////
     // 附加查询条件

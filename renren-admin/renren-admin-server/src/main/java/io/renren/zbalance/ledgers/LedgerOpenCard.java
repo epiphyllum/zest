@@ -1,5 +1,6 @@
 package io.renren.zbalance.ledgers;
 
+import io.renren.commons.tools.exception.RenException;
 import io.renren.zadmin.dao.JCardDao;
 import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.entity.JBalanceEntity;
@@ -26,33 +27,44 @@ public class LedgerOpenCard {
     // 开卡冻结
     public void ledgeOpenCardFreeze(JCardEntity entity) {
         // 子商户va扣除费用冻结
-        JBalanceEntity subVa = ledgerUtil.getSubVaAccount(entity.getSubId(), entity.getCurrency());
         String factMemo = "冻结-开卡费用:" + BigDecimal.ZERO.add(entity.getMerchantfee()).setScale(2, RoundingMode.HALF_UP);
         BigDecimal factAmount = entity.getMerchantfee();
-        ledgerUtil.freezeUpdate(subVa, LedgerConstant.ORIGIN_CARD_OPEN, LedgerConstant.FACT_CARD_OPEN_FREEZE, entity.getId(), factMemo, factAmount);
+
+        JBalanceEntity subVa = ledgerUtil.getSubVaAccount(entity.getSubId(), entity.getCurrency());
+        if (factAmount.compareTo(subVa.getBalance()) > 0) {
+            throw new RenException("余额不足");
+        }
+        // 记账
+        ledgerUtil.freezeUpdate(subVa, LedgerConstant.ORIGIN_CARD_OPEN, LedgerConstant.FACT_CARD_OPEN_FREEZE_SUB_VA, entity.getId(), factMemo, factAmount);
     }
 
     // 卡开解冻
     public void ledgeOpenCardUnFreeze(JCardEntity entity) {
         // 子商户va扣除费用冻结
-        JBalanceEntity subVa = ledgerUtil.getSubVaAccount(entity.getSubId(), entity.getCurrency());
         String factMemo = "解冻-开卡费用:" + BigDecimal.ZERO.add(entity.getMerchantfee()).setScale(2, RoundingMode.HALF_UP);
         BigDecimal factAmount = entity.getMerchantfee();
-        ledgerUtil.unFreezeUpdate(subVa, LedgerConstant.ORIGIN_CARD_OPEN, LedgerConstant.FACT_CARD_OPEN_UN_FREEZE, entity.getId(), factMemo, factAmount);
+
+        // 记账
+        JBalanceEntity subVa = ledgerUtil.getSubVaAccount(entity.getSubId(), entity.getCurrency());
+        ledgerUtil.unFreezeUpdate(subVa, LedgerConstant.ORIGIN_CARD_OPEN, LedgerConstant.FACT_CARD_OPEN_UNFREEZE_SUB_VA, entity.getId(), factMemo, factAmount);
     }
 
     // 原始凭证: 开卡费用
     public void ledgeOpenCard(JCardEntity entity) {
-        // 子商户va
-        JBalanceEntity subVa = ledgerUtil.getSubVaAccount(entity.getSubId(), entity.getCurrency());
-        // 开卡费用账户
-        JBalanceEntity feeAccount = ledgerUtil.getSubFeeAccount(entity.getSubId(), entity.getCurrency());
+        BigDecimal merchantFee = entity.getMerchantfee();
         BigDecimal showMerchantFee = BigDecimal.ZERO.add(entity.getMerchantfee()).setScale(2, RoundingMode.HALF_UP);
         String factMemo = "确认-开卡费用:" + showMerchantFee;
-        BigDecimal merchantFee = entity.getMerchantfee();
+
         // 子商户va扣除费用
-        ledgerUtil.confirmUpdate(subVa, LedgerConstant.ORIGIN_CARD_OPEN, LedgerConstant.FACT_CARD_OPEN_CONFIRM, entity.getId(), factMemo, merchantFee);
+        JBalanceEntity subVa = ledgerUtil.getSubVaAccount(entity.getSubId(), entity.getCurrency());
+        ledgerUtil.confirmUpdate(subVa, LedgerConstant.ORIGIN_CARD_OPEN, LedgerConstant.FACT_CARD_OPEN_CONFIRM_SUB_VA, entity.getId(), factMemo, merchantFee);
+
         // 子商户开卡费用账户
-        ledgerUtil.ledgeUpdate(feeAccount, LedgerConstant.ORIGIN_CARD_OPEN, LedgerConstant.FACT_CARD_OPEN_FEE_IN, entity.getId(), factMemo, merchantFee);
+        JBalanceEntity feeAccount = ledgerUtil.getCardFeeAccount(entity.getSubId(), entity.getCurrency());
+        ledgerUtil.ledgeUpdate(feeAccount, LedgerConstant.ORIGIN_CARD_OPEN, LedgerConstant.FACT_CARD_OPEN_IN_CARD_FEE, entity.getId(), factMemo, merchantFee);
+
+        // 通联开卡费用
+        JBalanceEntity aipCardFee = ledgerUtil.getAipCardFeeAccount(0L, entity.getCurrency());
+        ledgerUtil.ledgeUpdate(aipCardFee, LedgerConstant.ORIGIN_CARD_OPEN, LedgerConstant.FACT_CARD_OPEN_IN_AIP_CARD_FEE, entity.getId(), factMemo, entity.getFee());
     }
 }

@@ -19,7 +19,14 @@ import java.util.Date;
 @Schema(description = "j_fee_config")
 public class JFeeConfigDTO implements Serializable {
     private static final long serialVersionUID = 1L;
-
+    @Schema(description = "创建者")
+    private Long creator;
+    @Schema(description = "创建时间")
+    private Date createDate;
+    @Schema(description = "更新者")
+    private Long updater;
+    @Schema(description = "更新时间")
+    private Date updateDate;
     @Schema(description = "ID")
     private Long id;
 
@@ -35,6 +42,8 @@ public class JFeeConfigDTO implements Serializable {
 
     @Schema(description = "产品")
     private String marketproduct;
+    @Schema(description = "本币币种")
+    private String currency;
 
     @Schema(description = "开卡收费")
     private BigDecimal costCardFee;
@@ -43,14 +52,16 @@ public class JFeeConfigDTO implements Serializable {
     private BigDecimal costDepositRate;
     @Schema(description = "手续费扣率-成本")
     private BigDecimal costChargeRate;
+
     @Schema(description = "小金额手续费每笔")
     private BigDecimal costL50;
-    @Schema(description = "&gt;=50失败手续费")
+    @Schema(description = "失败手续费")
     private BigDecimal costGef50;
     @Schema(description = "失败费/笔, 当失败率&gt;15%")
     private BigDecimal costFailFee;
     @Schema(description = "争议处理费")
     private BigDecimal costDisputeFee;
+
     @Schema(description = "保证金扣率")
     private BigDecimal depositRate;
     @Schema(description = "手续费扣率")
@@ -63,18 +74,13 @@ public class JFeeConfigDTO implements Serializable {
     private BigDecimal failFee;
     @Schema(description = "争议处理费")
     private BigDecimal disputeFee;
-
     @Schema(description = "开卡收费")
     private BigDecimal cardFee;
 
-
-    @Schema(description = "创建者")
-    private Long creator;
-    @Schema(description = "创建时间")
-    private Date createDate;
-    @Schema(description = "更新者")
-    private Long updater;
-    @Schema(description = "更新时间")
-    private Date updateDate;
+    ///////////////////////////////////
+    @Schema(description = "va余额")
+    private BigDecimal subVa;
+    @Schema(description = "最大到账金额")
+    private BigDecimal maxAmount;
 
 }

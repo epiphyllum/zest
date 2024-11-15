@@ -7,7 +7,6 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.ConvertUtils;
-import io.renren.dao.SysDeptDao;
 import io.renren.zadmin.dao.*;
 import io.renren.zadmin.entity.*;
 import io.renren.zapi.ApiNotify;
@@ -44,7 +43,6 @@ import java.util.function.Consumer;
 @Service
 @Slf4j
 public class JCardManager {
-
     @Resource
     private ZinFileService zinFileService;
     @Resource
@@ -57,8 +55,6 @@ public class JCardManager {
     private ApiNotify apiNotify;
     @Resource
     private TransactionTemplate tx;
-    @Resource
-    private SysDeptDao sysDeptDao;
     @Resource
     private JVaDao jVaDao;
     @Resource
@@ -219,7 +215,6 @@ public class JCardManager {
             throw new RenException("请求非法");
         }
 
-
         // 入库 + 冻结记账
         tx.executeWithoutResult(status -> {
             jCardDao.insert(entity);
@@ -238,12 +233,12 @@ public class JCardManager {
     /**
      * 创建预付费卡额度主账户
      */
-    private void newPrepaidBalance(JCardEntity entity) {
+    private void newPrepaidQuotaBalance(JCardEntity entity) {
         JBalanceEntity jBalanceEntity = new JBalanceEntity();
         jBalanceEntity.setOwnerId(entity.getId());
         jBalanceEntity.setOwnerName(entity.getCardno());
         jBalanceEntity.setOwnerType(ZestConstant.USER_TYPE_PREPAID);
-        jBalanceEntity.setBalanceType(BalanceType.getPrepaidAccount(entity.getCurrency()));
+        jBalanceEntity.setBalanceType(BalanceType.getPrepaidQuotaAccount(entity.getCurrency()));
         jBalanceEntity.setCurrency(entity.getCurrency());
         jBalanceDao.insert(jBalanceEntity);
     }
@@ -325,9 +320,9 @@ public class JCardManager {
 
             // 有效期解密保存
             String decryptedExpiredate = CommonUtils.decryptSensitiveString(expiredate, zestConfig.getAccessConfig().getSensitiveKey(), "UTF-8");
-
             updateWrapper.set(JCardEntity::getCvv, cvv)
                     .set(JCardEntity::getExpiredate, decryptedExpiredate);
+
 
             // 备用
             jCardEntity.setCardno(response.getCardno());
@@ -346,7 +341,7 @@ public class JCardManager {
                 tx.executeWithoutResult(status -> {
                     // 预付费主卡, 需要做剩余额度账户管理, 建立预付费主卡, 剩余额度管理账户
                     if (jCardEntity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_PREPAID)) {
-                        this.newPrepaidBalance(jCardEntity);
+                        this.newPrepaidQuotaBalance(jCardEntity);
                         this.newPrepaidSumBalance(jCardEntity);
                     }
                     jCardDao.update(null, updateWrapper);
@@ -368,6 +363,8 @@ public class JCardManager {
             jCardEntity.setCardno(response.getCardno());
             this.queryCard(jCardEntity);
 
+            // 更新余额
+            this.balanceCard(jCardEntity);
             return;
         }
 

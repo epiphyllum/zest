@@ -58,6 +58,7 @@ public class JVpaJobEntity extends BaseEntity {
 
     private String maincardno;
     private String marketproduct;
+    private String productcurrency;
     private Integer num;
     private String email;
     private String cardexpiredate;

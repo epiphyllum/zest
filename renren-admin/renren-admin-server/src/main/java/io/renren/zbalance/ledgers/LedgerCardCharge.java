@@ -26,52 +26,70 @@ public class LedgerCardCharge {
 
     //
     public void ledgeCardChargeFreeze(JDepositEntity entity, JSubEntity sub) {
-        String factMemo = "冻结卡充值:" + BigDecimal.ZERO.add(entity.getAmount()).setScale(2, RoundingMode.HALF_UP);
-        BigDecimal factAmount = entity.getAmount();
+        BigDecimal factAmount = entity.getAmount().add(entity.getMerchantCharge()).add(entity.getMerchantDeposit());
+        String factMemo = String.format("冻结:%s-卡充值:%s, 到账:%s, 保证金:%s, 手续费:%s",
+                factAmount,
+                entity.getTxnAmount(), entity.getAmount(), entity.getMerchantDeposit(), entity.getMerchantCharge());
+
         JBalanceEntity subVa = ledgerUtil.getSubVaAccount(sub.getId(), entity.getCurrency());
-        ledgerUtil.freezeUpdate(subVa, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_FREEZE, entity.getId(), factMemo, factAmount);
+        ledgerUtil.freezeUpdate(subVa, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_FREEZE_SUB_VA, entity.getId(), factMemo, factAmount);
     }
 
     // 取消卡充值, 卡充值失败
     public void ledgeCardChargeUnFreeze(JDepositEntity entity, JSubEntity sub) {
-        String factMemo = "解冻卡充值:" + BigDecimal.ZERO.add(entity.getAmount()).setScale(2, RoundingMode.HALF_UP);
-        BigDecimal factAmount = entity.getAmount();
+        BigDecimal factAmount = entity.getAmount().add(entity.getMerchantCharge()).add(entity.getMerchantDeposit());
+        String factMemo = String.format("解冻:%s-卡充值:%s, 到账:%s, 保证金:%s, 手续费:%s",
+                factAmount,
+                entity.getTxnAmount(), entity.getAmount(), entity.getMerchantDeposit(), entity.getMerchantCharge());
         JBalanceEntity subVa = ledgerUtil.getSubVaAccount(sub.getId(), entity.getCurrency());
-        ledgerUtil.unFreezeUpdate(subVa, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_UN_FREEZE, entity.getId(), factMemo, factAmount);
+        ledgerUtil.unFreezeUpdate(subVa, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_UNFREEZE_SUB_VA, entity.getId(), factMemo, factAmount);
     }
 
     // 卡充值
     public void ledgeCardCharge(JDepositEntity entity, JSubEntity sub) {
-        BigDecimal showAmount = BigDecimal.ZERO.add(entity.getAmount()).setScale(2, RoundingMode.HALF_UP);
-        String factMemo = "确认卡充值:" + showAmount + ", 发起金额:" + entity.getTxnAmount() + ",担保金:" + entity.getSecurityamount() + ",手续费:" + entity.getFee();
-        BigDecimal factAmount = entity.getAmount();
-        // 记账1: 子商户subVa-
+        BigDecimal factAmount = entity.getAmount().add(entity.getMerchantCharge()).add(entity.getMerchantDeposit());
+        String factMemo = String.format("确认:%s-卡充值:%s, 到账:%s, 保证金:%s, 手续费:%s",
+                factAmount,
+                entity.getTxnAmount(), entity.getAmount(), entity.getMerchantDeposit(), entity.getMerchantCharge());
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // 记账1: 子商户-va
         JBalanceEntity subVa = ledgerUtil.getSubVaAccount(sub.getId(), entity.getCurrency());
-        ledgerUtil.confirmUpdate(subVa, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_CONFIRM, entity.getId(), factMemo, factAmount);
+        ledgerUtil.confirmUpdate(subVa, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_CONFIRM_SUB_VA, entity.getId(), factMemo, factAmount);
 
-        // 记账2: 子商户subSum+
-        JBalanceEntity subSum = ledgerUtil.getSubSumAccount(sub.getId(), entity.getCurrency());
-        ledgerUtil.ledgeUpdate(subSum, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_IN, entity.getId(), factMemo, factAmount);
+        // 记账2: 子商户-发卡总额
+        JBalanceEntity cardSum = ledgerUtil.getCardSumAccount(sub.getId(), entity.getCurrency());
+        BigDecimal cardSumAmount = entity.getAmount();
+        ledgerUtil.ledgeUpdate(cardSum, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_IN_CARD_SUM, entity.getId(), factMemo, cardSumAmount);
 
-        // 累计充值金额
-        JBalanceEntity chargeSum = ledgerUtil.getChargeSumAccount(0L, entity.getCurrency());
-        ledgerUtil.ledgeUpdate(chargeSum, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_IN_CHARGE_SUM, entity.getId(), factMemo, entity.getTxnAmount());
+        // 记账3: 子商户-保证金
+        JBalanceEntity deposit = ledgerUtil.getDepositAccount(sub.getId(), entity.getCurrency());
+        ledgerUtil.ledgeUpdate(deposit, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_IN_DEPOSIT, entity.getId(), factMemo, entity.getMerchantDeposit());
 
-        // 累计保证金额
-        JBalanceEntity depositSum = ledgerUtil.getDepositSumAccount(0L, entity.getCurrency());
-        ledgerUtil.ledgeUpdate(depositSum, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_IN_DEPOSIT_SUM, entity.getId(), factMemo, entity.getSecurityamount());
+        // 记账4: 子商户-手续费
+        JBalanceEntity charge = ledgerUtil.getChargeAccount(sub.getId(), entity.getCurrency());
+        ledgerUtil.ledgeUpdate(charge, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_IN_CHARGE, entity.getId(), factMemo, entity.getMerchantCharge());
 
-        // 累计手续费金额
-        JBalanceEntity feeSum = ledgerUtil.getFeeSumAccount(0L, entity.getCurrency());
-        ledgerUtil.ledgeUpdate(feeSum, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_IN_FEE_SUM, entity.getId(), factMemo, entity.getFee());
+        ///////////////////////////////////////////////////////////////////////////////////
+        // 通联-累计充值金额
+        JBalanceEntity aipCardSum = ledgerUtil.getAipCardSumAccount(0L, entity.getCurrency());
+        ledgerUtil.ledgeUpdate(aipCardSum, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_IN_AIP_CARD_SUM, entity.getId(), factMemo, entity.getTxnAmount());
+
+        // 通联-累计保证金额
+        JBalanceEntity depositSum = ledgerUtil.getAipDepositAccount(0L, entity.getCurrency());
+        ledgerUtil.ledgeUpdate(depositSum, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_IN_AIP_DEPOSIT, entity.getId(), factMemo, entity.getSecurityamount());
+
+        // 通联-累计手续费金额
+        JBalanceEntity aipCharge = ledgerUtil.getAipChargeAccount(0L, entity.getCurrency());
+        ledgerUtil.ledgeUpdate(aipCharge, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_IN_AIP_CHARGE, entity.getId(), factMemo, entity.getFee());
 
         // 预付费主卡充值
         if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_PREPAID)) {
             JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
                     .eq(JCardEntity::getCardno, entity.getCardno())
             );
-            JBalanceEntity ppMain = ledgerUtil.getPrepaidAccount(cardEntity.getId(), cardEntity.getCurrency());
-            ledgerUtil.ledgeUpdate(ppMain, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_IN_PREPAID_MAIN, entity.getId(), factMemo, factAmount);
+            JBalanceEntity prepaidQuota = ledgerUtil.getPrepaidQuotaAccount(cardEntity.getId(), cardEntity.getCurrency());
+            ledgerUtil.ledgeUpdate(prepaidQuota, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_IN_PREPAID_MAIN, entity.getId(), factMemo, factAmount);
         }
     }
 }

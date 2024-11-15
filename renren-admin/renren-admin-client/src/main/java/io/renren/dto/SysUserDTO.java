@@ -52,7 +52,7 @@ public class SysUserDTO implements Serializable {
     private String password;
 
     @Schema(description = "姓名", required = true)
-    @NotBlank(message = "{sysuser.realname.require}", groups = DefaultGroup.class)
+//    @NotBlank(message = "{sysuser.realname.require}", groups = DefaultGroup.class)
     private String realName;
 
     @Schema(description = "头像")
@@ -63,8 +63,8 @@ public class SysUserDTO implements Serializable {
     private Integer gender;
 
     @Schema(description = "邮箱", required = true)
-    @NotBlank(message = "{sysuser.email.require}", groups = DefaultGroup.class)
-    @Email(message = "{sysuser.email.error}", groups = DefaultGroup.class)
+//    @NotBlank(message = "{sysuser.email.require}", groups = DefaultGroup.class)
+//    @Email(message = "{sysuser.email.error}", groups = DefaultGroup.class)
     private String email;
 
     @Schema(description = "手机号", required = true)

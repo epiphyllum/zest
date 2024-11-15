@@ -143,8 +143,8 @@ public class JSubServiceImpl extends CrudServiceImpl<JSubDao, JSubEntity, JSubDT
 
         // 创建管理账户 - 按币种来: 15 * 3
         for (String currency : BalanceType.CURRENCY_LIST) {
-            newBalance(deptEntity, BalanceType.getSubSumAccount(currency), currency);
-            newBalance(deptEntity, BalanceType.getSubFeeAccount(currency), currency);
+            newBalance(deptEntity, BalanceType.getCardSumAccount(currency), currency);
+            newBalance(deptEntity, BalanceType.getCardFeeAccount(currency), currency);
             newBalance(deptEntity, BalanceType.getSubVaAccount(currency), currency);
         }
 

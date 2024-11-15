@@ -1,28 +1,12 @@
-package io.renren.service;
+package io.renren.zadmin;
 
 import io.renren.commons.tools.exception.RenException;
 import io.renren.zadmin.entity.JFeeConfigEntity;
-import jakarta.annotation.Resource;
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-@SpringBootTest
-public class PasswordTest {
-    @Resource
-    private PasswordEncoder passwordEncoder;
-
-    @Test
-    public void encode() {
-        String password = "123456";
-        password = passwordEncoder.encode(password);
-
-        System.out.println(password);
-    }
-
+public class MyTest {
     private BigDecimal calcOut(BigDecimal out, JFeeConfigEntity feeConfig) {
         // 正向计算
         BigDecimal deposit = out.multiply(feeConfig.getCostDepositRate()).setScale(2, RoundingMode.HALF_UP);
@@ -41,14 +25,12 @@ public class PasswordTest {
         BigDecimal left = calcOut(out, feeConfig);
         int compare = left.compareTo(amount);
         if (compare == 0) {
-            System.out.println(amount + " -> " + out);
             return out;
         } else if (compare < 0) {
             out = out.add(new BigDecimal("0.01"));
         } else {
             out = out.subtract(new BigDecimal("0.01"));
         }
-        System.out.println("need adjust");
 
         left = calcOut(out, feeConfig);
         compare = left.compareTo(amount);
@@ -60,8 +42,8 @@ public class PasswordTest {
         }
     }
 
-    public static void main () {
-        PasswordTest passwordTest = new PasswordTest();
+    public static void main (String[] args) {
+        MyTest passwordTest = new MyTest();
         JFeeConfigEntity feeConfig = new JFeeConfigEntity();
         feeConfig.setCostChargeRate(new BigDecimal("0.01"));
         feeConfig.setCostDepositRate(new BigDecimal("0.01"));
@@ -71,6 +53,4 @@ public class PasswordTest {
             current  = current.add(new BigDecimal("0.01"));
         }
     }
-
-
 }

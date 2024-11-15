@@ -201,6 +201,7 @@ public class LedgerUtil {
         }
     }
 
+    ////////////////////////////////////////////////////////////////////////
     // 商户va
     public JBalanceEntity getVaAccount(Long ownerId, String currency) {
         return jBalanceDao.selectOne(Wrappers.<JBalanceEntity>lambdaQuery()
@@ -209,7 +210,15 @@ public class LedgerUtil {
         );
     }
 
-    // 商户预收保证金
+    ////////////////////////////////////////////////////////////////////////
+    // 子商户-va
+    public JBalanceEntity getSubVaAccount(Long ownerId, String currency) {
+        return jBalanceDao.selectOne(Wrappers.<JBalanceEntity>lambdaQuery()
+                .eq(JBalanceEntity::getOwnerId, ownerId)
+                .eq(JBalanceEntity::getBalanceType, BalanceType.getSubVaAccount(currency))
+        );
+    }
+    // 子商户-保证金
     public JBalanceEntity getDepositAccount(Long ownerId, String currency) {
         return jBalanceDao.selectOne(Wrappers.<JBalanceEntity>lambdaQuery()
                 .eq(JBalanceEntity::getOwnerId, ownerId)
@@ -217,55 +226,48 @@ public class LedgerUtil {
         );
     }
 
-    // 商户卡充值手续费账户
-    public JBalanceEntity getChargeFeeAccount(Long ownerId, String currency) {
+    // 子商户-卡充值手续费账户
+    public JBalanceEntity getChargeAccount(Long ownerId, String currency) {
         return jBalanceDao.selectOne(Wrappers.<JBalanceEntity>lambdaQuery()
                 .eq(JBalanceEntity::getOwnerId, ownerId)
-                .eq(JBalanceEntity::getBalanceType, BalanceType.getChargeFeeAccount(currency))
+                .eq(JBalanceEntity::getBalanceType, BalanceType.getChargeAccount(currency))
         );
     }
 
-    // 商户交易手续费账户
-    public JBalanceEntity getTxnFeeAccount(Long ownerId, String currency) {
+    // 子商户-卡汇总金额账户
+    public JBalanceEntity getCardSumAccount(Long ownerId, String currency) {
         return jBalanceDao.selectOne(Wrappers.<JBalanceEntity>lambdaQuery()
                 .eq(JBalanceEntity::getOwnerId, ownerId)
-                .eq(JBalanceEntity::getBalanceType, BalanceType.getTxnFeeAccount(currency))
+                .eq(JBalanceEntity::getBalanceType, BalanceType.getCardSumAccount(currency))
         );
     }
 
-    // 子商户va
-    public JBalanceEntity getSubVaAccount(Long ownerId, String currency) {
+    // 子商户-开卡费账户
+    public JBalanceEntity getCardFeeAccount(Long ownerId, String currency) {
         return jBalanceDao.selectOne(Wrappers.<JBalanceEntity>lambdaQuery()
                 .eq(JBalanceEntity::getOwnerId, ownerId)
-                .eq(JBalanceEntity::getBalanceType, BalanceType.getSubVaAccount(currency))
+                .eq(JBalanceEntity::getBalanceType, BalanceType.getCardFeeAccount(currency))
         );
     }
 
-    // 子商户卡汇总金额账户
-    public JBalanceEntity getSubSumAccount(Long ownerId, String currency) {
+    // 子商户-交易手续费账户
+    public JBalanceEntity getTxnAccount(Long ownerId, String currency) {
         return jBalanceDao.selectOne(Wrappers.<JBalanceEntity>lambdaQuery()
                 .eq(JBalanceEntity::getOwnerId, ownerId)
-                .eq(JBalanceEntity::getBalanceType, BalanceType.getSubSumAccount(currency))
+                .eq(JBalanceEntity::getBalanceType, BalanceType.getTxnAccount(currency))
         );
     }
 
-    // 子商户开卡费账户
-    public JBalanceEntity getSubFeeAccount(Long ownerId, String currency) {
+    ////////////////////////////////////////////////////////////////////////
+    // 预付费主卡-额度账户
+    public JBalanceEntity getPrepaidQuotaAccount(Long ownerId, String currency) {
         return jBalanceDao.selectOne(Wrappers.<JBalanceEntity>lambdaQuery()
                 .eq(JBalanceEntity::getOwnerId, ownerId)
-                .eq(JBalanceEntity::getBalanceType, BalanceType.getSubFeeAccount(currency))
+                .eq(JBalanceEntity::getBalanceType, BalanceType.getPrepaidQuotaAccount(currency))
         );
     }
 
-    // 预付费主卡账户
-    public JBalanceEntity getPrepaidAccount(Long ownerId, String currency) {
-        return jBalanceDao.selectOne(Wrappers.<JBalanceEntity>lambdaQuery()
-                .eq(JBalanceEntity::getOwnerId, ownerId)
-                .eq(JBalanceEntity::getBalanceType, BalanceType.getPrepaidAccount(currency))
-        );
-    }
-
-    // 预付费主卡发卡总额
+    // 预付费主卡-发卡总额
     public JBalanceEntity getPrepaidSumAccount(Long ownerId, String currency) {
         return jBalanceDao.selectOne(Wrappers.<JBalanceEntity>lambdaQuery()
                 .eq(JBalanceEntity::getOwnerId, ownerId)
@@ -273,27 +275,44 @@ public class LedgerUtil {
         );
     }
 
-    // 累计通联发起充值金额
-    public JBalanceEntity getChargeSumAccount(Long ownerId, String currency) {
+    ////////////////////////////////////////////////////////////////////////
+    // 累计通联-发起充值金额
+    public JBalanceEntity getAipCardSumAccount(Long ownerId, String currency) {
         return jBalanceDao.selectOne(Wrappers.<JBalanceEntity>lambdaQuery()
                 .eq(JBalanceEntity::getOwnerId, ownerId)
-                .eq(JBalanceEntity::getBalanceType, BalanceType.getChargeSumAccount(currency))
+                .eq(JBalanceEntity::getBalanceType, BalanceType.getAipCardSumAccount(currency))
         );
     }
 
-    // 累计通联保证金金额
-    public JBalanceEntity getDepositSumAccount(Long ownerId, String currency) {
+    // 累计通联-手开卡费用
+    public JBalanceEntity getAipCardFeeAccount(Long ownerId, String currency) {
         return jBalanceDao.selectOne(Wrappers.<JBalanceEntity>lambdaQuery()
                 .eq(JBalanceEntity::getOwnerId, ownerId)
-                .eq(JBalanceEntity::getBalanceType, BalanceType.getDepositSumAccount(currency))
+                .eq(JBalanceEntity::getBalanceType, BalanceType.getAipCardFeeAccount(currency))
         );
     }
 
-    // 累计通联手续费金额
-    public JBalanceEntity getFeeSumAccount(Long ownerId, String currency) {
+    // 累计通联-保证金金额
+    public JBalanceEntity getAipDepositAccount(Long ownerId, String currency) {
         return jBalanceDao.selectOne(Wrappers.<JBalanceEntity>lambdaQuery()
                 .eq(JBalanceEntity::getOwnerId, ownerId)
-                .eq(JBalanceEntity::getBalanceType, BalanceType.getFeeSumAccount(currency))
+                .eq(JBalanceEntity::getBalanceType, BalanceType.getAipDepositAccount(currency))
+        );
+    }
+
+    // 累计通联-手续费金额
+    public JBalanceEntity getAipChargeAccount(Long ownerId, String currency) {
+        return jBalanceDao.selectOne(Wrappers.<JBalanceEntity>lambdaQuery()
+                .eq(JBalanceEntity::getOwnerId, ownerId)
+                .eq(JBalanceEntity::getBalanceType, BalanceType.getAipChargeAccount(currency))
+        );
+    }
+
+    // 累计通联-交易手续费
+    public JBalanceEntity getAipTxnAccount(Long ownerId, String currency) {
+        return jBalanceDao.selectOne(Wrappers.<JBalanceEntity>lambdaQuery()
+                .eq(JBalanceEntity::getOwnerId, ownerId)
+                .eq(JBalanceEntity::getBalanceType, BalanceType.getAipTxnAccount(currency))
         );
     }
 

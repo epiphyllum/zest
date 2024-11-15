@@ -105,9 +105,6 @@ public class JMerchantManager {
     public void openVa(JMerchantEntity entity) {
         // 15 * 5 = 75个账户
         for (String currency : BalanceType.CURRENCY_LIST) {
-            newBalance(entity, BalanceType.getDepositAccount(currency), currency);  //  预收保证金
-            newBalance(entity, BalanceType.getChargeFeeAccount(currency), currency); // 充值到卡手续费
-            newBalance(entity, BalanceType.getTxnFeeAccount(currency), currency);  // 预收交易手续费
             newBalance(entity, BalanceType.getVaAccount(currency), currency);  // 创建va账户
         }
     }
@@ -133,7 +130,7 @@ public class JMerchantManager {
      */
     public void submit(JMerchantEntity jMerchantEntity) {
         // 上传文件
-        this.uploadFiles(jMerchantEntity);
+        // this.uploadFiles(jMerchantEntity);
 
         // 准备请求
         TSubCreateRequest tSubCreateRequest = ConvertUtils.sourceToTarget(jMerchantEntity, TSubCreateRequest.class);

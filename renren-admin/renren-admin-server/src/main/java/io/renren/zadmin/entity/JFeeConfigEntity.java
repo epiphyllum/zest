@@ -31,13 +31,18 @@ public class JFeeConfigEntity extends BaseEntity {
     private Long merchantId;
     private String merchantName;
     private String marketproduct;
+    private String currency;
 
+    private BigDecimal costChargeRate;
+    private BigDecimal costDepositRate;
     private BigDecimal costCardFee;
     private BigDecimal costL50;
     private BigDecimal costGef50;
     private BigDecimal costFailFee;
     private BigDecimal costDisputeFee;
 
+    private BigDecimal chargeRate;
+    private BigDecimal depositRate;
     private BigDecimal cardFee;
     private BigDecimal l50;
     private BigDecimal gef50;

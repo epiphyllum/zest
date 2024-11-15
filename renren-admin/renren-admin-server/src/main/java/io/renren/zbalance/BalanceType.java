@@ -14,51 +14,75 @@ public class BalanceType {
     public static String getVaAccount(String currency) {
         return "VA_" + currency;
     }
-    // 商户保证金
-    public static String getDepositAccount(String currency) {
-        return "DEPOSIT_" + currency;
-    }
-    // 商户卡充值手续费
-    public static String getChargeFeeAccount(String currency) {
-        return "CHARGE_FEE_" + currency;
-    }
-    // 商户交易费用
-    public static String getTxnFeeAccount(String currency) {
-        return "TXN_FEE_" + currency;
-    }
+
+    /////////////////////////////////////////////////////////////////////////
+    // 子商户账户
+    /////////////////////////////////////////////////////////////////////////
     // 子商户VA
     public static String getSubVaAccount(String currency) {
         return "SUB_VA_" + currency;
     }
-    // 子商户卡汇总充值资金
-    public static String getSubSumAccount(String currency) {
-        return "SUB_SUM_" + currency;
+
+    // 子商户-保证金
+    public static String getDepositAccount(String currency) {
+        return "DEPOSIT_" + currency;
     }
-    // 子商户开卡费用
-    public static String getSubFeeAccount(String currency) {
-        return "SUB_FEE_" + currency;
+
+    // 子商户-卡充值手续费(收入)
+    public static String getChargeAccount(String currency) {
+        return "CHARGE_" + currency;
     }
-    // 预付费卡主卡额度
-    public static String getPrepaidAccount(String currency) {
-        return "PREPAID_" + currency;
+
+    // 子商户-开卡费用(收入)
+    public static String getCardFeeAccount(String currency) {
+        return "CARD_FEE_" + currency;
     }
-    // 预付费卡主卡发卡总额
+
+    // 子商户-卡汇总充值资金
+    public static String getCardSumAccount(String currency) {
+        return "CARD_SUM_" + currency;
+    }
+
+    // 子商户-交易费用(收入)
+    public static String getTxnAccount(String currency) {
+        return "TXN_" + currency;
+    }
+
+
+    // 预付费卡主卡-额度
+    public static String getPrepaidQuotaAccount(String currency) {
+        return "PREPAID_QUOTA" + currency;
+    }
+
+    // 预付费卡主卡-发卡总额
     public static String getPrepaidSumAccount(String currency) {
         return "PREPAID_SUM_" + currency;
     }
-
-    // 累计发起充值金额
-    public static String getChargeSumAccount(String currency) {
-        return "CHARGE_SUM_" + currency;
+    /////////////////////////////////////////////////////////////////////////
+    // 平台账户
+    /////////////////////////////////////////////////////////////////////////
+    // Aip-累计发起充值金额
+    public static String getAipCardSumAccount(String currency) {
+        return "AIP_CARD_SUM_" + currency;
     }
 
-    // 累计保证金
-    public static String getDepositSumAccount(String currency) {
-        return "DEPOSIT_SUM_" + currency;
+    // Aip-累计开卡手续费(成本)
+    public static String getAipCardFeeAccount(String currency) {
+        return "AIP_CARD_FEE_" + currency;
     }
 
-    // 累计手续费
-    public static String getFeeSumAccount(String currency) {
-        return "FEE_SUM_" + currency;
+    // Aip-累计保证金()
+    public static String getAipDepositAccount(String currency) {
+        return "AIP_DEPOSIT_" + currency;
+    }
+
+    // Aip-累计充值费用(成本)
+    public static String getAipChargeAccount(String currency) {
+        return "AIP_CHARGE_" + currency;
+    }
+
+    // Aip-累计手续费(成本)
+    public static String getAipTxnAccount(String currency) {
+        return "AIP_TXN_" + currency;
     }
 }

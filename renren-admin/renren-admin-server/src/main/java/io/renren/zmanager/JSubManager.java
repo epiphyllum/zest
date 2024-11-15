@@ -12,7 +12,6 @@ import io.renren.zcommon.ZestConstant;
 import io.renren.zadmin.dao.JBalanceDao;
 import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.dao.JSubDao;
-import io.renren.zadmin.dto.JSubDTO;
 import io.renren.zadmin.entity.JBalanceEntity;
 import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zadmin.entity.JSubEntity;
@@ -137,12 +136,15 @@ public class JSubManager {
      * @param entity
      */
     public void openSubVa(JSubEntity entity) {
-        // 创建管理账户 - 按币种来: 15 * 3
+        // 创建管理账户 - 按币种来: 15 * 6
         tx.executeWithoutResult(st -> {
             for (String currency : BalanceType.CURRENCY_LIST) {
-                newBalance(entity, BalanceType.getSubSumAccount(currency), currency);
-                newBalance(entity, BalanceType.getSubFeeAccount(currency), currency);
-                newBalance(entity, BalanceType.getSubVaAccount(currency), currency);
+                newBalance(entity, BalanceType.getSubVaAccount(currency), currency);      // 子商户va
+                newBalance(entity, BalanceType.getDepositAccount(currency), currency);    // 子商户保证
+                newBalance(entity, BalanceType.getChargeAccount(currency), currency);  // 子商户充值手续费
+                newBalance(entity, BalanceType.getCardFeeAccount(currency), currency);    // 子商户开卡费用
+                newBalance(entity, BalanceType.getCardSumAccount(currency), currency);    // 子商户卡充值总额
+                newBalance(entity, BalanceType.getTxnAccount(currency), currency);        // 子商户其他费用
             }
         });
     }

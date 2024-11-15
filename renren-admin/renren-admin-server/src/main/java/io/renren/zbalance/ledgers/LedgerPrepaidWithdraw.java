@@ -30,16 +30,15 @@ public class LedgerPrepaidWithdraw {
         JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
                 .eq(JCardEntity::getCardno, maincardno)
         );
-        JBalanceEntity prepaidBalance = ledgerUtil.getPrepaidAccount(cardEntity.getId(), cardEntity.getCurrency());
         BigDecimal factAmount = entity.getAdjustAmount().negate();
         String factMemo = String.format("预付费卡提现:%s", factAmount);
 
-        JBalanceEntity prepaidSumBalance = ledgerUtil.getPrepaidSumAccount(cardEntity.getId(), cardEntity.getCurrency());
-
         // 主卡额度+
-        ledgerUtil.ledgeUpdate(prepaidBalance, LedgerConstant.ORIGIN_TYPE_PREPAID_WITHDRAW, LedgerConstant.FACT_PREPAID_WITHDRAW_UP, entity.getId(), factMemo, factAmount);
+        JBalanceEntity prepaidBalance = ledgerUtil.getPrepaidQuotaAccount(cardEntity.getId(), cardEntity.getCurrency());
+        ledgerUtil.ledgeUpdate(prepaidBalance, LedgerConstant.ORIGIN_TYPE_PREPAID_WITHDRAW, LedgerConstant.FACT_PREPAID_WITHDRAW_IN_PREPAID_QUOTA, entity.getId(), factMemo, factAmount);
 
         // 发卡总额-
-        ledgerUtil.ledgeUpdate(prepaidSumBalance, LedgerConstant.ORIGIN_TYPE_PREPAID_WITHDRAW, LedgerConstant.FACT_PREPAID_WITHDRAW_DOWN, entity.getId(), factMemo, factAmount.negate());
+        JBalanceEntity prepaidSum = ledgerUtil.getPrepaidSumAccount(cardEntity.getId(), cardEntity.getCurrency());
+        ledgerUtil.ledgeUpdate(prepaidSum, LedgerConstant.ORIGIN_TYPE_PREPAID_WITHDRAW, LedgerConstant.FACT_PREPAID_WITHDRAW_OUT_PREPAID_SUM, entity.getId(), factMemo, factAmount.negate());
     }
 }

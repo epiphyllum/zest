@@ -68,6 +68,19 @@ public class JDepositDTO implements Serializable {
     @Schema(description = "发起金额")
     private BigDecimal txnAmount;
 
+    @Schema(description = "商户保证")
+    private BigDecimal merchantDeposit;
+    @Schema(description = "商户手续费")
+    private BigDecimal merchantCharge;
+    @Schema(description = "商户保证金比例")
+    private BigDecimal depositRate;
+    @Schema(description = "商户手续费比例")
+    private BigDecimal chargeRate;
+    @Schema(description = "保证金比例-成本")
+    private BigDecimal costDepositRate;
+    @Schema(description = "手续费比例-成本")
+    private BigDecimal costChargeRate;
+
     // 通联返回
     @Schema(description = "申请单号")
     private String applyid;

@@ -141,29 +141,16 @@ public class JBalanceController {
             JBalanceDTO va = null;
 
             String vaType = "VA_" + currency;
-            String depositType = "DEPOSIT_" + currency;
-            String chargeFeeType = "CHARGE_FEE_" + currency;
-            String txnFeeType = "TXN_FEE_" + currency;
-
             for (JBalanceDTO dto : dtoList) {
                 if (dto.getBalanceType().equals(vaType)) {
                     log.debug("check dto: {}-{}-{}-{}", dto.getBalance(), dto.getFrozen(), dto.getCurrency(), dto.getBalanceType());
                     va = dto;
-                } else if (dto.getBalanceType().equals(depositType)) {
-                    deposit = dto.getBalance();
-                } else if (dto.getBalanceType().equals(chargeFeeType)) {
-                    chargeFee = dto.getBalance();
-                } else if (dto.getBalanceType().equals(txnFeeType)) {
-                    txnFee = dto.getBalance();
                 }
             }
-            if (deposit == null || chargeFee == null || txnFee == null || va == null) {
+            if (va == null) {
                 log.info("deposit: {}, chargeFee: {}, txnFee: {}, va: {}", deposit, chargeFee, txnFee, va);
                 throw new RenException("internal logical error");
             }
-            va.setBalanceDeposit(deposit);
-            va.setBalanceChargeFee(chargeFee);
-            va.setBalanceTxnFee(txnFee);
             newList.add(va);
         }
         page.setList(newList);
@@ -210,31 +197,45 @@ public class JBalanceController {
             String currency = entry.getKey();
             List<JBalanceDTO> dtoList = entry.getValue();
 
-            BigDecimal subSum = null;
-            BigDecimal subFee = null;
             JBalanceDTO subVa = null;
+            BigDecimal cardSum = null;
+            BigDecimal cardFee = null;
+            BigDecimal charge = null;
+            BigDecimal deposit = null;
+            BigDecimal txn = null;
 
             String subVaType = "SUB_VA_" + currency;
-            String subSumType = "SUB_SUM_" + currency;
-            String subFeeType = "SUB_FEE_" + currency;
+            String cardSumType = "CARD_SUM_" + currency;
+            String cardFeeType = "CARD_FEE_" + currency;
+            String depositType = "DEPOSIT_" + currency;
+            String chargeType = "CHARGE_" + currency;
+            String txnType = "TXN_" + currency;
 
             for (JBalanceDTO dto : dtoList) {
                 log.info("check dto: {}-{}-{}-{}", dto.getBalance(), dto.getFrozen(), dto.getCurrency(), dto.getBalanceType());
                 if (dto.getBalanceType().equals(subVaType)) {
                     subVa = dto;
-                } else if (dto.getBalanceType().equals(subSumType)) {
-                    subSum = dto.getBalance();
-                } else if (dto.getBalanceType().equals(subFeeType)) {
-                    log.info("subFee: {}", dto);
-                    subFee = dto.getBalance();
+                } else if (dto.getBalanceType().equals(cardSumType)) {
+                    cardSum = dto.getBalance();
+                } else if (dto.getBalanceType().equals(cardFeeType)) {
+                    cardFee = dto.getBalance();
+                } else if (dto.getBalanceType().equals(depositType)) {
+                    deposit = dto.getBalance();
+                } else if (dto.getBalanceType().equals(chargeType)) {
+                    charge = dto.getBalance();
+                } else if (dto.getBalanceType().equals(txnType)) {
+                    txn = dto.getBalance();
                 }
             }
-            if (subSum == null || subFee == null || subVa == null) {
-                log.error("subSum: {}, subFee: {}, subVa: {}", subSum, subFee, subVa);
+            if (txn == null || cardSum == null || cardFee == null || charge == null || deposit == null || subVa == null) {
+                log.error("txn: {}, cardSum: {}, cardFee: {}, charge: {}, deposit: {}, subVa: {}", txn, cardSum, cardFee, charge, deposit, subVa);
                 throw new RenException("internal logical error");
             }
-            subVa.setBalanceSubFee(subFee);
-            subVa.setBalanceSubSum(subSum);
+            subVa.setBalanceCardFee(cardFee);
+            subVa.setBalanceCardSum(cardSum);
+            subVa.setBalanceCharge(charge);
+            subVa.setBalanceDeposit(deposit);
+            subVa.setBalanceTxn(txn);
             newList.add(subVa);
         }
         page.setList(newList);

@@ -5,7 +5,6 @@ import io.renren.zadmin.dao.JCardDao;
 import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.entity.JBalanceEntity;
 import io.renren.zadmin.entity.JCardEntity;
-import io.renren.zadmin.entity.JDepositEntity;
 import io.renren.zadmin.entity.JVpaAdjustEntity;
 import io.renren.zbalance.LedgerConstant;
 import io.renren.zbalance.LedgerUtil;
@@ -31,10 +30,12 @@ public class LedgerPrepaidCharge {
         JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
                 .eq(JCardEntity::getCardno, maincardno)
         );
-        JBalanceEntity prepaidBalance = ledgerUtil.getPrepaidAccount(cardEntity.getId(), cardEntity.getCurrency());
         BigDecimal factAmount = entity.getAdjustAmount();
         String factMemo = String.format("冻结-单笔充值:%s", factAmount);
-        ledgerUtil.freezeUpdate(prepaidBalance, LedgerConstant.ORIGIN_TYPE_PREPAID_CHARGE, LedgerConstant.FACT_PREPAID_CHARGE_FREEZE, entity.getId(), factMemo, factAmount);
+
+        // 记账
+        JBalanceEntity prepaidQuota = ledgerUtil.getPrepaidQuotaAccount(cardEntity.getId(), cardEntity.getCurrency());
+        ledgerUtil.freezeUpdate(prepaidQuota, LedgerConstant.ORIGIN_TYPE_PREPAID_CHARGE, LedgerConstant.FACT_PREPAID_CHARGE_FREEZE_PREPAID_QUOTA, entity.getId(), factMemo, factAmount);
     }
 
     // 预付费卡 单笔充值解冻(调整主卡可用额度)
@@ -43,29 +44,27 @@ public class LedgerPrepaidCharge {
         JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
                 .eq(JCardEntity::getCardno, maincardno)
         );
-        JBalanceEntity prepaidBalance = ledgerUtil.getPrepaidAccount(cardEntity.getId(), cardEntity.getCurrency());
         BigDecimal factAmount = entity.getAdjustAmount();
         String factMemo = String.format("解冻-单笔充值:%s", factAmount);
-        ledgerUtil.unFreezeUpdate(prepaidBalance, LedgerConstant.ORIGIN_TYPE_PREPAID_CHARGE, LedgerConstant.FACT_PREPAID_CHARGE_UN_FREEZE, entity.getId(), factMemo, factAmount);
+
+        // 记账
+        JBalanceEntity prepaidQuota = ledgerUtil.getPrepaidQuotaAccount(cardEntity.getId(), cardEntity.getCurrency());
+        ledgerUtil.unFreezeUpdate(prepaidQuota, LedgerConstant.ORIGIN_TYPE_PREPAID_CHARGE, LedgerConstant.FACT_PREPAID_CHARGE_UNFREEZE_PREPAID_QUOTA, entity.getId(), factMemo, factAmount);
     }
 
     // 预付费卡 单笔开卡充值确认(调整主卡可用额度)
     public void ledgePrepaidCharge(JVpaAdjustEntity entity) {
         String maincardno = entity.getMaincardno();
-        JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
-                .eq(JCardEntity::getCardno, maincardno)
-        );
-
-        // 金额
-        JBalanceEntity prepaidBalance = ledgerUtil.getPrepaidAccount(cardEntity.getId(), cardEntity.getCurrency());
+        JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery().eq(JCardEntity::getCardno, maincardno));
         BigDecimal factAmount = entity.getAdjustAmount();
+        String factMemo = String.format("确认-单笔充值:%s", factAmount);
 
         // 主卡额度
-        String factMemo = String.format("确认-单笔充值:%s", factAmount);
-        ledgerUtil.confirmUpdate(prepaidBalance, LedgerConstant.ORIGIN_TYPE_PREPAID_CHARGE, LedgerConstant.FACT_PREPAID_CHARGE_CONFIRM, entity.getId(), factMemo, factAmount);
+        JBalanceEntity prepaidQuota = ledgerUtil.getPrepaidQuotaAccount(cardEntity.getId(), cardEntity.getCurrency());
+        ledgerUtil.confirmUpdate(prepaidQuota, LedgerConstant.ORIGIN_TYPE_PREPAID_CHARGE, LedgerConstant.FACT_PREPAID_CHARGE_CONFIRM_PREPAID_QUOTA, entity.getId(), factMemo, factAmount);
 
         // 发卡总额
-        JBalanceEntity prepaidSumBalance = ledgerUtil.getPrepaidSumAccount(cardEntity.getId(), cardEntity.getCurrency());
-        ledgerUtil.ledgeUpdate(prepaidSumBalance, LedgerConstant.ORIGIN_TYPE_PREPAID_CHARGE, LedgerConstant.FACT_PREPAID_CHARGE_IN, entity.getId(), factMemo, factAmount);
+        JBalanceEntity prepaidSum = ledgerUtil.getPrepaidSumAccount(cardEntity.getId(), cardEntity.getCurrency());
+        ledgerUtil.ledgeUpdate(prepaidSum, LedgerConstant.ORIGIN_TYPE_PREPAID_CHARGE, LedgerConstant.FACT_PREPAID_CHARGE_IN_PREPAID_SUM, entity.getId(), factMemo, factAmount);
     }
 }

@@ -74,6 +74,8 @@ public class JVpaJobDTO implements Serializable {
     private String maincardno;
     @Schema(description = "卡产品")
     private String marketproduct;
+    @Schema(description = "本币币种")
+    private String productcurrency;
     @Schema(description = "开卡数量")
     private Integer num;
     @Schema(description = "邮箱")

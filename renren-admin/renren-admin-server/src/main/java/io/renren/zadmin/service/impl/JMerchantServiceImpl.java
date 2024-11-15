@@ -124,8 +124,8 @@ public class JMerchantServiceImpl extends CrudServiceImpl<JMerchantDao, JMerchan
         // 15 * 5 = 75个账户
         for (String currency : BalanceType.CURRENCY_LIST) {
             newBalance(deptEntity, BalanceType.getDepositAccount(currency), currency);  //  预收保证金
-            newBalance(deptEntity, BalanceType.getChargeFeeAccount(currency), currency); // 充值到卡手续费
-            newBalance(deptEntity, BalanceType.getTxnFeeAccount(currency), currency);  // 预收交易手续费
+            newBalance(deptEntity, BalanceType.getChargeAccount(currency), currency); // 充值到卡手续费
+            newBalance(deptEntity, BalanceType.getTxnAccount(currency), currency);  // 预收交易手续费
             newBalance(deptEntity, BalanceType.getVaAccount(currency), currency);  // 创建va账户
         }
 

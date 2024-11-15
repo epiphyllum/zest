@@ -86,10 +86,12 @@ public class JMerchantEntity extends BaseEntity {
 
     // (7)商户接入参数, 只有商户有， 子商户没有
     private String mcc;
-    private BigDecimal chargeRate;
-    private BigDecimal depositRate;
-    private BigDecimal costChargeRate;
-    private BigDecimal costDepositRate;
+    private String currencyList;
+
+//    private BigDecimal chargeRate;
+//    private BigDecimal depositRate;
+//    private BigDecimal costChargeRate;
+//    private BigDecimal costDepositRate;
 
     private String publicKey;
     private String sensitiveKey;
