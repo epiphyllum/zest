@@ -64,7 +64,7 @@ public class LedgerOpenCard {
         ledgerUtil.ledgeUpdate(feeAccount, LedgerConstant.ORIGIN_CARD_OPEN, LedgerConstant.FACT_CARD_OPEN_IN_CARD_FEE, entity.getId(), factMemo, merchantFee);
 
         // 通联开卡费用
-        JBalanceEntity aipCardFee = ledgerUtil.getAipCardFeeAccount(0L, entity.getCurrency());
+        JBalanceEntity aipCardFee = ledgerUtil.getAipCardFeeAccount(entity.getSubId(), entity.getCurrency());
         ledgerUtil.ledgeUpdate(aipCardFee, LedgerConstant.ORIGIN_CARD_OPEN, LedgerConstant.FACT_CARD_OPEN_IN_AIP_CARD_FEE, entity.getId(), factMemo, entity.getFee());
     }
 }

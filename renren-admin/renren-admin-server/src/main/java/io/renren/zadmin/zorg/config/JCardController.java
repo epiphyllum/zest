@@ -1,6 +1,7 @@
 package io.renren.zadmin.zorg.config;
 
 import io.renren.commons.log.annotation.LogOperation;
+import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.tools.constant.Constant;
 import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.page.PageData;
@@ -95,6 +96,12 @@ public class JCardController {
         entity.setApi(0);
         entity.setMeraplid(CommonUtils.uniqueId());
         entity.setTxnid(CommonUtils.uniqueId());
+
+        // 子商户操作
+        if (SecurityUser.getUser().getUserType().equals(ZestConstant.USER_TYPE_SUB)) {
+            entity.setSubId(SecurityUser.getDeptId());
+        }
+
         jCardManager.save(entity);
         return new Result();
     }

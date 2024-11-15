@@ -31,7 +31,7 @@ create table j_vpa_job
     -- 任务状态: 需要查询同类后台获取所有子卡信息以及cvv并插入到卡表
     state                varchar(2)     not null default '00' comment '批量开卡的任务状态',
     merchantfee          decimal(18, 2) not null default 0 comment '发卡手续费',
-    feecurrency          varchar(3)     not null default 0 comment '手续费币种',
+    feecurrency          varchar(3)     not null default 0 comment '通联手续费币种',
     -- 创建相关信息
     maincardno           varchar(30)    not null comment '主卡(共享主卡)',
     num                  int            not null comment '开卡数量',
@@ -39,6 +39,8 @@ create table j_vpa_job
     cardexpiredate       varchar(10)    not null comment '卡有效期',
 
     marketproduct        varchar(16)    not null comment '产品',
+    productcurrency      varchar(3)     not null comment '本币币种',
+
     -- 接口
     meraplid             varchar(32)    not null comment '商户发起的meraplid, 我们用id',
     applyid              varchar(32)    null comment '通联返回',

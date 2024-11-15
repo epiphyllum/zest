@@ -49,6 +49,7 @@ public class JBalanceServiceImpl extends CrudServiceImpl<JBalanceDao, JBalanceEn
     // 商户
     private void merchantFilter(QueryWrapper<JBalanceEntity> wrapper, UserDetail user, Map<String, Object> params) {
         // 找出预付费主卡
+        wrapper.notLikeRight("balance_type", "AIP_");
         List<Long> cardList = jCardDao.selectList(Wrappers.<JCardEntity>lambdaQuery()
                 .eq(JCardEntity::getMerchantId, user.getDeptId())
                 .eq(JCardEntity::getMarketproduct, ZinConstant.MP_VPA_MAIN_PREPAID)
@@ -70,6 +71,8 @@ public class JBalanceServiceImpl extends CrudServiceImpl<JBalanceDao, JBalanceEn
 
     // 子商户
     private void subFilter(QueryWrapper<JBalanceEntity> wrapper, UserDetail user, Map<String, Object> params) {
+        wrapper.notLikeRight("balance_type", "AIP_");
+
         // 找出预付费主卡
         List<Long> cardList = jCardDao.selectList(Wrappers.<JCardEntity>lambdaQuery()
                 .eq(JCardEntity::getSubId, user.getDeptId())
@@ -81,7 +84,9 @@ public class JBalanceServiceImpl extends CrudServiceImpl<JBalanceDao, JBalanceEn
             if (ownerType.equals(ZestConstant.USER_TYPE_SUB)) {
                 wrapper.eq("owner_id", user.getDeptId());
             } else if (ownerType.equals(ZestConstant.USER_TYPE_PREPAID)) {
-                wrapper.in("owner_id", cardList);
+                if (cardList.size() > 0) {
+                    wrapper.in("owner_id", cardList);
+                }
             }
         } else {
             // 没有选择归属方类型
@@ -115,6 +120,16 @@ public class JBalanceServiceImpl extends CrudServiceImpl<JBalanceDao, JBalanceEn
     public QueryWrapper<JBalanceEntity> getWrapper(Map<String, Object> params) {
         QueryWrapper<JBalanceEntity> wrapper = new QueryWrapper<>();
 
+        String ownerType = (String) params.get("ownerType");
+        wrapper.eq(StringUtils.isNotBlank(ownerType), "owner_type", ownerType);
+
+        String balanceType = (String) params.get("balanceType");
+        wrapper.likeRight(StringUtils.isNotBlank(balanceType), "balance_type", balanceType);
+
+        String currency = (String) params.get("currency");
+        wrapper.eq(StringUtils.isNotBlank(currency), "currency", currency);
+
+        // 特殊的
         UserDetail user = SecurityUser.getUser();
         if (ZestConstant.USER_TYPE_MERCHANT.equals(user.getUserType())) {
             // 商户
@@ -126,15 +141,6 @@ public class JBalanceServiceImpl extends CrudServiceImpl<JBalanceDao, JBalanceEn
             // 代理, 运营
             commonFilter.setLogBalanceFilter(wrapper, params);
         }
-
-        String ownerType = (String) params.get("ownerType");
-        wrapper.eq(StringUtils.isNotBlank(ownerType), "owner_type", ownerType);
-
-        String balanceType = (String) params.get("balanceType");
-        wrapper.likeRight(StringUtils.isNotBlank(balanceType), "balance_type", balanceType);
-
-        String currency = (String) params.get("currency");
-        wrapper.eq(StringUtils.isNotBlank(currency), "currency", currency);
         return wrapper;
     }
 

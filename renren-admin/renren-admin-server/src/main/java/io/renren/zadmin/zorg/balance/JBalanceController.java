@@ -198,23 +198,38 @@ public class JBalanceController {
             List<JBalanceDTO> dtoList = entry.getValue();
 
             JBalanceDTO subVa = null;
+
             BigDecimal cardSum = null;
             BigDecimal cardFee = null;
             BigDecimal charge = null;
             BigDecimal deposit = null;
             BigDecimal txn = null;
 
+            BigDecimal aipCardSum = null;
+            BigDecimal aipCardFee = null;
+            BigDecimal aipCharge = null;
+            BigDecimal aipDeposit = null;
+            BigDecimal aipTxn = null;
+
             String subVaType = "SUB_VA_" + currency;
+
             String cardSumType = "CARD_SUM_" + currency;
             String cardFeeType = "CARD_FEE_" + currency;
             String depositType = "DEPOSIT_" + currency;
             String chargeType = "CHARGE_" + currency;
             String txnType = "TXN_" + currency;
 
+            String aipCardSumType = "AIP_CARD_SUM_" + currency;
+            String aipCardFeeType = "AIP_CARD_FEE_" + currency;
+            String aipDepositType = "AIP_DEPOSIT_" + currency;
+            String aipChargeType = "AIP_CHARGE_" + currency;
+            String aipTxnType = "AIP_TXN_" + currency;
+
             for (JBalanceDTO dto : dtoList) {
                 log.info("check dto: {}-{}-{}-{}", dto.getBalance(), dto.getFrozen(), dto.getCurrency(), dto.getBalanceType());
                 if (dto.getBalanceType().equals(subVaType)) {
                     subVa = dto;
+
                 } else if (dto.getBalanceType().equals(cardSumType)) {
                     cardSum = dto.getBalance();
                 } else if (dto.getBalanceType().equals(cardFeeType)) {
@@ -225,17 +240,39 @@ public class JBalanceController {
                     charge = dto.getBalance();
                 } else if (dto.getBalanceType().equals(txnType)) {
                     txn = dto.getBalance();
+
+                } else if (dto.getBalanceType().equals(aipCardSumType)) {
+                    aipCardSum = dto.getBalance();
+                } else if (dto.getBalanceType().equals(aipCardFeeType)) {
+                    aipCardFee = dto.getBalance();
+                } else if (dto.getBalanceType().equals(aipDepositType)) {
+                    aipDeposit = dto.getBalance();
+                } else if (dto.getBalanceType().equals(aipChargeType)) {
+                    aipCharge = dto.getBalance();
+                } else if (dto.getBalanceType().equals(aipTxnType)) {
+                    aipTxn = dto.getBalance();
                 }
             }
-            if (txn == null || cardSum == null || cardFee == null || charge == null || deposit == null || subVa == null) {
+            if (txn == null || cardSum == null || cardFee == null || charge == null || deposit == null ||
+                    txn == null || cardSum == null || cardFee == null || charge == null || deposit == null ||
+                    subVa == null
+            ) {
                 log.error("txn: {}, cardSum: {}, cardFee: {}, charge: {}, deposit: {}, subVa: {}", txn, cardSum, cardFee, charge, deposit, subVa);
                 throw new RenException("internal logical error");
             }
+
             subVa.setBalanceCardFee(cardFee);
             subVa.setBalanceCardSum(cardSum);
             subVa.setBalanceCharge(charge);
             subVa.setBalanceDeposit(deposit);
             subVa.setBalanceTxn(txn);
+
+            subVa.setBalanceAipCardFee(aipCardFee);
+            subVa.setBalanceAipCardSum(aipCardSum);
+            subVa.setBalanceAipCharge(aipCharge);
+            subVa.setBalanceAipDeposit(aipDeposit);
+            subVa.setBalanceAipTxn(aipTxn);
+
             newList.add(subVa);
         }
         page.setList(newList);

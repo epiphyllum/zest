@@ -80,11 +80,11 @@ public class LedgerCardWithdraw {
         ledgerUtil.ledgeUpdate(charge, LedgerConstant.ORIGIN_TYPE_CARD_WITHDRAW, LedgerConstant.FACT_CARD_WITHDRAW_OUT_CHARGE, entity.getId(), factMemo, entity.getFee());
 
         // 记账4: 通联-手续费汇总
-        JBalanceEntity aipCharge = ledgerUtil.getAipChargeAccount(0L, entity.getCurrency());
+        JBalanceEntity aipCharge = ledgerUtil.getAipChargeAccount(sub.getId(), entity.getCurrency());
         ledgerUtil.ledgeUpdate(aipCharge, LedgerConstant.ORIGIN_TYPE_CARD_WITHDRAW, LedgerConstant.FACT_CARD_WITHDRAW_OUT_AIP_CHARGE, entity.getId(), factMemo, entity.getFee());
 
         // 记账5: 通联-卡充值汇总
-        JBalanceEntity aipCardSum = ledgerUtil.getAipCardSumAccount(0L, entity.getCurrency());
+        JBalanceEntity aipCardSum = ledgerUtil.getAipCardSumAccount(sub.getId(), entity.getCurrency());
         ledgerUtil.ledgeUpdate(aipCardSum, LedgerConstant.ORIGIN_TYPE_CARD_WITHDRAW, LedgerConstant.FACT_CARD_WITHDRAW_OUT_AIP_CARD_SUM, entity.getId(), factMemo, entity.getAmount().negate());
 
         // 预付费主卡提现

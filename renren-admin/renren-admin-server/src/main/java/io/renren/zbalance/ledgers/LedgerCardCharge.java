@@ -72,15 +72,15 @@ public class LedgerCardCharge {
 
         ///////////////////////////////////////////////////////////////////////////////////
         // 通联-累计充值金额
-        JBalanceEntity aipCardSum = ledgerUtil.getAipCardSumAccount(0L, entity.getCurrency());
+        JBalanceEntity aipCardSum = ledgerUtil.getAipCardSumAccount(sub.getId(), entity.getCurrency());
         ledgerUtil.ledgeUpdate(aipCardSum, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_IN_AIP_CARD_SUM, entity.getId(), factMemo, entity.getTxnAmount());
 
         // 通联-累计保证金额
-        JBalanceEntity depositSum = ledgerUtil.getAipDepositAccount(0L, entity.getCurrency());
+        JBalanceEntity depositSum = ledgerUtil.getAipDepositAccount(sub.getId(), entity.getCurrency());
         ledgerUtil.ledgeUpdate(depositSum, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_IN_AIP_DEPOSIT, entity.getId(), factMemo, entity.getSecurityamount());
 
         // 通联-累计手续费金额
-        JBalanceEntity aipCharge = ledgerUtil.getAipChargeAccount(0L, entity.getCurrency());
+        JBalanceEntity aipCharge = ledgerUtil.getAipChargeAccount(sub.getId(), entity.getCurrency());
         ledgerUtil.ledgeUpdate(aipCharge, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_IN_AIP_CHARGE, entity.getId(), factMemo, entity.getFee());
 
         // 预付费主卡充值

@@ -54,6 +54,7 @@ public class JBalanceDTO implements Serializable {
     /////////////////////////////////////////
     // 子商户管理账户
     /////////////////////////////////////////
+
     @Schema(description = "发卡汇总")
     private BigDecimal balanceCardSum;
     @Schema(description = "开卡费用")
@@ -64,6 +65,17 @@ public class JBalanceDTO implements Serializable {
     private BigDecimal balanceCharge;
     @Schema(description = "交易费用")
     private BigDecimal balanceTxn;
+
+    @Schema(description = "发卡汇总-aip")
+    private BigDecimal balanceAipCardSum;
+    @Schema(description = "开卡费用-aip")
+    private BigDecimal balanceAipCardFee;
+    @Schema(description = "保证金-aip")
+    private BigDecimal balanceAipDeposit;
+    @Schema(description = "充值手续费-aip")
+    private BigDecimal balanceAipCharge;
+    @Schema(description = "交易费用-aip")
+    private BigDecimal balanceAipTxn;
 
     /////////////////////////////////////////
     // 附加查询条件
