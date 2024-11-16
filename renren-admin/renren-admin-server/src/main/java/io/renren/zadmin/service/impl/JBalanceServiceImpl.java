@@ -26,6 +26,7 @@ import org.apache.catalina.User;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -127,7 +128,10 @@ public class JBalanceServiceImpl extends CrudServiceImpl<JBalanceDao, JBalanceEn
         wrapper.likeRight(StringUtils.isNotBlank(balanceType), "balance_type", balanceType);
 
         String currency = (String) params.get("currency");
-        wrapper.eq(StringUtils.isNotBlank(currency), "currency", currency);
+        if (StringUtils.isNotBlank(currency)) {
+            List<String> list = Arrays.stream(currency.split(",")).toList();
+            wrapper.in("currency", list);
+        }
 
         // 特殊的
         UserDetail user = SecurityUser.getUser();

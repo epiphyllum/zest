@@ -25,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -95,7 +96,16 @@ public class JLogServiceImpl extends CrudServiceImpl<JLogDao, JLogEntity, JLogDT
 
         // 币种
         String currency = (String) params.get("currency");
-        wrapper.eq(StringUtils.isNotBlank(currency), "currency", currency);
+        if (StringUtils.isNotBlank(currency)) {
+            List<String> list = Arrays.stream(currency.split(",")).toList();
+            wrapper.in("currency", list);
+        }
+
+        // 余额ID
+        String balanceId = (String) params.get("balanceId");
+        if (StringUtils.isNotBlank(balanceId)) {
+            wrapper.eq("balance_id", Long.parseLong(balanceId));
+        }
 
         // 账户类型
         String balanceType = (String) params.get("balanceType");

@@ -32,7 +32,7 @@ public class JBalanceDTO implements Serializable {
     @Schema(description = "更新时间")
     private Date updateDate;
 
-    // 业务字段(7)
+    // 业务字段
     @Schema(description = "属主ID")
     private Long ownerId;
     @Schema(description = "属主名称")
