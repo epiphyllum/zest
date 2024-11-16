@@ -581,6 +581,18 @@ public class JCardManager {
     // 预付费卡-充值
     public void prepaidCharge(Long id, BigDecimal adjustAmount) {
         JCardEntity cardEntity = jCardDao.selectById(id);
+
+        JVpaAdjustEntity processing = jVpaAdjustDao.selectOne(Wrappers.<JVpaAdjustEntity>lambdaQuery()
+                .eq(JVpaAdjustEntity::getState, ZinConstant.VPA_ADJUST_UNKNOWN)
+        );
+        if (processing != null) {
+            BigDecimal amount = processing.getAdjustAmount();
+            if (amount.compareTo(BigDecimal.ZERO) > 0) {
+                throw new RenException("有一笔" + amount + "充值进行中");
+            }
+            throw new RenException("有一笔" + amount + "提现进行中");
+        }
+
         BigDecimal oldAuth = cardEntity.getAuthmaxamount();
         BigDecimal newAuth = cardEntity.getAuthmaxamount().add(adjustAmount);
         JVpaAdjustEntity adjustEntity = ConvertUtils.sourceToTarget(cardEntity, JVpaAdjustEntity.class);
@@ -636,6 +648,18 @@ public class JCardManager {
     // 预付费卡-提现
     public void prepaidWithdraw(Long id, BigDecimal adjustAmount) {
         JCardEntity cardEntity = jCardDao.selectById(id);
+
+        JVpaAdjustEntity processing = jVpaAdjustDao.selectOne(Wrappers.<JVpaAdjustEntity>lambdaQuery()
+                .eq(JVpaAdjustEntity::getState, ZinConstant.VPA_ADJUST_UNKNOWN)
+        );
+        if (processing != null) {
+            BigDecimal amount = processing.getAdjustAmount();
+            if (amount.compareTo(BigDecimal.ZERO) > 0) {
+                throw new RenException("有一笔" + amount + "充值进行中");
+            }
+            throw new RenException("有一笔" + amount + "提现进行中");
+        }
+
         BigDecimal oldAuth = cardEntity.getAuthmaxamount();
         BigDecimal newAuth = cardEntity.getAuthmaxamount().subtract(adjustAmount);
 
