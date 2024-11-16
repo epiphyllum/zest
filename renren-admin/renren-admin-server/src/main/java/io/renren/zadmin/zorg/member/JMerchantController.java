@@ -129,7 +129,7 @@ public class JMerchantController {
         }
         //效验数据
         ValidatorUtils.validateEntity(dto, UpdateGroup.class, DefaultGroup.class);
-        jMerchantService.update(dto);
+        jMerchantManager.update(dto);
         return new Result();
     }
 

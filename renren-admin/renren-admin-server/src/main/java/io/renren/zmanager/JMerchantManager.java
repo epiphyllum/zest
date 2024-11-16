@@ -8,14 +8,16 @@ import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.dao.SysDeptDao;
 import io.renren.entity.SysDeptEntity;
-import io.renren.zadmin.entity.JSubEntity;
-import io.renren.zcommon.ZestConstant;
 import io.renren.zadmin.dao.JBalanceDao;
 import io.renren.zadmin.dao.JMerchantDao;
+import io.renren.zadmin.dao.JSubDao;
 import io.renren.zadmin.dto.JMerchantDTO;
 import io.renren.zadmin.entity.JBalanceEntity;
 import io.renren.zadmin.entity.JMerchantEntity;
+import io.renren.zadmin.entity.JSubEntity;
+import io.renren.zadmin.service.JMerchantService;
 import io.renren.zbalance.BalanceType;
+import io.renren.zcommon.ZestConstant;
 import io.renren.zcommon.ZinConstant;
 import io.renren.zin.file.ZinFileService;
 import io.renren.zin.sub.ZinSubService;
@@ -28,10 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 @Service
@@ -39,7 +38,11 @@ import java.util.concurrent.CompletableFuture;
 public class JMerchantManager {
 
     @Resource
+    private JMerchantService jMerchantService;
+    @Resource
     private JBalanceDao jBalanceDao;
+    @Resource
+    private JSubDao jSubDao;
     @Resource
     private TransactionTemplate tx;
     @Resource
@@ -103,10 +106,16 @@ public class JMerchantManager {
      * 商户开通VA以及管理账户
      */
     public void openVa(JMerchantEntity entity) {
-        // 15 * 5 = 75个账户
-        for (String currency : BalanceType.CURRENCY_LIST) {
+
+//        // 15 * 5 = 75个账户
+//        for (String currency : BalanceType.CURRENCY_LIST) {
+//            newBalance(entity, BalanceType.getVaAccount(currency), currency);  // 创建va账户
+//        }
+        String[] currencyList = entity.getCurrencyList().split(",");
+        for (String currency : currencyList) {
             newBalance(entity, BalanceType.getVaAccount(currency), currency);  // 创建va账户
         }
+
     }
 
     /**
@@ -242,6 +251,60 @@ public class JMerchantManager {
                 jSubEntity.setMerchantId(entity.getId());
                 jSubEntity.setApi(0);
                 jSubManager.save(jSubEntity);
+            }
+        });
+    }
+
+
+    public void update(JMerchantDTO dto) {
+        JMerchantEntity merchant = jMerchantDao.selectById(dto.getId());
+
+        // 还没有通过
+        if (!merchant.getState().equals(ZinConstant.MERCHANT_STATE_REGISTER)) {
+            jMerchantService.update(dto);
+            return;
+        }
+
+        // 原始币种列表
+        String[] oldList = merchant.getCurrencyList().split(",");
+        Set<String> oldSet = new HashSet<>();
+        oldSet.addAll(List.of(oldList));
+
+        // 新币种列表
+        String[] newList = merchant.getCurrencyList().split(",");
+        Set<String> newSet = new HashSet<>();
+        newSet.addAll(List.of(newList));
+
+        // 计算减少和增加的币种
+        Set<String> added = new HashSet<String>(newSet);
+        Set<String> removed = new HashSet<String>(oldSet);
+        added.removeAll(oldSet);
+        removed.removeAll(newSet);
+
+        // 如果有减少币种, 报错
+        if (removed.size() > 0) {
+            throw new RenException("不能删除支持的币种");
+        }
+
+        // 没有增加币种
+        if (newSet.size() == 0) {
+            jMerchantService.update(dto);
+            return;
+        }
+
+        // 子商户列表(审核通过的)
+        List<JSubEntity> subEntities = jSubDao.selectList(Wrappers.<JSubEntity>lambdaQuery()
+                .eq(JSubEntity::getMerchantId, dto.getId())
+                .eq(JSubEntity::getState, ZinConstant.MERCHANT_STATE_VERIFIED)
+        );
+        tx.executeWithoutResult(status -> {
+            // 新增加的币种
+            for (String currency : added) {
+                newBalance(merchant, BalanceType.getVaAccount(currency), currency);  // 创建va账户
+            }
+            // 子商户增加币种
+            for (JSubEntity subEntity : subEntities) {
+                jSubManager.openSubVa(subEntity, added);
             }
         });
     }

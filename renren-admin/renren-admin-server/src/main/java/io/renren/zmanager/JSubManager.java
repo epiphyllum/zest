@@ -22,6 +22,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
 @Service
 @Slf4j
 public class JSubManager {
@@ -49,8 +53,12 @@ public class JSubManager {
         JSubEntity entity = jSubDao.selectById(id);
         // 审核通过
         if (!ZinConstant.MERCHANT_STATE_VERIFIED.equals(entity.getState()) && ZinConstant.MERCHANT_STATE_VERIFIED.equals(state)) {
+            Long merchantId = entity.getMerchantId();
+            JMerchantEntity merchant = jMerchantDao.selectById(merchantId);
+            List<String> currencyList = Arrays.stream(merchant.getCurrencyList().split(",")).toList();
+
             tx.executeWithoutResult(st -> {
-                this.openSubVa(entity);
+                this.openSubVa(entity, currencyList);
                 jSubDao.update(null, Wrappers.<JSubEntity>lambdaUpdate()
                         .eq(JSubEntity::getId, id)
                         .set(JSubEntity::getState, ZinConstant.MERCHANT_STATE_VERIFIED)
@@ -135,10 +143,13 @@ public class JSubManager {
      *
      * @param entity
      */
-    public void openSubVa(JSubEntity entity) {
+    public void openSubVa(JSubEntity entity, Collection<String> currencyList) {
+
+
+
         // 创建管理账户 - 按币种来: 15 * 6
         tx.executeWithoutResult(st -> {
-            for (String currency : BalanceType.CURRENCY_LIST) {
+            for (String currency : currencyList) {
                 newBalance(entity, BalanceType.getSubVaAccount(currency), currency);      // 子商户va
                 // 子商户
                 newBalance(entity, BalanceType.getDepositAccount(currency), currency);    // 子商户保证
@@ -163,7 +174,7 @@ public class JSubManager {
         JBalanceEntity jBalanceEntity = new JBalanceEntity();
         jBalanceEntity.setOwnerId(entity.getId());
         jBalanceEntity.setOwnerName(entity.getCusname());
-        jBalanceEntity.setOwnerType("sub");  // attention
+        jBalanceEntity.setOwnerType(ZestConstant.USER_TYPE_SUB);  // attention
         jBalanceEntity.setBalanceType(type);
         jBalanceEntity.setCurrency(currency);
         jBalanceDao.insert(jBalanceEntity);
