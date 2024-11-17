@@ -32,7 +32,7 @@ public class LedgerOpenCard {
 
         JBalanceEntity subVa = ledgerUtil.getSubVaAccount(entity.getSubId(), entity.getCurrency());
         if (factAmount.compareTo(subVa.getBalance()) > 0) {
-            throw new RenException("余额不足");
+            throw new RenException("余额不足, 余额:" + subVa.getBalance());
         }
         // 记账
         ledgerUtil.freezeUpdate(subVa, LedgerConstant.ORIGIN_CARD_OPEN, LedgerConstant.FACT_CARD_OPEN_FREEZE_SUB_VA, entity.getId(), factMemo, factAmount);

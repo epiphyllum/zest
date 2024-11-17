@@ -49,14 +49,14 @@ public class JAllocateManager {
             throw new RenException("can not find account for merchant: " + entity.getMerchantId());
         }
         if (vaAccount.getBalance().compareTo(entity.getAmount()) < 0) {
-            throw new RenException("VA账户余额不足, VA账户:" + vaAccount.getBalance());
+            throw new RenException("账户余额不足, 账户余额:" + vaAccount.getBalance());
         }
         tx.executeWithoutResult(status -> {
             jAllocateDao.insert(entity);
             ledgerAllocation.ledgeM2s(entity);
             JBalanceEntity after = ledgerUtil.getVaAccount(entity.getMerchantId(), entity.getCurrency());
             if (after.getBalance().compareTo(BigDecimal.ZERO) < 0) {
-                throw new RenException("商户VA账户余额不足");
+                throw new RenException("商户账户余额不足" );
             }
         });
     }
@@ -66,7 +66,7 @@ public class JAllocateManager {
 
         JBalanceEntity subVaAccount = ledgerUtil.getSubVaAccount(entity.getSubId(), entity.getCurrency());
         if (subVaAccount.getBalance().compareTo(entity.getAmount()) < 0) {
-            throw new RenException("子商户VA账户余额不足, VA账户:" + subVaAccount.getBalance());
+            throw new RenException("子商户账户余额不足, 余额:" + subVaAccount.getBalance());
         }
 
         tx.executeWithoutResult(status -> {
@@ -74,7 +74,7 @@ public class JAllocateManager {
             ledgerAllocation.ledgeS2m(entity);
             JBalanceEntity after = ledgerUtil.getSubVaAccount(entity.getSubId(), entity.getCurrency());
             if (after.getBalance().compareTo(BigDecimal.ZERO) < 0) {
-                throw new RenException("子商户VA账户余额不足");
+                throw new RenException("子商户账户余额不足");
             }
 
         });
@@ -88,7 +88,7 @@ public class JAllocateManager {
                 !ZestConstant.USER_TYPE_OPERATION.equals(user.getUserType()) &&
                 !ZestConstant.USER_TYPE_AGENT.equals(user.getUserType())
         ) {
-            throw new RenException("not authorized, you are " + user.getUserType());
+            throw new RenException("权限不足");
         }
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);

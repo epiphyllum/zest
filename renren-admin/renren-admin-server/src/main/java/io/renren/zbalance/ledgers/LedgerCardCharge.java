@@ -26,10 +26,12 @@ public class LedgerCardCharge {
 
     //
     public void ledgeCardChargeFreeze(JDepositEntity entity, JSubEntity sub) {
-        BigDecimal factAmount = entity.getAmount().add(entity.getMerchantCharge()).add(entity.getMerchantDeposit());
-        String factMemo = String.format("冻结:%s-卡充值:%s, 到账:%s, 保证金:%s, 手续费:%s",
+        BigDecimal factAmount = entity.getAmount()
+                .add(entity.getMerchantCharge())
+                .add(entity.getMerchantDeposit());
+        String factMemo = String.format("冻结-卡充值:%s, 到账:%s, 保证金:%s, 手续费:%s",
                 factAmount,
-                entity.getTxnAmount(), entity.getAmount(), entity.getMerchantDeposit(), entity.getMerchantCharge());
+                entity.getAmount(), entity.getMerchantDeposit(), entity.getMerchantCharge());
 
         JBalanceEntity subVa = ledgerUtil.getSubVaAccount(sub.getId(), entity.getCurrency());
         ledgerUtil.freezeUpdate(subVa, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_FREEZE_SUB_VA, entity.getId(), factMemo, factAmount);
@@ -37,20 +39,24 @@ public class LedgerCardCharge {
 
     // 取消卡充值, 卡充值失败
     public void ledgeCardChargeUnFreeze(JDepositEntity entity, JSubEntity sub) {
-        BigDecimal factAmount = entity.getAmount().add(entity.getMerchantCharge()).add(entity.getMerchantDeposit());
-        String factMemo = String.format("解冻:%s-卡充值:%s, 到账:%s, 保证金:%s, 手续费:%s",
+        BigDecimal factAmount = entity.getAmount()
+                .add(entity.getMerchantCharge())
+                .add(entity.getMerchantDeposit());
+        String factMemo = String.format("解冻-卡充值:%s, 到账:%s, 保证金:%s, 手续费:%s",
                 factAmount,
-                entity.getTxnAmount(), entity.getAmount(), entity.getMerchantDeposit(), entity.getMerchantCharge());
+                entity.getAmount(), entity.getMerchantDeposit(), entity.getMerchantCharge());
         JBalanceEntity subVa = ledgerUtil.getSubVaAccount(sub.getId(), entity.getCurrency());
         ledgerUtil.unFreezeUpdate(subVa, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_UNFREEZE_SUB_VA, entity.getId(), factMemo, factAmount);
     }
 
     // 卡充值
     public void ledgeCardCharge(JDepositEntity entity, JSubEntity sub) {
-        BigDecimal factAmount = entity.getAmount().add(entity.getMerchantCharge()).add(entity.getMerchantDeposit());
-        String factMemo = String.format("确认:%s-卡充值:%s, 到账:%s, 保证金:%s, 手续费:%s",
+        BigDecimal factAmount = entity.getAmount()
+                .add(entity.getMerchantCharge())
+                .add(entity.getMerchantDeposit());
+        String factMemo = String.format("确认-卡充值:%s, 到账:%s, 保证金:%s, 手续费:%s",
                 factAmount,
-                entity.getTxnAmount(), entity.getAmount(), entity.getMerchantDeposit(), entity.getMerchantCharge());
+                entity.getAmount(), entity.getMerchantDeposit(), entity.getMerchantCharge());
 
         ///////////////////////////////////////////////////////////////////////////////////
         // 记账1: 子商户-va

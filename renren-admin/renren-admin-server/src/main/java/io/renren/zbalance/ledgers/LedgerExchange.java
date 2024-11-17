@@ -43,7 +43,7 @@ public class LedgerExchange {
     // 原始凭证: 换汇
     public void ledgeExchange(JExchangeEntity entity) {
         Long merchantId = entity.getMerchantId();
-        String factMemo = "解冻-换汇" + entity.getAmount() + entity.getPayerccy() + ", 买入: " + entity.getSettleamount() + entity.getSettlecurrency();
+        String factMemo = "确认-换汇" + entity.getAmount() + entity.getPayerccy() + ", 买入: " + entity.getSettleamount() + entity.getSettlecurrency();
         BigDecimal factAmount = entity.getSettleamount();
         // 卖出币种: 确认冻结
         JBalanceEntity outBalance = ledgerUtil.getVaAccount(merchantId, entity.getPayerccy());

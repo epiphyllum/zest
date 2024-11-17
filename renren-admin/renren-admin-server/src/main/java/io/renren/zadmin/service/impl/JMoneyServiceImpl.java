@@ -41,6 +41,12 @@ public class JMoneyServiceImpl extends CrudServiceImpl<JMoneyDao, JMoneyEntity, 
 
         commonFilter.setFilterMerchant(wrapper, params);
 
+        // id
+        String id = (String) params.get("id");
+        if (StringUtils.isNotBlank(id)) {
+            wrapper.eq( "id", Long.parseLong(id));
+        }
+
         // 通联账号
         String acctno = (String) params.get("acctno");
         wrapper.like(StringUtils.isNotBlank(acctno), "acctno", acctno);

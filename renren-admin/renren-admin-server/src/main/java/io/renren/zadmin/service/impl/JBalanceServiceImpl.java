@@ -26,6 +26,7 @@ import org.apache.catalina.User;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -69,11 +70,9 @@ public class JBalanceServiceImpl extends CrudServiceImpl<JBalanceDao, JBalanceEn
             wrapper.in("owner_id", ownerIdList);
         }
     }
-
     // 子商户
     private void subFilter(QueryWrapper<JBalanceEntity> wrapper, UserDetail user, Map<String, Object> params) {
         wrapper.notLikeRight("balance_type", "AIP_");
-
         // 找出预付费主卡
         List<Long> cardList = jCardDao.selectList(Wrappers.<JCardEntity>lambdaQuery()
                 .eq(JCardEntity::getSubId, user.getDeptId())
@@ -91,11 +90,12 @@ public class JBalanceServiceImpl extends CrudServiceImpl<JBalanceDao, JBalanceEn
             }
         } else {
             // 没有选择归属方类型
+            ArrayList<Long> longs = new ArrayList<>();
             if (cardList.size() > 0) {
-                wrapper.eq("owner_id", user.getDeptId()).or(w -> {
-                    w.in("owner_id", cardList);
-                });
+                longs.addAll(cardList);
             }
+            longs.add(user.getDeptId());
+            wrapper.in("owner_id", longs);
         }
     }
 

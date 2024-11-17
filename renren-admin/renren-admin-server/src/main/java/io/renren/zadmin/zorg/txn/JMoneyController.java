@@ -94,7 +94,7 @@ public class JMoneyController {
     @Operation(summary = "保存")
     @LogOperation("保存")
     @PreAuthorize("hasAuthority('zorg:jmoney:save')")
-    public Result save(@RequestBody JMoneyDTO dto) {
+    public Result<Long> save(@RequestBody JMoneyDTO dto) {
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
         JMoneyEntity entity = ConvertUtils.sourceToTarget(dto, JMoneyEntity.class);
@@ -102,7 +102,9 @@ public class JMoneyController {
         entity.setMeraplid(CommonUtils.uniqueId());
         JMerchantEntity merchant = jMerchantDao.selectById(dto.getMerchantId());
         jMoneyManager.saveAndSubmit(entity, merchant, dto.getCardid());
-        return new Result();
+        Result<Long> result = new Result<>();
+        result.setData(entity.getId());
+        return result;
     }
 
     @PutMapping

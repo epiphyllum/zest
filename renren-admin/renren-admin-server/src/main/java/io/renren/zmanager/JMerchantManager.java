@@ -111,6 +111,7 @@ public class JMerchantManager {
 //        for (String currency : BalanceType.CURRENCY_LIST) {
 //            newBalance(entity, BalanceType.getVaAccount(currency), currency);  // 创建va账户
 //        }
+        log.info("openva, currencyList: {}", entity.getCurrencyList());
         String[] currencyList = entity.getCurrencyList().split(",");
         for (String currency : currencyList) {
             newBalance(entity, BalanceType.getVaAccount(currency), currency);  // 创建va账户
@@ -122,6 +123,7 @@ public class JMerchantManager {
      * 创建账户
      */
     private void newBalance(JMerchantEntity entity, String type, String currency) {
+        log.info("newBalance: {}, {}, {}", entity, type, currency);
         JBalanceEntity jBalanceEntity = new JBalanceEntity();
         jBalanceEntity.setOwnerId(entity.getId());
         jBalanceEntity.setOwnerName(entity.getCusname());
@@ -170,7 +172,6 @@ public class JMerchantManager {
         String legalphotobackfid = jMerchantEntity.getLegalphotobackfid();
         String legalphotofrontfid = jMerchantEntity.getLegalphotofrontfid();
         String organfid = jMerchantEntity.getOrganfid();
-
         List<String> fids = new ArrayList<>();
         if (agreementfid != null) {
             fids.add(agreementfid);
@@ -190,7 +191,6 @@ public class JMerchantManager {
         if (organfid != null) {
             fids.add(organfid);
         }
-
         Map<String, CompletableFuture<String>> jobs = new HashMap<>();
         for (String fid : fids) {
             if (StringUtils.isBlank(fid)) {

@@ -106,6 +106,7 @@ public class JBalanceController {
     @PreAuthorize("hasAuthority('zorg:jbalance:page')")
     public Result<PageData<JBalanceDTO>> pageMerchant(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
         if (ZestConstant.isOperationOrAgent()) {
+            params.put("ownerType", "merchant");
             // 运营+代理登录， 必须有ownerId
             if (StringUtils.isBlank((String) params.get("ownerId"))) {
                 PageData<JBalanceDTO> page = new PageData<>();
@@ -113,7 +114,6 @@ public class JBalanceController {
                 page.setList(List.of());
                 return new Result<PageData<JBalanceDTO>>().ok(page);
             }
-            log.info("page/merchant, operation/agent, ownerId: {}", params.get("ownerId"));
         } else if (ZestConstant.isMerchant()) {
             // 商户登录， ownerId 就是自己
             log.info("page/merchant, ownerId: {}", SecurityUser.getDeptId());
@@ -135,20 +135,15 @@ public class JBalanceController {
             String currency = entry.getKey();
             List<JBalanceDTO> dtoList = entry.getValue();
 
-            BigDecimal deposit = BigDecimal.ZERO;
-            BigDecimal chargeFee = BigDecimal.ZERO;
-            BigDecimal txnFee = BigDecimal.ZERO;
             JBalanceDTO va = null;
 
             String vaType = "VA_" + currency;
             for (JBalanceDTO dto : dtoList) {
                 if (dto.getBalanceType().equals(vaType)) {
-                    log.debug("check dto: {}-{}-{}-{}", dto.getBalance(), dto.getFrozen(), dto.getCurrency(), dto.getBalanceType());
                     va = dto;
                 }
             }
             if (va == null) {
-                log.info("deposit: {}, chargeFee: {}, txnFee: {}, va: {}", deposit, chargeFee, txnFee, va);
                 throw new RenException("internal logical error");
             }
             newList.add(va);
