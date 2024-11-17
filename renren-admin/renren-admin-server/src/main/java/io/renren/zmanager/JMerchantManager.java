@@ -1,5 +1,8 @@
 package io.renren.zmanager;
 
+import cn.hutool.json.JSONObject;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.security.user.SecurityUser;
@@ -106,17 +109,10 @@ public class JMerchantManager {
      * 商户开通VA以及管理账户
      */
     public void openVa(JMerchantEntity entity) {
-
-//        // 15 * 5 = 75个账户
-//        for (String currency : BalanceType.CURRENCY_LIST) {
-//            newBalance(entity, BalanceType.getVaAccount(currency), currency);  // 创建va账户
-//        }
-        log.info("openva, currencyList: {}", entity.getCurrencyList());
         String[] currencyList = entity.getCurrencyList().split(",");
         for (String currency : currencyList) {
             newBalance(entity, BalanceType.getVaAccount(currency), currency);  // 创建va账户
         }
-
     }
 
     /**

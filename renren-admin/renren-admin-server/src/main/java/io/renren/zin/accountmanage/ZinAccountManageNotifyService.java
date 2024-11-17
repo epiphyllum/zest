@@ -35,8 +35,7 @@ public class ZinAccountManageNotifyService {
     // 有申请单的情况
     // body:[{"acctno":"80000000369966","amount":100000,"applyid":"461809","bid":"2024110903652310","currency":"USD","nid":"20241109000000489344","payeraccountname":"自营商户","payeraccountno":"12312113","time":"2024-11-09T11:07:10Z","trxcod":"CP213"}]
     private void withApply(TMoneyInNotify notify) {
-
-        log.debug("入金申请, 申请单号: {}", notify.getApplyid());
+        log.info("入金申请, 申请单号: {}", notify.getApplyid());
 
         // 直接去匹配申请单
         JMoneyEntity jMoneyEntity = jMoneyDao.selectOne(Wrappers.<JMoneyEntity>lambdaQuery()
@@ -47,9 +46,17 @@ public class ZinAccountManageNotifyService {
         }
         // 如果能找到, 看来账账号是否匹配
         if (!notify.getPayeraccountno().equals(jMoneyEntity.getCardno())) {
-            throw new RenException("入金通知, applyid=" + notify.getApplyid() + ", 来账账号不匹配, notify:" + notify.getPayeraccountno() + "db:" + jMoneyEntity.getCardno());
+            log.error("无法匹配账号:{} -> {}", notify.getPayeraccountno(), jMoneyEntity.getCardno());
+            throw new RenException("入金通知, applyid=" + notify.getApplyid() + ", 来账账号不匹配, notify:" + notify.getPayeraccountno() + ",db:" + jMoneyEntity.getCardno());
         }
-        log.debug("匹配入金申请单成功, 记账...");
+
+        // 匹配金额
+        if(notify.getAmount().compareTo(jMoneyEntity.getAmount()) != 0) {
+            log.error("无法匹配金额:{} -> {}", notify.getAmount(), jMoneyEntity.getAmount());
+            throw new RenException("入金通知, applyid=" + notify.getApplyid() + ", 金额不匹配, notify:" + notify.getAmount() + ",db:" + jMoneyEntity.getAmount());
+        }
+
+        log.info("匹配到入金申请单成功, 开始记账...");
 
         // 更新入金通知
         JMoneyEntity updateEntity = ConvertUtils.sourceToTarget(notify, JMoneyEntity.class);
@@ -59,8 +66,8 @@ public class ZinAccountManageNotifyService {
         tx.executeWithoutResult(status -> {
             int cnt = jMoneyDao.update(null, Wrappers.<JMoneyEntity>lambdaUpdate()
                     .eq(JMoneyEntity::getId, jMoneyEntity.getId())
-                    .ne(JMoneyEntity::getState, ZinConstant.PAY_APPLY_LG_DJ)
-                    .set(JMoneyEntity::getState, ZinConstant.PAY_APPLY_LG_DJ)
+                    .ne(JMoneyEntity::getState, ZinConstant.PAY_APPLY_LG_DJ)  // 没记账
+                    .set(JMoneyEntity::getState, ZinConstant.PAY_APPLY_LG_DJ) // 记账
                     .set(JMoneyEntity::getPayeraccountno, notify.getPayeraccountno())
                     .set(JMoneyEntity::getPayeraccountbank, notify.getPayeraccountbank())
                     .set(JMoneyEntity::getPayeraccountcountry, notify.getPayeraccountcountry())
