@@ -40,14 +40,23 @@ public class JWithdrawEntity extends BaseEntity {
     private String marketproduct;
     private String cardno;
     private String payeeid;      // 提现到哪个账户
+
     private BigDecimal amount;
     private String currency;
+
     private String applyid;
     private String state;
     private String stateexplain;
+
+    // 担保金
     private BigDecimal securityamount;
     private String securitycurrency;
 
+    // 通联退手续费
     private BigDecimal fee;
     private String feecurrency;
+
+    // 退商户手续费
+    private BigDecimal merchantfee;
 }
+

@@ -62,4 +62,4 @@ create table j_log
   collate utf8mb4_bin
   DEFAULT CHARACTER SET utf8mb4 COMMENT ='j_log';
 create index idx_j_log_0 on j_log (owner_id, create_date);
-create unique index uidx_j_log_0 on j_log (fact_type, fact_id);
+create unique index uidx_j_log_0 on j_log (origin_type, fact_type, fact_id);

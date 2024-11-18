@@ -57,11 +57,6 @@ public class ZinAccountManageNotifyService {
         }
 
         log.info("匹配到入金申请单成功, 开始记账...");
-
-        // 更新入金通知
-        JMoneyEntity updateEntity = ConvertUtils.sourceToTarget(notify, JMoneyEntity.class);
-        updateEntity.setId(jMoneyEntity.getId());
-
         // 记账 + 更新记录
         tx.executeWithoutResult(status -> {
             int cnt = jMoneyDao.update(null, Wrappers.<JMoneyEntity>lambdaUpdate()
@@ -84,8 +79,9 @@ public class ZinAccountManageNotifyService {
             try {
                 ledgerMoneyIn.ledgeMoneyIn(entity);
             } catch (Exception ex) {
-                log.error("记账失败: {}", entity);
+                log.error("记账失败, 入金记录:{}", entity);
                 ex.printStackTrace();
+                throw ex;
             }
         });
 
@@ -116,7 +112,7 @@ public class ZinAccountManageNotifyService {
 
         if (notify.getTrxcod().equals(ZinConstant.CP201)) {
             log.info("CP201 todo");
-            throw new RenException("cp201尚未实现");
+            throw new RenException("CP201尚未实现");
         }
     }
 

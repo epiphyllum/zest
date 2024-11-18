@@ -45,37 +45,44 @@ public class JCardServiceImpl extends CrudServiceImpl<JCardDao, JCardEntity, JCa
         QueryWrapper<JCardEntity> wrapper = new QueryWrapper<>();
         commonFilter.setFilterAll(wrapper, params);
 
+        // id
+        String id = (String) params.get("id");
+        if (StringUtils.isNotBlank(id)) {
+            wrapper.eq("id", Long.parseLong(id));
+        }
+
+        // 主卡
         String maincardno = (String) params.get("maincardno");
         if (StringUtils.isNotBlank(maincardno)) {
             wrapper.eq("maincardno", maincardno);
         }
 
+        // 卡号
         String cardno = (String) params.get("cardno");
         if (StringUtils.isNotBlank(cardno)) {
             wrapper.eq("cardno", cardno);
         }
 
-        String producttype = (String) params.get("producttype");
-        if (StringUtils.isNotBlank(producttype)) {
-            wrapper.eq("producttype", producttype);
-        }
-
+        // 产品
         String marketproduct = (String) params.get("marketproduct");
         if (StringUtils.isNotBlank(marketproduct)) {
             String[] split = marketproduct.split(",");
             wrapper.in("marketproduct", List.of(split));
         }
 
+        // 姓
         String surname = (String) params.get("surname");
         if (StringUtils.isNotBlank(surname)) {
             wrapper.eq("surname", surname);
         }
 
+        // 名
         String name = (String) params.get("name");
         if (StringUtils.isNotBlank(name)) {
             wrapper.eq("name", name);
         }
 
+        // 已发行的卡 || 发卡中
         String normal = (String) params.get("normal");
         if (StringUtils.isNotBlank(normal)) {
             // 卡片管理: 需要卡状态是新的, 发卡成功后，

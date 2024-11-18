@@ -19,6 +19,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -26,6 +29,8 @@ import java.util.concurrent.CompletableFuture;
 @Slf4j
 public class JWithdrawManager {
 
+    @Resource
+    private  JFeeConfigDao jFeeConfigDao;
     @Resource
     private JCardManager jCardManager;
     @Resource
@@ -70,15 +75,33 @@ public class JWithdrawManager {
     }
 
     /**
-     * 保存充值
+     * 保存提现
      */
     public void save(JWithdrawEntity entity) {
         JSubEntity subEntity = fillInfo(entity);
+
         // 填充payerid, 什么币种的卡， 就用哪个通联va
         List<JVaEntity> jVaEntities = jVaDao.selectList(Wrappers.emptyWrapper());
         JVaEntity jVaEntity = jVaEntities.stream().filter(e -> e.getCurrency().equals(entity.getCurrency())).findFirst().get();
         entity.setPayeeid(jVaEntity.getTid());
         entity.setState("00");
+
+        // 产品配置
+        JFeeConfigEntity feeConfig = jFeeConfigDao.selectOne(Wrappers.<JFeeConfigEntity>lambdaQuery()
+                .eq(JFeeConfigEntity::getMerchantId, entity.getMerchantId())
+                .eq(JFeeConfigEntity::getMarketproduct, entity.getMarketproduct())
+        );
+        if (feeConfig == null) {
+            feeConfig = jFeeConfigDao.selectOne(Wrappers.<JFeeConfigEntity>lambdaQuery()
+                    .eq(JFeeConfigEntity::getMerchantId, 0L)
+                    .eq(JFeeConfigEntity::getMarketproduct, entity.getMarketproduct())
+            );
+        }
+        if (feeConfig == null) {
+            throw new RenException("没有配置");
+        }
+        BigDecimal merchantfee = entity.getAmount().multiply(feeConfig.getChargeRate()).setScale(2, RoundingMode.HALF_UP).negate();
+        entity.setMerchantfee(merchantfee);
 
         try {
             tx.executeWithoutResult(st -> {

@@ -210,6 +210,21 @@ public class JVpaManager {
 
     // 填充卡列表, 初始额度调整列表
     public void vpaInitFill(JVpaJobEntity entity, List<JCardEntity> cards, List<JVpaAdjustEntity> adjusts, JCardEntity mainCard) {
+        // 产品费用配置
+        JFeeConfigEntity feeConfig = jFeeConfigDao.selectOne(Wrappers.<JFeeConfigEntity>lambdaQuery()
+                .eq(JFeeConfigEntity::getMerchantId, entity.getMerchantId())
+                .eq(JFeeConfigEntity::getMarketproduct, entity.getMarketproduct())
+        );
+        if (feeConfig == null) {
+            feeConfig = jFeeConfigDao.selectOne(Wrappers.<JFeeConfigEntity>lambdaQuery()
+                    .eq(JFeeConfigEntity::getMerchantId, 0L)
+                    .eq(JFeeConfigEntity::getMarketproduct, entity.getMarketproduct())
+            );
+        }
+        if (feeConfig == null) {
+            throw new RenException("没有配置");
+        }
+
         BigDecimal merchantFee = entity.getMerchantfee().divide(new BigDecimal(entity.getNum()), 2, RoundingMode.HALF_UP);
         for (JCardEntity jCardEntity : cards) {
             jCardEntity.setMaincardno(entity.getMaincardno());
@@ -246,9 +261,10 @@ public class JVpaManager {
             jCardEntity.setOnlhkflag(entity.getOnlhkflag());
             jCardEntity.setVpaJob(entity.getId());               // 那个发卡任务发的卡
 
-            // 币种， 开卡费
-            jCardEntity.setFeecurrency(entity.getFeecurrency());
+            // 开卡费(收入) + (成本)
             jCardEntity.setMerchantfee(merchantFee);
+            jCardEntity.setFee(feeConfig.getCostCardFee());
+
             // cvv加密入库
             jCardEntity.setCvv(CommonUtils.encryptSensitiveString(jCardEntity.getCvv(), zestConfig.getAccessConfig().getSensitiveKey(), "UTF-8"));
 

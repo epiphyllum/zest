@@ -69,6 +69,9 @@ public class JWithdrawDTO implements Serializable {
     private BigDecimal fee;
     @Schema(description = "费用币种")
     private String feecurrency;
+    // 退商户手续费
+    @Schema(description = "退商户手续费")
+    private BigDecimal merchantfee;
 
     // 提取otp
     private String otp;

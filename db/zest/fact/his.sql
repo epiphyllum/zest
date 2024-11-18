@@ -10,15 +10,20 @@ create table j_deposit_stat
     currency      varchar(3) comment '币种',
     marketproduct varchar(16) comment '产品类型',
 
-    -- 发卡数据统计量
+    -- 发卡数据-收入
     card_fee      decimal(18, 2) comment '开卡费用',
-    aip_card_fee  decimal(18, 2) comment '开卡费用-成本',
     card_sum      decimal(18, 2) comment '充值总额',
-    aip_card_sum  decimal(18, 2) comment '发起充值总额',
     charge        decimal(18, 2) comment '充值手续费',
-    aip_charge    decimal(18, 2) comment '充值手续费-成本',
     deposit       decimal(18, 2) comment '保证金',
+    withdraw      decimal(18, 2) comment '提现',
+
+    -- 发卡数据-成本
+    aip_card_fee  decimal(18, 2) comment '开卡费用-成本',
+    aip_card_sum  decimal(18, 2) comment '发起充值总额-成本',
+    aip_charge    decimal(18, 2) comment '充值手续费-成本',
     aip_deposit   decimal(18, 2) comment '保证金-成本',
+    aip_withdraw  decimal(18, 2) comment '提现-成本',
+
     total_card    bigint comment '发卡量',
 
     -- basic(4)

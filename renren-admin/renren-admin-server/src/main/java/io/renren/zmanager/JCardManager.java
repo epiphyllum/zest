@@ -110,6 +110,7 @@ public class JCardManager {
         if (feeConfig == null) {
             throw new RenException("没有配置");
         }
+
         entity.setFee(feeConfig.getCostCardFee());
         entity.setMerchantfee(feeConfig.getCardFee());
     }

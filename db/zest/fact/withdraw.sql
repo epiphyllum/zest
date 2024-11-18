@@ -25,6 +25,8 @@ create table j_withdraw
     securityamount   decimal(18, 2),
     securitycurrency varchar(3) comment '币种',
 
+    merchantfee      decimal(18,2) comment '商户手续费',
+
     -- extra
     `state`          varchar(2)     not null default 0 comment '状态',
     stateexplain     varchar(200),
