@@ -25,4 +25,5 @@ public class LedgerMoneyIn {
         String factMemo = "入金:" + entity.getAmount() + entity.getCurrency();
         ledgerUtil.ledgeUpdate(vaAccount, LedgerConstant.ORIGIN_TYPE_MONEY, LedgerConstant.FACT_MONEY_IN_VA, entity.getId(), factMemo, entity.getAmount());
     }
+
 }

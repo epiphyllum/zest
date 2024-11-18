@@ -47,7 +47,7 @@ public class LedgerExchange {
         BigDecimal factAmount = entity.getSettleamount();
         // 卖出币种: 确认冻结
         JBalanceEntity outBalance = ledgerUtil.getVaAccount(merchantId, entity.getPayerccy());
-        ledgerUtil.confirmUpdate(outBalance, LedgerConstant.ORIGIN_TYPE_EXCHANGE, LedgerConstant.FACT_EXCHANGE_CONFIRM_VA, entity.getId(), factMemo, factAmount);
+        ledgerUtil.confirmUpdate(outBalance, LedgerConstant.ORIGIN_TYPE_EXCHANGE, LedgerConstant.FACT_EXCHANGE_CONFIRM_VA, entity.getId(), factMemo, entity.getAmount());
 
         // 买入币种: 入账
         JBalanceEntity targetVa = ledgerUtil.getVaAccount(merchantId, entity.getPayeeccy());
