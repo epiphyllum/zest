@@ -16,6 +16,7 @@ import io.renren.zadmin.entity.JCardEntity;
 import io.renren.zadmin.entity.JSubEntity;
 import io.renren.zin.cardtxn.dto.TAuthTxnNotify;
 import jakarta.annotation.Resource;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -73,7 +74,7 @@ public class ZinCardTxnNotifyService {
         JMerchantEntity merchant = jMerchantDao.selectById(subEntity.getMerchantId());
 
         // 通知商户
-        if (merchant.getWebhook() != null) {
+        if (StringUtils.isNotBlank(merchant.getWebhook())) {
             apiNotify.cardTxnNotify(entity, merchant);
         }
     }
