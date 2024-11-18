@@ -13,8 +13,12 @@ public class TAuthTxnNotify {
     private String cardno;       //	卡号
     private String state;        //	状态
     private String stateexplain; //	状态说明
+
     private BigDecimal amount;   //	金额
+    private BigDecimal settleamount;   //	金额
     private String currency;     //	币种
+    private String settlecurrency;     //	币种
+
     private String trxtime;      //	交易时间
     private String trxdir;       //	交易方向
     private String trxaddr;      //	交易地点
