@@ -240,13 +240,12 @@ public class JDepositManager {
         log.info("卡充值, state: {} -> {}", oldState, newState);
         // 变成成功
         if (newState.equals(ZinConstant.CARD_APPLY_SUCCESS) && !oldState.equals(ZinConstant.CARD_APPLY_SUCCESS)) {
-
             entity.setSecurityamount(response.getSecurityamount());
             entity.setSecuritycurrency(response.getSecuritycurrency());
             entity.setFee(response.getFee());
             entity.setFeecurrency(response.getFeecurrency());
             try {
-                tx.executeWithoutResult(st -> {
+                Boolean execute = tx.execute(st -> {
                     int update = jDepositDao.update(null, Wrappers.<JDepositEntity>lambdaUpdate()
                             .eq(JDepositEntity::getId, entity.getId())
                             .eq(JDepositEntity::getState, oldState)
@@ -257,21 +256,23 @@ public class JDepositManager {
                             .set(JDepositEntity::getState, newState)
                     );
                     if (update != 1) {
-                        throw new RenException("更新充值失败");
+                        st.setRollbackOnly();
+                        return false;
                     }
                     ledgerCardCharge.ledgeCardCharge(entity, subEntity);
+                    return true;
                 });
+                if (execute.equals(true)) {
+                    CompletableFuture.runAsync(() -> {
+                        JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery().eq(JCardEntity::getCardno, entity.getCardno()));
+                        jCardManager.balanceCard(cardEntity);
+                    });
+                }
             } catch (Exception ex) {
                 log.error("充值记账错误, 充值记录:{}", entity, subEntity);
                 ex.printStackTrace();
                 throw ex;
             }
-
-            CompletableFuture.runAsync(() -> {
-                JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery().eq(JCardEntity::getCardno, entity.getCardno()));
-                jCardManager.balanceCard(cardEntity);
-            });
-
         } else {
             jDepositDao.update(null, Wrappers.<JDepositEntity>lambdaUpdate()
                     .eq(JDepositEntity::getId, entity.getId())

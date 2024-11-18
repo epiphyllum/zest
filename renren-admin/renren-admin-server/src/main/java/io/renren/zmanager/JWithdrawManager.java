@@ -138,7 +138,7 @@ public class JWithdrawManager {
             entity.setFeecurrency(response.getFeecurrency());
 
             try {
-                tx.executeWithoutResult(st -> {
+                Boolean execute = tx.execute(st -> {
                     int update = jWithdrawDao.update(null, Wrappers.<JWithdrawEntity>lambdaUpdate()
                             .eq(JWithdrawEntity::getId, entity.getId())
                             .eq(JWithdrawEntity::getState, oldState)
@@ -150,21 +150,23 @@ public class JWithdrawManager {
                             .set(JWithdrawEntity::getFeecurrency, response.getFeecurrency())
                     );
                     if (update != 1) {
-                        throw new RenException("更新提现记录失败");
+                        st.setRollbackOnly();
+                        return false;
                     }
                     ledgerCardWithdraw.ledgeCardWithdraw(entity, subEntity);
+                    return true;
                 });
+                if(execute.equals(true)) {
+                    CompletableFuture.runAsync(() -> {
+                        JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery().eq(JCardEntity::getCardno, entity.getCardno()));
+                        jCardManager.balanceCard(cardEntity);
+                    });
+                }
             } catch (Exception ex) {
                 log.error("提现记账失败, 记录:{}, 子商户:{}", entity, subEntity);
                 ex.printStackTrace();
                 throw ex;
             }
-
-            CompletableFuture.runAsync(() -> {
-                JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery().eq(JCardEntity::getCardno, entity.getCardno()));
-                jCardManager.balanceCard(cardEntity);
-            });
-
         } else {
             jWithdrawDao.update(null, Wrappers.<JWithdrawEntity>lambdaUpdate()
                     .eq(JWithdrawEntity::getId, entity.getId())
