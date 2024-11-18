@@ -78,29 +78,31 @@ public class JExchangeManager {
         // 状态从不成功到成功
         if (ZinConstant.payApplyStateMap.get(oldState) != ZinConstant.STATE_SUCCESS &&
                 ZinConstant.payApplyStateMap.get(newState) == ZinConstant.STATE_SUCCESS) {
-            tx.executeWithoutResult(st -> {
+            Boolean execute = tx.execute(st -> {
                 int cnt = jExchangeDao.update(update, Wrappers.<JExchangeEntity>lambdaUpdate()
                         .eq(JExchangeEntity::getId, jExchangeEntity.getId())
                         .ne(JExchangeEntity::getState, ZinConstant.PAY_APPLY_SUCCESS)
                 );
                 if (cnt != 1) {
-                    throw new RenException("更新换汇状态失败");
+                    return false;
                 }
                 jExchangeEntity.setExfee(response.getFee());
                 jExchangeEntity.setExfxrate(response.getFxrate());
                 ledgerExchange.ledgeExchange(jExchangeEntity);
+                return true;
             });
+            // 是否通知商户
+            if (notify && execute) {
+                JExchangeEntity entity = jExchangeDao.selectById(jExchangeEntity.getId());
+                JMerchantEntity merchant = jMerchantDao.selectById(entity.getMerchantId());
+                apiNotify.exchangeNotify(entity, merchant);
+            }
         } else {
             // 其他情况,  只是简单更新
             jExchangeDao.updateById(update);
         }
 
-        // 是否通知商户
-        if (notify) {
-            JExchangeEntity entity = jExchangeDao.selectById(jExchangeEntity.getId());
-            JMerchantEntity merchant = jMerchantDao.selectById(entity.getMerchantId());
-            apiNotify.exchangeNotify(entity, merchant);
-        }
+
     }
 
     /**

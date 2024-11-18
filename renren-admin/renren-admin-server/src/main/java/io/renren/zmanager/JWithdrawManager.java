@@ -156,7 +156,7 @@ public class JWithdrawManager {
                     ledgerCardWithdraw.ledgeCardWithdraw(entity, subEntity);
                     return true;
                 });
-                if(execute.equals(true)) {
+                if(execute) {
                     CompletableFuture.runAsync(() -> {
                         JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery().eq(JCardEntity::getCardno, entity.getCardno()));
                         jCardManager.balanceCard(cardEntity);
