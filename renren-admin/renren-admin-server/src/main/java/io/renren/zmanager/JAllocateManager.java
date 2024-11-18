@@ -63,7 +63,6 @@ public class JAllocateManager {
 
     // 子商户VA转商户VA
     public void handleS2m(JAllocateEntity entity) {
-
         JBalanceEntity subVaAccount = ledgerUtil.getSubVaAccount(entity.getSubId(), entity.getCurrency());
         if (subVaAccount.getBalance().compareTo(entity.getAmount()) < 0) {
             throw new RenException("子商户账户余额不足, 余额:" + subVaAccount.getBalance());
@@ -76,7 +75,6 @@ public class JAllocateManager {
             if (after.getBalance().compareTo(BigDecimal.ZERO) < 0) {
                 throw new RenException("子商户账户余额不足");
             }
-
         });
     }
 

@@ -619,11 +619,14 @@ public class JCardManager {
             TCardUpdateScene request = new TCardUpdateScene(cardEntity.getCurrency(), cardEntity.getCardno(), newAuth, null);
             TCardUpdateSceneResponse response = zinCardApplyService.cardUpdateScene(request);
             tx.executeWithoutResult(st -> {
-                jVpaAdjustDao.update(null, Wrappers.<JVpaAdjustEntity>lambdaUpdate()
+                int update = jVpaAdjustDao.update(null, Wrappers.<JVpaAdjustEntity>lambdaUpdate()
                         .eq(JVpaAdjustEntity::getId, adjustEntity.getId())
                         .eq(JVpaAdjustEntity::getState, ZinConstant.VPA_ADJUST_UNKNOWN)
                         .set(JVpaAdjustEntity::getState, ZinConstant.VPA_ADJUST_SUCCESS)
                 );
+                if (update != 1) {
+                    throw new RenException("更新调整失败");
+                }
                 // 更新卡的当前额度
                 jCardDao.update(null, Wrappers.<JCardEntity>lambdaUpdate()
                         .eq(JCardEntity::getId, cardEntity.getId())
@@ -633,7 +636,9 @@ public class JCardManager {
                 // confirm记账
                 ledgerPrepaidCharge.ledgePrepaidCharge(adjustEntity);
             });
-            this.balanceCard(cardEntity);
+            CompletableFuture.runAsync(() -> {
+                this.balanceCard(cardEntity);
+            });
         } catch (Exception ex) {
             // 查询通联修改是否成功， 再确定是否解冻释放, 更新调整失败
             ledgerPrepaidCharge.ledgePrepaidChargeUnFreeze(adjustEntity);
@@ -682,11 +687,14 @@ public class JCardManager {
         try {
             TCardUpdateSceneResponse response = zinCardApplyService.cardUpdateScene(request);
             tx.executeWithoutResult(st -> {
-                jVpaAdjustDao.update(null, Wrappers.<JVpaAdjustEntity>lambdaUpdate()
+                int update = jVpaAdjustDao.update(null, Wrappers.<JVpaAdjustEntity>lambdaUpdate()
                         .eq(JVpaAdjustEntity::getId, adjustEntity.getId())
                         .eq(JVpaAdjustEntity::getState, ZinConstant.VPA_ADJUST_UNKNOWN)
                         .set(JVpaAdjustEntity::getState, ZinConstant.VPA_ADJUST_SUCCESS)
                 );
+                if (update != 1) {
+                    throw new RenException("更新调整失败");
+                }
                 // 更新卡的当前额度
                 jCardDao.update(null, Wrappers.<JCardEntity>lambdaUpdate()
                         .eq(JCardEntity::getId, cardEntity.getId())
@@ -695,7 +703,9 @@ public class JCardManager {
                 // confirm记账
                 ledgerPrepaidWithdraw.ledgePrepaidWithdraw(adjustEntity);
             });
-            this.balanceCard(cardEntity);
+            CompletableFuture.runAsync(() -> {
+                this.balanceCard(cardEntity);
+            });
         } catch (Exception ex) {
             ex.printStackTrace();
             log.error("failed");
