@@ -148,7 +148,7 @@ public class JVpaManager {
             );
         }
         if (feeConfig == null) {
-            throw new RenException("配置不存在");
+            throw new RenException("费用配置缺失");
         }
         entity.setProductcurrency(feeConfig.getCurrency());
 
@@ -179,14 +179,20 @@ public class JVpaManager {
         log.info("vpa open card, fee:{}", totalMerchantFee);
 
         // 记账 + 入库
-        tx.executeWithoutResult(st -> {
-            jVpaJobDao.insert(entity);
-            if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_SHARE)) {
-                ledgerOpenVpaShare.ledgeOpenVpaShareFreeze(entity);
-            } else if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_PREPAID)) {
-                ledgerOpenVpaPrepaid.ledgeOpenVpaPrepaidFreeze(entity);
-            }
-        });
+        try {
+            tx.executeWithoutResult(st -> {
+                jVpaJobDao.insert(entity);
+                if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_SHARE)) {
+                    ledgerOpenVpaShare.ledgeOpenVpaShareFreeze(entity);
+                } else if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_PREPAID)) {
+                    ledgerOpenVpaPrepaid.ledgeOpenVpaPrepaidFreeze(entity);
+                }
+            });
+        } catch (Exception e) {
+            log.error("VPA发卡记账失败, 发卡任务:{}", entity);
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     // 提交通联
@@ -304,32 +310,38 @@ public class JVpaManager {
             }
 
             // 插入卡表， 记账扣费, 更新任务状态:  200
-            tx.executeWithoutResult(status -> {
-                // 插入卡数据
-                for (JCardEntity jCardEntity : jCardEntities) {
-                    jCardDao.insert(jCardEntity);
-                }
+            try {
+                tx.executeWithoutResult(status -> {
+                    // 插入卡数据
+                    for (JCardEntity jCardEntity : jCardEntities) {
+                        jCardDao.insert(jCardEntity);
+                    }
 
-                // 插入卡初始额度数据
-                for (JVpaAdjustEntity adjustEntity : adjustEntities) {
-                    jVpaAdjustDao.insert(adjustEntity);
-                }
+                    // 插入卡初始额度数据
+                    for (JVpaAdjustEntity adjustEntity : adjustEntities) {
+                        jVpaAdjustDao.insert(adjustEntity);
+                    }
 
-                // 更新任务记录
-                jVpaJobDao.update(null, Wrappers.<JVpaJobEntity>lambdaUpdate()
-                        .eq(JVpaJobEntity::getId, entity.getId())
-                        .eq(JVpaJobEntity::getState, prevState)
-                        .set(JVpaJobEntity::getState, ZinConstant.CARD_APPLY_SUCCESS)
-                );
-                // 记账
-                if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_SHARE)) {
-                    ledgerOpenVpaShare.ledgeOpenShareVpa(entity);
-                } else if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_PREPAID)) {
-                    ledgerOpenVpaPrepaid.ledgeOpenVpaPrepaid(entity);
-                } else {
-                    throw new RenException("未知发卡类型");
-                }
-            });
+                    // 更新任务记录
+                    jVpaJobDao.update(null, Wrappers.<JVpaJobEntity>lambdaUpdate()
+                            .eq(JVpaJobEntity::getId, entity.getId())
+                            .eq(JVpaJobEntity::getState, prevState)
+                            .set(JVpaJobEntity::getState, ZinConstant.CARD_APPLY_SUCCESS)
+                    );
+                    // 记账
+                    if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_SHARE)) {
+                        ledgerOpenVpaShare.ledgeOpenShareVpa(entity);
+                    } else if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_PREPAID)) {
+                        ledgerOpenVpaPrepaid.ledgeOpenVpaPrepaid(entity);
+                    } else {
+                        throw new RenException("未知发卡类型");
+                    }
+                });
+            } catch (Exception e) {
+                log.error("开卡记账失败, 任务:{}", entity);
+                e.printStackTrace();
+                throw e;
+            }
 
             // 更新所有余额账号余额
             for (JCardEntity jCardEntity : jCardEntities) {
@@ -349,21 +361,27 @@ public class JVpaManager {
     }
 
     public void cancel(JVpaJobEntity entity) {
-        tx.executeWithoutResult(status -> {
-            int update = jVpaJobDao.update(null, Wrappers.<JVpaJobEntity>lambdaUpdate()
-                    .eq(JVpaJobEntity::getId, entity.getId())
-                    .set(JVpaJobEntity::getState, ZinConstant.CARD_APPLY_CLOSE)
-            );
-            if (update != 1) {
-                throw new RenException("取消失败");
-            }
-            if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_SHARE)) {
-                ledgerOpenVpaShare.ledgeOpenVpaShareUnFreeze(entity);
-            } else if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_PREPAID)) {
-                ledgerOpenVpaPrepaid.ledgeOpenVpaPrepaidUnFreeze(entity);
-            } else {
-                throw new RenException("未知发卡类型");
-            }
-        });
+        try {
+            tx.executeWithoutResult(status -> {
+                int update = jVpaJobDao.update(null, Wrappers.<JVpaJobEntity>lambdaUpdate()
+                        .eq(JVpaJobEntity::getId, entity.getId())
+                        .set(JVpaJobEntity::getState, ZinConstant.CARD_APPLY_CLOSE)
+                );
+                if (update != 1) {
+                    throw new RenException("取消失败");
+                }
+                if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_SHARE)) {
+                    ledgerOpenVpaShare.ledgeOpenVpaShareUnFreeze(entity);
+                } else if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_PREPAID)) {
+                    ledgerOpenVpaPrepaid.ledgeOpenVpaPrepaidUnFreeze(entity);
+                } else {
+                    throw new RenException("未知发卡类型");
+                }
+            });
+        } catch (Exception e) {
+            log.error("取消开卡失败, 任务:{}", entity);
+            e.printStackTrace();
+            throw e;
+        }
     }
 }

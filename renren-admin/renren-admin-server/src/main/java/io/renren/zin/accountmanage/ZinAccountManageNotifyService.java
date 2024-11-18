@@ -78,10 +78,13 @@ public class ZinAccountManageNotifyService {
             if (cnt != 1) {
                 throw new RenException("入金通知处理失败");
             }
+
+            // 重新查回来
             JMoneyEntity entity = jMoneyDao.selectById(jMoneyEntity.getId());
             try {
                 ledgerMoneyIn.ledgeMoneyIn(entity);
             } catch (Exception ex) {
+                log.error("记账失败: {}", entity);
                 ex.printStackTrace();
             }
         });

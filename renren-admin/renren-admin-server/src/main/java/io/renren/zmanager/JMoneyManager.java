@@ -196,6 +196,7 @@ public class JMoneyManager {
         } catch (Exception ex) {
             log.error("记账失败: {}", moneyEntity);
             ex.printStackTrace();
+            throw ex;
         }
     }
 }

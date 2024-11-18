@@ -172,11 +172,17 @@ public class JDepositManager {
         entity.setState("00");
 
         // 入库
-        tx.executeWithoutResult(st -> {
-            log.info("insert deposit: {}", entity);
-            jDepositDao.insert(entity);
-            ledgerCardCharge.ledgeCardChargeFreeze(entity, subEntity);
-        });
+        try {
+            tx.executeWithoutResult(st -> {
+                log.info("insert deposit: {}", entity);
+                jDepositDao.insert(entity);
+                ledgerCardCharge.ledgeCardChargeFreeze(entity, subEntity);
+            });
+        } catch ( Exception ex) {
+            log.error("充值记账失败, 充值记录:{}, 子商户:{}", entity, subEntity);
+            ex.printStackTrace();
+            throw ex;
+        }
 
         if (submit) {
             try {
@@ -234,24 +240,32 @@ public class JDepositManager {
         log.info("卡充值, state: {} -> {}", oldState, newState);
         // 变成成功
         if (newState.equals(ZinConstant.CARD_APPLY_SUCCESS) && !oldState.equals(ZinConstant.CARD_APPLY_SUCCESS)) {
-            tx.executeWithoutResult(st -> {
-                jDepositDao.update(null, Wrappers.<JDepositEntity>lambdaUpdate()
-                        .eq(JDepositEntity::getId, entity.getId())
-                        .eq(JDepositEntity::getState, oldState)
-                        .set(JDepositEntity::getSecurityamount, response.getSecurityamount())
-                        .set(JDepositEntity::getSecuritycurrency, response.getSecuritycurrency())
-                        .set(JDepositEntity::getFee, response.getFee())
-                        .set(JDepositEntity::getFeecurrency, response.getFeecurrency())
-                        .set(JDepositEntity::getState, newState)
-                );
 
-                entity.setSecurityamount(response.getSecurityamount());
-                entity.setSecuritycurrency(response.getSecuritycurrency());
-                entity.setFee(response.getFee());
-                entity.setFeecurrency(response.getFeecurrency());
-
-                ledgerCardCharge.ledgeCardCharge(entity, subEntity);
-            });
+            entity.setSecurityamount(response.getSecurityamount());
+            entity.setSecuritycurrency(response.getSecuritycurrency());
+            entity.setFee(response.getFee());
+            entity.setFeecurrency(response.getFeecurrency());
+            try {
+                tx.executeWithoutResult(st -> {
+                    int update = jDepositDao.update(null, Wrappers.<JDepositEntity>lambdaUpdate()
+                            .eq(JDepositEntity::getId, entity.getId())
+                            .eq(JDepositEntity::getState, oldState)
+                            .set(JDepositEntity::getSecurityamount, response.getSecurityamount())
+                            .set(JDepositEntity::getSecuritycurrency, response.getSecuritycurrency())
+                            .set(JDepositEntity::getFee, response.getFee())
+                            .set(JDepositEntity::getFeecurrency, response.getFeecurrency())
+                            .set(JDepositEntity::getState, newState)
+                    );
+                    if (update != 1) {
+                        throw new RenException("更新充值失败");
+                    }
+                    ledgerCardCharge.ledgeCardCharge(entity, subEntity);
+                });
+            } catch (Exception ex) {
+                log.error("充值记账错误, 充值记录:{}", entity, subEntity);
+                ex.printStackTrace();
+                throw ex;
+            }
 
             CompletableFuture.runAsync(() -> {
                 JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery().eq(JCardEntity::getCardno, entity.getCardno()));
@@ -315,13 +329,19 @@ public class JDepositManager {
     public void cancel(JDepositEntity entity) {
         JSubEntity subEntity = jSubDao.selectById(entity.getSubId());
         // 入库
-        tx.executeWithoutResult(st -> {
-            jDepositDao.update(null, Wrappers.<JDepositEntity>lambdaUpdate()
-                    .isNull(JDepositEntity::getApplyid)
-                    .eq(JDepositEntity::getId, entity.getId())
-                    .set(JDepositEntity::getState, "07")
-            );
-            ledgerCardCharge.ledgeCardChargeUnFreeze(entity, subEntity);
-        });
+        try {
+            tx.executeWithoutResult(st -> {
+                jDepositDao.update(null, Wrappers.<JDepositEntity>lambdaUpdate()
+                        .isNull(JDepositEntity::getApplyid)
+                        .eq(JDepositEntity::getId, entity.getId())
+                        .set(JDepositEntity::getState, "07")
+                );
+                ledgerCardCharge.ledgeCardChargeUnFreeze(entity, subEntity);
+            });
+        } catch (Exception ex) {
+            log.error("充值作废失败, 记录:{}, 子商户:{}", entity, subEntity);
+            ex.printStackTrace();
+            throw ex;
+        }
     }
 }

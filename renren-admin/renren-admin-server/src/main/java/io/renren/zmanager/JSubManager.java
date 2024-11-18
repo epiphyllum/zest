@@ -144,27 +144,22 @@ public class JSubManager {
      * @param entity
      */
     public void openSubVa(JSubEntity entity, Collection<String> currencyList) {
-
-
-
         // 创建管理账户 - 按币种来: 15 * 6
-        tx.executeWithoutResult(st -> {
-            for (String currency : currencyList) {
-                newBalance(entity, BalanceType.getSubVaAccount(currency), currency);      // 子商户va
-                // 子商户
-                newBalance(entity, BalanceType.getDepositAccount(currency), currency);    // 子商户保证
-                newBalance(entity, BalanceType.getChargeAccount(currency), currency);     // 子商户充值手续费
-                newBalance(entity, BalanceType.getCardFeeAccount(currency), currency);    // 子商户开卡费用
-                newBalance(entity, BalanceType.getCardSumAccount(currency), currency);    // 子商户卡充值总额
-                newBalance(entity, BalanceType.getTxnAccount(currency), currency);        // 子商户其他费用
-                // 成本账户
-                newBalance(entity, BalanceType.getAipDepositAccount(currency), currency);  // 子商户保证
-                newBalance(entity, BalanceType.getAipChargeAccount(currency), currency);   // 子商户充值手续费
-                newBalance(entity, BalanceType.getAipCardFeeAccount(currency), currency);  // 子商户开卡费用
-                newBalance(entity, BalanceType.getAipCardSumAccount(currency), currency);  // 子商户卡充值总额
-                newBalance(entity, BalanceType.getAipTxnAccount(currency), currency);      // 子商户其他费用
-            }
-        });
+        for (String currency : currencyList) {
+            newBalance(entity, BalanceType.getSubVaAccount(currency), currency);      // 子商户va
+            // 子商户
+            newBalance(entity, BalanceType.getDepositAccount(currency), currency);    // 子商户保证
+            newBalance(entity, BalanceType.getChargeAccount(currency), currency);     // 子商户充值手续费
+            newBalance(entity, BalanceType.getCardFeeAccount(currency), currency);    // 子商户开卡费用
+            newBalance(entity, BalanceType.getCardSumAccount(currency), currency);    // 子商户卡充值总额
+            newBalance(entity, BalanceType.getTxnAccount(currency), currency);        // 子商户其他费用
+            // 成本账户
+            newBalance(entity, BalanceType.getAipDepositAccount(currency), currency);  // 子商户保证
+            newBalance(entity, BalanceType.getAipChargeAccount(currency), currency);   // 子商户充值手续费
+            newBalance(entity, BalanceType.getAipCardFeeAccount(currency), currency);  // 子商户开卡费用
+            newBalance(entity, BalanceType.getAipCardSumAccount(currency), currency);  // 子商户卡充值总额
+            newBalance(entity, BalanceType.getAipTxnAccount(currency), currency);      // 子商户其他费用
+        }
     }
 
     /**

@@ -80,10 +80,15 @@ public class JWithdrawManager {
         entity.setPayeeid(jVaEntity.getTid());
         entity.setState("00");
 
-        tx.executeWithoutResult(st -> {
-            jWithdrawDao.insert(entity);
-            ledgerCardWithdraw.ledgeCardWithdrawFreeze(entity, subEntity);
-        });
+        try {
+            tx.executeWithoutResult(st -> {
+                jWithdrawDao.insert(entity);
+                ledgerCardWithdraw.ledgeCardWithdrawFreeze(entity, subEntity);
+            });
+        } catch (Exception ex) {
+            log.error("提现失败, 记录:{}, 子商户:{}", entity, subEntity);
+            throw ex;
+        }
     }
 
     /**
@@ -104,23 +109,31 @@ public class JWithdrawManager {
 
         // 变成成功
         if (newState.equals(ZinConstant.CARD_APPLY_SUCCESS) && !oldState.equals(ZinConstant.CARD_APPLY_SUCCESS)) {
-            tx.executeWithoutResult(st -> {
-                jWithdrawDao.update(null, Wrappers.<JWithdrawEntity>lambdaUpdate()
-                        .eq(JWithdrawEntity::getId, entity.getId())
-                        .eq(JWithdrawEntity::getState, oldState)
-                        .set(JWithdrawEntity::getState, newState)
-                        .set(JWithdrawEntity::getStateexplain, response.getStateexplain())
-                        .set(JWithdrawEntity::getSecurityamount, response.getSecurityamount())
-                        .set(JWithdrawEntity::getSecuritycurrency, response.getSecuritycurrency())
-                        .set(JWithdrawEntity::getFee, response.getFee())
-                        .set(JWithdrawEntity::getFeecurrency, response.getFeecurrency())
-                );
-                entity.setSecurityamount(response.getSecurityamount());
-                entity.setSecuritycurrency(response.getSecuritycurrency());
-                entity.setFee(response.getFee());
-                entity.setFeecurrency(response.getFeecurrency());
-                ledgerCardWithdraw.ledgeCardWithdraw(entity, subEntity);
-            });
+            entity.setSecurityamount(response.getSecurityamount());
+            entity.setSecuritycurrency(response.getSecuritycurrency());
+            entity.setFee(response.getFee());
+            entity.setFeecurrency(response.getFeecurrency());
+
+            try {
+                tx.executeWithoutResult(st -> {
+                    jWithdrawDao.update(null, Wrappers.<JWithdrawEntity>lambdaUpdate()
+                            .eq(JWithdrawEntity::getId, entity.getId())
+                            .eq(JWithdrawEntity::getState, oldState)
+                            .set(JWithdrawEntity::getState, newState)
+                            .set(JWithdrawEntity::getStateexplain, response.getStateexplain())
+                            .set(JWithdrawEntity::getSecurityamount, response.getSecurityamount())
+                            .set(JWithdrawEntity::getSecuritycurrency, response.getSecuritycurrency())
+                            .set(JWithdrawEntity::getFee, response.getFee())
+                            .set(JWithdrawEntity::getFeecurrency, response.getFeecurrency())
+                    );
+                    ledgerCardWithdraw.ledgeCardWithdraw(entity, subEntity);
+                });
+            } catch (Exception ex) {
+                log.error("提现记账失败, 记录:{}, 子商户:{}", entity, subEntity);
+                ex.printStackTrace();
+                throw ex;
+            }
+
             CompletableFuture.runAsync(() -> {
                 JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery().eq(JCardEntity::getCardno, entity.getCardno()));
                 jCardManager.balanceCard(cardEntity);
@@ -166,13 +179,19 @@ public class JWithdrawManager {
      */
     public void cancel(JWithdrawEntity entity) {
         JSubEntity subEntity = jSubDao.selectById(entity.getSubId());
-        tx.executeWithoutResult(st -> {
-            jWithdrawDao.update(null, Wrappers.<JWithdrawEntity>lambdaUpdate()
-                    .eq(JWithdrawEntity::getId, entity.getId())
-                    .isNull(JWithdrawEntity::getApplyid)
-                    .set(JWithdrawEntity::getState, ZinConstant.PAY_APPLY_FAIL)
-            );
-            ledgerCardWithdraw.ledgeCardWithdrawUnFreeze(entity, subEntity);
-        });
+        try {
+            tx.executeWithoutResult(st -> {
+                jWithdrawDao.update(null, Wrappers.<JWithdrawEntity>lambdaUpdate()
+                        .eq(JWithdrawEntity::getId, entity.getId())
+                        .isNull(JWithdrawEntity::getApplyid)
+                        .set(JWithdrawEntity::getState, ZinConstant.PAY_APPLY_FAIL)
+                );
+                ledgerCardWithdraw.ledgeCardWithdrawUnFreeze(entity, subEntity);
+            });
+        } catch (Exception ex) {
+            log.error("提现作废失败, 记录:{}, 子商户:{}", entity, subEntity);
+            ex.printStackTrace();
+            throw ex;
+        }
     }
 }
