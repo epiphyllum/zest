@@ -175,7 +175,7 @@ public class JWithdrawManager {
         }
 
         // 需要通知商户的话
-        if (entity.getApi() == 1 && notify) {
+        if (entity.getApi().equals(1) && notify) {
             JMerchantEntity merchant = jMerchantDao.selectById(entity.getMerchantId());
             JWithdrawEntity freshEntity = jWithdrawDao.selectById(entity.getId());
             apiNotify.cardWithdrawNotify(freshEntity, merchant);
