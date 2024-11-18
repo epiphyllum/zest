@@ -13,15 +13,16 @@ create table j_packet
     send           varchar(2048) not null comment '报文内容',
     sign           varchar(1024) not null comment '签名',
     ip             varchar(15)  comment 'IP',
+
     -- basic(4)
     creator        bigint comment '创建者',
     create_date    datetime comment '创建时间',
     updater        bigint comment '更新者',
     update_date    datetime comment '更新时间',
     primary key (id)
-) ENGINE = InnoDB
+) engine = innodb
   collate utf8mb4_bin
-  DEFAULT CHARACTER SET utf8mb4 COMMENT ='j_packet';
+  default character set utf8mb4 comment ='j_packet';
 create index idx_j_packet_1 on j_packet(req_id);
 
 -- 通联日志

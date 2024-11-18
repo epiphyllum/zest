@@ -187,7 +187,7 @@ public class JMoneyManager {
                     .set(JMoneyEntity::getMerchantId, jMaccountEntity.getMerchantId())
                     .set(JMoneyEntity::getMerchantName, jMaccountEntity.getMerchantName())
             );
-            if (update != 1) {
+            if (update!= 1) {
                 throw new RenException("匹配失败");
             }
             ledgerMoneyIn.ledgeMoneyIn(moneyEntity);
