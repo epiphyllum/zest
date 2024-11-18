@@ -61,8 +61,6 @@ public class ZinRequester {
     private String commonQueryParams;
     private Sign signer;
     private Sign verifier;
-    @Autowired
-    private LoggersEndpoint loggersEndpoint;
 
     @Data
     @AllArgsConstructor
@@ -284,7 +282,6 @@ public class ZinRequester {
 
     // 验证通联回调
     public <T> T verify(HttpServletRequest request, String body, String auth, String date, Class<T> clazz) {
-        log.info("recv notification[{}]\nbody:[{}]\nauth:[{}]\ndate:[{}]", request.getRequestURI(), body, auth, date);
         String uri = request.getRequestURI();
         String params = request.getQueryString();
         StringBuilder sb = new StringBuilder();
@@ -299,6 +296,7 @@ public class ZinRequester {
         boolean verify = this.verifier.verify(toSign.getBytes(StandardCharsets.UTF_8), sign);
         if (!verify) {
             log.error("verify signature failed\ntoSign:{}", toSign);
+            log.error("recv notification[{}]\nbody:[{}]\nauth:[{}]\ndate:[{}]", request.getRequestURI(), body, auth, date);
             throw new RenException("verify failed");
         }
         String reqid = request.getParameter("reqid");

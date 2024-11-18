@@ -95,7 +95,7 @@ public class LedgerCardCharge {
                     .eq(JCardEntity::getCardno, entity.getCardno())
             );
             JBalanceEntity prepaidQuota = ledgerUtil.getPrepaidQuotaAccount(cardEntity.getId(), cardEntity.getCurrency());
-            ledgerUtil.ledgeUpdate(prepaidQuota, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_IN_PREPAID_MAIN, entity.getId(), factMemo, factAmount);
+            ledgerUtil.ledgeUpdate(prepaidQuota, LedgerConstant.ORIGIN_TYPE_CARD_CHARGE, LedgerConstant.FACT_CARD_CHARGE_IN_PREPAID_MAIN, entity.getId(), factMemo, entity.getAmount());
         }
     }
 }

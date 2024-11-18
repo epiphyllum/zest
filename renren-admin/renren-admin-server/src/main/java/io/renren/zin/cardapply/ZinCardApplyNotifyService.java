@@ -74,8 +74,12 @@ public class ZinCardApplyNotifyService {
         if (jCardEntity.getState().equals(notify.getState())) {
             return;
         }
+        boolean notifyFlag = false;
         // 查询通联, 并通知商户
-        jCardManager.query(jCardEntity, true);
+        if (jCardEntity.getApi().equals(1)) {
+            notifyFlag = true;
+        }
+        jCardManager.query(jCardEntity, notifyFlag);
     }
 
     // CP453: 注销
@@ -95,7 +99,11 @@ public class ZinCardApplyNotifyService {
         JDepositEntity entity = jDepositDao.selectOne(Wrappers.<JDepositEntity>lambdaQuery().eq(JDepositEntity::getApplyid, applyid));
 
         // 查询通联并通知商户
-        jDepositManager.query(entity, true);
+        boolean notifyFlag = false;
+        if (entity.getApi().equals(1)) {
+            notifyFlag = true;
+        }
+        jDepositManager.query(entity, notifyFlag);
     }
 
     //CP452	保证金提现
@@ -103,7 +111,11 @@ public class ZinCardApplyNotifyService {
         String applyid = notify.getApplyid();
         JWithdrawEntity entity = jWithdrawDao.selectOne(Wrappers.<JWithdrawEntity>lambdaQuery().eq(JWithdrawEntity::getApplyid, applyid));
         // 查询通联并通知商户
-        jWithdrawManager.query(entity, true);
+        boolean notifyFlag = false;
+        if (entity.getApi().equals(1)) {
+            notifyFlag = true;
+        }
+        jWithdrawManager.query(entity, notifyFlag);
     }
 
     // CP460: 通华金服共享卡子卡开卡通知
@@ -111,7 +123,13 @@ public class ZinCardApplyNotifyService {
         JVpaJobEntity entity = jVpaJobDao.selectOne(Wrappers.<JVpaJobEntity>lambdaQuery()
                 .eq(JVpaJobEntity::getApplyid, notify.getApplyid())
         );
-        jVpaManager.query(entity, true);
+
+        boolean notifyFlag = false;
+        if (entity.getApi().equals(1)) {
+            notifyFlag = true;
+        }
+
+        jVpaManager.query(entity, notifyFlag);
     }
 
 }

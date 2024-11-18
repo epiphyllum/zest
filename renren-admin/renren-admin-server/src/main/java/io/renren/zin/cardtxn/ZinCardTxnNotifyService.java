@@ -19,6 +19,7 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class ZinCardTxnNotifyService {
@@ -41,12 +42,15 @@ public class ZinCardTxnNotifyService {
     // 2. 卡充值记录
     // 3. 提现记录
     public void handle(TAuthTxnNotify notify) {
+        // copy
         JAuthEntity entity = ConvertUtils.sourceToTarget(notify, JAuthEntity.class);
+
         JCardEntity card = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
                 .eq(JCardEntity::getCardno, notify.getCardno())
         );
         Long subId = card.getSubId();
         JSubEntity subEntity = jSubDao.selectById(subId);
+        // 打标签
         entity.setAgentId(subEntity.getAgentId());
         entity.setAgentName(subEntity.getAgentName());
         entity.setMerchantId(subEntity.getMerchantId());
@@ -60,7 +64,9 @@ public class ZinCardTxnNotifyService {
         jAuthDao.saveOrUpdate(entity);
 
         // 更新下余额
-        jCardManager.balanceCard(card);
+        CompletableFuture.runAsync(() -> {
+            jCardManager.balanceCard(card);
+        });
 
         // 通知商户
         entity = jAuthDao.selectById(id);
