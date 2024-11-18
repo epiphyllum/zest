@@ -84,7 +84,7 @@ public class LedgerCardWithdraw {
 
         // 记账3: 子商户-Va
         JBalanceEntity subVa = ledgerUtil.getSubVaAccount(sub.getId(), entity.getCurrency());
-        ledgerUtil.ledgeUpdate(subVa, LedgerConstant.ORIGIN_TYPE_CARD_WITHDRAW, LedgerConstant.FACT_CARD_WITHDRAW_IN_SUB_VA, entity.getId(), factMemo, factAmount);
+        ledgerUtil.ledgeUpdate(subVa, LedgerConstant.ORIGIN_TYPE_CARD_WITHDRAW, LedgerConstant.FACT_CARD_WITHDRAW_IN_SUB_VA, entity.getId(), factMemo, factAmount.add(entity.getMerchantfee().negate()));
 
         // 记账4: 通联-手续费汇总
         JBalanceEntity aipCharge = ledgerUtil.getAipChargeAccount(sub.getId(), entity.getCurrency());
