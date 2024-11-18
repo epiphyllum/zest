@@ -95,7 +95,6 @@ public class JFeeConfigController {
         dto.setAgentId(merchant.getAgentId());
         dto.setAgentName(merchant.getAgentName());
         dto.setMerchantName(merchant.getCusname());
-        dto.setCurrency(ZinConstant.marketproductCurrencyMap.get(dto.getMarketproduct()));
         jFeeConfigService.save(dto);
         return new Result();
     }

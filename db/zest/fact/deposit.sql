@@ -26,13 +26,13 @@ create table j_deposit
     -- 冗余增加的(1)
     currency         varchar(3)     not null,                -- 币种
     txn_amount       decimal(18, 2) not null,                -- 发起金额
-    merchant_charge       decimal(18, 2) not null,                -- 发起金额
-    merchant_deposit       decimal(18, 2) not null,                -- 发起金额
+    merchant_charge       decimal(18, 2) not null,           -- 发起金额
+    merchant_deposit       decimal(18, 2) not null,          -- 发起金额
 
-    charge_rate       decimal(18, 2) not null,                -- 发起金额
-    deposit_rate       decimal(18, 2) not null,                -- 发起金额
-    cost_charge_rate       decimal(18, 2) not null,                -- 发起金额
-    cost_deposit_rate       decimal(18, 2) not null,                -- 发起金额
+    charge_rate       decimal(18, 2) not null,               -- 发起金额
+    deposit_rate       decimal(18, 2) not null,              -- 发起金额
+    cost_charge_rate       decimal(18, 2) not null,          -- 发起金额
+    cost_deposit_rate       decimal(18, 2) not null,         -- 发起金额
 
     -- 通联返回(2)
     applyid          varchar(32)    null comment '申请单号', -- 申请单号	applyid	String	32	Y

@@ -138,7 +138,6 @@ public class JMoneyManager {
         notify.setPayeraccountname("未知名称");
         log.info("模拟通联入金通知: {}", notify);
         zinAccountManageNotifyService.handle(notify);
-
     }
 
     // 补充材料

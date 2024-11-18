@@ -1,5 +1,7 @@
 package io.renren.zcommon;
 
+import io.renren.zadmin.zorg.config.JCardController;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -146,30 +148,18 @@ public class ZinConstant {
     public static final String CARD_TYPE_VIRTUAL = "1";      // 虚拟卡
     public static final String CARD_TYPE_BOTH = "4";         // 虚实同发
 
-    //  虚拟实体卡类别
-    public static final Map<String, List<String>> cardTypeMap = new HashMap<>() {{
-        put(CARD_TYPE_VIRTUAL, List.of(CARD_PRODUCT_VIRTUAL));
-        put(CARD_TYPE_BOTH, List.of(CARD_PRODUCT_REAL));
+    // 卡类型
+    public static Map<String, String> cardTypeMap = new HashMap<>(){{
+        put("001001", CARD_TYPE_BOTH);     // 实体卡
+        put("001201", CARD_TYPE_VIRTUAL);  // 虚拟卡
+        put("021201", CARD_TYPE_VIRTUAL);  // 虚拟卡
     }};
 
-    // 卡产品币种映射:
+    // 通联卡产品币种映射:
     public static final Map<String, String> productCurrencyMap = new HashMap<>() {{
         put("001001", "HKD");  // VCC实体卡
         put("001201", "HKD");  // VCC虚拟卡
         put("021201", "HKD");  // 共享卡
-    }};
-
-    // 市场卡产品币种映射:
-    public static final Map<String, String> marketproductCurrencyMap = new HashMap<>() {{
-        put(MP_VCC_MAIN_REAL, "HKD");  // VCC实体卡
-        put(MP_VCC_MAIN_VIRTUAL, "HKD");  // VCC实体卡
-        put(MP_VCC_REAL, "HKD");  // VCC实体卡
-        put(MP_VCC_VIRTUAL, "HKD");  // VCC实体卡
-
-        put(MP_VPA_MAIN, "HKD");  // VCC实体卡
-        put(MP_VPA_MAIN_PREPAID, "HKD");  // VCC实体卡
-        put(MP_VPA_SHARE, "HKD");  // VCC实体卡
-        put(MP_VPA_PREPAID, "HKD");  // VCC实体卡
     }};
 
     // 不对外卡产品
@@ -183,19 +173,19 @@ public class ZinConstant {
     public static final String MP_VPA_SHARE = "VpaShare";                // 共享子卡 ： VPA通联标准功能
     public static final String MP_VPA_PREPAID = "VpaPrepaid";            // 预付费卡
 
-    // 市场产品到对外产品的映射
-    public static Map<String, String> marketProdcutMap = new HashMap<>() {{
-        put(MP_VCC_MAIN_REAL, "001001");
-        put(MP_VCC_MAIN_VIRTUAL, "001201");
-
-        put(MP_VCC_REAL, "001001");
-        put(MP_VCC_VIRTUAL, "001201");
-
-        put(MP_VPA_MAIN, "021201");
-        put(MP_VPA_MAIN_PREPAID, "021201");
-
-        put(MP_VPA_SHARE, "021201");
-        put(MP_VPA_PREPAID, "021201");
+    //  币种 -> 市场产品 -> 通联产品
+    public static Map<String, Map<String, String>> marketProdcutMap = new HashMap<>() {{
+        put("HKD", new HashMap<>() {{
+                    put(MP_VCC_MAIN_REAL, "001001");
+                    put(MP_VCC_MAIN_VIRTUAL, "001201");
+                    put(MP_VCC_REAL, "001001");
+                    put(MP_VCC_VIRTUAL, "001201");
+                    put(MP_VPA_MAIN, "021201");
+                    put(MP_VPA_MAIN_PREPAID, "021201");
+                    put(MP_VPA_SHARE, "021201");
+                    put(MP_VPA_PREPAID, "021201");
+                }}
+        );
     }};
 
     // vpa场景类型

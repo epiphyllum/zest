@@ -1,6 +1,7 @@
 package io.renren.zmanager;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.zadmin.dao.JExchangeDao;
 import io.renren.zadmin.dao.JMerchantDao;
@@ -78,10 +79,13 @@ public class JExchangeManager {
         if (ZinConstant.payApplyStateMap.get(oldState) != ZinConstant.STATE_SUCCESS &&
                 ZinConstant.payApplyStateMap.get(newState) == ZinConstant.STATE_SUCCESS) {
             tx.executeWithoutResult(st -> {
-                jExchangeDao.update(update, Wrappers.<JExchangeEntity>lambdaUpdate()
+                int cnt = jExchangeDao.update(update, Wrappers.<JExchangeEntity>lambdaUpdate()
                         .eq(JExchangeEntity::getId, jExchangeEntity.getId())
                         .ne(JExchangeEntity::getState, ZinConstant.PAY_APPLY_SUCCESS)
                 );
+                if (cnt != 1) {
+                    throw new RenException("更新换汇状态失败");
+                }
                 jExchangeEntity.setExfee(response.getFee());
                 jExchangeEntity.setExfxrate(response.getFxrate());
                 ledgerExchange.ledgeExchange(jExchangeEntity);
@@ -125,6 +129,7 @@ public class JExchangeManager {
         update.setId(jExchangeEntity.getId());
         update.setState(ZinConstant.PAY_APPLY_CF_DJ);  // 中间内部态: 以提交
         jExchangeDao.updateById(update);
+        // 查询通联
         this.query(jExchangeEntity, false);
     }
 
@@ -133,10 +138,13 @@ public class JExchangeManager {
      */
     public void cancel(JExchangeEntity entity) {
         tx.executeWithoutResult(status -> {
-            jExchangeDao.update(null, Wrappers.<JExchangeEntity>lambdaUpdate()
+            int update = jExchangeDao.update(null, Wrappers.<JExchangeEntity>lambdaUpdate()
                     .eq(JExchangeEntity::getId, entity.getId())
                     .set(JExchangeEntity::getState, ZinConstant.PAY_APPLY_CC_DJ)   // 内部取消
             );
+            if (update != 1) {
+                throw new RenException("取消换汇失败");
+            }
             ledgerExchange.ledgeExchangeUnFreeze(entity);
         });
     }

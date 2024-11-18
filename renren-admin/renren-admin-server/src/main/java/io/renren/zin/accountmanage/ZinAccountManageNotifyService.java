@@ -51,7 +51,7 @@ public class ZinAccountManageNotifyService {
         }
 
         // 匹配金额
-        if(notify.getAmount().compareTo(jMoneyEntity.getAmount()) != 0) {
+        if(notify.getAmount().compareTo(jMoneyEntity.getApplyAmount()) != 0) {
             log.error("无法匹配金额:{} -> {}", notify.getAmount(), jMoneyEntity.getAmount());
             throw new RenException("入金通知, applyid=" + notify.getApplyid() + ", 金额不匹配, notify:" + notify.getAmount() + ",db:" + jMoneyEntity.getAmount());
         }

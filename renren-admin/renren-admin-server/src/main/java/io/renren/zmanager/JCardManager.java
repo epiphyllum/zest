@@ -116,21 +116,20 @@ public class JCardManager {
 
     public void save(JCardEntity entity) {
         // 市场产品 -> 通联产品
-        entity.setProducttype(ZinConstant.marketProdcutMap.get(entity.getMarketproduct()));
-        log.debug("通联卡产品: {}", entity.getProducttype());
+        entity.setProducttype(ZinConstant.marketProdcutMap.get(entity.getCurrency()).get(entity.getMarketproduct()));
 
-        // 市场产品 --> 币种
-        String currency = ZinConstant.marketproductCurrencyMap.get(entity.getMarketproduct());
-        log.debug("卡产品币种: {}", currency);
-        entity.setCurrency(currency);
-        entity.setFeecurrency(currency);
+        // 开卡费用币种
+        entity.setFeecurrency(entity.getCurrency());
 
         // 卡状态与卡申请状态
         entity.setState(ZinConstant.CARD_APPLY_NEW_DJ);
         entity.setCardstate(ZinConstant.CARD_STATE_NEW_DJ);
 
-        // 什么币种的卡， 就用那个va作为payerid
-        JVaEntity jVaEntity = jVaDao.selectOne(Wrappers.<JVaEntity>lambdaQuery().eq(JVaEntity::getCurrency, currency));
+        // 卡类型
+        entity.setCardtype(ZinConstant.cardTypeMap.get(entity.getProducttype()));
+
+        // 什么币种的卡， 就用哪个va作为payerid: 通联需要扣费
+        JVaEntity jVaEntity = jVaDao.selectOne(Wrappers.<JVaEntity>lambdaQuery().eq(JVaEntity::getCurrency, entity.getCurrency()));
         entity.setPayerid(jVaEntity.getTid());
 
         // 虚拟主卡, 实体主卡不对外
@@ -640,13 +639,19 @@ public class JCardManager {
                 this.balanceCard(cardEntity);
             });
         } catch (Exception ex) {
-            // 查询通联修改是否成功， 再确定是否解冻释放, 更新调整失败
-            ledgerPrepaidCharge.ledgePrepaidChargeUnFreeze(adjustEntity);
-            jVpaAdjustDao.update(null, Wrappers.<JVpaAdjustEntity>lambdaUpdate()
-                    .eq(JVpaAdjustEntity::getId, adjustEntity.getId())
-                    .eq(JVpaAdjustEntity::getState, ZinConstant.VPA_ADJUST_UNKNOWN)
-                    .set(JVpaAdjustEntity::getState, ZinConstant.VPA_ADJUST_FAIL)
-            );
+
+            tx.executeWithoutResult(st -> {
+                int update = jVpaAdjustDao.update(null, Wrappers.<JVpaAdjustEntity>lambdaUpdate()
+                        .eq(JVpaAdjustEntity::getId, adjustEntity.getId())
+                        .eq(JVpaAdjustEntity::getState, ZinConstant.VPA_ADJUST_UNKNOWN)
+                        .set(JVpaAdjustEntity::getState, ZinConstant.VPA_ADJUST_FAIL)
+                );
+                if (update != 1) {
+                    throw new RenException("回滚失败");
+                }
+                // 查询通联修改是否成功， 再确定是否解冻释放, 更新调整失败
+                ledgerPrepaidCharge.ledgePrepaidChargeUnFreeze(adjustEntity);
+            });
         }
     }
 
@@ -761,14 +766,14 @@ public class JCardManager {
 
             this.balanceCard(cardEntity);
         } catch (Exception ex) {
-            ex.printStackTrace();
             // 查询下， 如果明确失败
             jVpaAdjustDao.update(null, Wrappers.<JVpaAdjustEntity>lambdaUpdate()
                     .eq(JVpaAdjustEntity::getId, adjustEntity.getId())
                     .eq(JVpaAdjustEntity::getState, ZinConstant.VPA_ADJUST_UNKNOWN)
                     .set(JVpaAdjustEntity::getState, ZinConstant.VPA_ADJUST_FAIL)
             );
-            throw new RenException("调整失败");
+            ex.printStackTrace();
+            throw ex;
         }
     }
 
