@@ -191,7 +191,9 @@ public class JMoneyController {
         if (!user.getUserType().equals("operation") && !user.getUserType().equals("agent") && !user.getUserType().equals("merchant")) {
             return Result.fail(9999, "not authorized, you are " + user.getUserType());
         }
-        // todo
+
+        jMoneyManager.matchMoney(id);
+
         return new Result();
     }
 

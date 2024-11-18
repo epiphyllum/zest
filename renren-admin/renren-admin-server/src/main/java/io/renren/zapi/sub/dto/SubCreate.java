@@ -47,6 +47,5 @@ public class SubCreate {
     private String agreementfid;       //	子卡商户合作协议	200	Y	附件fid
     private String credifid;           //	统一社会信用证及影印件	200	C	注册国家/地区areacode为CHN，三证合一时，填入统一社会信用证及影印件上传文件fid
     private String buslicensefid;      //	营业执照	200	C	附件fid
-    private String taxfid;             //	税务登记证及影印件	200	C	注册国家/地区areacode为CHN，三证不合一时，填入税务登记证及影印件上传文件fid
     private String organfid;           //	组织机构代码及影印件	200	C	注册国家/地区areacode为CHN，三证不合一时，填入组织机构代码及影印件上传文件fid
 }

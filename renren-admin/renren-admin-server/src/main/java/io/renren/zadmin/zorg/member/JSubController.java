@@ -120,8 +120,8 @@ public class JSubController {
         if (!user.getUserType().equals("operation") && !user.getUserType().equals("agent") && !user.getUserType().equals("merchant")) {
             return Result.fail(9999, "not authorized");
         }
-        if (!state.equals(ZinConstant.MERCHANT_STATE_VERIFIED) && state.equals(ZinConstant.MERCHANT_STATE_FAIL)) {
-            throw new RenException("invalid state");
+        if (state.equals(ZinConstant.MERCHANT_STATE_VERIFIED) || state.equals(ZinConstant.MERCHANT_STATE_FAIL)) {
+            throw new RenException("当前状态不正确:" + state);
         }
         jSubManager.verify(id, state);
         return new Result();

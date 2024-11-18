@@ -97,7 +97,7 @@ public class ZinAccountManageNotifyService {
     public void handle(TMoneyInNotify notify) {
         // CP213
         if (notify.getTrxcod().equals(ZinConstant.CP213)) {
-            // 没有申请单
+            // 没有申请单号
             if (notify.getApplyid() == null) {
                 JMoneyEntity notifyInsert = ConvertUtils.sourceToTarget(notify, JMoneyEntity.class);
                 jMoneyDao.insert(notifyInsert);
@@ -105,7 +105,8 @@ public class ZinAccountManageNotifyService {
                 this.match(notifyInsert);
                 return;
             }
-            // 有申请单
+
+            // 没有申请单
             this.withApply(notify);
             return;
         }
@@ -141,6 +142,7 @@ public class ZinAccountManageNotifyService {
         String finalMerchantName = merchantName;
         Long finalAgentId = agentId;
         String finalAgentName = agentName;
+
         tx.executeWithoutResult(status -> {
             jMoneyDao.update(null, Wrappers.<JMoneyEntity>lambdaUpdate()
                     .eq(JMoneyEntity::getId, entity.getId())
@@ -154,6 +156,7 @@ public class ZinAccountManageNotifyService {
             entity.setMerchantName(finalMerchantName);
             ledgerMoneyIn.ledgeMoneyIn(entity);
         });
+
         return true;
     }
 

@@ -8,6 +8,7 @@ import io.renren.zadmin.dao.JMoneyDao;
 import io.renren.zadmin.entity.JMaccountEntity;
 import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zadmin.entity.JMoneyEntity;
+import io.renren.zbalance.ledgers.LedgerMoneyIn;
 import io.renren.zcommon.CommonUtils;
 import io.renren.zcommon.ZestConfig;
 import io.renren.zcommon.ZinConstant;
@@ -19,6 +20,7 @@ import io.renren.zin.umbrella.dto.*;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +42,10 @@ public class JMoneyManager {
     private JMaccountDao jMaccountDao;
     @Resource
     private ZinUmbrellaService zinUmbrellaService;
+    @Resource
+    private TransactionTemplate tx;
+    @Resource
+    private LedgerMoneyIn ledgerMoneyIn;
 
     // 保存
     public void saveAndSubmit(JMoneyEntity entity, JMerchantEntity merchant, String cardId) {
@@ -152,5 +158,39 @@ public class JMoneyManager {
         updateEntity.setApplyAmount(entity.getApplyAmount());
         updateEntity.setState(ZinConstant.PAY_APPLY_CF_DJ);
         jMoneyDao.updateById(updateEntity);
+    }
+
+    // 人工匹配
+    public void matchMoney(Long id) {
+        JMoneyEntity moneyEntity = jMoneyDao.selectById(id);
+        String payeraccountno = moneyEntity.getPayeraccountno();
+        JMaccountEntity jMaccountEntity = jMaccountDao.selectOne(Wrappers.<JMaccountEntity>lambdaQuery()
+                .eq(JMaccountEntity::getCardno, payeraccountno)
+        );
+
+        // 匹配来账账号
+        if (jMaccountEntity == null) {
+            throw new RenException("来账账户不匹配");
+        }
+
+        moneyEntity.setMerchantId(jMaccountEntity.getMerchantId());
+        moneyEntity.setMerchantName(jMaccountEntity.getMerchantName());
+
+        // 记账
+        tx.executeWithoutResult(status -> {
+            int update = jMoneyDao.update(null, Wrappers.<JMoneyEntity>lambdaUpdate()
+                    .eq(JMoneyEntity::getId, moneyEntity.getId())
+                    .ne(JMoneyEntity::getState, ZinConstant.PAY_APPLY_LG_DJ)
+                    .set(JMoneyEntity::getState, ZinConstant.PAY_APPLY_LG_DJ)
+                    .set(JMoneyEntity::getAgentId, jMaccountEntity.getAgentId())
+                    .set(JMoneyEntity::getAgentName, jMaccountEntity.getAgentName())
+                    .set(JMoneyEntity::getMerchantId, jMaccountEntity.getMerchantId())
+                    .set(JMoneyEntity::getMerchantName, jMaccountEntity.getMerchantName())
+            );
+            if (update != 1) {
+                throw new RenException("匹配失败");
+            }
+            ledgerMoneyIn.ledgeMoneyIn(moneyEntity);
+        });
     }
 }
