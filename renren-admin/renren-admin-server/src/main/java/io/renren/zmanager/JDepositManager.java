@@ -280,7 +280,7 @@ public class JDepositManager {
             );
         }
 
-        if (entity.getApi() == 1 && notify) {
+        if (entity.getApi().equals(1) && notify) {
             JMerchantEntity merchant = jMerchantDao.selectById(entity.getMerchantId());
             JDepositEntity freshEntity = jDepositDao.selectById(entity.getId());
             apiNotify.cardChargeNotify(freshEntity, merchant);
