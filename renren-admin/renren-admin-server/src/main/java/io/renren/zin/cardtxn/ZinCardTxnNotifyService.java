@@ -71,6 +71,10 @@ public class ZinCardTxnNotifyService {
         // 通知商户
         entity = jAuthDao.selectById(id);
         JMerchantEntity merchant = jMerchantDao.selectById(subEntity.getMerchantId());
-        apiNotify.cardTxnNotify(entity, merchant);
+
+        // 通知商户
+        if (merchant.getWebhook() != null) {
+            apiNotify.cardTxnNotify(entity, merchant);
+        }
     }
 }
