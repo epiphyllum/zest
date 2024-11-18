@@ -139,7 +139,7 @@ public class JWithdrawManager {
 
             try {
                 tx.executeWithoutResult(st -> {
-                    jWithdrawDao.update(null, Wrappers.<JWithdrawEntity>lambdaUpdate()
+                    int update = jWithdrawDao.update(null, Wrappers.<JWithdrawEntity>lambdaUpdate()
                             .eq(JWithdrawEntity::getId, entity.getId())
                             .eq(JWithdrawEntity::getState, oldState)
                             .set(JWithdrawEntity::getState, newState)
@@ -149,6 +149,9 @@ public class JWithdrawManager {
                             .set(JWithdrawEntity::getFee, response.getFee())
                             .set(JWithdrawEntity::getFeecurrency, response.getFeecurrency())
                     );
+                    if (update != 1) {
+                        throw new RenException("更新提现记录失败");
+                    }
                     ledgerCardWithdraw.ledgeCardWithdraw(entity, subEntity);
                 });
             } catch (Exception ex) {
