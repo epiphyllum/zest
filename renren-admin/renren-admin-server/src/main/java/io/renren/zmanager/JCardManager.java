@@ -142,10 +142,8 @@ public class JCardManager {
 
         // 填充子相关方ID
         this.fillBySub(entity);
-
         // 查询商户
         JMerchantEntity merchant = jMerchantDao.selectById(entity.getMerchantId());
-
         // 填充开卡成本与收费
         fillMerchantFee(entity, merchant);
 
