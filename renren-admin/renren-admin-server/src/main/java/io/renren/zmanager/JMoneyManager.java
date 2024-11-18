@@ -177,20 +177,25 @@ public class JMoneyManager {
         moneyEntity.setMerchantName(jMaccountEntity.getMerchantName());
 
         // 记账
-        tx.executeWithoutResult(status -> {
-            int update = jMoneyDao.update(null, Wrappers.<JMoneyEntity>lambdaUpdate()
-                    .eq(JMoneyEntity::getId, moneyEntity.getId())
-                    .ne(JMoneyEntity::getState, ZinConstant.PAY_APPLY_LG_DJ)
-                    .set(JMoneyEntity::getState, ZinConstant.PAY_APPLY_LG_DJ)
-                    .set(JMoneyEntity::getAgentId, jMaccountEntity.getAgentId())
-                    .set(JMoneyEntity::getAgentName, jMaccountEntity.getAgentName())
-                    .set(JMoneyEntity::getMerchantId, jMaccountEntity.getMerchantId())
-                    .set(JMoneyEntity::getMerchantName, jMaccountEntity.getMerchantName())
-            );
-            if (update!= 1) {
-                throw new RenException("匹配失败");
-            }
-            ledgerMoneyIn.ledgeMoneyIn(moneyEntity);
-        });
+        try {
+            tx.executeWithoutResult(status -> {
+                int update = jMoneyDao.update(null, Wrappers.<JMoneyEntity>lambdaUpdate()
+                        .eq(JMoneyEntity::getId, moneyEntity.getId())
+                        .ne(JMoneyEntity::getState, ZinConstant.PAY_APPLY_LG_DJ)
+                        .set(JMoneyEntity::getState, ZinConstant.PAY_APPLY_LG_DJ)
+                        .set(JMoneyEntity::getAgentId, jMaccountEntity.getAgentId())
+                        .set(JMoneyEntity::getAgentName, jMaccountEntity.getAgentName())
+                        .set(JMoneyEntity::getMerchantId, jMaccountEntity.getMerchantId())
+                        .set(JMoneyEntity::getMerchantName, jMaccountEntity.getMerchantName())
+                );
+                if (update != 1) {
+                    throw new RenException("匹配失败");
+                }
+                ledgerMoneyIn.ledgeMoneyIn(moneyEntity);
+            });
+        } catch (Exception ex) {
+            log.error("记账失败: {}", moneyEntity);
+            ex.printStackTrace();
+        }
     }
 }
