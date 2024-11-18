@@ -32,8 +32,8 @@ public class LedgerCardWithdraw {
         JBalanceEntity cardSum = ledgerUtil.getCardSumAccount(sub.getId(), entity.getCurrency());
         ledgerUtil.freezeUpdate(cardSum, LedgerConstant.ORIGIN_TYPE_CARD_WITHDRAW, LedgerConstant.FACT_CARD_WITHDRAW_FREEZE_CARD_SUM, entity.getId(), factMemo, factAmount);
 
-        JBalanceEntity cardFee = ledgerUtil.getCardFeeAccount(sub.getId(), entity.getCurrency());
-        ledgerUtil.freezeUpdate(cardFee, LedgerConstant.ORIGIN_TYPE_CARD_WITHDRAW, LedgerConstant.FACT_CARD_WITHDRAW_FREEZE_CARD_FEE, entity.getId(), factMemo, entity.getMerchantfee().negate());
+        JBalanceEntity charge = ledgerUtil.getChargeAccount(sub.getId(), entity.getCurrency());
+        ledgerUtil.freezeUpdate(charge, LedgerConstant.ORIGIN_TYPE_CARD_WITHDRAW, LedgerConstant.FACT_CARD_WITHDRAW_FREEZE_CARD_CHARGE, entity.getId(), factMemo, entity.getMerchantfee().negate());
 
         // 预付费主卡提现
         if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_PREPAID)) {
@@ -56,8 +56,8 @@ public class LedgerCardWithdraw {
         JBalanceEntity cardSum = ledgerUtil.getCardSumAccount(sub.getId(), entity.getCurrency());
         ledgerUtil.unFreezeUpdate(cardSum, LedgerConstant.ORIGIN_TYPE_CARD_WITHDRAW, LedgerConstant.FACT_CARD_WITHDRAW_UNFREEZE_CARD_SUM, entity.getId(), factMemo, factAmount);
 
-        JBalanceEntity cardFee = ledgerUtil.getCardFeeAccount(sub.getId(), entity.getCurrency());
-        ledgerUtil.unFreezeUpdate(cardFee, LedgerConstant.ORIGIN_TYPE_CARD_WITHDRAW, LedgerConstant.FACT_CARD_WITHDRAW_FREEZE_CARD_FEE, entity.getId(), factMemo, entity.getMerchantfee().negate());
+        JBalanceEntity charge = ledgerUtil.getChargeAccount(sub.getId(), entity.getCurrency());
+        ledgerUtil.unFreezeUpdate(charge, LedgerConstant.ORIGIN_TYPE_CARD_WITHDRAW, LedgerConstant.FACT_CARD_WITHDRAW_FREEZE_CARD_CHARGE, entity.getId(), factMemo, entity.getMerchantfee().negate());
 
         if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_PREPAID)) {
             JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()

@@ -70,11 +70,11 @@ public class LedgerConstant {
     // 卡提现
     public static final int ORIGIN_TYPE_CARD_WITHDRAW = 700;                             // 卡提现
     public static final int FACT_CARD_WITHDRAW_FREEZE_CARD_SUM = 70000;                  // 0. 子商户-卡汇总资金账户(冻结)
-    public static final int FACT_CARD_WITHDRAW_FREEZE_CARD_FEE = 70001;                  // 0. 子商户-卡汇总资金账户(冻结)
+    public static final int FACT_CARD_WITHDRAW_FREEZE_CARD_CHARGE = 70001;               // 0. 子商户-退手续费
     public static final int FACT_CARD_WITHDRAW_UNFREEZE_CARD_SUM = 70002;                // 1. 子商户-卡汇总资金账户(解冻)
-    public static final int FACT_CARD_WITHDRAW_UNFREEZE_CARD_FEE = 70003;                // 1. 子商户-卡汇总资金账户(解冻)
+    public static final int FACT_CARD_WITHDRAW_UNFREEZE_CARD_CHARGE = 70003;             // 1. 子商户-退手续费
     public static final int FACT_CARD_WITHDRAW_CONFIRM_CARD_SUM = 70004;                 // 2. 子商户-卡汇总资金账户(确认成功)
-    public static final int FACT_CARD_WITHDRAW_CONFIRM_CARD_FEE = 70005;                 // 2. 子商户-卡汇总资金账户(确认成功)
+    public static final int FACT_CARD_WITHDRAW_CONFIRM_CARD_CHARGE = 70005;              // 2. 子商户-退手续费
     public static final int FACT_CARD_WITHDRAW_IN_SUB_VA = 70006;                        // 3. 子商户-VA+
     public static final int FACT_CARD_WITHDRAW_OUT_CHARGE = 70007;                       // 4. 子商户-退手续费-
     public static final int FACT_CARD_WITHDRAW_OUT_AIP_CHARGE = 70008;                   // 5. 通联-退手续费
