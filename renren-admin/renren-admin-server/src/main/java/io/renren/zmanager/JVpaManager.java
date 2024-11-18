@@ -372,7 +372,7 @@ public class JVpaManager {
         }
 
         // vpa我们对外接口还没提供
-        if (entity.getApi().equals(1) && notify) {
+        if (notify) {
         }
     }
 

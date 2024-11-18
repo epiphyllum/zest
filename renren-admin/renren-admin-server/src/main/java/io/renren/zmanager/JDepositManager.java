@@ -178,7 +178,7 @@ public class JDepositManager {
                 jDepositDao.insert(entity);
                 ledgerCardCharge.ledgeCardChargeFreeze(entity, subEntity);
             });
-        } catch ( Exception ex) {
+        } catch (Exception ex) {
             log.error("充值记账失败, 充值记录:{}, 子商户:{}", entity, subEntity);
             ex.printStackTrace();
             throw ex;
@@ -280,7 +280,8 @@ public class JDepositManager {
             );
         }
 
-        if (entity.getApi().equals(1) && notify) {
+        if (notify) {
+            log.info("API交易, 通知商户, notify:{}", notify);
             JMerchantEntity merchant = jMerchantDao.selectById(entity.getMerchantId());
             JDepositEntity freshEntity = jDepositDao.selectById(entity.getId());
             apiNotify.cardChargeNotify(freshEntity, merchant);

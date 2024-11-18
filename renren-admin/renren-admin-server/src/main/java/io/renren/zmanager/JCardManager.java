@@ -351,7 +351,7 @@ public class JCardManager {
             }
 
             // 是否需要通知api商户
-            if (jCardEntity.getApi().equals(1) && notify) {
+            if (notify) {
                 // 发卡状态更新
                 JCardEntity entity = jCardDao.selectById(jCardEntity.getId());
                 apiNotify.cardNewNotify(entity, merchant);
@@ -374,7 +374,7 @@ public class JCardManager {
                 ledgerOpenCard.ledgeOpenCardUnFreeze(jCardEntity);
             });
             // 通知商户
-            if (jCardEntity.getApi().equals(1) && notify) {
+            if (notify) {
                 // 发卡状态更新
                 JCardEntity entity = jCardDao.selectById(jCardEntity.getId());
                 JMerchantEntity merchant = jMerchantDao.selectById(jCardEntity.getMerchantId());

@@ -96,7 +96,7 @@ public class JExchangeManager {
         }
 
         // 是否通知商户
-        if (jExchangeEntity.getApi() == 1 && notify) {
+        if (notify) {
             JExchangeEntity entity = jExchangeDao.selectById(jExchangeEntity.getId());
             JMerchantEntity merchant = jMerchantDao.selectById(entity.getMerchantId());
             apiNotify.exchangeNotify(entity, merchant);
