@@ -144,12 +144,4 @@ watch(
 </#if>
 </#list>
 
-const addKey = ref(0);
-const addOrUpdateRef = ref();
-const addOrUpdateHandle = (${pk.attrName}?: number) => {
-  addKey.value++;
-  nextTick(() => {
-    addOrUpdateRef.value.init(${pk.attrName});
-  });
-};
 </script>

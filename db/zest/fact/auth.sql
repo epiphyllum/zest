@@ -10,6 +10,7 @@ create table j_auth
     merchant_name  varchar(32) not null comment '子商户',
     sub_id         bigint      not null,
     sub_name       varchar(50) not null,
+    marketproduct  varchar(16) not null comment '卡产品',
 
     -- todo: 钱包
     wallet_id      bigint comment '钱包id',

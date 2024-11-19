@@ -10,6 +10,7 @@ create table j_authed
     merchant_name varchar(50)    not null comment '商户名称',
     sub_id        bigint,
     sub_name      varchar(50),
+    marketproduct varchar(16) not null comment '卡产品',
 
     wallet_id     bigint comment '钱包id',
     wallet_name   varchar(50) comment '钱包用户',

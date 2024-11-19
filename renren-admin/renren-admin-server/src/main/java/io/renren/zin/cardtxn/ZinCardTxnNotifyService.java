@@ -7,6 +7,7 @@ import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zapi.ApiNotify;
 import io.renren.zapi.ApiNotifyService;
+import io.renren.zcommon.ZinConstant;
 import io.renren.zmanager.JCardManager;
 import io.renren.zadmin.dao.JAuthDao;
 import io.renren.zadmin.dao.JCardDao;
@@ -58,7 +59,14 @@ public class ZinCardTxnNotifyService {
         entity.setMerchantName(subEntity.getMerchantName());
         entity.setSubId(subId);
         entity.setSubName(subEntity.getCusname());
+        entity.setMarketproduct(card.getMarketproduct());
         entity.setCreateDate(new Date());
+
+        // 如果是-钱包卡
+        if (card.getMarketproduct().equals(ZinConstant.MP_VPA_WALLET)) {
+            entity.setWalletId(card.getWalletId());
+            entity.setWalletName(card.getWalletName());
+        }
 
         Long id = DefaultIdentifierGenerator.getInstance().nextId(entity);
         entity.setId(id);

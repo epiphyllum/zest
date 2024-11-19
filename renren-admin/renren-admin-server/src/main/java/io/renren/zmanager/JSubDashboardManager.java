@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class JSubDashboardManager {
+
     @Data
     public static class PrepaidWallet {
         private String cardno;            // 主卡卡号

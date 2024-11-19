@@ -172,6 +172,7 @@ public class ZinConstant {
     public static final String MP_VPA_MAIN_PREPAID = "VpaMainPrepaid";   // 预付费主卡
     public static final String MP_VPA_SHARE = "VpaShare";                // 共享子卡 ： VPA通联标准功能
     public static final String MP_VPA_PREPAID = "VpaPrepaid";            // 预付费卡
+    public static final String MP_VPA_WALLET = "VpaWallet";              // 钱包卡
 
     //  币种 -> 市场产品 -> 通联产品
     public static Map<String, Map<String, String>> marketProdcutMap = new HashMap<>() {{

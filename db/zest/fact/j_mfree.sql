@@ -2,11 +2,16 @@
 drop table if exists j_mfree;
 create table j_mfree
 (
+
     id            bigint      not null,
     agent_id      bigint      not null,
     agent_name    varchar(50) not null,
     merchant_id   bigint      not null,
     merchant_name varchar(50) not null,
+    sub_id   bigint      not null,
+    sub_name varchar(50) not null,
+    marketproduct varchar(16) not null,
+    currency varchar(3) not null,
 
     -- basic
     creator       bigint comment '创建者',

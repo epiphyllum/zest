@@ -40,6 +40,8 @@ public class JCardEntity extends BaseEntity {
     //
     private String marketproduct;
     private String maincardno;
+    private Long walletId;
+    private String walletName;
 
     // 请求数据(5)
     private String meraplid;
