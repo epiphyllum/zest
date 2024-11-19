@@ -13,6 +13,7 @@ import io.renren.commons.tools.validator.group.UpdateGroup;
 import io.renren.zadmin.dto.JBatchDTO;
 import io.renren.zadmin.excel.JBatchExcel;
 import io.renren.zadmin.service.JBatchService;
+import io.renren.zmanager.JBatchManager;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -25,6 +26,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 
 /**
@@ -39,6 +41,8 @@ import java.util.Map;
 public class JBatchController {
     @Resource
     private JBatchService jBatchService;
+    @Resource
+    private JBatchManager jBatchManager;
 
     @GetMapping("page")
     @Operation(summary = "分页")
@@ -63,4 +67,25 @@ public class JBatchController {
         ExcelUtils.exportExcelToTarget(response, null, "j_batch", list, JBatchExcel.class);
     }
 
+    @GetMapping("run")
+    @Operation(summary = "运行批处理")
+    @LogOperation("允许批处理")
+    @PreAuthorize("hasAuthority('zorg:jbatch:run')")
+    public Result run(@RequestParam("batchType") String batchType, @RequestParam("batchDate") String batchDate) throws Exception {
+        CompletableFuture.runAsync(() -> {
+            jBatchManager.run(batchType, batchDate);
+        });
+        return new Result<>();
+    }
+
+    @GetMapping("rerun")
+    @Operation(summary = "重新运行批处理")
+    @LogOperation("重新允许批处理")
+    @PreAuthorize("hasAuthority('zorg:jbatch:rerun')")
+    public Result rerun(@RequestParam("id") Long id) {
+        CompletableFuture.runAsync(() -> {
+            jBatchManager.rerun(id);
+        });
+        return new Result();
+    }
 }

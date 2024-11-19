@@ -82,7 +82,7 @@ public class JBatchManager {
     }
 
     // 结算流水下载
-    public void statAuthed(String dateStr) {
+    public void authedBatch(String dateStr) {
         Date date = DateUtils.parse(dateStr, DateUtils.DATE_PATTERN);
         JBatchEntity batchEntity = newBatchItem(date, ZestConstant.BATCH_TYPE_AUTHED);
 
@@ -90,14 +90,17 @@ public class JBatchManager {
         String entryDate = dateStr.replaceAll("-", "");
         TAuthSettledQuery request = new TAuthSettledQuery();
         request.setPagesize(100);
-        request.setPagesize(1);
+        request.setPageindex(1);
         request.setEntrydate(entryDate);
         TAuthSettledResponse response = zinCardTxnService.settledQuery(request);
         int downloaded = response.getDatalist().size();
         int total = response.getTotal();
         int batchSize = 1000;
         int batchCount = total / 1000 + 1;
-
+        if (total == 0) {
+            log.info("没有流水");
+            return;
+        }
         // 批次
         List<List<JAuthedEntity>> batchList = new ArrayList<>(batchCount);
 
@@ -354,5 +357,24 @@ public class JBatchManager {
             statEntity.setWithdrawCharge(BigDecimal.ZERO);
             statEntity.setAipWithdrawCharge(BigDecimal.ZERO);
         }
+    }
+
+    // 允许批处理任务
+    public void run(String batchType, String date) {
+        if (batchType.equals(ZestConstant.BATCH_TYPE_STAT)) {
+            this.statBatch(date);
+            return;
+        }
+        if (batchType.equals(ZestConstant.BATCH_TYPE_AUTHED)) {
+            this.authedBatch(date);
+            return;
+        }
+    }
+
+    // 重新运行批处理
+    public void rerun(Long id) {
+        JBatchEntity batchEntity = jBatchDao.selectById(id);
+        String dateStr = DateUtils.format(batchEntity.getBatchDate(), DateUtils.DATE_PATTERN);
+        run(batchEntity.getBatchType(), dateStr);
     }
 }

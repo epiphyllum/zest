@@ -51,6 +51,11 @@ public class JSubManager {
      */
     public void verify(Long id, String state) {
         JSubEntity entity = jSubDao.selectById(id);
+
+        String oldState = entity.getState();
+        if (oldState.equals(ZinConstant.MERCHANT_STATE_VERIFIED) || oldState.equals(ZinConstant.MERCHANT_STATE_FAIL)) {
+            throw new RenException("当前状态不正确:" + state);
+        }
         // 审核通过
         if (!ZinConstant.MERCHANT_STATE_VERIFIED.equals(entity.getState()) && ZinConstant.MERCHANT_STATE_VERIFIED.equals(state)) {
             Long merchantId = entity.getMerchantId();
