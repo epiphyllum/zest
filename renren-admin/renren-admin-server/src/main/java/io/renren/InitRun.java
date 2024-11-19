@@ -20,9 +20,6 @@ public class InitRun implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         initConfig();
-        jStatManager.statBatch("2024-11-18");
-        jStatManager.statBatch("2024-11-16");
-        jStatManager.statBatch("2024-11-15");
     }
 
     public void initConfig() {
