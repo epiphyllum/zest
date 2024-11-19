@@ -19,6 +19,8 @@ delete from j_auth;
 delete from j_packet;
 delete from j_channel_log;
 delete from j_va;
+delete from j_stat;
+delete from j_batch;
 
 delete from sys_dept where name not in ('大吉');
 delete from sys_user where username not in ('dj', 'admin');
