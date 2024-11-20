@@ -72,7 +72,7 @@ public class JMaccountManager {
             CompletableFuture.runAsync(() -> {
                 JMerchantEntity merchant = jMerchantDao.selectById(entity.getMerchantId());
                 MoneyAccountNotify moneyAccountNotify = ConvertUtils.sourceToTarget(entity, MoneyAccountNotify.class);
-                moneyAccountNotify.setId(entity.getCardid());
+                moneyAccountNotify.setState(response.getState());
                 apiNotifyService.notifyMerchant(moneyAccountNotify, merchant, ZapiConstant.API_moneyAccountNotify);
             });
         }

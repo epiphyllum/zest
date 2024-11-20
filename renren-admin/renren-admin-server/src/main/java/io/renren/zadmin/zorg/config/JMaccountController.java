@@ -29,6 +29,7 @@ import io.renren.zin.umbrella.dto.TMoneyAccountAdd;
 import io.renren.zin.umbrella.dto.TMoneyAccountAddResponse;
 import io.renren.zin.umbrella.dto.TMoneyAccountQuery;
 import io.renren.zin.umbrella.dto.TMoneyAccountQueryResponse;
+import io.renren.zmanager.JMaccountManager;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -64,6 +65,8 @@ public class JMaccountController {
     private ZinUmbrellaService zinUmbrellaService;
     @Resource
     private JMaccountDao jMaccountDao;
+    @Resource
+    private JMaccountManager jMaccountManager;
 
     @GetMapping("page")
     @Operation(summary = "分页")
@@ -182,7 +185,6 @@ public class JMaccountController {
         update.setId(id);
         update.setCardid(cardId);
         jMaccountDao.updateById(update);
-
         return new Result();
     }
 
@@ -191,9 +193,7 @@ public class JMaccountController {
     @PreAuthorize("hasAuthority('zorg:jmaccount:query')")
     public Result query(@RequestParam("id") Long id) throws Exception {
         JMaccountEntity jMaccountEntity = jMaccountDao.selectById(id);
-
-
+        jMaccountManager.query(jMaccountEntity);
         return new Result();
-
     }
 }

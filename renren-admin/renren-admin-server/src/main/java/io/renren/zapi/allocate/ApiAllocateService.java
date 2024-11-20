@@ -41,7 +41,7 @@ public class ApiAllocateService {
         JMoneyEntity entity = ConvertUtils.sourceToTarget(request, JMoneyEntity.class);
         entity.setApi(1);
         entity.setMerchantId(context.getMerchant().getId());
-        jMoneyManager.saveAndSubmit(entity, context.getMerchant(), request.getCardId());
+        jMoneyManager.saveAndSubmit(entity, context.getMerchant(), request.getCardno());
 
         // 应答
         entity = jMoneyDao.selectById(entity.getId());
@@ -64,6 +64,10 @@ public class ApiAllocateService {
         if (entity == null) {
             throw new RenException("无此记录");
         }
+
+        entity.setApplyAmount(request.getAmount());
+        entity.setTransferfid(request.getTransferfid());
+        entity.setOtherfid(request.getOtherfid());
 
         // 确认
         jMoneyManager.confirm(entity);

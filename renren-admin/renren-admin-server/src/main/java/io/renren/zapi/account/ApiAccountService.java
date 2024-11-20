@@ -71,7 +71,7 @@ public class ApiAccountService {
         jMaccountManager.submit(entity);
 
         // 转换结果返回
-        MoneyAccountAddResponse response =  new MoneyAccountAddResponse(entity.getCardid());
+        MoneyAccountAddResponse response =  new MoneyAccountAddResponse();
         Result<MoneyAccountAddResponse> result = new Result<>();
         result.setData(response);
         return result;

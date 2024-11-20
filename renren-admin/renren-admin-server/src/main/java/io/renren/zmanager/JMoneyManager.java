@@ -48,7 +48,7 @@ public class JMoneyManager {
     private LedgerMoneyIn ledgerMoneyIn;
 
     // 保存
-    public void saveAndSubmit(JMoneyEntity entity, JMerchantEntity merchant, String cardId) {
+    public void saveAndSubmit(JMoneyEntity entity, JMerchantEntity merchant, String cardno) {
         // 填充商户代理信息
         entity.setMerchantName(merchant.getCusname());
         entity.setAgentName(merchant.getAgentName());
@@ -58,9 +58,9 @@ public class JMoneyManager {
         entity.setState(ZinConstant.PAY_APPLY_NEW_DJ);
 
         // 填充来账账户信息
-        JMaccountEntity jMaccountEntity = jMaccountDao.selectOne(Wrappers.<JMaccountEntity>lambdaQuery().eq(JMaccountEntity::getCardid, cardId));
+        JMaccountEntity jMaccountEntity = jMaccountDao.selectOne(Wrappers.<JMaccountEntity>lambdaQuery().eq(JMaccountEntity::getCardno, cardno));
         if (jMaccountEntity == null) {
-            log.error("找不到来账账户: {}", cardId);
+            log.error("找不到来账账户: {}", cardno);
             throw new RenException("账户不存在");
         }
         entity.setCardname(jMaccountEntity.getCardname());
@@ -69,7 +69,7 @@ public class JMoneyManager {
         // 调用通联
         TMoneyApply apply = new TMoneyApply();
         apply.setCurrency(entity.getCurrency());
-        apply.setId(cardId);
+        apply.setId(jMaccountEntity.getCardid());
         apply.setMeraplid(CommonUtils.uniqueId());
         TMoneyApplyResponse response = zinUmbrellaService.depositApply(apply);
         entity.setReferencecode(response.getReferencecode());
@@ -110,8 +110,10 @@ public class JMoneyManager {
         TMoneyConfirm confirm = new TMoneyConfirm();
         confirm.setApplyid(entity.getApplyid());
         confirm.setAmount(entity.getApplyAmount());
+
         confirm.setOtherfid(entity.getOtherfid());
         confirm.setTransferfid(entity.getTransferfid());
+
         TMoneyConfirmResponse response = zinUmbrellaService.depositConfirm(confirm);
         // 更新
         JMoneyEntity updateEntity = new JMoneyEntity();
@@ -121,7 +123,6 @@ public class JMoneyManager {
         updateEntity.setApplyAmount(entity.getApplyAmount());
         updateEntity.setState(ZinConstant.PAY_APPLY_CF_DJ);
         jMoneyDao.updateById(updateEntity);
-
     }
 
     public void mockMoneyInNotify(JMoneyEntity entity) {

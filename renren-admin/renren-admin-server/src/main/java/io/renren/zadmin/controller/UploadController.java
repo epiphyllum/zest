@@ -36,7 +36,7 @@ public class UploadController {
     private ZinFileService zinFileService;
 
     @PostMapping()
-    public Result<String> upload(@RequestParam("file") MultipartFile file, @RequestHeader("XUpload") boolean upload) {
+    public Result<String> upload(@RequestParam("file") MultipartFile file, @RequestHeader("XUpload") Boolean upload) {
         return uploadFile(file, upload);
     }
 
