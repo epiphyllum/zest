@@ -106,7 +106,6 @@ public class JWithdrawManager {
         try {
             tx.executeWithoutResult(st -> {
                 jWithdrawDao.insert(entity);
-                ledgerCardWithdraw.ledgeCardWithdrawFreeze(entity, subEntity);
             });
         } catch (Exception ex) {
             log.error("提现失败, 记录:{}, 子商户:{}", entity, subEntity);
@@ -214,7 +213,6 @@ public class JWithdrawManager {
                         .isNull(JWithdrawEntity::getApplyid)
                         .set(JWithdrawEntity::getState, ZinConstant.PAY_APPLY_FAIL)
                 );
-                ledgerCardWithdraw.ledgeCardWithdrawUnFreeze(entity, subEntity);
             });
         } catch (Exception ex) {
             log.error("提现作废失败, 记录:{}, 子商户:{}", entity, subEntity);

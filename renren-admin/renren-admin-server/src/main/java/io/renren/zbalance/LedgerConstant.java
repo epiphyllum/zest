@@ -69,18 +69,12 @@ public class LedgerConstant {
     public static final int FACT_PREPAID_WITHDRAW_OUT_PREPAID_SUM = 60301;               // 2: 发卡总额减
     // 卡提现
     public static final int ORIGIN_TYPE_CARD_WITHDRAW = 700;                             // 卡提现
-    public static final int FACT_CARD_WITHDRAW_FREEZE_CARD_SUM = 70000;                  // 0. 子商户-卡汇总资金账户(冻结)
-    public static final int FACT_CARD_WITHDRAW_FREEZE_CARD_CHARGE = 70001;               // 0. 子商户-退手续费
-    public static final int FACT_CARD_WITHDRAW_UNFREEZE_CARD_SUM = 70002;                // 1. 子商户-卡汇总资金账户(解冻)
-    public static final int FACT_CARD_WITHDRAW_UNFREEZE_CARD_CHARGE = 70003;             // 1. 子商户-退手续费
-    public static final int FACT_CARD_WITHDRAW_CONFIRM_CARD_SUM = 70004;                 // 2. 子商户-卡汇总资金账户(确认成功)
-    public static final int FACT_CARD_WITHDRAW_CONFIRM_CARD_CHARGE = 70005;              // 2. 子商户-退手续费
-    public static final int FACT_CARD_WITHDRAW_IN_SUB_VA = 70006;                        // 3. 子商户-VA+
-    public static final int FACT_CARD_WITHDRAW_OUT_AIP_CHARGE = 70007;                   // 5. 通联-退手续费
-    public static final int FACT_CARD_WITHDRAW_OUT_AIP_CARD_SUM = 70008;                 // 6. 通联-卡汇总资金
-    public static final int FACT_CARD_WITHDRAW_FREEZE_PREPAID_QUOTA = 70009;             // 7. 如果是预防费主卡: 预付费主卡可以余额减少
-    public static final int FACT_CARD_WITHDRAW_UNFREEZE_PREPAID_QUOTA = 70010;           // 8. 如果是预防费主卡: 预付费主卡可以余额减少
-    public static final int FACT_CARD_WITHDRAW_OUT_PREPAID_QUOTA = 70011;                // 9. 如果是预防费主卡: 预付费主卡可以余额减少
+    public static final int FACT_CARD_WITHDRAW_IN_SUB_VA = 70001;                        // 3. 子商户-VA+
+    public static final int FACT_CARD_WITHDRAW_OUT_CARD_SUM = 70002;                 // 2. 子商户-卡汇总资金账户(确认成功)
+    public static final int FACT_CARD_WITHDRAW_OUT_CARD_CHARGE = 70003;              // 2. 子商户-退手续费
+    public static final int FACT_CARD_WITHDRAW_OUT_AIP_CHARGE = 70004;                   // 5. 通联-退手续费
+    public static final int FACT_CARD_WITHDRAW_OUT_AIP_CARD_SUM = 70005;                 // 6. 通联-卡汇总资金
+    public static final int FACT_CARD_WITHDRAW_OUT_PREPAID_QUOTA = 70006;                // 9. 如果是预防费主卡: 预付费主卡可以余额减少
     // 商户VA提现
     public static final int ORIGIN_TYPE_VA_WITHDRAW = 800;         // 商户VA提现
     // 释放商户担保金
