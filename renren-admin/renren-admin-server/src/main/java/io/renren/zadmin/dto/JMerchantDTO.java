@@ -116,6 +116,8 @@ public class JMerchantDTO implements Serializable {
 
     @Schema(description = "商户公钥")
     private String publicKey;
+    @Schema(description = "敏感秘钥")
+    private String sensitiveKey;
     @Schema(description = "webhook")
     private String webhook;
     @Schema(description = "whiteIp")

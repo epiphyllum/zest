@@ -101,7 +101,7 @@ public class JMoneyController {
         entity.setApi(0);
         entity.setMeraplid(CommonUtils.uniqueId());
         JMerchantEntity merchant = jMerchantDao.selectById(dto.getMerchantId());
-        jMoneyManager.saveAndSubmit(entity, merchant, dto.getCardid());
+        jMoneyManager.saveAndSubmit(entity, merchant, dto.getCardno());
         Result<Long> result = new Result<>();
         result.setData(entity.getId());
         return result;

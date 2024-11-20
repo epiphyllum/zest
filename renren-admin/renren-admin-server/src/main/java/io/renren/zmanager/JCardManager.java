@@ -116,8 +116,17 @@ public class JCardManager {
     }
 
     public void save(JCardEntity entity) {
+        Map<String, String> productMap = ZinConstant.marketProdcutMap.get(entity.getCurrency());
+        if (productMap == null) {
+            throw new RenException("币种不合法:" + entity.getCurrency());
+        }
+        String baseProduct  = productMap.get(entity.getMarketproduct());
+        if (baseProduct == null) {
+            throw new RenException("产品类型不合法:" + entity.getMarketproduct());
+        }
+
         // 市场产品 -> 通联产品
-        entity.setProducttype(ZinConstant.marketProdcutMap.get(entity.getCurrency()).get(entity.getMarketproduct()));
+        entity.setProducttype(baseProduct);
 
         // 开卡费用币种
         entity.setFeecurrency(entity.getCurrency());
@@ -350,19 +359,21 @@ public class JCardManager {
                 jCardDao.update(null, updateWrapper);
             }
 
-            // 是否需要通知api商户
-            if (notify) {
-                // 发卡状态更新
-                JCardEntity entity = jCardDao.selectById(jCardEntity.getId());
-                apiNotify.cardNewNotify(entity, merchant);
-            }
-
             // 发卡成功, 查询更新状态
             jCardEntity.setCardno(response.getCardno());
             this.queryCard(jCardEntity);
 
             // 更新余额
             this.balanceCard(jCardEntity);
+
+            // 是否需要通知api商户
+            if (notify || jCardEntity.getApi().equals(1)) {
+                log.info("接口商户通知...");
+                // 通知商户
+                JCardEntity entity = jCardDao.selectById(jCardEntity.getId());
+                apiNotify.cardNewNotify(entity, merchant);
+            }
+
             return;
         }
 
@@ -374,7 +385,8 @@ public class JCardManager {
                 ledgerOpenCard.ledgeOpenCardUnFreeze(jCardEntity);
             });
             // 通知商户
-            if (notify) {
+            if (notify || jCardEntity.getApi().equals(1)) {
+                log.info("接口商户通知...");
                 // 发卡状态更新
                 JCardEntity entity = jCardDao.selectById(jCardEntity.getId());
                 JMerchantEntity merchant = jMerchantDao.selectById(jCardEntity.getMerchantId());

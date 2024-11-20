@@ -3,13 +3,18 @@ package io.renren.zmanager;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.tools.exception.RenException;
+import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.zadmin.dao.JMaccountDao;
+import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.dao.JMoneyDao;
 import io.renren.zadmin.entity.JMaccountEntity;
 import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zadmin.entity.JMoneyEntity;
+import io.renren.zapi.ApiNotifyService;
+import io.renren.zapi.allocate.dto.MoneyNotify;
 import io.renren.zbalance.ledgers.LedgerMoneyIn;
 import io.renren.zcommon.CommonUtils;
+import io.renren.zcommon.ZapiConstant;
 import io.renren.zcommon.ZestConfig;
 import io.renren.zcommon.ZinConstant;
 import io.renren.zin.accountmanage.ZinAccountManageNotifyService;
@@ -19,6 +24,7 @@ import io.renren.zin.umbrella.ZinUmbrellaService;
 import io.renren.zin.umbrella.dto.*;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -46,6 +52,10 @@ public class JMoneyManager {
     private TransactionTemplate tx;
     @Resource
     private LedgerMoneyIn ledgerMoneyIn;
+    @Resource
+    private ApiNotifyService apiNotifyService;
+    @Resource
+    private JMerchantDao jMerchantDao;
 
     // 保存
     public void saveAndSubmit(JMoneyEntity entity, JMerchantEntity merchant, String cardno) {
@@ -139,6 +149,17 @@ public class JMoneyManager {
         notify.setPayeraccountname("未知名称");
         log.info("模拟通联入金通知: {}", notify);
         zinAccountManageNotifyService.handle(notify);
+        if (entity.getApi().equals(1)) {
+            entity = jMoneyDao.selectById(entity.getId());
+            this.notifyMerchant(entity);
+        }
+    }
+
+    private void notifyMerchant(JMoneyEntity entity) {
+        log.info("接口商户, 通知商户...");
+        JMerchantEntity merchant = jMerchantDao.selectById(entity.getMerchantId());
+        MoneyNotify moneyNotify = ConvertUtils.sourceToTarget(entity, MoneyNotify.class);
+        apiNotifyService.notifyMerchant(moneyNotify, merchant, ZapiConstant.API_moneyNotify);
     }
 
     // 补充材料
@@ -197,6 +218,12 @@ public class JMoneyManager {
             log.error("记账失败: {}", moneyEntity);
             ex.printStackTrace();
             throw ex;
+        }
+
+        // 接口商户
+        if (moneyEntity.getApi().equals(1)) {
+            JMoneyEntity entity = jMoneyDao.selectById(moneyEntity.getId());
+            this.notifyMerchant(entity);
         }
     }
 }

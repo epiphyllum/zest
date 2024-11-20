@@ -6,6 +6,12 @@ server:
 spring:
   application:
     name: renren-devtools-server
+
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+
+
   #环境 dev|test|prod
   profiles:
     active: dev

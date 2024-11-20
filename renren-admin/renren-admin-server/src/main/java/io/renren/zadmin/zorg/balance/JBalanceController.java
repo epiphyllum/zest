@@ -175,7 +175,7 @@ public class JBalanceController {
             // 子商户登录， subId就是ownerId
             params.put("ownerId", SecurityUser.getDeptId().toString());
         } else {
-            throw new RenException("invalid user");
+            throw new RenException("非法用户");
         }
 
         params.put(Constant.LIMIT, "200");
@@ -219,7 +219,7 @@ public class JBalanceController {
             String aipTxnType = "AIP_TXN_" + currency;
 
             for (JBalanceDTO dto : dtoList) {
-                log.info("check dto: {}-{}-{}-{}", dto.getBalance(), dto.getFrozen(), dto.getCurrency(), dto.getBalanceType());
+//                log.info("check dto: {}-{}-{}-{}", dto.getBalance(), dto.getFrozen(), dto.getCurrency(), dto.getBalanceType());
                 if (dto.getBalanceType().equals(subVaType)) {
                     subVa = dto;
 

@@ -11,6 +11,10 @@ spring:
       max-file-size: 15MB
       max-request-size: 15MB
 
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+
   #环境 dev|test|prod
   profiles:
     active: dev
@@ -43,3 +47,4 @@ spring:
           - data-id: zest.yaml
             group: ${spring.cloud.nacos.config.group}
             refresh: true
+

@@ -61,6 +61,7 @@ public class ApiCardApplyService {
         JCardEntity entity = ConvertUtils.sourceToTarget(request, JCardEntity.class);
         entity.setApi(1);
         entity.setMerchantId(merchant.getId());
+        entity.setTxnid(CommonUtils.uniqueId());
         jCardManager.save(entity);
 
         // 提交通联

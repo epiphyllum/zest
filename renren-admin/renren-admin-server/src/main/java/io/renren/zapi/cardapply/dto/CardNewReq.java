@@ -8,8 +8,9 @@ public class CardNewReq {
     private String meraplid;         //	申请单流水, 客户自己生成，保持唯一
     private Long subId;              // 子商户号
 
-    private String cardtype;         //	卡片种类	1：虚拟卡，（主卡产品类型为：通华金服VISA虚拟卡）4：虚实同发，（主卡产品类型为：通华金服VISA公务卡、万商义乌VISA商务卡）
-    private String producttype;      //
+    private String marketproduct;    //
+    private String currency;         //
+
     private String belongtype;       //	主体类型	1：员工, 2：合作企业
     private String cardholdertype;   //	持卡人身份: 1：法人持有, 0：其他管理员
     private String companyposition;  //	公司职位	1：法人代表, 2：董事 3：高级管理员, 4：经理, 5：职员

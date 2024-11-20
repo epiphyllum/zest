@@ -6,10 +6,13 @@ import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.commons.tools.utils.Result;
 import io.renren.zadmin.dao.JCardDao;
 import io.renren.zadmin.entity.JCardEntity;
+import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zapi.ApiContext;
 import io.renren.zapi.ApiNotify;
 import io.renren.zapi.cardmoney.ApiCardMoneyService;
 import io.renren.zapi.cardstate.dto.*;
+import io.renren.zcommon.CommonUtils;
+import io.renren.zcommon.ZestConfig;
 import io.renren.zin.TResult;
 import io.renren.zin.cardapply.ZinCardApplyService;
 import io.renren.zin.cardapply.dto.TCardPayInfoRequest;
@@ -21,10 +24,12 @@ import io.renren.zin.cardstate.ZinCardStateService;
 import io.renren.zin.cardstate.dto.*;
 import io.renren.zmanager.JCardManager;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 
 @Service
+@Slf4j
 public class ApiCardStateService {
 
     @Resource
@@ -35,11 +40,13 @@ public class ApiCardStateService {
     private ZinCardMoneyService zinCardMoneyService;
     @Resource
     private JCardDao jCardDao;
+    @Resource
+    private ZestConfig zestConfig;
 
     @Resource
     private JCardManager jCardManager;
 
-    private JCardEntity  getCardEntity(String cardno, ApiContext context) {
+    private JCardEntity getCardEntity(String cardno, ApiContext context) {
         // 查询卡
         JCardEntity entity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
                 .eq(JCardEntity::getCardno, cardno)
@@ -48,7 +55,7 @@ public class ApiCardStateService {
             throw new RenException("no record");
         }
         // 看是否为这个商户的卡
-        if(!entity.getMerchantId().equals(context.getMerchant().getId())) {
+        if (!entity.getMerchantId().equals(context.getMerchant().getId())) {
             throw new RenException("no record");
         }
         return entity;
@@ -80,9 +87,13 @@ public class ApiCardStateService {
             case CardStateChangeType.CARD_UNFREEZE:
                 TCardUnfreezeRequest tCardUnfreezeRequest = ConvertUtils.sourceToTarget(request, TCardUnfreezeRequest.class);
                 zinCardStateService.cardUnfreeze(tCardUnfreezeRequest);
+                break;
             default:
                 throw new RenException("unsupported change type");
         }
+
+        JCardEntity cardEntity = getCardEntity(request.getCardno(), context);
+        jCardManager.queryCard(cardEntity);
 
         Result<CardChangeRes> result = new Result<>();
         result.setData(new CardChangeRes());
@@ -100,7 +111,7 @@ public class ApiCardStateService {
 
         // 应答
         Result<CardChangeQueryRes> result = new Result<>();
-        CardChangeQueryRes  res = new CardChangeQueryRes(entity.getState(), entity.getCardno());
+        CardChangeQueryRes res = new CardChangeQueryRes(entity.getCardstate(), entity.getCardno());
         result.setData(res);
         return result;
     }
@@ -123,7 +134,32 @@ public class ApiCardStateService {
 
     // 卡支付信息: cvv2 | expiredate
     public Result<CardPayInfoRes> cardPayInfo(CardPayInfoReq request, ApiContext context) {
-        throw new RenException("unsupported");
+        JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
+                .eq(JCardEntity::getCardno, request.getCardno())
+        );
+
+        JMerchantEntity merchant = context.getMerchant();
+        log.info("merchant: {}", merchant);
+
+        log.info("Allinpay Key:{}, merchant Key:{}", zestConfig.getAccessConfig().getSensitiveKey(), merchant.getSensitiveKey());
+
+        String plainCvv = CommonUtils.decryptSensitiveString(cardEntity.getCvv(), zestConfig.getAccessConfig().getSensitiveKey(), "utf-8");
+        log.info("Cvv plain: {}", plainCvv);
+
+        String merchantCvv = CommonUtils.encryptSensitiveString(plainCvv, merchant.getSensitiveKey(), "utf-8");
+        log.info("Merchant Cvv plain: {}", merchantCvv);
+
+        String merchantExpiredate = CommonUtils.encryptSensitiveString(cardEntity.getExpiredate(), merchant.getSensitiveKey(), "utf-8");
+        log.info("Merchant Expiredate plain: {}", merchantExpiredate);
+
+        CardPayInfoRes res = new CardPayInfoRes();
+        res.setCardno(request.getCardno());
+        res.setCvv(merchantCvv);
+        res.setExpiredate(merchantExpiredate);
+
+        Result<CardPayInfoRes> result = new Result<>();
+        result.setData(res);
+        return result;
     }
 
 }

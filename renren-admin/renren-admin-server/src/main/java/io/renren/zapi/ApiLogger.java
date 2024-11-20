@@ -16,6 +16,7 @@ import java.util.concurrent.CompletableFuture;
 public class ApiLogger {
     @Resource
     private ObjectMapper objectMapper;
+
     @Resource
     private JPacketDao jPacketDao;
 

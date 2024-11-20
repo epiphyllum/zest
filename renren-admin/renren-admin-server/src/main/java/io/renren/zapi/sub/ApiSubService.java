@@ -12,6 +12,7 @@ import io.renren.zapi.sub.dto.SubCreateRes;
 import io.renren.zapi.sub.dto.SubQuery;
 import io.renren.zapi.sub.dto.SubQueryRes;
 import io.renren.zcommon.ZinConstant;
+import io.renren.zmanager.JSubManager;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +22,12 @@ public class ApiSubService {
     @Resource
     private JSubDao jSubDao;
 
+    @Resource
+    private JSubManager jSubManager;
+
     public Result<SubCreateRes> subCreate(SubCreate request, ApiContext context) {
+
+        // 准备数据
         JMerchantEntity merchant = context.getMerchant();
         JSubEntity subEntity = ConvertUtils.sourceToTarget(request, JSubEntity.class);
         subEntity.setMerchantId(merchant.getId());
@@ -29,7 +35,12 @@ public class ApiSubService {
         subEntity.setAgentId(merchant.getAgentId());
         subEntity.setAgentName(merchant.getAgentName());
         subEntity.setState(ZinConstant.MONEY_ACCOUNT_TO_VERIFY);
-        jSubDao.insert(subEntity);
+        subEntity.setApi(1);
+
+        // 调用manager服务
+        jSubManager.save(subEntity);
+
+        // 应答
         SubCreateRes subCreateRes = new SubCreateRes(subEntity.getId());
         Result<SubCreateRes> result = new Result<>();
         result.setData(subCreateRes);

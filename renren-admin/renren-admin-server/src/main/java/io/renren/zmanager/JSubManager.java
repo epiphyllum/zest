@@ -94,7 +94,21 @@ public class JSubManager {
         }
     }
 
+
     public Long fill(JSubEntity entity) {
+        if (entity.getApi().equals(1)) {
+            return fillByApi(entity);
+        }
+        return fillByWeb(entity);
+    }
+
+    public Long fillByApi(JSubEntity entity) {
+        SysDeptEntity agentDept = sysDeptDao.selectById(entity.getAgentId());
+        Long djId = agentDept.getPid();
+        return djId;
+    }
+
+    public Long fillByWeb(JSubEntity entity) {
         UserDetail user = SecurityUser.getUser();
         if (user.getUserType() == null) {
             throw new RenException("invalid request user");
@@ -134,27 +148,27 @@ public class JSubManager {
         return djId;
     }
 
-    public void save(JSubEntity dto) {
+    public void save(JSubEntity entity) {
         // 属性copy
-        JSubEntity jSubEntity = ConvertUtils.sourceToTarget(dto, JSubEntity.class);
-        jSubEntity.setState(ZinConstant.MERCHANT_STATE_TO_VERIFY);
+        entity.setState(ZinConstant.MERCHANT_STATE_TO_VERIFY);
 
         // 填充
-        Long djId = this.fill(jSubEntity);
+        Long djId = this.fill(entity);
+
         // 自商户部门id是三级别:  大吉Id, agentId, merchantId
-        String pids = djId + "," + jSubEntity.getAgentId() + "," + jSubEntity.getMerchantId();
+        String pids = djId + "," + entity.getAgentId() + "," + entity.getMerchantId();
         // 子商户部门
         SysDeptEntity deptEntity = new SysDeptEntity();
         deptEntity.setPids(pids);
-        deptEntity.setName(dto.getCusname());
-        deptEntity.setPid(dto.getMerchantId());
+        deptEntity.setName(entity.getCusname());
+        deptEntity.setPid(entity.getMerchantId());
 
         tx.executeWithoutResult(st -> {
             sysDeptService.insert(deptEntity);
             // 子商户的ID 就是子商户的部门ID
-            jSubEntity.setId(deptEntity.getId());
+            entity.setId(deptEntity.getId());
             // 创建子商户
-            jSubDao.insert(jSubEntity);
+            jSubDao.insert(entity);
         });
     }
 

@@ -88,11 +88,6 @@ public class JMerchantEntity extends BaseEntity {
     private String mcc;
     private String currencyList;
 
-//    private BigDecimal chargeRate;
-//    private BigDecimal depositRate;
-//    private BigDecimal costChargeRate;
-//    private BigDecimal costDepositRate;
-
     private String publicKey;
     private String sensitiveKey;
     private String webhook;
