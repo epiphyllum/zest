@@ -191,14 +191,9 @@ public class JMaccountController {
     @PreAuthorize("hasAuthority('zorg:jmaccount:query')")
     public Result query(@RequestParam("id") Long id) throws Exception {
         JMaccountEntity jMaccountEntity = jMaccountDao.selectById(id);
-        TMoneyAccountQuery query = ConvertUtils.sourceToTarget(jMaccountEntity, TMoneyAccountQuery.class);
-        query.setId(jMaccountEntity.getCardid());
-        query.setCurrency(null);
-        TMoneyAccountQueryResponse response = zinUmbrellaService.queryMoneyAccount(query);
-        JMaccountEntity update = new JMaccountEntity();
-        update.setId(id);
-        update.setState(response.getState());
-        jMaccountDao.updateById(update);
+
+
         return new Result();
+
     }
 }

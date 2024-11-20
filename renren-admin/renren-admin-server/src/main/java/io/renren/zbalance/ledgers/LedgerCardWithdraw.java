@@ -33,17 +33,17 @@ public class LedgerCardWithdraw {
 
         // 记账1: 子商户-卡汇总资金
         JBalanceEntity cardSum = ledgerUtil.getCardSumAccount(sub.getId(), entity.getCurrency());
-        ledgerUtil.ledgeUpdate(cardSum, LedgerConstant.ORIGIN_TYPE_CARD_WITHDRAW, LedgerConstant.FACT_CARD_WITHDRAW_OUT_CARD_SUM, entity.getId(), factMemo, factAmount);
+        ledgerUtil.ledgeUpdate(cardSum, LedgerConstant.ORIGIN_TYPE_CARD_WITHDRAW, LedgerConstant.FACT_CARD_WITHDRAW_OUT_CARD_SUM, entity.getId(), factMemo, factAmount.negate());
 
-        // 记账2: 子商户-手续费汇总
+        // 记账2: 子商户-手续费汇总 merchantfee已经是负数
         JBalanceEntity charge = ledgerUtil.getChargeAccount(sub.getId(), entity.getCurrency());
         ledgerUtil.ledgeUpdate(charge, LedgerConstant.ORIGIN_TYPE_CARD_WITHDRAW, LedgerConstant.FACT_CARD_WITHDRAW_OUT_CARD_CHARGE, entity.getId(), factMemo, entity.getMerchantfee());
 
-        // 记账3: 子商户-Va
+        // 记账3: 子商户-Va:  amount + abs(merchantfee)
         JBalanceEntity subVa = ledgerUtil.getSubVaAccount(sub.getId(), entity.getCurrency());
         ledgerUtil.ledgeUpdate(subVa, LedgerConstant.ORIGIN_TYPE_CARD_WITHDRAW, LedgerConstant.FACT_CARD_WITHDRAW_IN_SUB_VA, entity.getId(), factMemo, factAmount.add(entity.getMerchantfee().negate()));
 
-        // 记账4: 通联-手续费汇总
+        // 记账4: 通联-手续费汇总  fee已经是负数
         JBalanceEntity aipCharge = ledgerUtil.getAipChargeAccount(sub.getId(), entity.getCurrency());
         ledgerUtil.ledgeUpdate(aipCharge, LedgerConstant.ORIGIN_TYPE_CARD_WITHDRAW, LedgerConstant.FACT_CARD_WITHDRAW_OUT_AIP_CHARGE, entity.getId(), factMemo, entity.getFee());
 
