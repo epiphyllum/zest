@@ -28,7 +28,7 @@ public class ApiSubService {
         subEntity.setMerchantName(merchant.getCusname());
         subEntity.setAgentId(merchant.getAgentId());
         subEntity.setAgentName(merchant.getAgentName());
-        subEntity.setState(ZinConstant.MERCHANT_STATE_TO_VERIFY);
+        subEntity.setState(ZinConstant.MONEY_ACCOUNT_TO_VERIFY);
         jSubDao.insert(subEntity);
         SubCreateRes subCreateRes = new SubCreateRes(subEntity.getId());
         Result<SubCreateRes> result = new Result<>();

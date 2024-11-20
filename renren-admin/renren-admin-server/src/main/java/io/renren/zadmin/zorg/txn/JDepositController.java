@@ -15,6 +15,7 @@ import io.renren.commons.tools.validator.ValidatorUtils;
 import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
+import io.renren.zcommon.ZestConstant;
 import io.renren.zmanager.JDepositManager;
 import io.renren.zadmin.dao.JDepositDao;
 import io.renren.zadmin.dto.JDepositDTO;
@@ -64,6 +65,16 @@ public class JDepositController {
     @PreAuthorize("hasAuthority('zorg:jdeposit:page')")
     public Result<PageData<JDepositDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
         PageData<JDepositDTO> page = jDepositService.page(params);
+
+        // 不是机构, 屏蔽掉成本
+        if (!ZestConstant.isOperation()) {
+            for (JDepositDTO jDepositDTO : page.getList()) {
+                jDepositDTO.setTxnAmount(null);
+                jDepositDTO.setCostDepositRate(null);
+                jDepositDTO.setCostChargeRate(null);
+            }
+        }
+
         return new Result<PageData<JDepositDTO>>().ok(page);
     }
 

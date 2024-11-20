@@ -20,7 +20,7 @@ public class JMaccountManager {
     private ZinUmbrellaService zinUmbrellaService;
 
     public void save(JMaccountEntity entity) {
-        entity.setState(ZinConstant.MONEY_ACCOUNT_NEW_DJ);
+        entity.setState(ZinConstant.MONEY_ACCOUNT_TO_VERIFY);
         entity.setApi(1);
         jMaccountDao.insert(entity);
     }

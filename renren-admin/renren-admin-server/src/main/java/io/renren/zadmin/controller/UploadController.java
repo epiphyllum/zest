@@ -36,11 +36,11 @@ public class UploadController {
     private ZinFileService zinFileService;
 
     @PostMapping()
-    public Result<String> upload(@RequestParam("file") MultipartFile file) {
-        return uploadFile(file);
+    public Result<String> upload(@RequestParam("file") MultipartFile file, @RequestHeader("XUpload") boolean upload) {
+        return uploadFile(file, upload);
     }
 
-    private Result<String> uploadFile(MultipartFile file) {
+    private Result<String> uploadFile(MultipartFile file, boolean upload) {
         if (file.isEmpty()) {
             return Result.fail(9999, "非法请求");
         }
@@ -62,12 +62,15 @@ public class UploadController {
             String filePath = wholeDir + "/" + filename;
             file.transferTo(new File(filePath));
 
-            log.info("save file to {}", filePath);
+            log.info("文件保存到:{}", filePath);
 
             Result<String> result = new Result<>();
 
-            log.info("上传文件到通联: {}", filename);
-            zinFileService.upload(filename);
+            // 上传通联
+            if (upload) {
+                log.info("上传文件到通联: {}", filename);
+                zinFileService.upload(filename);
+            }
 
             // 文件id
             result.setData(filename);

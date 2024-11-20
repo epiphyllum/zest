@@ -57,7 +57,6 @@ public class ZinConstant {
     public static final String MONEY_ACCOUNT_FROZEN = "4";          // 冻结；
     public static final String MONEY_ACCOUNT_CLOSE = "5";           // 关闭；
     public static final String MONEY_ACCOUNT_TO_REVIEW = "6";       // 待复审
-    public static final String MONEY_ACCOUNT_NEW_DJ = "00";         // 大吉状态: 新建
 
     // 通用状态管理
     public static final int STATE_PROCESSING = 0; // 处理中

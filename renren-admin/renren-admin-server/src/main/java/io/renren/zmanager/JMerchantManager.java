@@ -286,7 +286,7 @@ public class JMerchantManager {
         }
 
         // 没有增加币种
-        if (newSet.size() == 0) {
+        if (added.size() == 0) {
             jMerchantService.update(dto);
             return;
         }
@@ -297,6 +297,7 @@ public class JMerchantManager {
                 .eq(JSubEntity::getState, ZinConstant.MERCHANT_STATE_VERIFIED)
         );
         tx.executeWithoutResult(status -> {
+            jMerchantService.update(dto);
             // 新增加的币种
             for (String currency : added) {
                 newBalance(merchant, BalanceType.getVaAccount(currency), currency);  // 创建va账户

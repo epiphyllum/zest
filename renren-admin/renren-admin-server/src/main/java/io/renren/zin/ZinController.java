@@ -53,7 +53,7 @@ public class ZinController {
         return "OK";
     }
 
-    // 换汇申请单状态通知:  这个是支付类申请单的通知
+    // 支付类申请单的通知:
     @PostMapping("applynotify")
     public String auditrst(HttpServletRequest request, @RequestBody String body, @RequestHeader("X-AGCP-Auth") String auth, @RequestHeader("X-AGCP-Date") String date) {
         TExchangeStateNotify tExchangeStateNotify = requester.<TExchangeStateNotify>verify(request, body, auth, date, TExchangeStateNotify.class);
@@ -61,7 +61,7 @@ public class ZinController {
         return "OK";
     }
 
-    // 卡申请状态通知
+    // 卡申请状态通知: 主卡、子卡申请,  保证金缴纳、提取, 卡注销申请单状态变化
     @PostMapping("vpaauditrst")
     public String vpaauditrst(HttpServletRequest request, @RequestBody String body, @RequestHeader("X-AGCP-Auth") String auth, @RequestHeader("X-AGCP-Date") String date) {
         TCardApplyNotify tCardApplyNotify = requester.<TCardApplyNotify>verify(request, body, auth, date, TCardApplyNotify.class);
@@ -69,7 +69,7 @@ public class ZinController {
         return "OK";
     }
 
-    // 卡状态变更通知
+    // 卡状态变更通知: 卡状态变更，主动发起通知合作方，涉及的状态变更的功能接口（卡挂失、解除卡挂失、卡止付、解除卡止付、销卡、解除销卡）。
     @PostMapping("cardchangenotify")
     public String cardchangenotify(HttpServletRequest request, @RequestBody String body, @RequestHeader("X-AGCP-Auth") String auth, @RequestHeader("X-AGCP-Date") String date) {
         TCardChangeNotify tCardChangeNotify = requester.<TCardChangeNotify>verify(request, body, auth, date, TCardChangeNotify.class);

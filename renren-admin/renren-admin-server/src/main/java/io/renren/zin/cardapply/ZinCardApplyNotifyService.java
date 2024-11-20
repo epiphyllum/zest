@@ -48,20 +48,32 @@ public class ZinCardApplyNotifyService {
     // 卡申请单状态通知: 3005
     public void cardApplyNotify(TCardApplyNotify notify) {
         String trxcode = notify.getTrxcode();
+        // 开卡
         if (trxcode.equals(ZinConstant.CP450)) {
             handleCP450(notify);
-        } else if (trxcode.equals(ZinConstant.CP453)) {
+        }
+        // 注销
+        else if (trxcode.equals(ZinConstant.CP453)) {
             handleCP453(notify);
-        } else if (trxcode.equals(ZinConstant.CP458)) {
+        }
+        // 注销撤回
+        else if (trxcode.equals(ZinConstant.CP458)) {
             handleCP458(notify);
-        } else if (trxcode.equals(ZinConstant.CP451)) {
+        }
+        // 保证金缴纳
+        else if (trxcode.equals(ZinConstant.CP451)) {
             handleCP451(notify);
-        } else if (trxcode.equals(ZinConstant.CP452)) {
+        }
+        // 保证金提现
+        else if (trxcode.equals(ZinConstant.CP452)) {
             handleCP452(notify);
-        } else if (trxcode.equals(ZinConstant.CP460)) {
+        }
+        // VPA卡开卡
+        else if (trxcode.equals(ZinConstant.CP460)) {
             handleCP460(notify);
-        } else {
-            log.error("unknown notify: {}", notify);
+        }
+        else {
+            log.error("未知的交易类型: {}", notify);
         }
     }
 
@@ -123,12 +135,10 @@ public class ZinCardApplyNotifyService {
         JVpaJobEntity entity = jVpaJobDao.selectOne(Wrappers.<JVpaJobEntity>lambdaQuery()
                 .eq(JVpaJobEntity::getApplyid, notify.getApplyid())
         );
-
         boolean notifyFlag = false;
         if (entity.getApi().equals(1)) {
             notifyFlag = true;
         }
-
         jVpaManager.query(entity, notifyFlag);
     }
 

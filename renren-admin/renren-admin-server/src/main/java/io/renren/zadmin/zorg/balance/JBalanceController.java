@@ -116,7 +116,6 @@ public class JBalanceController {
             }
         } else if (ZestConstant.isMerchant()) {
             // 商户登录， ownerId 就是自己
-            log.info("page/merchant, ownerId: {}", SecurityUser.getDeptId());
             params.put("ownerId", SecurityUser.getDeptId().toString());
         } else {
             // 其他为非法用户
@@ -172,7 +171,6 @@ public class JBalanceController {
                 page.setList(List.of());
                 return new Result<PageData<JBalanceDTO>>().ok(page);
             }
-            log.info("page/merchant, operation/agent, ownerId: {}", params.get("ownerId"));
         } else if (ZestConstant.isSub()) {
             // 子商户登录， subId就是ownerId
             params.put("ownerId", SecurityUser.getDeptId().toString());

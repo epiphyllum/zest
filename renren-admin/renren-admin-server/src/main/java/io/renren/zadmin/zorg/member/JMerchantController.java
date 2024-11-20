@@ -127,6 +127,7 @@ public class JMerchantController {
         if (!user.getUserType().equals("operation") && !user.getUserType().equals("agent")) {
             return Result.fail(9999, "not authorized");
         }
+
         //效验数据
         ValidatorUtils.validateEntity(dto, UpdateGroup.class, DefaultGroup.class);
         jMerchantManager.update(dto);

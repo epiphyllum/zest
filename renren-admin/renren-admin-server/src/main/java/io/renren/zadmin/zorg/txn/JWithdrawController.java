@@ -15,6 +15,7 @@ import io.renren.commons.tools.validator.ValidatorUtils;
 import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
+import io.renren.zcommon.ZestConstant;
 import io.renren.zmanager.JWithdrawManager;
 import io.renren.zadmin.dao.JWithdrawDao;
 import io.renren.zadmin.dto.JWithdrawDTO;
@@ -64,6 +65,13 @@ public class JWithdrawController {
     @PreAuthorize("hasAuthority('zorg:jwithdraw:page')")
     public Result<PageData<JWithdrawDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
         PageData<JWithdrawDTO> page = jWithdrawService.page(params);
+
+        // 非机构登录, 屏蔽成本项
+        if (!ZestConstant.isOperation()) {
+            for (JWithdrawDTO jWithdrawDTO : page.getList()) {
+                jWithdrawDTO.setFee(null);
+            }
+        }
         return new Result<PageData<JWithdrawDTO>>().ok(page);
     }
 

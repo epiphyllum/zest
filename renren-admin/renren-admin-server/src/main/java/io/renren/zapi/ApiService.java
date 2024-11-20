@@ -155,7 +155,6 @@ public class ApiService {
      */
     public Result<?> invokeService(String body, Long merchantId, String sign, String reqId, String name) {
         String ip = CommonUtils.getIp();
-        log.info("body: {}, ip: {}", body, ip);
         ApiMeta apiMeta = metaMap.get(name);
         JMerchantEntity merchant = jMerchantDao.selectById(merchantId);
         if (merchant == null) {
@@ -183,6 +182,7 @@ public class ApiService {
         packetEntity.setApiName(name);
         packetEntity.setReqId(reqId);
         packetEntity.setRecv(body);
+        packetEntity.setIp(ip);
         packetEntity.setSign(sign);
 
         try {

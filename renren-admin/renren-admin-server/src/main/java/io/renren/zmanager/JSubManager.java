@@ -8,6 +8,10 @@ import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.dao.SysDeptDao;
 import io.renren.entity.SysDeptEntity;
 import io.renren.service.SysDeptService;
+import io.renren.zapi.ApiNotifyService;
+import io.renren.zapi.sub.ApiSubService;
+import io.renren.zapi.sub.dto.SubNotify;
+import io.renren.zcommon.ZapiConstant;
 import io.renren.zcommon.ZestConstant;
 import io.renren.zadmin.dao.JBalanceDao;
 import io.renren.zadmin.dao.JMerchantDao;
@@ -42,6 +46,8 @@ public class JSubManager {
     private SysDeptDao sysDeptDao;
     @Resource
     private JBalanceDao jBalanceDao;
+    @Resource
+    private ApiNotifyService apiNotifyService;
 
     /**
      * 审核通过
@@ -56,20 +62,23 @@ public class JSubManager {
         if (oldState.equals(ZinConstant.MERCHANT_STATE_VERIFIED) || oldState.equals(ZinConstant.MERCHANT_STATE_FAIL)) {
             throw new RenException("当前状态不正确:" + state);
         }
+
+        // 查询商户
+        Long merchantId = entity.getMerchantId();
+        JMerchantEntity merchant = jMerchantDao.selectById(merchantId);
+
         // 审核通过
         if (!ZinConstant.MERCHANT_STATE_VERIFIED.equals(entity.getState()) && ZinConstant.MERCHANT_STATE_VERIFIED.equals(state)) {
-            Long merchantId = entity.getMerchantId();
-            JMerchantEntity merchant = jMerchantDao.selectById(merchantId);
             List<String> currencyList = Arrays.stream(merchant.getCurrencyList().split(",")).toList();
 
             tx.executeWithoutResult(st -> {
+                // 开通子商户VA
                 this.openSubVa(entity, currencyList);
                 jSubDao.update(null, Wrappers.<JSubEntity>lambdaUpdate()
                         .eq(JSubEntity::getId, id)
                         .set(JSubEntity::getState, ZinConstant.MERCHANT_STATE_VERIFIED)
                 );
             });
-            return;
         }
 
         // 审核不通过
@@ -77,6 +86,12 @@ public class JSubManager {
                 .eq(JSubEntity::getId, id)
                 .set(JSubEntity::getState, state)
         );
+
+        // 接口创建
+        if (entity.getApi().equals(1)) {
+            SubNotify subNotify = new SubNotify(id, entity.getCusname(), state);
+            apiNotifyService.notifyMerchant(subNotify, merchant, ZapiConstant.API_subNotify);
+        }
     }
 
     public Long fill(JSubEntity entity) {
