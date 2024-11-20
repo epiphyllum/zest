@@ -2,8 +2,10 @@ package io.renren.zin.sub.dto;
 
 import io.renren.zin.TResult;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode
 public class TSubQueryResponse extends TResult {
     private String ctid;    // 相同注册的唯一标识
     private String cusid;   // 通联子商户号

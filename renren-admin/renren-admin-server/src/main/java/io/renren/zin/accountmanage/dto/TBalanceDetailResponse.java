@@ -2,11 +2,13 @@ package io.renren.zin.accountmanage.dto;
 
 import io.renren.zin.TResult;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.Date;
 import java.util.List;
 
 @Data
+@EqualsAndHashCode
 public class TBalanceDetailResponse extends TResult {
 
     @Data

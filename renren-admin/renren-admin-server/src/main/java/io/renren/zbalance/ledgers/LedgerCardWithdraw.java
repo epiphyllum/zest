@@ -57,7 +57,7 @@ public class LedgerCardWithdraw {
         ledgerUtil.unFreezeUpdate(cardSum, LedgerConstant.ORIGIN_TYPE_CARD_WITHDRAW, LedgerConstant.FACT_CARD_WITHDRAW_UNFREEZE_CARD_SUM, entity.getId(), factMemo, factAmount);
 
         JBalanceEntity charge = ledgerUtil.getChargeAccount(sub.getId(), entity.getCurrency());
-        ledgerUtil.unFreezeUpdate(charge, LedgerConstant.ORIGIN_TYPE_CARD_WITHDRAW, LedgerConstant.FACT_CARD_WITHDRAW_FREEZE_CARD_CHARGE, entity.getId(), factMemo, entity.getMerchantfee().negate());
+        ledgerUtil.unFreezeUpdate(charge, LedgerConstant.ORIGIN_TYPE_CARD_WITHDRAW, LedgerConstant.FACT_CARD_WITHDRAW_UNFREEZE_CARD_CHARGE, entity.getId(), factMemo, entity.getMerchantfee().negate());
 
         if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_PREPAID)) {
             JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
@@ -80,7 +80,7 @@ public class LedgerCardWithdraw {
 
         // 记账2: 子商户-手续费汇总
         JBalanceEntity charge = ledgerUtil.getChargeAccount(sub.getId(), entity.getCurrency());
-        ledgerUtil.confirmUpdate(charge, LedgerConstant.ORIGIN_TYPE_CARD_WITHDRAW, LedgerConstant.FACT_CARD_WITHDRAW_OUT_CHARGE, entity.getId(), factMemo, entity.getMerchantfee());
+        ledgerUtil.confirmUpdate(charge, LedgerConstant.ORIGIN_TYPE_CARD_WITHDRAW, LedgerConstant.FACT_CARD_WITHDRAW_CONFIRM_CARD_CHARGE, entity.getId(), factMemo, entity.getMerchantfee());
 
         // 记账3: 子商户-Va
         JBalanceEntity subVa = ledgerUtil.getSubVaAccount(sub.getId(), entity.getCurrency());

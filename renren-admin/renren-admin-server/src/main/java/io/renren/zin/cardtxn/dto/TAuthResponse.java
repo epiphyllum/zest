@@ -2,6 +2,7 @@ package io.renren.zin.cardtxn.dto;
 
 import io.renren.zin.TResult;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.List;
 
 // 已入账交易明细查询 结果
 @Data
+@EqualsAndHashCode
 public class TAuthResponse extends TResult {
 
     @Data

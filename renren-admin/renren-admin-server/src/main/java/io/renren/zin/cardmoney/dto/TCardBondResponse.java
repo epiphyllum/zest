@@ -2,11 +2,13 @@ package io.renren.zin.cardmoney.dto;
 
 import io.renren.zin.TResult;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 @Data
+@EqualsAndHashCode
 public class TCardBondResponse extends TResult {
     @Data
     public static class Item {

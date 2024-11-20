@@ -2,11 +2,13 @@ package io.renren.zin.exchange.dto;
 
 import io.renren.zin.TResult;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
 
 // 换汇查询
 @Data
+@EqualsAndHashCode
 public class TExchangeQueryResponse extends TResult {
     private String meraplid;      // 申请单流水
     private String acctno;        // 受益人账号

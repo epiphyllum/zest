@@ -2,10 +2,12 @@ package io.renren.zin.exchange.dto;
 
 import io.renren.zin.TResult;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
 
 @Data
+@EqualsAndHashCode
 public class TExchangeLockResponse extends TResult {
     private String applyid;          // 申请单号
     private BigDecimal amount;       // 交易金额

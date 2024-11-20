@@ -2,11 +2,13 @@ package io.renren.zin.cardapply.dto;
 
 import io.renren.zin.TResult;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
 
 // 卡申请单查询应答
 @Data
+@EqualsAndHashCode
 public class TCardApplyResponse extends TResult {
     String meraplid;           // 申请单流水	meraplid	String	32	Y	  	String	32	Y	 
     String applyid;            // 申请单号	applyid	String	32	Y	   //	String	32	Y	 
