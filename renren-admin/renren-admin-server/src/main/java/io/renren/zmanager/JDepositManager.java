@@ -66,7 +66,7 @@ public class JDepositManager {
     public JSubEntity fillInfo(JDepositEntity entity) {
         JSubEntity subEntity = jSubDao.selectById(entity.getSubId());
         if (subEntity == null) {
-            throw new RenException("in valid request, lack subId");
+            throw new RenException("非法请求,子商户ID错误");
         }
         entity.setAgentId(subEntity.getAgentId());
         entity.setAgentName(subEntity.getAgentName());
@@ -281,7 +281,7 @@ public class JDepositManager {
             );
         }
 
-        if (notify) {
+        if (notify || entity.getApi().equals(1)) {
             log.info("API交易, 通知商户, notify:{}", notify);
             JMerchantEntity merchant = jMerchantDao.selectById(entity.getMerchantId());
             JDepositEntity freshEntity = jDepositDao.selectById(entity.getId());
@@ -345,5 +345,19 @@ public class JDepositManager {
             ex.printStackTrace();
             throw ex;
         }
+    }
+
+    /**
+     * 通知商户
+     * @param id
+     */
+    public void notify(Long id) {
+        JDepositEntity jDepositEntity = jDepositDao.selectById(id);
+        if(!jDepositEntity.getApi().equals(1) ) {
+            throw new RenException("非接口交易");
+        }
+        Long merchantId = jDepositEntity.getMerchantId();
+        JMerchantEntity merchant = jMerchantDao.selectById(merchantId);
+        apiNotify.cardChargeNotify(jDepositEntity, merchant);
     }
 }

@@ -170,5 +170,15 @@ public class JDepositController {
         return Result.ok;
     }
 
+    // 通知商户
+    @GetMapping("notify")
+    @PreAuthorize("hasAuthority('zorg:jdeposit:notify')")
+    public Result notify(@RequestParam("id") Long id) {
+        if (!ZestConstant.isOperation()) {
+            throw new RenException("not permitted");
+        }
+        jDepositManager.notify(id);
+        return new Result();
+    }
 
 }

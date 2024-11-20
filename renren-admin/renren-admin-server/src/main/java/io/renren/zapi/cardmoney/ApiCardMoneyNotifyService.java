@@ -44,6 +44,8 @@ public class ApiCardMoneyNotifyService {
      */
     public void cardChargeNotify(JDepositEntity entity, JMerchantEntity merchant){
         CardChargeNotify notify = ConvertUtils.sourceToTarget(entity, CardChargeNotify.class);
+        notify.setMerchantdeposit(entity.getMerchantDeposit());
+        notify.setMerchantfee(entity.getMerchantCharge());
         apiNotifyService.notifyMerchant(notify, merchant, "cardChargeNotify");
     }
 }

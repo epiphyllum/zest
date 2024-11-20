@@ -75,9 +75,6 @@ public class JMerchantManager {
             agentId = user.getDeptId();
         }
 
-        // 上传商户附件
-        // this.uploadFiles(jMerchantEntity);
-
         SysDeptEntity agentDept = sysDeptDao.selectById(agentId);
         String agentName = agentDept.getName();
         String pids = agentDept.getPid() + "," + agentId;
@@ -136,9 +133,6 @@ public class JMerchantManager {
      * @param jMerchantEntity
      */
     public void submit(JMerchantEntity jMerchantEntity) {
-        // 上传文件
-        // this.uploadFiles(jMerchantEntity);
-
         // 准备请求
         TSubCreateRequest tSubCreateRequest = ConvertUtils.sourceToTarget(jMerchantEntity, TSubCreateRequest.class);
         tSubCreateRequest.setMeraplid(jMerchantEntity.getId().toString());
@@ -153,60 +147,6 @@ public class JMerchantManager {
                 .set(JMerchantEntity::getCusid, cusid)
                 .set(JMerchantEntity::getMeraplid, tSubCreateRequest.getMeraplid())
         );
-    }
-
-    /**
-     * 上传通联文件:  deprecated
-     *
-     * @param jMerchantEntity
-     */
-    private void uploadFiles(JMerchantEntity jMerchantEntity) {
-        // 拿到所有文件fid
-        String agreementfid = jMerchantEntity.getAgreementfid();
-        String buslicensefid = jMerchantEntity.getBuslicensefid();
-        String credifid = jMerchantEntity.getCredifid();
-        String legalphotobackfid = jMerchantEntity.getLegalphotobackfid();
-        String legalphotofrontfid = jMerchantEntity.getLegalphotofrontfid();
-        String organfid = jMerchantEntity.getOrganfid();
-        List<String> fids = new ArrayList<>();
-        if (agreementfid != null) {
-            fids.add(agreementfid);
-        }
-        if (buslicensefid != null) {
-            fids.add(buslicensefid);
-        }
-        if (credifid != null) {
-            fids.add(credifid);
-        }
-        if (legalphotobackfid != null) {
-            fids.add(legalphotobackfid);
-        }
-        if (legalphotofrontfid != null) {
-            fids.add(legalphotofrontfid);
-        }
-        if (organfid != null) {
-            fids.add(organfid);
-        }
-        Map<String, CompletableFuture<String>> jobs = new HashMap<>();
-        for (String fid : fids) {
-            if (StringUtils.isBlank(fid)) {
-                continue;
-            }
-            jobs.put(fid, CompletableFuture.supplyAsync(() -> {
-                return zinFileService.upload(fid);
-            }));
-        }
-
-        jobs.forEach((j, f) -> {
-            log.info("wait {}...", j);
-            try {
-                f.get();
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new RenException("can not upload file:" + j);
-            }
-        });
-        log.info("文件上传完毕, 开始请求创建商户...");
     }
 
     /**

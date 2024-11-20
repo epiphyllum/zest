@@ -176,7 +176,7 @@ public class JWithdrawManager {
         }
 
         // 需要通知商户的话
-        if (notify) {
+        if (notify || entity.getApi().equals(1)) {
             JMerchantEntity merchant = jMerchantDao.selectById(entity.getMerchantId());
             JWithdrawEntity freshEntity = jWithdrawDao.selectById(entity.getId());
             apiNotify.cardWithdrawNotify(freshEntity, merchant);
@@ -219,5 +219,16 @@ public class JWithdrawManager {
             ex.printStackTrace();
             throw ex;
         }
+    }
+
+    /**
+     * 通知商户
+     * @param id
+     */
+    public void notify(Long id) {
+        JWithdrawEntity withdrawEntity = jWithdrawDao.selectById(id);
+        Long merchantId = withdrawEntity.getMerchantId();
+        JMerchantEntity merchant = jMerchantDao.selectById(merchantId);
+        apiNotify.cardWithdrawNotify(withdrawEntity, merchant);
     }
 }

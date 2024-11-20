@@ -87,32 +87,6 @@ public class JMoneyManager {
         jMoneyDao.insert(entity);
     }
 
-    public void uploadFiles(JMoneyEntity jMoneyEntity) {
-        // 拿到所有文件fid
-        String transferfid = jMoneyEntity.getTransferfid();
-        String otherfid = jMoneyEntity.getOtherfid();
-
-        List<String> fids = List.of(transferfid, otherfid);
-        Map<String, CompletableFuture<String>> jobs = new HashMap<>();
-        for (String fid : fids) {
-            if (StringUtils.isBlank(fid)) {
-                continue;
-            }
-            jobs.put(fid, CompletableFuture.supplyAsync(() -> {
-                return zinFileService.upload(fid);
-            }));
-        }
-        jobs.forEach((j, f) -> {
-            log.info("wait {}...", j);
-            try {
-                f.get();
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new RenException("can not upload file:" + j);
-            }
-        });
-    }
-
     // confirm
     public void confirm(JMoneyEntity entity) {
 

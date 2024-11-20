@@ -10,9 +10,14 @@ import io.renren.commons.tools.validator.ValidatorUtils;
 import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
+import io.renren.zadmin.dao.JAuthDao;
+import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.dto.JAuthDTO;
+import io.renren.zadmin.entity.JAuthEntity;
+import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zadmin.excel.JAuthExcel;
 import io.renren.zadmin.service.JAuthService;
+import io.renren.zmanager.JAuthManager;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -38,6 +43,9 @@ import java.util.Map;
 public class JAuthController {
     @Resource
     private JAuthService jAuthService;
+    @Resource
+    private JAuthManager jAuthManager;
+
 
     @GetMapping("page")
     @Operation(summary = "分页")
@@ -103,4 +111,12 @@ public class JAuthController {
         ExcelUtils.exportExcelToTarget(response, null, "j_auth", list, JAuthExcel.class);
     }
 
+    @GetMapping("notify")
+    @Operation(summary = "通知商户")
+    @LogOperation("通知商户")
+    @PreAuthorize("hasAuthority('zorg:jauth:notify')")
+    public Result notify( @RequestParam("id") Long id) throws Exception {
+        jAuthManager.notify(id);
+        return new Result();
+    }
 }

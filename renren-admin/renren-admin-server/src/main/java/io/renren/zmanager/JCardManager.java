@@ -368,7 +368,6 @@ public class JCardManager {
 
             // 是否需要通知api商户
             if (notify || jCardEntity.getApi().equals(1)) {
-                log.info("接口商户通知...");
                 // 通知商户
                 JCardEntity entity = jCardDao.selectById(jCardEntity.getId());
                 apiNotify.cardNewNotify(entity, merchant);
@@ -386,7 +385,6 @@ public class JCardManager {
             });
             // 通知商户
             if (notify || jCardEntity.getApi().equals(1)) {
-                log.info("接口商户通知...");
                 // 发卡状态更新
                 JCardEntity entity = jCardDao.selectById(jCardEntity.getId());
                 JMerchantEntity merchant = jMerchantDao.selectById(jCardEntity.getMerchantId());
@@ -395,51 +393,6 @@ public class JCardManager {
         }
         // 其他情况
         jCardDao.update(null, updateWrapper);
-    }
-
-    public void uploadFiles(JCardEntity cardEntity) {
-        // 拿到所有文件fid
-        String photofront = cardEntity.getPhotofront();
-        String photoback = cardEntity.getPhotoback();
-        String photofront2 = cardEntity.getPhotofront2();
-        String photoback2 = cardEntity.getPhotoback2();
-        String agmfid = cardEntity.getAgmfid();
-
-        List<String> fids = new ArrayList<>();
-        if (photofront != null) {
-            fids.add(photofront);
-        }
-        if (photoback != null) {
-            fids.add(photoback);
-        }
-        if (photofront2 != null) {
-            fids.add(photofront2);
-        }
-        if (photoback2 != null) {
-            fids.add(photoback2);
-        }
-        if (agmfid != null) {
-            fids.add(agmfid);
-        }
-        Map<String, CompletableFuture<String>> jobs = new HashMap<>();
-        for (String fid : fids) {
-            if (StringUtils.isBlank(fid)) {
-                continue;
-            }
-            jobs.put(fid, CompletableFuture.supplyAsync(() -> {
-                return zinFileService.upload(fid);
-            }));
-        }
-        jobs.forEach((j, f) -> {
-            log.info("wait {}...", j);
-            try {
-                f.get();
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new RenException("can not upload file:" + j);
-            }
-        });
-        log.info("文件上传完毕, 开始请求创建商户...");
     }
 
     public void activateCard(JCardEntity jCardEntity) {

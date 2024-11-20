@@ -219,4 +219,16 @@ public class JExchangeController {
         jExchangeManager.cancel(jExchangeEntity);
         return new Result();
     }
+
+    // 通知商户
+    @GetMapping("notify")
+    @PreAuthorize("hasAuthority('zorg:jexchange:notify')")
+    public Result notify(@RequestParam("id") Long id) {
+        if (!ZestConstant.isOperation()) {
+            throw new RenException("not permitted");
+        }
+        jExchangeManager.notify(id);
+        return new Result();
+    }
+
 }

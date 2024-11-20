@@ -11,6 +11,7 @@ import io.renren.zadmin.dto.VDepositDTO;
 import io.renren.zadmin.entity.VDepositEntity;
 import io.renren.zadmin.entity.VDepositEntity;
 import io.renren.zadmin.service.VDepositService;
+import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,9 @@ import java.util.Map;
 @Service
 public class VDepositServiceImpl extends CrudServiceImpl<VDepositDao, VDepositEntity, VDepositDTO> implements VDepositService {
 
+    @Resource
+    private CommonFilter commonFilter;
+
     @Override
     public PageData<VDepositDTO> page(Map<String, Object> params) {
         IPage<VDepositEntity> page = baseDao.selectPage(
@@ -38,14 +42,13 @@ public class VDepositServiceImpl extends CrudServiceImpl<VDepositDao, VDepositEn
     public QueryWrapper<VDepositEntity> getWrapper(Map<String, Object> params){
         QueryWrapper<VDepositEntity> wrapper = new QueryWrapper<>();
 
-        String agentId = (String)params.get("agentId");
-        wrapper.eq(StringUtils.isNotBlank(agentId), "agent_id", agentId);
 
-        String merchantId = (String)params.get("merchantId");
-        wrapper.eq(StringUtils.isNotBlank(merchantId), "merchant_id", merchantId);
-
-        String subId = (String)params.get("subId");
-        wrapper.eq(StringUtils.isNotBlank(subId), "sub_id", subId);
+//        String agentId = (String)params.get("agentId");
+//        wrapper.eq(StringUtils.isNotBlank(agentId), "agent_id", agentId);
+//        String merchantId = (String)params.get("merchantId");
+//        wrapper.eq(StringUtils.isNotBlank(merchantId), "merchant_id", merchantId);
+//        String subId = (String)params.get("subId");
+//        wrapper.eq(StringUtils.isNotBlank(subId), "sub_id", subId);
 
         String currency = (String)params.get("currency");
         wrapper.eq(StringUtils.isNotBlank(currency), "currency", currency);
@@ -55,6 +58,8 @@ public class VDepositServiceImpl extends CrudServiceImpl<VDepositDao, VDepositEn
 
         String statDate = (String)params.get("statDate");
         wrapper.eq(StringUtils.isNotBlank(statDate), "stat_date", statDate);
+
+        commonFilter.setFilterAll(wrapper, params);
 
         return wrapper;
     }

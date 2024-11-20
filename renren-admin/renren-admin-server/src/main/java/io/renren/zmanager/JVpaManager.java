@@ -176,8 +176,6 @@ public class JVpaManager {
         // 初始状态
         entity.setState(ZinConstant.CARD_APPLY_NEW_DJ);
 
-        log.info("vpa open card, fee:{}", totalMerchantFee);
-
         // 记账 + 入库
         try {
             tx.executeWithoutResult(st -> {
@@ -293,7 +291,7 @@ public class JVpaManager {
 
     // 开卡任务查询
     public void query(JVpaJobEntity entity, boolean notify) {
-        log.info("query job: {}", entity);
+        log.info("查询发卡任务: {}", entity);
         TCardApplyQuery query = new TCardApplyQuery();
         query.setApplyid(entity.getApplyid());
         TCardApplyResponse response = zinCardApplyService.cardApplyQuery(query);
@@ -365,17 +363,22 @@ public class JVpaManager {
                     jCardManager.balanceCard(jCardEntity);
                 });
             }
+
+            // vpa我们对外接口还没提供
+            if (notify || entity.getApi().equals(1)) {
+                // todo
+            }
         }
         // 非失败 -> 失败
         else if (!ZinConstant.isCardApplyFail(prevState) && ZinConstant.isCardApplyFail(nextState)) {
             log.info("发卡 非失败 --> 失败");
         }
-
-        // vpa我们对外接口还没提供
-        if (notify) {
-        }
     }
 
+    /**
+     * 取消发卡任务
+     * @param entity
+     */
     public void cancel(JVpaJobEntity entity) {
         try {
             tx.executeWithoutResult(status -> {

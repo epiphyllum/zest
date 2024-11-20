@@ -152,4 +152,13 @@ public class JExchangeManager {
     }
 
 
+    // 通知商户
+    public void notify(Long id) {
+        JExchangeEntity exchangeEntity = jExchangeDao.selectById(id);
+        if (!exchangeEntity.getApi().equals(1)) {
+            throw new RenException("非接口交易");
+        }
+        JMerchantEntity merchant = jMerchantDao.selectById(exchangeEntity.getMerchantId());
+        apiNotify.exchangeNotify(exchangeEntity, merchant);
+    }
 }

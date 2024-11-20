@@ -168,4 +168,15 @@ public class JWithdrawController {
         return Result.ok;
     }
 
+    // 通知商户
+    @GetMapping("notify")
+    @PreAuthorize("hasAuthority('zorg:jexchange:notify')")
+    public Result notify(@RequestParam("id") Long id) {
+        if (!ZestConstant.isOperation()) {
+            throw new RenException("not permitted");
+        }
+        jWithdrawManager.notify(id);
+        return new Result();
+    }
+
 }

@@ -1,4 +1,4 @@
-package io.renren.zmanager;
+package io.renren.zdashboard;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.zadmin.dao.JBalanceDao;
@@ -10,6 +10,7 @@ import io.renren.zadmin.entity.JCardEntity;
 import io.renren.zadmin.entity.JSubEntity;
 import io.renren.zbalance.BalanceType;
 import io.renren.zcommon.ZinConstant;
+import io.renren.zmanager.JCardManager;
 import jakarta.annotation.Resource;
 import lombok.Data;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class JSubDashboardManager {
+public class JAgentDashboard {
 
     @Data
     public static class PrepaidWallet {

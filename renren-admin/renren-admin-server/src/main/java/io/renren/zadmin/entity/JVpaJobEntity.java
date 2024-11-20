@@ -43,13 +43,10 @@ public class JVpaJobEntity extends BaseEntity {
     private Integer authmaxcount;
     private BigDecimal authmaxamount;
     private String onlhkflag;
-
     private String begindate;
     private String enddate;
-
     private String naturalmonthflag;
     private String naturalmonthstartday;
-
     private String fixedamountflag;
 
     private String state;

@@ -11,5 +11,6 @@ public class CardWithdrawNotify {
     String cardno;             // 卡号
     BigDecimal amount;         //
     String currency;           // 币种
+    BigDecimal merchantfee;    // 退手续费
     String state;              // 申请单状态
 }

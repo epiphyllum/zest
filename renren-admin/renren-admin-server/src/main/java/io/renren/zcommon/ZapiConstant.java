@@ -41,6 +41,12 @@ public class ZapiConstant {
     public static final String API_cardWithdrawNotify = "cardWithdrawNotify";// 卡提现通知
     public static final String API_cardTxnNotify = "cardTxnNotify";          // 卡交易流水通知
     public static final String API_cardTxnDownload = "cardTxnDownload";      // 卡结算交易下载
+    // VPA()
+    public static final String API_newPrepaidJob = "newPrepaidJob";      // 卡结算交易下载
+    public static final String API_newShareJob = "newShareJob";      // 卡结算交易下载
+    public static final String API_vpaJobNotify = "vpaJobNotify";      // 卡结算交易下载
+    public static final String API_vpaJobQuery = "vpaJobQuery";      // 卡结算交易下载
+
     // 换汇服务(4)
     public static final String API_exchange = "exchange";                    // 换汇申请
     public static final String API_exchangeLock = "exchangeLock";            // 锁汇询价
