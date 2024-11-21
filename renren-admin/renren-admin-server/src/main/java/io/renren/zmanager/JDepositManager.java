@@ -34,6 +34,8 @@ import java.util.concurrent.CompletableFuture;
 @Slf4j
 public class JDepositManager {
     @Resource
+    private JCommon jCommon;
+    @Resource
     private ZinFileService zinFileService;
     @Resource
     private TransactionTemplate tx;
@@ -62,7 +64,9 @@ public class JDepositManager {
     @Resource
     private JFeeConfigDao jFeeConfigDao;
 
-    // 填充信息
+    /**
+     * 填充信息
+     */
     public JSubEntity fillInfo(JDepositEntity entity) {
         JSubEntity subEntity = jSubDao.selectById(entity.getSubId());
         if (subEntity == null) {
@@ -82,6 +86,9 @@ public class JDepositManager {
         return subEntity;
     }
 
+    /**
+     * 通联计算方法: 扣除保证金后， 扣除手续费, 剩下的钱
+     */
     private BigDecimal calcOut(BigDecimal out, JFeeConfigEntity feeConfig) {
         // 正向计算
         BigDecimal deposit = out.multiply(feeConfig.getCostDepositRate()).setScale(2, RoundingMode.HALF_UP);
@@ -91,12 +98,23 @@ public class JDepositManager {
         return left;
     }
 
+    //  发起金额 到账金额 填充:
+    private void fixAmount(JDepositEntity entity, JFeeConfigEntity feeConfig) {
+        BigDecimal txnAmount = calcTxnAmount(entity.getAmount(), feeConfig);
+        entity.setTxnAmount(txnAmount);
+        // 成本与收入扣率
+        entity.setDepositRate(feeConfig.getDepositRate());
+        entity.setChargeRate(feeConfig.getChargeRate());
+        entity.setCostDepositRate(feeConfig.getDepositRate());
+        entity.setCostChargeRate(feeConfig.getChargeRate());
+        BigDecimal merchantDeposit = entity.getAmount().multiply(feeConfig.getDepositRate()).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal merchantCharge = entity.getAmount().multiply(feeConfig.getChargeRate()).setScale(2, RoundingMode.HALF_UP);
+        entity.setMerchantCharge(merchantCharge);
+        entity.setMerchantDeposit(merchantDeposit);
+    }
+
     /**
-     * 计算需要发起金额
-     * 充值手续费1%，担保金2%，充值金额100 HKD,  则：
-     * 担保金=100*0.02=2 HKD
-     * 充值手续费=（100-2）*0.01=0.98 HKD
-     * 到账金额 = 100-2-0.98=97.02 HKD
+     * 根据通联算法， 给定到账金额， 反向计算发起金额
      */
     public BigDecimal calcTxnAmount(BigDecimal amount, JFeeConfigEntity feeConfig) {
         BigDecimal rate1 = BigDecimal.ONE.subtract(feeConfig.getCostChargeRate());
@@ -123,58 +141,27 @@ public class JDepositManager {
         }
     }
 
-    //  发起金额 到账金额 填充:
-    public void fixAmount(JDepositEntity entity, JFeeConfigEntity feeConfig) {
-        BigDecimal txnAmount = calcTxnAmount(entity.getAmount(), feeConfig);
-        entity.setTxnAmount(txnAmount);
-
-        // 成本与收入扣率
-        entity.setDepositRate(feeConfig.getDepositRate());
-        entity.setChargeRate(feeConfig.getChargeRate());
-        entity.setCostDepositRate(feeConfig.getDepositRate());
-        entity.setCostChargeRate(feeConfig.getChargeRate());
-
-        BigDecimal merchantDeposit = entity.getAmount().multiply(feeConfig.getDepositRate()).setScale(2, RoundingMode.HALF_UP);
-        BigDecimal merchantCharge = entity.getAmount().multiply(feeConfig.getChargeRate()).setScale(2, RoundingMode.HALF_UP);
-        entity.setMerchantCharge(merchantCharge);
-        entity.setMerchantDeposit(merchantDeposit);
-    }
-
-    public JFeeConfigEntity getFeeConfig(JDepositEntity entity) {
-        // 卡产品
-        JFeeConfigEntity feeConfig = jFeeConfigDao.selectOne(Wrappers.<JFeeConfigEntity>lambdaQuery()
-                .eq(JFeeConfigEntity::getMerchantId, entity.getMerchantId())
-                .eq(JFeeConfigEntity::getMarketproduct, entity.getMarketproduct())
-        );
-        if (feeConfig == null) {
-            feeConfig = jFeeConfigDao.selectOne(Wrappers.<JFeeConfigEntity>lambdaQuery()
-                    .eq(JFeeConfigEntity::getMerchantId, 0L)
-                    .eq(JFeeConfigEntity::getMarketproduct, entity.getMarketproduct())
-            );
-        }
-        return feeConfig;
-    }
-
     public void saveAndSubmit(JDepositEntity entity, boolean submit) {
+        // 产品配置
+        JFeeConfigEntity feeConfig = jCommon.getFeeConfig(entity.getMerchantId(), entity.getMarketproduct());
+
         // 填充payerid, 什么币种的卡， 就用哪个通联va
         List<JVaEntity> jVaEntities = jVaDao.selectList(Wrappers.emptyWrapper());
         JVaEntity jVaEntity = jVaEntities.stream().filter(e -> e.getCurrency().equals(entity.getCurrency())).findFirst().get();
         entity.setPayerid(jVaEntity.getTid());
 
-        // 填充id信息
+        // 填充代理, 商户信息
         JSubEntity subEntity = fillInfo(entity);
 
-        // 金额计算
-        JFeeConfigEntity feeConfig = getFeeConfig(entity);
+        // 金额计算填充
         fixAmount(entity, feeConfig);
 
-        // 初始太
+        // 初始状态
         entity.setState("00");
 
         // 入库
         try {
             tx.executeWithoutResult(st -> {
-                log.info("insert deposit: {}", entity);
                 jDepositDao.insert(entity);
                 ledgerCardCharge.ledgeCardChargeFreeze(entity, subEntity);
             });
@@ -184,42 +171,10 @@ public class JDepositManager {
             throw ex;
         }
 
+        // 是否提交通联
         if (submit) {
-            try {
-                this.submit(entity);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+            this.submit(entity);
         }
-    }
-
-    /**
-     * 上传所需文件
-     */
-    public void uploadFiles(JDepositEntity entity) {
-        // 拿到所有文件fid
-        String agmfid = entity.getAgmfid();
-
-        List<String> fids = List.of(agmfid);
-        Map<String, CompletableFuture<String>> jobs = new HashMap<>();
-        for (String fid : fids) {
-            if (StringUtils.isBlank(fid)) {
-                continue;
-            }
-            jobs.put(fid, CompletableFuture.supplyAsync(() -> {
-                return zinFileService.upload(fid);
-            }));
-        }
-        jobs.forEach((j, f) -> {
-            log.info("wait {}...", j);
-            try {
-                f.get();
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new RenException("can not upload file:" + j);
-            }
-        });
-        log.info("文件上传完毕, 开始请求创建商户...");
     }
 
     /**
@@ -309,15 +264,13 @@ public class JDepositManager {
 
     /**
      * 修改了金额， 需要重新设置发起金额
-     *
-     * @param dto
      */
     public void update(JDepositDTO dto) {
         JDepositEntity entity = jDepositDao.selectById(dto.getId());
         log.info("oldAmount: {}, newAmount: {}", entity.getAmount(), dto.getAmount());
         // 如果修改了金额: 需要重新计算发起金额
         if (entity.getAmount().compareTo(dto.getAmount()) != 0) {
-            JFeeConfigEntity feeConfig = getFeeConfig(entity);
+            JFeeConfigEntity feeConfig = jCommon.getFeeConfig(entity.getMerchantId(), entity.getMarketproduct());
             fixAmount(entity, feeConfig);
         }
         jDepositService.update(dto);
@@ -325,8 +278,6 @@ public class JDepositManager {
 
     /**
      * 作废, 需要解冻
-     *
-     * @param entity
      */
     public void cancel(JDepositEntity entity) {
         JSubEntity subEntity = jSubDao.selectById(entity.getSubId());
@@ -349,12 +300,11 @@ public class JDepositManager {
 
     /**
      * 通知商户
-     * @param id
      */
     public void notify(Long id) {
         JDepositEntity jDepositEntity = jDepositDao.selectById(id);
-        if(!jDepositEntity.getApi().equals(1) ) {
-            throw new RenException("非接口交易");
+        if (!jDepositEntity.getApi().equals(1)) {
+            throw new RenException("非接口交易, 无法通知");
         }
         Long merchantId = jDepositEntity.getMerchantId();
         JMerchantEntity merchant = jMerchantDao.selectById(merchantId);

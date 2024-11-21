@@ -37,11 +37,7 @@ import java.util.concurrent.CompletableFuture;
 @Slf4j
 public class JMoneyManager {
     @Resource
-    private ZestConfig zestConfig;
-    @Resource
     private ZinAccountManageNotifyService zinAccountManageNotifyService;
-    @Resource
-    private ZinFileService zinFileService;
     @Resource
     private JMoneyDao jMoneyDao;
     @Resource
@@ -87,7 +83,7 @@ public class JMoneyManager {
         jMoneyDao.insert(entity);
     }
 
-    // confirm
+    // 确认申请
     public void confirm(JMoneyEntity entity) {
 
         // 提交通联
@@ -109,6 +105,7 @@ public class JMoneyManager {
         jMoneyDao.updateById(updateEntity);
     }
 
+    // 模拟通联回调
     public void mockMoneyInNotify(JMoneyEntity entity) {
         TMoneyInNotify notify = new TMoneyInNotify();
         notify.setAmount(entity.getApplyAmount());
@@ -129,6 +126,7 @@ public class JMoneyManager {
         }
     }
 
+    // 通知商户
     private void notifyMerchant(JMoneyEntity entity) {
         log.info("接口商户, 通知商户...");
         JMerchantEntity merchant = jMerchantDao.selectById(entity.getMerchantId());

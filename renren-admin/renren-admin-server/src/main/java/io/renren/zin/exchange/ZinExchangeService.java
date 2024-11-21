@@ -32,4 +32,8 @@ public class ZinExchangeService {
         return requester.request(uniqueId(), "/gcpapi/apply/query", tExchangeQueryRequest, TExchangeQueryResponse.class);
     }
 
+    // 换汇查询: 2005
+    public TExchangeRateResponse exchangeRate(TExchangeRateRequest request) {
+        return requester.request(uniqueId(), "/gcpapi/card/getexrate", request, TExchangeRateResponse.class);
+    }
 }

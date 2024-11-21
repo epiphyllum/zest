@@ -139,18 +139,9 @@ public class ApiCardStateService {
         );
 
         JMerchantEntity merchant = context.getMerchant();
-        log.info("merchant: {}", merchant);
-
-        log.info("Allinpay Key:{}, merchant Key:{}", zestConfig.getAccessConfig().getSensitiveKey(), merchant.getSensitiveKey());
-
         String plainCvv = CommonUtils.decryptSensitiveString(cardEntity.getCvv(), zestConfig.getAccessConfig().getSensitiveKey(), "utf-8");
-        log.info("Cvv plain: {}", plainCvv);
-
         String merchantCvv = CommonUtils.encryptSensitiveString(plainCvv, merchant.getSensitiveKey(), "utf-8");
-        log.info("Merchant Cvv plain: {}", merchantCvv);
-
         String merchantExpiredate = CommonUtils.encryptSensitiveString(cardEntity.getExpiredate(), merchant.getSensitiveKey(), "utf-8");
-        log.info("Merchant Expiredate plain: {}", merchantExpiredate);
 
         CardPayInfoRes res = new CardPayInfoRes();
         res.setCardno(request.getCardno());

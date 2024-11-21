@@ -42,13 +42,6 @@ public class VWithdrawServiceImpl extends CrudServiceImpl<VWithdrawDao, VWithdra
     public QueryWrapper<VWithdrawEntity> getWrapper(Map<String, Object> params){
         QueryWrapper<VWithdrawEntity> wrapper = new QueryWrapper<>();
 
-//        String agentId = (String)params.get("agentId");
-//        wrapper.eq(StringUtils.isNotBlank(agentId), "agent_id", agentId);
-//        String merchantId = (String)params.get("merchantId");
-//        wrapper.eq(StringUtils.isNotBlank(merchantId), "merchant_id", merchantId);
-//        String subId = (String)params.get("subId");
-//        wrapper.eq(StringUtils.isNotBlank(subId), "sub_id", subId);
-
         String currency = (String)params.get("currency");
         wrapper.eq(StringUtils.isNotBlank(currency), "currency", currency);
         String marketproduct = (String)params.get("marketproduct");
@@ -57,7 +50,6 @@ public class VWithdrawServiceImpl extends CrudServiceImpl<VWithdrawDao, VWithdra
         wrapper.eq(StringUtils.isNotBlank(statDate), "stat_date", statDate);
 
         commonFilter.setFilterAll(wrapper, params);
-
         return wrapper;
     }
 

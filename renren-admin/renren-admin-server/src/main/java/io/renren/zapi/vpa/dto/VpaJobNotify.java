@@ -6,5 +6,6 @@ import java.util.List;
 
 @Data
 public class VpaJobNotify {
-    private List<JobItem> items;
+    private String meraplid;
+    private String state;
 }

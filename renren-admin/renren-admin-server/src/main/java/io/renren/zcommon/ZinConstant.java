@@ -15,7 +15,7 @@ public class ZinConstant {
     public static final String YES_FLAG = "Y";     // 通用FLAG
     public static final String NO_FLAG = "N";      // 通用FLAG
 
-    // 支付申请单状态:
+    // 支付申请单: 换汇
     public static final String PAY_APPLY_MIDDLE_1 = "01";           // 处理中提交申报明细成功后的状态，此时需要运营人员初审通过。
     public static final String PAY_APPLY_MIDDLE_5 = "05";           // 交易处理渠道处理中间过程。
     public static final String PAY_APPLY_FIRST_VERIFY = "16";       // 初审通过后的状态，此时需要运营人员复审通过。
@@ -27,13 +27,12 @@ public class ZinConstant {
     public static final String PAY_APPLY_SUCCESS = "06";            // 处理成功
     public static final String PAY_APPLY_FAIL = "07";               // 处理失败申请单处理失败，具体原因根据提示了解。
     public static final String PAY_APPLY_CLOSE = "11";              // 交易已关闭申请单流程中登录商户平台手动关闭，或由运营人员手动关闭申请单。
-
     public static final String PAY_APPLY_NEW_DJ = "00";             // 大吉状态: 新建
     public static final String PAY_APPLY_CF_DJ = "CF";              // 大吉状态: 确认
     public static final String PAY_APPLY_CC_DJ = "CC";              // 大吉状态: 取消
     public static final String PAY_APPLY_LG_DJ = "LG";              // 大吉状态: 已记账
 
-    // 卡状态
+    // 卡申请单状态:  保证金充值, 保证金提现,
     public static final String CARD_STATE_TO_VERIFY = "01";         // 待审核
     public static final String CARD_STATE_PROCESSING = "02";        // 申请处理中
     public static final String CARD_STATE_SUCCESS = "03";           // 申请成功（正常）
@@ -49,6 +48,7 @@ public class ZinConstant {
     public static final String CARD_STATE_TO_DELIVER = "13";        // 待寄出
     public static final String CARD_STATE_TO_ACTIVATE = "14";       // 待激活
     public static final String CARD_STATE_NEW_DJ = "00";            // 开卡成功后的初始状态:  我方添加的
+    public static final List<String> cardStateFinal = List.of("02", "04", "05","07");
 
     // 入金账户状态
     public static final String MONEY_ACCOUNT_TO_VERIFY = "0";       // 待审核；

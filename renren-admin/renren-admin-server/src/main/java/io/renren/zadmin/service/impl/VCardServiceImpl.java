@@ -49,13 +49,6 @@ public class VCardServiceImpl extends CrudServiceImpl<VCardDao, VCardEntity, VCa
         String marketproduct = (String)params.get("marketproduct");
         wrapper.eq(StringUtils.isNotBlank(marketproduct), "marketproduct", marketproduct);
 
-//        String merchantId = (String)params.get("merchantId");
-//        wrapper.eq(StringUtils.isNotBlank(merchantId), "merchant_id", merchantId);
-//        String subId = (String)params.get("subId");
-//        wrapper.eq(StringUtils.isNotBlank(subId), "sub_id", subId);
-//        String agentId = (String)params.get("agentId");
-//        wrapper.eq(StringUtils.isNotBlank(agentId), "agent_id", agentId);
-
         commonFilter.setFilterAll(wrapper, params);
         return wrapper;
     }

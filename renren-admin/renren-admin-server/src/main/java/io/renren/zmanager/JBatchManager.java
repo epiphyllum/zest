@@ -84,6 +84,8 @@ public class JBatchManager {
     // 结算流水下载
     public void authedBatch(String dateStr) {
         Date date = DateUtils.parse(dateStr, DateUtils.DATE_PATTERN);
+
+        // 创建任务记录
         JBatchEntity batchEntity = newBatchItem(date, ZestConstant.BATCH_TYPE_AUTHED);
 
         // 第一次下载
@@ -104,7 +106,7 @@ public class JBatchManager {
         // 批次
         List<List<JAuthedEntity>> batchList = new ArrayList<>(batchCount);
 
-        //  准备批次
+        // 准备批次
         List<JAuthedEntity> curBatch = new ArrayList<>(1000);
         for (TAuthSettledResponse.Item item : response.getDatalist()) {
             JAuthedEntity entity = ConvertUtils.sourceToTarget(item, JAuthedEntity.class);
@@ -113,7 +115,6 @@ public class JBatchManager {
                 curBatch = new ArrayList<>(1000);
             }
         }
-
         while (downloaded < total) {
             request.setPageindex(request.getPageindex() + 1);
             response = zinCardTxnService.settledQuery(request);
@@ -131,30 +132,41 @@ public class JBatchManager {
             batchList.add(curBatch);
         }
 
+        boolean success = true;
+
         // 开始插入批次
-        for (List<JAuthedEntity> batch : batchList) {
-            tx.executeWithoutResult(st -> {
-                try {
-                    jAuthedService.insertBatch(batch);
-                } catch (Exception ex) {
-                    for (JAuthedEntity jAuthedEntity : batch) {
-                        try {
-                            jAuthedDao.insert(jAuthedEntity);
-                        } catch (DuplicateKeyException e) {
+        try {
+            for (List<JAuthedEntity> batch : batchList) {
+                tx.executeWithoutResult(st -> {
+                    try {
+                        jAuthedService.insertBatch(batch);
+                    } catch (Exception ex) {
+                        for (JAuthedEntity jAuthedEntity : batch) {
+                            try {
+                                jAuthedDao.insert(jAuthedEntity);
+                            } catch (DuplicateKeyException e) {
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            success = false;
         }
 
+        String state = success ? ZestConstant.BATCH_STATUS_SUCCESS : ZestConstant.BATCH_STATUS_FAIL;
         jBatchDao.update(null, Wrappers.<JBatchEntity>lambdaUpdate()
                 .eq(JBatchEntity::getId, batchEntity.getId())
                 .eq(JBatchEntity::getState, batchEntity.getState())
-                .set(JBatchEntity::getState, ZestConstant.BATCH_STATUS_SUCCESS)
+                .set(JBatchEntity::getState, state)
                 .set(JBatchEntity::getMemo, "记录:" + total));
 
     }
 
+    /**
+     * 插入任务
+     */
     private JBatchEntity newBatchItem(Date date, String batchType) {
         JBatchEntity batchEntity = jBatchDao.selectOne(Wrappers.<JBatchEntity>lambdaQuery()
                 .eq(JBatchEntity::getBatchDate, date)
@@ -170,126 +182,55 @@ public class JBatchManager {
         return batchEntity;
     }
 
-    // 生成某一天的数据
-    public void statBatch(String dateStr) {
-        Date date = DateUtils.parse(dateStr, DateUtils.DATE_PATTERN);
-
-        // 检查是否可以统计
-        checkStatDate(date);
-
-        // 拿到任务
-        JBatchEntity batchEntity = newBatchItem(date, ZestConstant.BATCH_TYPE_STAT);
-        if (batchEntity.getState().equals(ZestConstant.BATCH_STATUS_SUCCESS)) {
-            throw new RenException("重复执行");
-        }
-
-        Map<String, VCardEntity> cardMap = new HashMap<>();
-        Map<String, VDepositEntity> depositMap = new HashMap<>();
-        Map<String, VWithdrawEntity> withdrawMap = new HashMap<>();
-        Set<String> allKeys = new HashSet<>();
-
-        // 卡统计
-        List<VCardEntity> cardList = vCardDao.selectByDate(date);
+    /**
+     * 收集发卡数据
+     */
+    private void gatherCard(List<VCardEntity> cardList, Set<String> allKeys, Map<String, VCardEntity> map) {
         for (VCardEntity vCardEntity : cardList) {
             String key = vCardEntity.getAgentName() + vCardEntity.getAgentId()
                     + vCardEntity.getMerchantName() + vCardEntity.getMerchantId()
                     + vCardEntity.getSubName() + vCardEntity.getSubId()
                     + vCardEntity.getMarketproduct()
                     + vCardEntity.getCurrency();
-            cardMap.put(key, vCardEntity);
+            map.put(key, vCardEntity);
             allKeys.add(key);
         }
+    }
 
-        // 充值统计
-        List<VDepositEntity> vDepositEntities = vDepositDao.selectByDate(date);
+    /**
+     * 收集充值数据
+     */
+    private void gatherDeposit(List<VDepositEntity> vDepositEntities, Set<String> allKeys, Map<String, VDepositEntity> map) {
         for (VDepositEntity vDepositEntity : vDepositEntities) {
             String key = vDepositEntity.getAgentName() + vDepositEntity.getAgentId()
                     + vDepositEntity.getMerchantName() + vDepositEntity.getMerchantId()
                     + vDepositEntity.getSubName() + vDepositEntity.getSubId()
                     + vDepositEntity.getMarketproduct()
                     + vDepositEntity.getCurrency();
-            depositMap.put(key, vDepositEntity);
+            map.put(key, vDepositEntity);
             allKeys.add(key);
         }
+    }
 
-        // 提现统计
-        List<VWithdrawEntity> vWithdrawEntities = vWithdrawDao.selectByDate(date);
+    /**
+     * 收集提现数据
+     */
+    private void gatherWithdraw(List<VWithdrawEntity> vWithdrawEntities, Set<String> allKeys, Map<String, VWithdrawEntity> map) {
         for (VWithdrawEntity vWithdrawEntity : vWithdrawEntities) {
             String key = vWithdrawEntity.getAgentName() + vWithdrawEntity.getAgentId()
                     + vWithdrawEntity.getMerchantName() + vWithdrawEntity.getMerchantId()
                     + vWithdrawEntity.getSubName() + vWithdrawEntity.getSubId()
                     + vWithdrawEntity.getMarketproduct()
                     + vWithdrawEntity.getCurrency();
-            withdrawMap.put(key, vWithdrawEntity);
+            map.put(key, vWithdrawEntity);
             allKeys.add(key);
         }
-
-        int batchSize = 1000;
-
-        List<List<JStatEntity>> batchList = new ArrayList<>();
-        List<JStatEntity> curBatch = new ArrayList<>(batchSize);
-
-        int total = 0;
-
-        // 合并:
-        for (String key : allKeys) {
-            VWithdrawEntity withdrawEntity = withdrawMap.get(key);
-            VCardEntity cardEntity = cardMap.get(key);
-            VDepositEntity depositEntity = depositMap.get(key);
-            JStatEntity statEntity = new JStatEntity();
-            String md5Key = DigestUtil.md5Hex(key + dateStr);
-            statEntity.setMd5(md5Key);
-            statEntity.setStatDate(date);
-            setFields(withdrawEntity, cardEntity, depositEntity, statEntity);
-            curBatch.add(statEntity);
-            if (curBatch.size() == batchSize) {
-                batchList.add(curBatch);
-                curBatch = new ArrayList<>(batchSize);
-            }
-            total += 1;
-        }
-
-        if (curBatch.size() < batchSize) {
-            batchList.add(curBatch);
-        }
-
-        String memo = String.format("合并统计, 充值交易:%d, 提现交易:%d, 发卡交易:%d, 合并:%d, 批次:%d",
-                vDepositEntities.size(), vWithdrawEntities.size(), cardList.size(), total, batchList.size()
-        );
-        System.out.println(memo);
-
-        boolean success = true;
-        try {
-            for (List<JStatEntity> batch : batchList) {
-                tx.executeWithoutResult(st -> {
-                    try {
-                        jStatService.insertBatch(batch);
-                    } catch (DuplicateKeyException ex) {
-                        log.error("batch failed: {}", ex.getMessage());
-                        for (JStatEntity jStatEntity : batch) {
-                            try {
-                                jStatDao.insert(jStatEntity);
-                            } catch (DuplicateKeyException e) {
-                                log.error("insert failed: {}", e.getMessage());
-                            }
-                        }
-                    }
-                });
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            success = false;
-        }
-
-        String updateState = success ? ZestConstant.BATCH_STATUS_SUCCESS : ZestConstant.BATCH_STATUS_FAIL;
-        jBatchDao.update(null, Wrappers.<JBatchEntity>lambdaUpdate()
-                .eq(JBatchEntity::getId, batchEntity.getId())
-                .eq(JBatchEntity::getState, batchEntity.getState())
-                .set(JBatchEntity::getState, updateState)
-                .set(JBatchEntity::getMemo, memo));
-
     }
 
+
+    /**
+     * 填充维度信息
+     */
     private void setFields(VWithdrawEntity withdrawEntity, VCardEntity cardEntity, VDepositEntity depositEntity, JStatEntity statEntity) {
         boolean isKeySet = false;
         if (depositEntity != null) {
@@ -359,7 +300,123 @@ public class JBatchManager {
         }
     }
 
-    // 允许批处理任务
+    /**
+     * 收集批次数据
+     */
+    private int gatherStatBatchList(
+            List<List<JStatEntity>> batchList,
+            Set<String> allKeys,
+            Map<String, VCardEntity> cardMap,
+            Map<String, VDepositEntity> depositMap,
+            Map<String, VWithdrawEntity> withdrawMap,
+            int batchSize,
+            Date date,
+            String dateStr
+    ) {
+        List<JStatEntity> curBatch = new ArrayList<>(batchSize);
+        int total = 0;
+        // 合并:
+        for (String key : allKeys) {
+            VWithdrawEntity withdrawEntity = withdrawMap.get(key);
+            VCardEntity cardEntity = cardMap.get(key);
+            VDepositEntity depositEntity = depositMap.get(key);
+            JStatEntity statEntity = new JStatEntity();
+            String md5Key = DigestUtil.md5Hex(key + dateStr);
+            statEntity.setMd5(md5Key);
+            statEntity.setStatDate(date);
+            setFields(withdrawEntity, cardEntity, depositEntity, statEntity);
+            curBatch.add(statEntity);
+            if (curBatch.size() == batchSize) {
+                batchList.add(curBatch);
+                curBatch = new ArrayList<>(batchSize);
+            }
+            total += 1;
+        }
+        if (curBatch.size() < batchSize) {
+            batchList.add(curBatch);
+        }
+        return total;
+
+
+    }
+
+    // 生成某一天的数据
+    public void statBatch(String dateStr) {
+        Date date = DateUtils.parse(dateStr, DateUtils.DATE_PATTERN);
+
+        // 检查是否可以统计
+        checkStatDate(date);
+
+        // 拿到任务
+        JBatchEntity batchEntity = newBatchItem(date, ZestConstant.BATCH_TYPE_STAT);
+        if (batchEntity.getState().equals(ZestConstant.BATCH_STATUS_SUCCESS)) {
+            throw new RenException("重复执行");
+        }
+
+        Map<String, VCardEntity> cardMap = new HashMap<>();
+        Map<String, VDepositEntity> depositMap = new HashMap<>();
+        Map<String, VWithdrawEntity> withdrawMap = new HashMap<>();
+        Set<String> allKeys = new HashSet<>();
+
+        // 卡统计, 充值统计, 提现统计
+        List<VCardEntity> cardList = vCardDao.selectByDate(date);
+        List<VDepositEntity> vDepositEntities = vDepositDao.selectByDate(date);
+        List<VWithdrawEntity> vWithdrawEntities = vWithdrawDao.selectByDate(date);
+
+        // 收集
+        gatherCard(cardList, allKeys, cardMap);
+        gatherDeposit(vDepositEntities, allKeys, depositMap);
+        gatherWithdraw(vWithdrawEntities, allKeys, withdrawMap);
+
+        // 收集并拆分批次
+        int batchSize = 1000;
+        List<List<JStatEntity>> batchList = new ArrayList<>();
+        int total = gatherStatBatchList(batchList, allKeys, cardMap, depositMap, withdrawMap, batchSize, date, dateStr);
+        String memo = String.format("合并统计, 充值交易:%d, 提现交易:%d, 发卡交易:%d, 合并:%d, 批次:%d",
+                vDepositEntities.size(), vWithdrawEntities.size(), cardList.size(), total, batchList.size()
+        );
+        log.info(memo);
+
+        // 运行批次
+        boolean success = true;
+        try {
+            for (List<JStatEntity> batch : batchList) {
+                tx.executeWithoutResult(st -> {
+                    // 先整体插入批次
+                    try {
+                        jStatService.insertBatch(batch);
+                    } catch (DuplicateKeyException ex) {
+                        // 整体插入如果有主键重复， 则单笔插入
+                        log.error("batch failed: {}", ex.getMessage());
+                        for (JStatEntity jStatEntity : batch) {
+                            try {
+                                jStatDao.insert(jStatEntity);
+                            } catch (DuplicateKeyException e) {
+                                log.error("insert failed: {}", e.getMessage());
+                            }
+                        }
+                    }
+                });
+            }
+        } catch (Exception e) {
+            log.error("运行失败");
+            e.printStackTrace();
+            success = false;
+        }
+
+        // 更新任务状态
+        String updateState = success ? ZestConstant.BATCH_STATUS_SUCCESS : ZestConstant.BATCH_STATUS_FAIL;
+        jBatchDao.update(null, Wrappers.<JBatchEntity>lambdaUpdate()
+                .eq(JBatchEntity::getId, batchEntity.getId())
+                .eq(JBatchEntity::getState, batchEntity.getState())
+                .set(JBatchEntity::getState, updateState)
+                .set(JBatchEntity::getMemo, memo));
+
+    }
+
+    /**
+     * 批处理任务
+     */
     public void run(String batchType, String date) {
         if (batchType.equals(ZestConstant.BATCH_TYPE_STAT)) {
             this.statBatch(date);
@@ -371,7 +428,9 @@ public class JBatchManager {
         }
     }
 
-    // 重新运行批处理
+    /**
+     * 重新运行批处理
+     */
     public void rerun(Long id) {
         JBatchEntity batchEntity = jBatchDao.selectById(id);
         String dateStr = DateUtils.format(batchEntity.getBatchDate(), DateUtils.DATE_PATTERN);

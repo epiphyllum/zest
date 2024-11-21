@@ -7,4 +7,5 @@ import java.math.BigDecimal;
 // 预付费卡开卡任务
 @Data
 public class NewPrepaidJobRes {
+    String applyid;
 }

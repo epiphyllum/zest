@@ -6,5 +6,5 @@ import java.math.BigDecimal;
 
 @Data
 public class NewShareJobRes {
-    // 支持交易币种
+    String applyid;
 }

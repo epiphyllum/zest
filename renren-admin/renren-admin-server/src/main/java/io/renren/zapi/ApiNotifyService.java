@@ -52,7 +52,6 @@ public class ApiNotifyService {
         this.signer.setPrivateKey(rsaSigner.getPrivateKey());
     }
 
-
     // 通知商户: OK| FAIL
     public String notifyMerchant(Object object, JMerchantEntity merchant, String apiName) {
         String body = null;
@@ -103,10 +102,8 @@ public class ApiNotifyService {
         // 商户webhook地址
         String url = merchant.getWebhook();
         try {
-            log.info("req:[{}][{}]", url, body);
             ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
             String result = responseEntity.getBody();
-            log.info("res:[{}]", result);
             packetEntity.setRecv(result);
             apiLogger.logPacketSuccess(packetEntity);
             return result;

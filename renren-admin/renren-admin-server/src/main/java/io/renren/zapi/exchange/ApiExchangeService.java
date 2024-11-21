@@ -9,6 +9,9 @@ import io.renren.zadmin.entity.JExchangeEntity;
 import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zapi.ApiContext;
 import io.renren.zapi.exchange.dto.*;
+import io.renren.zin.exchange.ZinExchangeService;
+import io.renren.zin.exchange.dto.TExchangeRateRequest;
+import io.renren.zin.exchange.dto.TExchangeRateResponse;
 import io.renren.zmanager.JExchangeManager;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +25,8 @@ public class ApiExchangeService {
     private JExchangeDao jExchangeDao;
     @Resource
     private JExchangeManager jExchangeManager;
+    @Resource
+    private ZinExchangeService zinExchangeService;
 
     // 查原交易
     private JExchangeEntity getEntity(String meraplid, String applyid, ApiContext context) {
@@ -129,6 +134,16 @@ public class ApiExchangeService {
         exchangeQueryResponse.setMeraplid(entity.getMeraplid());  // 换回来
         Result<ExchangeQueryRes> result = new Result<>();
         result.setData(exchangeQueryResponse);
+        return result;
+    }
+
+    // 汇率查询服务
+    public Result<ExchangeRateQueryRes> exchangeRate(ExchangeRateQuery request, ApiContext context) {
+        TExchangeRateRequest tExchangeRateRequest = ConvertUtils.sourceToTarget(request, TExchangeRateRequest.class);
+        TExchangeRateResponse tExchangeRateResponse = zinExchangeService.exchangeRate(tExchangeRateRequest);
+        ExchangeRateQueryRes exchangeRateQueryRes = ConvertUtils.sourceToTarget(tExchangeRateResponse, ExchangeRateQueryRes.class);
+        Result<ExchangeRateQueryRes> result = new Result<>();
+        result.setData(exchangeRateQueryRes);
         return result;
     }
 }

@@ -1,9 +1,5 @@
 package io.renren.zmanager;
 
-import cn.hutool.json.JSONObject;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
@@ -15,11 +11,11 @@ import io.renren.zadmin.dao.JBalanceDao;
 import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.dao.JSubDao;
 import io.renren.zadmin.dto.JMerchantDTO;
-import io.renren.zadmin.entity.JBalanceEntity;
 import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zadmin.entity.JSubEntity;
 import io.renren.zadmin.service.JMerchantService;
 import io.renren.zbalance.BalanceType;
+import io.renren.zbalance.LedgerUtil;
 import io.renren.zcommon.ZestConstant;
 import io.renren.zcommon.ZinConstant;
 import io.renren.zin.file.ZinFileService;
@@ -30,11 +26,13 @@ import io.renren.zin.sub.dto.TSubQuery;
 import io.renren.zin.sub.dto.TSubQueryResponse;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -43,21 +41,19 @@ public class JMerchantManager {
     @Resource
     private JMerchantService jMerchantService;
     @Resource
-    private JBalanceDao jBalanceDao;
-    @Resource
     private JSubDao jSubDao;
     @Resource
     private TransactionTemplate tx;
     @Resource
     private JMerchantDao jMerchantDao;
     @Resource
-    private ZinFileService zinFileService;
-    @Resource
     private ZinSubService zinSubService;
     @Resource
     private SysDeptDao sysDeptDao;
     @Resource
     private JSubManager jSubManager;
+    @Resource
+    private LedgerUtil ledgerUtil;
 
     public JMerchantEntity save(JMerchantDTO dto) {
 
@@ -108,24 +104,9 @@ public class JMerchantManager {
     public void openVa(JMerchantEntity entity) {
         String[] currencyList = entity.getCurrencyList().split(",");
         for (String currency : currencyList) {
-            newBalance(entity, BalanceType.getVaAccount(currency), currency);  // 创建va账户
+            ledgerUtil.newBalance(ZestConstant.USER_TYPE_MERCHANT, entity.getCusname(), entity.getId(), BalanceType.getVaAccount(currency), currency);
         }
     }
-
-    /**
-     * 创建账户
-     */
-    private void newBalance(JMerchantEntity entity, String type, String currency) {
-        log.info("newBalance: {}, {}, {}", entity, type, currency);
-        JBalanceEntity jBalanceEntity = new JBalanceEntity();
-        jBalanceEntity.setOwnerId(entity.getId());
-        jBalanceEntity.setOwnerName(entity.getCusname());
-        jBalanceEntity.setOwnerType(ZestConstant.USER_TYPE_MERCHANT);
-        jBalanceEntity.setBalanceType(type);
-        jBalanceEntity.setCurrency(currency);
-        jBalanceDao.insert(jBalanceEntity);
-    }
-
 
     /**
      * 提交通联
@@ -190,6 +171,8 @@ public class JMerchantManager {
                 jSubEntity.setMerchantId(entity.getId());
                 jSubEntity.setApi(0);
                 jSubManager.save(jSubEntity);
+                // 默认子商户自动审核通过
+                jSubManager.verify(jSubEntity.getId(), ZinConstant.MERCHANT_STATE_VERIFIED);
             }
         });
     }
@@ -240,7 +223,8 @@ public class JMerchantManager {
             jMerchantService.update(dto);
             // 新增加的币种
             for (String currency : added) {
-                newBalance(merchant, BalanceType.getVaAccount(currency), currency);  // 创建va账户
+                // newBalance(merchant, BalanceType.getVaAccount(currency), currency);  // 创建va账户
+                ledgerUtil.newBalance(ZestConstant.USER_TYPE_MERCHANT, merchant.getCusname(), merchant.getId(), BalanceType.getVaAccount(currency), currency);
             }
             // 子商户增加币种
             for (JSubEntity subEntity : subEntities) {

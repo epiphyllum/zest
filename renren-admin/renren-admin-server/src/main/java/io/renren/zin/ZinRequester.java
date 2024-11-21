@@ -85,6 +85,7 @@ public class ZinRequester {
         this.verifier.setPublicKey(rsaVerifier.getPublicKey());
     }
 
+    //  HTTP请求头设置
     private HeaderInfo getHeaders(String reqId, Object body, String uri, String params) {
         ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
         String agcpDate = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
@@ -191,8 +192,8 @@ public class ZinRequester {
             if (ttResult.getRspcode().equals("0000")) {
                 return ttResult;
             }
-            log.error("toSign: [{}]", headerInfo.getToSign());
-            throw new RenException("allinpay error:" + ttResult.getRspinfo());
+            log.error("通联失败:{}, toSign: [{}]", headerInfo.getToSign(), ttResult);
+            throw new RenException("发卡行错误:" + ttResult.getRspinfo());
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             throw new RenException("request to allinpay failed");
@@ -257,12 +258,13 @@ public class ZinRequester {
             if (tResult.getRspcode().equals("0000")) {
                 return;
             }
-            throw new RenException("allinpay error:" + tResult.getRspinfo());
+            throw new RenException("发卡行错误:" + tResult.getRspinfo());
         } catch (JsonProcessingException e) {
-            throw new RenException("can not upload " + fileId);
+            throw new RenException("无法上传文件:" + fileId);
         }
     }
 
+    // 读取请求体
     public String readBody(HttpServletRequest request) {
         try {
             InputStream inputStream = request.getInputStream();
@@ -297,7 +299,7 @@ public class ZinRequester {
         if (!verify) {
             log.error("verify signature failed\ntoSign:{}", toSign);
             log.error("recv notification[{}]\nbody:[{}]\nauth:[{}]\ndate:[{}]", request.getRequestURI(), body, auth, date);
-            throw new RenException("verify failed");
+            throw new RenException("验证签名失败");
         }
         String reqid = request.getParameter("reqid");
         JChannelLogEntity logEntity = new JChannelLogEntity();

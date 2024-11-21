@@ -8,6 +8,7 @@ import io.renren.zapi.cardmoney.ApiCardMoneyNotifyService;
 import io.renren.zapi.cardstate.ApiCardStateNotifyService;
 import io.renren.zapi.exchange.ApiExchangeNotifyService;
 import io.renren.zapi.sub.ApiSubNotifyService;
+import io.renren.zapi.vpa.ApiVpaNotifyService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
@@ -27,19 +28,24 @@ public class ApiNotify {
     private ApiExchangeNotifyService apiExchangeNotifyService;
     @Resource
     private ApiSubNotifyService apiSubNotifyService;
+    @Resource
+    private ApiVpaNotifyService apiVpaNotifyService;
 
     // 子商户创建通知
     public void subNotify(JSubEntity entity, JMerchantEntity merchant) {
         apiSubNotifyService.subNotify(entity, merchant);
     }
+
     // 来账白名单通知
     public void moneyAccountNotify(JMaccountEntity entity, JMerchantEntity merchant) {
         apiAccountNotifyService.moneyAccountNotify(entity, merchant);
     }
+
     // 入金通知
     public void moneyNotify(JMoneyEntity entity, JMerchantEntity merchant) {
         apiAllocateNotifyService.moneyNotify(entity, merchant);
     }
+
     // 开卡通知
     public void cardNewNotify(JCardEntity entity, JMerchantEntity merchant) {
         apiCardApplyNotifyService.cardNewNotify(entity, merchant);
@@ -54,16 +60,24 @@ public class ApiNotify {
     public void cardChargeNotify(JDepositEntity entity, JMerchantEntity merchant) {
         apiCardMoneyNotifyService.cardChargeNotify(entity, merchant);
     }
+
     // 卡提现通知
     public void cardWithdrawNotify(JWithdrawEntity entity, JMerchantEntity merchant) {
         apiCardMoneyNotifyService.cardWithdrawNotify(entity, merchant);
     }
+
     // 商户卡交易通知
     public void cardTxnNotify(JAuthEntity entity, JMerchantEntity merchant) {
         apiCardMoneyNotifyService.cardTxnNotify(entity, merchant);
     }
+
     // 换汇通知
     public void exchangeNotify(JExchangeEntity entity, JMerchantEntity merchant) {
         apiExchangeNotifyService.exchangeNotify(entity, merchant);
+    }
+
+    // vpa开卡结果通知
+    public void vpaJobNotify(JVpaJobEntity entity, JMerchantEntity merchant) {
+        apiVpaNotifyService.vpaJobNotify(entity, merchant);
     }
 }

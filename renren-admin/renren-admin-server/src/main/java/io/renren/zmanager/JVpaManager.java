@@ -1,11 +1,14 @@
 package io.renren.zmanager;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.zadmin.dao.*;
 import io.renren.zadmin.entity.*;
 import io.renren.zapi.ApiNotify;
+import io.renren.zapi.vpa.dto.JobItem;
 import io.renren.zbalance.LedgerUtil;
 import io.renren.zbalance.ledgers.LedgerOpenVpaPrepaid;
 import io.renren.zbalance.ledgers.LedgerOpenVpaShare;
@@ -34,6 +37,10 @@ import java.util.regex.Pattern;
 @Slf4j
 public class JVpaManager {
 
+    @Resource
+    private JCommon jCommon;
+    @Resource
+    private ObjectMapper objectMapper;
     @Resource
     private LedgerUtil ledgerUtil;
     @Resource
@@ -77,12 +84,13 @@ public class JVpaManager {
             throw new RenException("有效期时间格式错误");
         }
 
+        // 设置的token有效期， 要在主卡有效期之前
         String cardexpiredateNorm = pCardexpiredateMatcher.group(1) + pCardexpiredateMatcher.group(2);
         if (mainCardExpiredate.compareTo(cardexpiredateNorm) < 0) {
             throw new RenException("要求有效期时间不能晚于主卡有效期:" + mainCardExpiredate);
         }
 
-        // 期限enddate： YYYY-MM-DD
+        // 期限卡: 额外限制:enddate： YYYY-MM-DD
         if (entity.getCycle().equals(ZinConstant.VPA_CYCLE_DEADLINE)) {
             String enddate = entity.getEnddate();
             Pattern pEnddate = Pattern.compile("\\d\\d(\\d\\d)-(\\d\\d)-(\\d\\d)");
@@ -137,19 +145,7 @@ public class JVpaManager {
         entity.setMerchantName(sub.getMerchantName());
         entity.setSubName(sub.getCusname());
 
-        JFeeConfigEntity feeConfig = jFeeConfigDao.selectOne(Wrappers.<JFeeConfigEntity>lambdaQuery()
-                .eq(JFeeConfigEntity::getMarketproduct, entity.getMarketproduct())
-                .eq(JFeeConfigEntity::getMerchantId, entity.getMerchantId())
-        );
-        if (feeConfig == null) {
-            feeConfig = jFeeConfigDao.selectOne(Wrappers.<JFeeConfigEntity>lambdaQuery()
-                    .eq(JFeeConfigEntity::getMarketproduct, entity.getMarketproduct())
-                    .eq(JFeeConfigEntity::getMerchantId, 0L)
-            );
-        }
-        if (feeConfig == null) {
-            throw new RenException("费用配置缺失");
-        }
+        JFeeConfigEntity feeConfig = jCommon.getFeeConfig(sub.getMerchantId(), entity.getMarketproduct());
         entity.setProductcurrency(feeConfig.getCurrency());
 
         // 计算批次发卡手续费
@@ -208,20 +204,7 @@ public class JVpaManager {
 
     // 填充卡列表, 初始额度调整列表
     public void vpaInitFill(JVpaJobEntity entity, List<JCardEntity> cards, List<JVpaAdjustEntity> adjusts, JCardEntity mainCard) {
-        // 产品费用配置
-        JFeeConfigEntity feeConfig = jFeeConfigDao.selectOne(Wrappers.<JFeeConfigEntity>lambdaQuery()
-                .eq(JFeeConfigEntity::getMerchantId, entity.getMerchantId())
-                .eq(JFeeConfigEntity::getMarketproduct, entity.getMarketproduct())
-        );
-        if (feeConfig == null) {
-            feeConfig = jFeeConfigDao.selectOne(Wrappers.<JFeeConfigEntity>lambdaQuery()
-                    .eq(JFeeConfigEntity::getMerchantId, 0L)
-                    .eq(JFeeConfigEntity::getMarketproduct, entity.getMarketproduct())
-            );
-        }
-        if (feeConfig == null) {
-            throw new RenException("没有配置");
-        }
+        JFeeConfigEntity feeConfig = jCommon.getFeeConfig(entity.getMerchantId(), entity.getMarketproduct());
 
         BigDecimal merchantFee = entity.getMerchantfee().divide(new BigDecimal(entity.getNum()), 2, RoundingMode.HALF_UP);
         for (JCardEntity jCardEntity : cards) {
@@ -377,6 +360,7 @@ public class JVpaManager {
 
     /**
      * 取消发卡任务
+     *
      * @param entity
      */
     public void cancel(JVpaJobEntity entity) {
@@ -403,4 +387,6 @@ public class JVpaManager {
             throw e;
         }
     }
+
+
 }

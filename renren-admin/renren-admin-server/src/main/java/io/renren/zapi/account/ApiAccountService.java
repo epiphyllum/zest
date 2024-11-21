@@ -78,7 +78,7 @@ public class ApiAccountService {
     }
 
     /**
-     * 银行账户修改: todo
+     * 银行账户修改: 没什么用
      */
     public Result<MoneyAccountUpdateResponse> moneyAccountUpdate(MoneyAccountUpdate request, ApiContext context) {
         return null;

@@ -176,6 +176,9 @@ public class JCardDTO implements Serializable {
     // 卡余额
     @Schema(description = "balance")
     private BigDecimal balance;
+    @Schema(description = "prepaidQuota")
+    private BigDecimal prepaidQuota;
+
 
     @Schema(description = "cvv")
     private String cvv;

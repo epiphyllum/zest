@@ -6,20 +6,21 @@ import java.math.BigDecimal;
 
 @Data
 public class NewShareJobReq {
+    private String meraplid;
     // 支持交易币种
-    private String currency;
-    private String cycle;
-    private Integer authmaxcount;
-    private BigDecimal authmaxamount;
-    private String onlhkflag;
-    private String begindate;
-    private String enddate;
-    private String naturalmonthflag;
-    private String naturalmonthstartday;
-    private String fixedamountflag;
+    private String currency;               // 支持交易币种, 逗号分割
+    private String cycle;                  // 场景类型:
+    private Integer authmaxcount;          // 最大授权笔数
+    private BigDecimal authmaxamount;      // 最大授权金额
+    private String onlhkflag;              // 是否仅限香港
+    private String begindate;              // 期限卡开始日期
+    private String enddate;                // 期限卡结束日期
+    private String naturalmonthflag;       // 是否自然月
+    private String naturalmonthstartday;   // 自然月开始日期
+    private String fixedamountflag;        // 是否单次定额
 
-    private String cardexpiredate; // 有效期
-    private String maincardno; // 主卡卡号maincardnoString30Y主卡产品类型为：021201:通华VPA电子卡的主卡卡号
-    private Integer num; // 申请数量numString6O为空，默认申请1张，一次申请最大数量为10万
-    private String email; // 接受卡片邮箱emailString50O为空，不发送VPA子卡信息，需自行到用卡平台下载
+    private String cardexpiredate;         // 有效期
+    private String maincardno;             // 主卡卡号
+    private Integer num;                   // 申请数量
+    private String email;                  // 接受卡片邮箱
 }

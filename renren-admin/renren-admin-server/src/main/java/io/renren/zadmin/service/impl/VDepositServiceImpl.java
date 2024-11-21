@@ -42,14 +42,6 @@ public class VDepositServiceImpl extends CrudServiceImpl<VDepositDao, VDepositEn
     public QueryWrapper<VDepositEntity> getWrapper(Map<String, Object> params){
         QueryWrapper<VDepositEntity> wrapper = new QueryWrapper<>();
 
-
-//        String agentId = (String)params.get("agentId");
-//        wrapper.eq(StringUtils.isNotBlank(agentId), "agent_id", agentId);
-//        String merchantId = (String)params.get("merchantId");
-//        wrapper.eq(StringUtils.isNotBlank(merchantId), "merchant_id", merchantId);
-//        String subId = (String)params.get("subId");
-//        wrapper.eq(StringUtils.isNotBlank(subId), "sub_id", subId);
-
         String currency = (String)params.get("currency");
         wrapper.eq(StringUtils.isNotBlank(currency), "currency", currency);
 

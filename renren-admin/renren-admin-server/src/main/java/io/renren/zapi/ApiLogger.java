@@ -56,7 +56,7 @@ public class ApiLogger {
         // 记录日志
         CompletableFuture.runAsync(() -> {
             try {
-//                packetEntity.setSend(failEx.getMessage());
+                packetEntity.setSend(failEx.getMessage());
             } catch (Exception ex) {
                 ex.printStackTrace();
                 return;

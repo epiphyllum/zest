@@ -24,6 +24,7 @@ import io.renren.zadmin.service.JVaService;
 import io.renren.zin.accountmanage.dto.TVaListRequest;
 import io.renren.zin.accountmanage.dto.TVaListResponse;
 import io.renren.zin.accountmanage.ZinAccountManageService;
+import io.renren.zmanager.JVaManager;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -55,9 +56,7 @@ public class JVaController {
     @Resource
     private JVaService jVaService;
     @Resource
-    private ZinAccountManageService zinAccountManageService;
-    @Resource
-    private JVaDao jVaDao;
+    private JVaManager jVaManager;
 
     @GetMapping("page")
     @Operation(summary = "分页")
@@ -110,30 +109,8 @@ public class JVaController {
                 !user.getUserType().equals("agent")) {
             return Result.fail(9999, "not authorized");
         }
-        //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
-        TVaListResponse tVaListResponse = zinAccountManageService.vaList(new TVaListRequest());
-        Long aLong = jVaDao.selectCount(Wrappers.emptyWrapper());
-        List<JVaEntity> jVaEntities = new ArrayList<>(tVaListResponse.getAccts().size());
-        for (TVaListResponse.VaItem acct : tVaListResponse.getAccts()) {
-            JVaEntity jVaEntity = ConvertUtils.sourceToTarget(acct, JVaEntity.class);
-            jVaEntity.setTid(acct.getId());
-            jVaEntities.add(jVaEntity);
-        }
-        if (aLong > 0) {
-            for (JVaEntity jVaEntity : jVaEntities) {
-                jVaDao.update(null, Wrappers.<JVaEntity>lambdaUpdate()
-                        .eq(JVaEntity::getAccountno, jVaEntity.getAccountno())
-                        .set(JVaEntity::getAmount, jVaEntity.getAmount())
-                        .set(JVaEntity::getTid, jVaEntity.getTid())
-                        .set(JVaEntity::getUpdateDate, new Date())
-                );
-            }
-        } else {
-            for (JVaEntity jVaEntity : jVaEntities) {
-                jVaDao.insert(jVaEntity);
-            }
-        }
+        jVaManager.refresh();
         return new Result();
     }
 

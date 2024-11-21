@@ -22,6 +22,7 @@ import io.renren.zapi.cardmoney.ApiCardMoneyService;
 import io.renren.zapi.cardstate.ApiCardStateService;
 import io.renren.zapi.exchange.ApiExchangeService;
 import io.renren.zapi.sub.ApiSubService;
+import io.renren.zapi.vpa.ApiVpaService;
 import io.renren.zcommon.CommonUtils;
 import io.renren.zcommon.ZestConfig;
 import jakarta.annotation.PostConstruct;
@@ -88,6 +89,8 @@ public class ApiService {
     private ApiCardStateService apiCardStateService;
     @Resource
     private ApiCardApplyService apiCardApplyService;
+    @Resource
+    private ApiVpaService apiVpaService;
 
     public static Map<String, ApiMeta> metaMap = new HashMap<>();
 
@@ -116,6 +119,7 @@ public class ApiService {
         initService(apiCardApplyService);
         initService(apiCardMoneyService);
         initService(apiCardStateService);
+        initService(apiVpaService);
     }
 
     /**

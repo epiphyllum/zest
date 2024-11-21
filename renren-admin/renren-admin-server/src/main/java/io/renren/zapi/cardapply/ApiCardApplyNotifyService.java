@@ -15,18 +15,9 @@ public class ApiCardApplyNotifyService {
 
     /**
      * 发卡状态通知
-     * @param entity
-     * @param merchant
      */
     public void cardNewNotify(JCardEntity entity, JMerchantEntity merchant) {
         CardNewNotify notify = ConvertUtils.sourceToTarget(entity, CardNewNotify.class);
         apiNotifyService.notifyMerchant(notify, merchant, "cardNewNotify");
-    }
-
-    /**
-     * vpa卡发卡
-     */
-    public void cardVpaNewNotify() {
-
     }
 }

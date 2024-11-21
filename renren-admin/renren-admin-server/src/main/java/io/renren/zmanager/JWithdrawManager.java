@@ -6,6 +6,7 @@ import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.zadmin.dao.*;
 import io.renren.zadmin.entity.*;
 import io.renren.zapi.ApiNotify;
+import io.renren.zbalance.LedgerUtil;
 import io.renren.zbalance.ledgers.LedgerCardWithdraw;
 import io.renren.zcommon.ZinConstant;
 import io.renren.zin.cardapply.ZinCardApplyService;
@@ -30,7 +31,7 @@ import java.util.concurrent.CompletableFuture;
 public class JWithdrawManager {
 
     @Resource
-    private  JFeeConfigDao jFeeConfigDao;
+    private JCommon jCommon;
     @Resource
     private JCardManager jCardManager;
     @Resource
@@ -53,12 +54,14 @@ public class JWithdrawManager {
     private JWithdrawDao jWithdrawDao;
     @Resource
     private JCardDao jCardDao;
+    @Resource
+    private LedgerUtil ledgerUtil;
 
     // 填充信息
     public JSubEntity fillInfo(JWithdrawEntity entity) {
         JSubEntity subEntity = jSubDao.selectById(entity.getSubId());
         if (subEntity == null) {
-            throw new RenException("in valid request, lack subId");
+            throw new RenException("数据非法, 缺少子商户ID");
         }
         entity.setAgentId(subEntity.getAgentId());
         entity.setAgentName(subEntity.getAgentName());
@@ -70,7 +73,6 @@ public class JWithdrawManager {
                 .eq(JCardEntity::getCardno, entity.getCardno())
         );
         entity.setMarketproduct(cardEntity.getMarketproduct());
-//        entity.setMaincardno(cardEntity.getMaincardno());
         return subEntity;
     }
 
@@ -78,7 +80,28 @@ public class JWithdrawManager {
      * 保存提现
      */
     public void save(JWithdrawEntity entity) {
+
         JSubEntity subEntity = fillInfo(entity);
+
+        // 如果是预付费主卡提现, 那么如果有在提现的就不能提
+        if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_PREPAID)) {
+            Long processing = jWithdrawDao.selectCount(Wrappers.<JWithdrawEntity>lambdaQuery()
+                    .eq(JWithdrawEntity::getCardno, entity.getCardno())
+                    .notIn(JWithdrawEntity::getState, ZinConstant.cardStateFinal)
+            );
+            if (processing > 0) {
+                throw new RenException("有正在进行的提现, 请完成后再操作!");
+            }
+
+            JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery().eq(JCardEntity::getCardno, entity.getCardno()));
+            JBalanceEntity prepaidQuotaAccount = ledgerUtil.getPrepaidQuotaAccount(cardEntity.getId(), cardEntity.getCurrency());
+            if (prepaidQuotaAccount == null) {
+                throw new RenException("预付费发卡额度账户不存在");
+            }
+            if (prepaidQuotaAccount.getBalance().compareTo(entity.getAmount()) < 0) {
+                throw new RenException("提现金额不能大于可发卡额!");
+            }
+        }
 
         // 填充payerid, 什么币种的卡， 就用哪个通联va
         List<JVaEntity> jVaEntities = jVaDao.selectList(Wrappers.emptyWrapper());
@@ -86,20 +109,10 @@ public class JWithdrawManager {
         entity.setPayeeid(jVaEntity.getTid());
         entity.setState("00");
 
-        // 产品配置
-        JFeeConfigEntity feeConfig = jFeeConfigDao.selectOne(Wrappers.<JFeeConfigEntity>lambdaQuery()
-                .eq(JFeeConfigEntity::getMerchantId, entity.getMerchantId())
-                .eq(JFeeConfigEntity::getMarketproduct, entity.getMarketproduct())
-        );
-        if (feeConfig == null) {
-            feeConfig = jFeeConfigDao.selectOne(Wrappers.<JFeeConfigEntity>lambdaQuery()
-                    .eq(JFeeConfigEntity::getMerchantId, 0L)
-                    .eq(JFeeConfigEntity::getMarketproduct, entity.getMarketproduct())
-            );
-        }
-        if (feeConfig == null) {
-            throw new RenException("没有配置");
-        }
+        // 卡产品配置
+        JFeeConfigEntity feeConfig = jCommon.getFeeConfig(entity.getMerchantId(), entity.getMarketproduct());
+
+        // 计算商户手续费
         BigDecimal merchantfee = entity.getAmount().multiply(feeConfig.getChargeRate()).setScale(2, RoundingMode.HALF_UP).negate();
         entity.setMerchantfee(merchantfee);
 
@@ -155,7 +168,7 @@ public class JWithdrawManager {
                     ledgerCardWithdraw.ledgeCardWithdraw(entity, subEntity);
                     return true;
                 });
-                if(execute) {
+                if (execute) {
                     CompletableFuture.runAsync(() -> {
                         JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery().eq(JCardEntity::getCardno, entity.getCardno()));
                         jCardManager.balanceCard(cardEntity);
@@ -223,6 +236,7 @@ public class JWithdrawManager {
 
     /**
      * 通知商户
+     *
      * @param id
      */
     public void notify(Long id) {

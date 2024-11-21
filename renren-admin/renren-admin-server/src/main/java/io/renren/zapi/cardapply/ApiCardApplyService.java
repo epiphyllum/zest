@@ -38,11 +38,6 @@ import java.util.List;
 public class ApiCardApplyService {
 
     @Resource
-    private ZinCardApplyService zinCardApplyService;
-    @Resource
-    private ZinCardStateService zinCardStateService;
-
-    @Resource
     private JCardManager jCardManager;
     @Resource
     private JCardDao jCardDao;
@@ -76,13 +71,17 @@ public class ApiCardApplyService {
 
     // 开卡查询
     public Result<CardNewQueryRes> cardNewQuery(CardNewQuery request, ApiContext context) {
-        // 查询原是卡信息
+        if (request.getApplyid() == null && request.getMeraplid() == null) {
+            throw new RenException("字段applyid,meraplid至少提供一个");
+        }
+
+        // 查询原卡信息
         JCardEntity entity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
                 .eq(request.getApplyid() != null, JCardEntity::getApplyid, request.getApplyid())
                 .eq(request.getMeraplid() != null, JCardEntity::getMeraplid, request.getMeraplid())
         );
         if (entity == null) {
-            throw new RenException("no record");
+            throw new RenException("记录不存在");
         }
 
         // 查询通联
@@ -101,67 +100,72 @@ public class ApiCardApplyService {
         JCardEntity entity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
                 .eq(JCardEntity::getCardno, request.getCardno())
         );
-        JMerchantEntity merchant = context.getMerchant();
-        if (!entity.getMerchantId().equals(merchant.getId())) {
-            throw new RenException("in valid card number");
+        if (entity == null) {
+            throw new RenException("卡号不存在:" + request.getCardno());
         }
 
+        JMerchantEntity merchant = context.getMerchant();
+        if (!entity.getMerchantId().equals(merchant.getId())) {
+            throw new RenException("卡号不属于商户:" + request.getCardno());
+        }
+
+        // 激活卡
         jCardManager.activateCard(entity);
 
-        // 空对象
+        // 返回空对象
         CardNewActivateRes res = new CardNewActivateRes();
         return new Result<CardNewActivateRes>().ok(res);
     }
 
-    // vpa卡查询
-    public Result<String> vpaNewQuery(VpaNewQuery request, ApiContext context) {
-        if (request.getApplyid() == null && request.getMeraplid() == null) {
-            throw new RenException("invalid request");
-        }
-        JVpaJobEntity entity = jVpaJobDao.selectOne(Wrappers.<JVpaJobEntity>lambdaQuery()
-                .eq(request.getApplyid() != null, JVpaJobEntity::getApplyid, request.getApplyid())
-                .eq(request.getMeraplid() != null, JVpaJobEntity::getMeraplid, request.getMeraplid())
-        );
-
-        VpaNewQueryRes res = new VpaNewQueryRes();
-
-        // 成功的
-        if (ZinConstant.isCardApplySuccess(entity.getState())) {
-            List<JCardEntity> vpaCardList = jCardDao.selectList(Wrappers.<JCardEntity>lambdaQuery()
-                    .eq(JCardEntity::getMerchantId, context.getMerchant().getId())
-                    .eq(JCardEntity::getVpaJob, entity.getId())
-                    .select(JCardEntity::getCvv, JCardEntity::getExpiredate, JCardEntity::getCardno)
-            );
-            String sensitiveKey = zestConfig.getAccessConfig().getSensitiveKey();
-
-            List<VpaNewQueryRes.Item> items = new ArrayList<>(vpaCardList.size());
-
-            for (JCardEntity cardEntity : vpaCardList) {
-                String cvv = CommonUtils.decryptSensitiveString(cardEntity.getCvv(), sensitiveKey, "UTF-8");
-                String expiredate = CommonUtils.decryptSensitiveString(cardEntity.getExpiredate(), sensitiveKey, "UTF-8");
-                String cardno = cardEntity.getCardno();
-                VpaNewQueryRes.Item item = new VpaNewQueryRes.Item(cvv, expiredate, cardno);
-                items.add(item);
-            }
-            res.setItems(items);
-//            res.setFeecurrency(entity.getFixedamountflag());
-            res.setMerchantfee(entity.getMerchantfee());
-            res.setState(entity.getState());
-        } else {
-            res.setState(entity.getState());
-        }
-
-        Result<String> result = new Result<>();
-        String rawStr = null;
-        try {
-            rawStr = objectMapper.writeValueAsString(res);
-
-//            String encrypted = CommonUtils.encryptSenstiveString(rawStr, "key", );
+//    // vpa卡查询
+//    public Result<String> vpaNewQuery(VpaNewQuery request, ApiContext context) {
+//        if (request.getApplyid() == null && request.getMeraplid() == null) {
+//            throw new RenException("字段applyid, meraplid至少提供一个");
+//        }
+//        JVpaJobEntity entity = jVpaJobDao.selectOne(Wrappers.<JVpaJobEntity>lambdaQuery()
+//                .eq(request.getApplyid() != null, JVpaJobEntity::getApplyid, request.getApplyid())
+//                .eq(request.getMeraplid() != null, JVpaJobEntity::getMeraplid, request.getMeraplid())
+//        );
+//        if (entity == null) {
+//            throw new RenException("无此记录");
+//        }
+//
+//        VpaNewQueryRes res = new VpaNewQueryRes();
+//
+//        // 成功的
+//        if (ZinConstant.isCardApplySuccess(entity.getState())) {
+//            List<JCardEntity> vpaCardList = jCardDao.selectList(Wrappers.<JCardEntity>lambdaQuery()
+//                    .eq(JCardEntity::getMerchantId, context.getMerchant().getId())
+//                    .eq(JCardEntity::getVpaJob, entity.getId())
+//                    .select(JCardEntity::getCvv, JCardEntity::getExpiredate, JCardEntity::getCardno)
+//            );
+//            String sensitiveKey = zestConfig.getAccessConfig().getSensitiveKey();
+//
+//            List<VpaNewQueryRes.Item> items = new ArrayList<>(vpaCardList.size());
+//
+//            for (JCardEntity cardEntity : vpaCardList) {
+//                String cvv = CommonUtils.decryptSensitiveString(cardEntity.getCvv(), sensitiveKey, "UTF-8");
+//                String expiredate = CommonUtils.decryptSensitiveString(cardEntity.getExpiredate(), sensitiveKey, "UTF-8");
+//                String cardno = cardEntity.getCardno();
+//                VpaNewQueryRes.Item item = new VpaNewQueryRes.Item(cvv, expiredate, cardno);
+//                items.add(item);
+//            }
+//            res.setItems(items);
+//            res.setMerchantfee(entity.getMerchantfee());
+//            res.setState(entity.getState());
+//        } else {
+//            res.setState(entity.getState());
+//        }
+//
+//        Result<String> result = new Result<>();
+//        try {
+//            String rawStr = objectMapper.writeValueAsString(res);
+//            String encrypted = CommonUtils.encryptSensitiveString(rawStr, context.getMerchant().getSensitiveKey(),"utf-8" );
 //            result.setData(encrypted);
-
-            return result;
-        } catch (JsonProcessingException e) {
-            throw new RenException("加密失败");
-        }
-    }
+//            return result;
+//        } catch (JsonProcessingException e) {
+//            throw new RenException("加密失败");
+//        }
+//    }
+//
 }

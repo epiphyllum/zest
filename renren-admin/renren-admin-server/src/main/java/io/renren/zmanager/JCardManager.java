@@ -44,7 +44,7 @@ import java.util.function.Consumer;
 @Slf4j
 public class JCardManager {
     @Resource
-    private ZinFileService zinFileService;
+    private JCommon jCommon;
     @Resource
     private ZinCardApplyService zinCardApplyService;
     @Resource
@@ -79,8 +79,6 @@ public class JCardManager {
     private JVpaAdjustDao jVpaAdjustDao;
     @Resource
     private JConfigDao jConfigDao;
-    @Resource
-    private JFeeConfigDao jFeeConfigDao;
 
     // 补充agentId, agentName, merchantName
     public void fillBySub(JCardEntity entity) {
@@ -96,21 +94,7 @@ public class JCardManager {
     }
 
     public void fillMerchantFee(JCardEntity entity, JMerchantEntity merchant) {
-
-        JFeeConfigEntity feeConfig = jFeeConfigDao.selectOne(Wrappers.<JFeeConfigEntity>lambdaQuery()
-                .eq(JFeeConfigEntity::getMerchantId, merchant.getId())
-                .eq(JFeeConfigEntity::getMarketproduct, entity.getMarketproduct())
-        );
-        if (feeConfig == null) {
-            feeConfig = jFeeConfigDao.selectOne(Wrappers.<JFeeConfigEntity>lambdaQuery()
-                    .eq(JFeeConfigEntity::getMerchantId, 0L)
-                    .eq(JFeeConfigEntity::getMarketproduct, entity.getMarketproduct())
-            );
-        }
-        if (feeConfig == null) {
-            throw new RenException("没有配置");
-        }
-
+        JFeeConfigEntity feeConfig = jCommon.getFeeConfig(merchant.getId(), entity.getMarketproduct());
         entity.setFee(feeConfig.getCostCardFee());
         entity.setMerchantfee(feeConfig.getCardFee());
     }
@@ -120,7 +104,7 @@ public class JCardManager {
         if (productMap == null) {
             throw new RenException("币种不合法:" + entity.getCurrency());
         }
-        String baseProduct  = productMap.get(entity.getMarketproduct());
+        String baseProduct = productMap.get(entity.getMarketproduct());
         if (baseProduct == null) {
             throw new RenException("产品类型不合法:" + entity.getMarketproduct());
         }
@@ -283,7 +267,6 @@ public class JCardManager {
             TCardSubApplyResponse response = zinCardApplyService.cardSubApply(request);
             applyid = response.getApplyid();
         }
-        // vpa子卡都是批量开的, 不在这里提交
 
         // 更新applyid
         JCardEntity update = new JCardEntity();
@@ -318,26 +301,22 @@ public class JCardManager {
 
         // 不成功 -> 成功
         if (!ZinConstant.isCardApplySuccess(prevState) && ZinConstant.isCardApplySuccess(nextState)) {
+
             // 调用下通联获取cvv2 + expiredate
             TCardPayInfoRequest req = new TCardPayInfoRequest();
             req.setCardno(response.getCardno());
             TCardPayInfoResponse resp = zinCardApplyService.cardPayInfo(req);
             String cvv = resp.getCvv();
             String expiredate = resp.getExpiredate();
-
             // 有效期解密保存
             String decryptedExpiredate = CommonUtils.decryptSensitiveString(expiredate, zestConfig.getAccessConfig().getSensitiveKey(), "UTF-8");
             updateWrapper.set(JCardEntity::getCvv, cvv)
                     .set(JCardEntity::getExpiredate, decryptedExpiredate);
-
-
             // 备用
             jCardEntity.setCardno(response.getCardno());
             jCardEntity.setFee(response.getFee());  // 通联实际费用
             jCardEntity.setFeecurrency(response.getFeecurrency());
-
             JMerchantEntity merchant = jMerchantDao.selectById(jCardEntity.getMerchantId());
-
             // vcc虚拟卡， vcc实体卡, 共享主卡, 预付费主卡, 四种卡有收费有收费处理
             String mpType = jCardEntity.getMarketproduct();
             if (mpType.equals(ZinConstant.MP_VCC_VIRTUAL) ||
@@ -358,22 +337,19 @@ public class JCardManager {
                 // 其他卡没有收费处理
                 jCardDao.update(null, updateWrapper);
             }
-
             // 发卡成功, 查询更新状态
             jCardEntity.setCardno(response.getCardno());
             this.queryCard(jCardEntity);
-
             // 更新余额
             this.balanceCard(jCardEntity);
-
             // 是否需要通知api商户
             if (notify || jCardEntity.getApi().equals(1)) {
                 // 通知商户
                 JCardEntity entity = jCardDao.selectById(jCardEntity.getId());
                 apiNotify.cardNewNotify(entity, merchant);
             }
-
             return;
+
         }
 
         // 非失败 -> 失败
@@ -544,9 +520,9 @@ public class JCardManager {
     // 预付费卡-充值
     public void prepaidCharge(Long id, BigDecimal adjustAmount) {
         JCardEntity cardEntity = jCardDao.selectById(id);
-
         JVpaAdjustEntity processing = jVpaAdjustDao.selectOne(Wrappers.<JVpaAdjustEntity>lambdaQuery()
                 .eq(JVpaAdjustEntity::getState, ZinConstant.VPA_ADJUST_UNKNOWN)
+                .eq(JVpaAdjustEntity::getCardno, cardEntity.getCardno())
         );
         if (processing != null) {
             BigDecimal amount = processing.getAdjustAmount();
@@ -623,8 +599,10 @@ public class JCardManager {
     public void prepaidWithdraw(Long id, BigDecimal adjustAmount) {
         JCardEntity cardEntity = jCardDao.selectById(id);
 
+        // 如果卡有充提进行中
         JVpaAdjustEntity processing = jVpaAdjustDao.selectOne(Wrappers.<JVpaAdjustEntity>lambdaQuery()
                 .eq(JVpaAdjustEntity::getState, ZinConstant.VPA_ADJUST_UNKNOWN)
+                .eq(JVpaAdjustEntity::getCardno, cardEntity.getCardno())
         );
         if (processing != null) {
             BigDecimal amount = processing.getAdjustAmount();

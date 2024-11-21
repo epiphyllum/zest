@@ -11,6 +11,7 @@ import io.renren.service.SysDeptService;
 import io.renren.zapi.ApiNotifyService;
 import io.renren.zapi.sub.ApiSubService;
 import io.renren.zapi.sub.dto.SubNotify;
+import io.renren.zbalance.LedgerUtil;
 import io.renren.zcommon.ZapiConstant;
 import io.renren.zcommon.ZestConstant;
 import io.renren.zadmin.dao.JBalanceDao;
@@ -35,6 +36,8 @@ import java.util.List;
 public class JSubManager {
 
     @Resource
+    private LedgerUtil ledgerUtil;
+    @Resource
     private TransactionTemplate tx;
     @Resource
     private JMerchantDao jMerchantDao;
@@ -50,14 +53,10 @@ public class JSubManager {
     private ApiNotifyService apiNotifyService;
 
     /**
-     * 审核通过
-     *
-     * @param id
-     * @param state
+     * 审核 通过|不通过
      */
     public void verify(Long id, String state) {
         JSubEntity entity = jSubDao.selectById(id);
-
         String oldState = entity.getState();
         if (oldState.equals(ZinConstant.MERCHANT_STATE_VERIFIED) || oldState.equals(ZinConstant.MERCHANT_STATE_FAIL)) {
             throw new RenException("当前状态不正确:" + state);
@@ -70,7 +69,6 @@ public class JSubManager {
         // 审核通过
         if (!ZinConstant.MERCHANT_STATE_VERIFIED.equals(entity.getState()) && ZinConstant.MERCHANT_STATE_VERIFIED.equals(state)) {
             List<String> currencyList = Arrays.stream(merchant.getCurrencyList().split(",")).toList();
-
             tx.executeWithoutResult(st -> {
                 // 开通子商户VA
                 this.openSubVa(entity, currencyList);
@@ -95,6 +93,11 @@ public class JSubManager {
     }
 
 
+    /**
+     *
+     * @param entity
+     * @return
+     */
     public Long fill(JSubEntity entity) {
         if (entity.getApi().equals(1)) {
             return fillByApi(entity);
@@ -102,13 +105,21 @@ public class JSubManager {
         return fillByWeb(entity);
     }
 
-    public Long fillByApi(JSubEntity entity) {
+    /**
+     * API请求: 只需要返回机构ID
+     * @param entity
+     */
+    private Long fillByApi(JSubEntity entity) {
         SysDeptEntity agentDept = sysDeptDao.selectById(entity.getAgentId());
         Long djId = agentDept.getPid();
         return djId;
     }
 
-    public Long fillByWeb(JSubEntity entity) {
+    /**
+     * 管理后台填充代理， 商户信息， 返回机构ID
+     * @param entity
+     */
+    private Long fillByWeb(JSubEntity entity) {
         UserDetail user = SecurityUser.getUser();
         if (user.getUserType() == null) {
             throw new RenException("invalid request user");
@@ -148,8 +159,12 @@ public class JSubManager {
         return djId;
     }
 
+    /**
+     * 保存入库
+     * @param entity
+     */
     public void save(JSubEntity entity) {
-        // 属性copy
+        // 初始状态
         entity.setState(ZinConstant.MERCHANT_STATE_TO_VERIFY);
 
         // 填充
@@ -180,32 +195,19 @@ public class JSubManager {
     public void openSubVa(JSubEntity entity, Collection<String> currencyList) {
         // 创建管理账户 - 按币种来: 15 * 6
         for (String currency : currencyList) {
-            newBalance(entity, BalanceType.getSubVaAccount(currency), currency);      // 子商户va
+            ledgerUtil.newBalance(ZestConstant.USER_TYPE_SUB, entity.getCusname(), entity.getId(), BalanceType.getSubVaAccount(currency), currency);  // 子商户va
             // 子商户
-            newBalance(entity, BalanceType.getDepositAccount(currency), currency);    // 子商户保证
-            newBalance(entity, BalanceType.getChargeAccount(currency), currency);     // 子商户充值手续费
-            newBalance(entity, BalanceType.getCardFeeAccount(currency), currency);    // 子商户开卡费用
-            newBalance(entity, BalanceType.getCardSumAccount(currency), currency);    // 子商户卡充值总额
-            newBalance(entity, BalanceType.getTxnAccount(currency), currency);        // 子商户其他费用
+            ledgerUtil.newBalance(ZestConstant.USER_TYPE_SUB,entity.getCusname(), entity.getId(), BalanceType.getDepositAccount(currency), currency);    // 子商户保证
+            ledgerUtil.newBalance(ZestConstant.USER_TYPE_SUB,entity.getCusname(), entity.getId(), BalanceType.getChargeAccount(currency), currency);     // 子商户充值手续费
+            ledgerUtil.newBalance(ZestConstant.USER_TYPE_SUB,entity.getCusname(), entity.getId(), BalanceType.getCardFeeAccount(currency), currency);    // 子商户开卡费用
+            ledgerUtil.newBalance(ZestConstant.USER_TYPE_SUB,entity.getCusname(), entity.getId(), BalanceType.getCardSumAccount(currency), currency);    // 子商户卡充值总额
+            ledgerUtil.newBalance(ZestConstant.USER_TYPE_SUB,entity.getCusname(), entity.getId(), BalanceType.getTxnAccount(currency), currency);        // 子商户其他费用
             // 成本账户
-            newBalance(entity, BalanceType.getAipDepositAccount(currency), currency);  // 子商户保证
-            newBalance(entity, BalanceType.getAipChargeAccount(currency), currency);   // 子商户充值手续费
-            newBalance(entity, BalanceType.getAipCardFeeAccount(currency), currency);  // 子商户开卡费用
-            newBalance(entity, BalanceType.getAipCardSumAccount(currency), currency);  // 子商户卡充值总额
-            newBalance(entity, BalanceType.getAipTxnAccount(currency), currency);      // 子商户其他费用
+            ledgerUtil.newBalance(ZestConstant.USER_TYPE_SUB,entity.getCusname(), entity.getId(), BalanceType.getAipDepositAccount(currency), currency); // 子商户保证
+            ledgerUtil.newBalance(ZestConstant.USER_TYPE_SUB,entity.getCusname(), entity.getId(), BalanceType.getAipChargeAccount(currency), currency);  // 子商户充值手续费
+            ledgerUtil.newBalance(ZestConstant.USER_TYPE_SUB,entity.getCusname(), entity.getId(), BalanceType.getAipCardFeeAccount(currency), currency); // 子商户开卡费用
+            ledgerUtil.newBalance(ZestConstant.USER_TYPE_SUB,entity.getCusname(), entity.getId(), BalanceType.getAipCardSumAccount(currency), currency); // 子商户卡充值总额
+            ledgerUtil.newBalance(ZestConstant.USER_TYPE_SUB,entity.getCusname(), entity.getId(), BalanceType.getAipTxnAccount(currency), currency);     // 子商户其他费用
         }
-    }
-
-    /**
-     * 创建账户
-     */
-    private void newBalance(JSubEntity entity, String type, String currency) {
-        JBalanceEntity jBalanceEntity = new JBalanceEntity();
-        jBalanceEntity.setOwnerId(entity.getId());
-        jBalanceEntity.setOwnerName(entity.getCusname());
-        jBalanceEntity.setOwnerType(ZestConstant.USER_TYPE_SUB);  // attention
-        jBalanceEntity.setBalanceType(type);
-        jBalanceEntity.setCurrency(currency);
-        jBalanceDao.insert(jBalanceEntity);
     }
 }

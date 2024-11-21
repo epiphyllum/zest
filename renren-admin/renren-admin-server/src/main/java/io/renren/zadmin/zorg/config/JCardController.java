@@ -1,5 +1,6 @@
 package io.renren.zadmin.zorg.config;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.log.annotation.LogOperation;
 import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.tools.constant.Constant;
@@ -13,6 +14,9 @@ import io.renren.commons.tools.validator.ValidatorUtils;
 import io.renren.commons.tools.validator.group.AddGroup;
 import io.renren.commons.tools.validator.group.DefaultGroup;
 import io.renren.commons.tools.validator.group.UpdateGroup;
+import io.renren.zadmin.dao.JBalanceDao;
+import io.renren.zadmin.entity.JBalanceEntity;
+import io.renren.zbalance.BalanceType;
 import io.renren.zcommon.CommonUtils;
 import io.renren.zcommon.ZinConstant;
 import io.renren.zmanager.JCardManager;
@@ -35,6 +39,8 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -56,6 +62,8 @@ public class JCardController {
     private JCardManager jCardManager;
     @Resource
     private JCardDao jCardDao;
+    @Resource
+    private JBalanceDao jBalanceDao;
 
     @GetMapping("page")
     @Operation(summary = "分页")
@@ -69,9 +77,31 @@ public class JCardController {
     public Result<PageData<JCardDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
         PageData<JCardDTO> page = jCardService.page(params);
         if (!ZestConstant.isOperation()) {
+
+            List<Long> mainPPList = new ArrayList<>();
+            Map<Long, JCardDTO> map = new HashMap<>();
             page.getList().forEach(e -> {
                 e.setCvv(null);
+                // 预付费主卡，
+                if (ZinConstant.MP_VPA_MAIN_PREPAID.equals(e.getMarketproduct())) {
+                    mainPPList.add(e.getId());
+                    map.put(e.getId(), e);
+                }
             });
+
+            // 如果有预付费主卡， 加上主卡发卡额度
+            if (mainPPList.size() > 0) {
+                List<JBalanceEntity> balanceEntities = jBalanceDao.selectList(Wrappers.<JBalanceEntity>lambdaQuery()
+                        .in(JBalanceEntity::getOwnerId, mainPPList)
+                        .select(JBalanceEntity::getOwnerId, JBalanceEntity::getBalance, JBalanceEntity::getCurrency, JBalanceEntity::getBalanceType)
+                );
+                for (JBalanceEntity balanceEntity : balanceEntities) {
+                    JCardDTO jCardDTO = map.get(balanceEntity.getOwnerId());
+                    if ( balanceEntity.getBalanceType().equals(BalanceType.getPrepaidQuotaAccount(jCardDTO.getCurrency()))) {
+                        jCardDTO.setPrepaidQuota(balanceEntity.getBalance());
+                    }
+                }
+            }
         }
         return new Result<PageData<JCardDTO>>().ok(page);
     }

@@ -16,6 +16,8 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.math.BigDecimal;
+
 @Service
 public class JExchangeManager {
 
@@ -151,6 +153,9 @@ public class JExchangeManager {
         });
     }
 
+    public BigDecimal getExchangeRate(String src, String dst) {
+        return null;
+    }
 
     // 通知商户
     public void notify(Long id) {

@@ -15,6 +15,9 @@ public class ApiAccountNotifyService {
     @Resource
     private ApiNotifyService apiNotifyService;
 
+    /**
+     * 通知商户
+     */
     public void moneyAccountNotify(JMaccountEntity entity, JMerchantEntity merchant) {
         MoneyAccountNotify notify = ConvertUtils.sourceToTarget(entity, MoneyAccountNotify.class);
         apiNotifyService.notifyMerchant(notify, merchant, "moneyAccountNotify");

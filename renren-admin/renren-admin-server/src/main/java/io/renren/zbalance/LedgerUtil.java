@@ -7,6 +7,8 @@ import io.renren.zadmin.dao.JBalanceDao;
 import io.renren.zadmin.dao.JLogDao;
 import io.renren.zadmin.entity.JBalanceEntity;
 import io.renren.zadmin.entity.JLogEntity;
+import io.renren.zadmin.entity.JMerchantEntity;
+import io.renren.zcommon.ZestConstant;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
@@ -22,6 +24,20 @@ public class LedgerUtil {
     private JLogDao jLogDao;
     @Resource
     private JBalanceDao jBalanceDao;
+
+    /**
+     * 创建账户
+     */
+    public void newBalance(String ownerType, String ownerName, Long ownerId, String balanceType, String currency) {
+        JBalanceEntity jBalanceEntity = new JBalanceEntity();
+        jBalanceEntity.setOwnerId(ownerId);
+        jBalanceEntity.setOwnerName(ownerName);
+        jBalanceEntity.setOwnerType(ownerType);
+        jBalanceEntity.setBalanceType(balanceType);
+        jBalanceEntity.setCurrency(currency);
+        jBalanceDao.insert(jBalanceEntity);
+    }
+
 
     /**
      * 记账流水
