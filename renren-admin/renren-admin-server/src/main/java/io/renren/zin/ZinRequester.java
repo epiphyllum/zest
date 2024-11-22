@@ -178,15 +178,16 @@ public class ZinRequester {
                 .body(body);
         String url = zestConfig.getAccessConfig().getBaseUrl() + uri + "?" + commonQueryParams + "&" + "reqid=" + reqId;
 
+        JChannelLogEntity logEntity = new JChannelLogEntity();
+        logEntity.setApiName(uri);
+        logEntity.setSign(headerInfo.sign);
+        logEntity.setReqId(reqId);
+        logEntity.setSend(body);
+
         try {
             ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
             String bodyResp = responseEntity.getBody();
-            JChannelLogEntity logEntity = new JChannelLogEntity();
-            logEntity.setApiName(uri);
-            logEntity.setSign(headerInfo.sign);
-            logEntity.setSend(body);
             logEntity.setRecv(bodyResp);
-            logEntity.setReqId(reqId);
             zinLogger.logPacketSuccess(logEntity);
             T ttResult = objectMapper.readValue(bodyResp, clazz);
             if (ttResult.getRspcode().equals("0000")) {
@@ -194,9 +195,10 @@ public class ZinRequester {
             }
             log.error("通联失败:{}, toSign: [{}]", headerInfo.getToSign(), ttResult);
             throw new RenException("发卡行错误:" + ttResult.getRspinfo());
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            throw new RenException("request to allinpay failed");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            zinLogger.logPacketException(logEntity, ex);
+            throw new RenException("请求发卡行失败");
         }
     }
 
@@ -297,8 +299,8 @@ public class ZinRequester {
         byte[] sign = HexUtil.decodeHex(signature);
         boolean verify = this.verifier.verify(toSign.getBytes(StandardCharsets.UTF_8), sign);
         if (!verify) {
-            log.error("verify signature failed\ntoSign:{}", toSign);
-            log.error("recv notification[{}]\nbody:[{}]\nauth:[{}]\ndate:[{}]", request.getRequestURI(), body, auth, date);
+            log.error("验证签名失败, 签名串:{}", toSign);
+            log.error("收到应答[{}]\n应答体:[{}]\nauth:[{}]\ndate:[{}]", request.getRequestURI(), body, auth, date);
             throw new RenException("验证签名失败");
         }
         String reqid = request.getParameter("reqid");
@@ -312,8 +314,8 @@ public class ZinRequester {
         try {
             return objectMapper.readValue(body, clazz);
         } catch (JsonProcessingException e) {
-            log.error("can json process error:{}", e.getMessage());
-            throw new RenException("can not process " + uri);
+            log.error("无法解析应答:{}", e.getMessage());
+            throw new RenException("无法解析通联应答");
         }
     }
 

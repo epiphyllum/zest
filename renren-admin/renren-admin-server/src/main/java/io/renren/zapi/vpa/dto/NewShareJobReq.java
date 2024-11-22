@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 @Data
 public class NewShareJobReq {
     private String meraplid;
+    private Long subId;
     // 支持交易币种
     private String currency;               // 支持交易币种, 逗号分割
     private String cycle;                  // 场景类型:

@@ -50,6 +50,7 @@ public class JSubDashboard {
 
     // 今日日统计
     private Map<String, StatItem> todayMap(Long subId) {
+        return null;
     }
 
     // 过去30天统计
@@ -76,9 +77,11 @@ public class JSubDashboard {
         StatItem todayStat;
 
         // 当月情况
-        StatItem monthStat:
+        StatItem monthStat;
 
         // 预付费卡情况
         List<PrepaidCardStat> prepaidCardStatList;
+
+        return null;
     }
 }

@@ -16,6 +16,7 @@ import io.renren.zapi.ApiContext;
 import io.renren.zapi.vpa.dto.*;
 import io.renren.zcommon.CommonUtils;
 import io.renren.zcommon.ZestConfig;
+import io.renren.zcommon.ZinConstant;
 import io.renren.zmanager.JCardManager;
 import io.renren.zmanager.JVpaManager;
 import jakarta.annotation.Resource;
@@ -44,9 +45,12 @@ public class ApiVpaService {
     // 发行预付费子卡
     public Result<NewPrepaidJobRes> newPrepaidJob(NewPrepaidJobReq request, ApiContext context) {
         JVpaJobEntity entity = ConvertUtils.sourceToTarget(request, JVpaJobEntity.class);
+        entity.setMarketproduct(ZinConstant.MP_VPA_PREPAID);
+        entity.setCycle(ZinConstant.VPA_CYCLE_DEADLINE);  // 预付费卡一定是期限卡
         jVpaManager.save(entity);
         jVpaManager.submit(entity);
         NewPrepaidJobRes res = new NewPrepaidJobRes();
+        res.setApplyid(entity.getApplyid());
         Result<NewPrepaidJobRes> result = new Result<>();
         result.setData(res);
         return result;
@@ -55,19 +59,16 @@ public class ApiVpaService {
     // 发行共享子卡
     public Result<NewShareJobRes> newShareJob(NewShareJobReq request, ApiContext context) {
         JVpaJobEntity entity = ConvertUtils.sourceToTarget(request, JVpaJobEntity.class);
+        entity.setMarketproduct(ZinConstant.MP_VPA_SHARE);
         jVpaManager.save(entity);
         jVpaManager.submit(entity);
         NewShareJobRes res = new NewShareJobRes();
+        res.setApplyid(entity.getApplyid());
         Result<NewShareJobRes> result = new Result<>();
         result.setData(res);
         return result;
     }
 
-    private JCardEntity getCard(String cardno) {
-        return jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
-                .eq(JCardEntity::getCardno, cardno)
-        );
-    }
 
     //  设置共享子卡额度
     public Result<SetQuotaRes> setQuota(SetQuotaReq request, ApiContext context) {
@@ -105,15 +106,20 @@ public class ApiVpaService {
             throw new RenException("记录不存在");
         }
 
-        // todo: 状态
         Result<VpaJobQueryRes> result = new Result<>();
-        String vpaResult = this.getVpaResult(job);
         VpaJobQueryRes res = new VpaJobQueryRes();
-        res.setEncrypted(vpaResult);
-        res.setState("01");
+        res.setState(job.getState());
+
+        // 发卡成功
+        if (job.getState().equals(ZinConstant.CARD_APPLY_SUCCESS)) {
+            String vpaResult = this.getVpaResult(job);
+            res.setEncrypted(vpaResult);
+        }
+        result.setData(res);
         return result;
     }
 
+    // 发卡加密数据结果
     private String getVpaResult(JVpaJobEntity entity) {
         Long merchantId = entity.getMerchantId();
         List<JobItem> list = jCardDao.selectList(Wrappers.<JCardEntity>lambdaQuery()
@@ -140,6 +146,17 @@ public class ApiVpaService {
         } catch (JsonProcessingException e) {
             throw new RenException("加密失败");
         }
+    }
+
+    // 获取卡
+    private JCardEntity getCard(String cardno) {
+        JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
+                .eq(JCardEntity::getCardno, cardno)
+        );
+        if (cardEntity == null) {
+            throw new RenException("卡号错误:" + cardno);
+        }
+        return cardEntity;
     }
 
 }

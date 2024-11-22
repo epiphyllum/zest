@@ -77,29 +77,33 @@ public class JCardController {
     public Result<PageData<JCardDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params) {
         PageData<JCardDTO> page = jCardService.page(params);
         if (!ZestConstant.isOperation()) {
-
-            List<Long> mainPPList = new ArrayList<>();
-            Map<Long, JCardDTO> map = new HashMap<>();
             page.getList().forEach(e -> {
                 e.setCvv(null);
-                // 预付费主卡，
-                if (ZinConstant.MP_VPA_MAIN_PREPAID.equals(e.getMarketproduct())) {
-                    mainPPList.add(e.getId());
-                    map.put(e.getId(), e);
-                }
             });
+        }
 
-            // 如果有预付费主卡， 加上主卡发卡额度
-            if (mainPPList.size() > 0) {
-                List<JBalanceEntity> balanceEntities = jBalanceDao.selectList(Wrappers.<JBalanceEntity>lambdaQuery()
-                        .in(JBalanceEntity::getOwnerId, mainPPList)
-                        .select(JBalanceEntity::getOwnerId, JBalanceEntity::getBalance, JBalanceEntity::getCurrency, JBalanceEntity::getBalanceType)
-                );
-                for (JBalanceEntity balanceEntity : balanceEntities) {
-                    JCardDTO jCardDTO = map.get(balanceEntity.getOwnerId());
-                    if ( balanceEntity.getBalanceType().equals(BalanceType.getPrepaidQuotaAccount(jCardDTO.getCurrency()))) {
-                        jCardDTO.setPrepaidQuota(balanceEntity.getBalance());
-                    }
+        List<Long> mainPPList = new ArrayList<>();
+        Map<Long, JCardDTO> map = new HashMap<>();
+        page.getList().forEach(e -> {
+            e.setCvv(null);
+            // 预付费主卡，
+            if (ZinConstant.MP_VPA_MAIN_PREPAID.equals(e.getMarketproduct())) {
+                mainPPList.add(e.getId());
+                map.put(e.getId(), e);
+            }
+        });
+
+        // 如果有预付费主卡， 加上主卡发卡额度
+        if (mainPPList.size() > 0) {
+            log.info("本页有预付费主卡:{}", mainPPList.size());
+            List<JBalanceEntity> balanceEntities = jBalanceDao.selectList(Wrappers.<JBalanceEntity>lambdaQuery()
+                    .in(JBalanceEntity::getOwnerId, mainPPList)
+                    .select(JBalanceEntity::getOwnerId, JBalanceEntity::getBalance, JBalanceEntity::getCurrency, JBalanceEntity::getBalanceType)
+            );
+            for (JBalanceEntity balanceEntity : balanceEntities) {
+                JCardDTO jCardDTO = map.get(balanceEntity.getOwnerId());
+                if (balanceEntity.getBalanceType().equals(BalanceType.getPrepaidQuotaAccount(jCardDTO.getCurrency()))) {
+                    jCardDTO.setPrepaidQuota(balanceEntity.getBalance());
                 }
             }
         }

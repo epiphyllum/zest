@@ -3,6 +3,7 @@ package io.renren;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.zadmin.dao.JConfigDao;
 import io.renren.zadmin.entity.JConfigEntity;
+import io.renren.zcommon.ZestConfig;
 import io.renren.zmanager.JVaManager;
 import jakarta.annotation.Resource;
 import org.springframework.boot.CommandLineRunner;
@@ -12,6 +13,8 @@ import java.util.List;
 
 @Component
 public class InitRun implements CommandLineRunner {
+    @Resource
+    private ZestConfig zestConfig;
     @Resource
     private JConfigDao jConfigDao;
     @Resource

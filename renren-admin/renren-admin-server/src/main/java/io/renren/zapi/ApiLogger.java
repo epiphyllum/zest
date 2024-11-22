@@ -1,6 +1,7 @@
 package io.renren.zapi;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.renren.commons.tools.exception.ExceptionUtils;
 import io.renren.commons.tools.utils.Result;
 import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.dao.JPacketDao;
@@ -31,6 +32,9 @@ public class ApiLogger {
                 packetEntity.setSend(objectMapper.writeValueAsString(result));
                 jPacketDao.insert(packetEntity);
             } catch (Exception ex) {
+
+
+
                 ex.printStackTrace();
                 return;
             }
@@ -56,7 +60,8 @@ public class ApiLogger {
         // 记录日志
         CompletableFuture.runAsync(() -> {
             try {
-                packetEntity.setSend(failEx.getMessage());
+                String errorStackTrace = ExceptionUtils.getErrorStackTrace(failEx);
+                packetEntity.setSend(errorStackTrace);
             } catch (Exception ex) {
                 ex.printStackTrace();
                 return;

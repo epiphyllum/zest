@@ -1,6 +1,7 @@
 package io.renren.zin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.renren.commons.tools.exception.ExceptionUtils;
 import io.renren.commons.tools.utils.Result;
 import io.renren.zadmin.dao.JChannelLogDao;
 import io.renren.zadmin.entity.JChannelLogEntity;
@@ -52,7 +53,8 @@ public class ZinLogger {
         // 记录日志
         CompletableFuture.runAsync(() -> {
             try {
-//                logEntity.setSend(failEx.getMessage());
+                String errorStackTrace = ExceptionUtils.getErrorStackTrace(failEx);
+                logEntity.setSend(errorStackTrace);
             } catch (Exception ex) {
                 ex.printStackTrace();
                 return;

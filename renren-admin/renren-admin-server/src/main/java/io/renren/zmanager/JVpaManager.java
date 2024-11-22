@@ -109,7 +109,7 @@ public class JVpaManager {
     public void save(JVpaJobEntity entity) {
         Long subId = entity.getSubId();
         if (subId == null) {
-            throw new RenException("invalid request");
+            throw new RenException("缺少字段:subId");
         }
 
         // 不限制交易笔数

@@ -160,9 +160,12 @@ public class ApiService {
     public Result<?> invokeService(String body, Long merchantId, String sign, String reqId, String name) {
         String ip = CommonUtils.getIp();
         ApiMeta apiMeta = metaMap.get(name);
+        if (apiMeta == null) {
+            throw new RenException("接口名称错误:" + name);
+        }
         JMerchantEntity merchant = jMerchantDao.selectById(merchantId);
         if (merchant == null) {
-            throw new RenException("invalid merchant id:" + merchantId);
+            throw new RenException("非法商户号:" + merchantId);
         }
 
         // 开发环境不验证签名
