@@ -70,9 +70,8 @@ public class JVpaAdjustController {
     public Result save(@RequestBody JVpaAdjustDTO dto){
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
-
+        dto.setApi(0);
         jVpaAdjustService.save(dto);
-
         return new Result();
     }
 

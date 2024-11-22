@@ -1,5 +1,6 @@
 package io.renren.zadmin.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import com.baomidou.mybatisplus.annotation.*;
@@ -33,7 +34,11 @@ public class JVpaAdjustEntity extends BaseEntity {
     private BigDecimal adjustAmount;
     private BigDecimal oldQuota;
     private BigDecimal newQuota;
+
     private String state;
+    private String meraplid;
+    private Integer api;
+
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updater;
     @TableField(fill = FieldFill.INSERT_UPDATE)

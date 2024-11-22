@@ -517,9 +517,14 @@ public class JCardManager {
         jCardDao.updateById(update);
     }
 
-    // 预付费卡-充值
-    public void prepaidCharge(Long id, BigDecimal adjustAmount) {
+
+    public void prepaidCharge(Long id, BigDecimal adjustAmount, int api) {
         JCardEntity cardEntity = jCardDao.selectById(id);
+        this.prepaidCharge(cardEntity, adjustAmount, api);
+    }
+
+    // 预付费卡-充值
+    public void prepaidCharge(JCardEntity cardEntity, BigDecimal adjustAmount, int api) {
         JVpaAdjustEntity processing = jVpaAdjustDao.selectOne(Wrappers.<JVpaAdjustEntity>lambdaQuery()
                 .eq(JVpaAdjustEntity::getState, ZinConstant.VPA_ADJUST_UNKNOWN)
                 .eq(JVpaAdjustEntity::getCardno, cardEntity.getCardno())
@@ -535,6 +540,7 @@ public class JCardManager {
         BigDecimal oldAuth = cardEntity.getAuthmaxamount();
         BigDecimal newAuth = cardEntity.getAuthmaxamount().add(adjustAmount);
         JVpaAdjustEntity adjustEntity = ConvertUtils.sourceToTarget(cardEntity, JVpaAdjustEntity.class);
+        adjustEntity.setApi(api);
         adjustEntity.setId(null);
         adjustEntity.setCreateDate(null);
         adjustEntity.setUpdateDate(null);
@@ -595,9 +601,13 @@ public class JCardManager {
         }
     }
 
-    // 预付费卡-提现
-    public void prepaidWithdraw(Long id, BigDecimal adjustAmount) {
+    public void prepaidWithdraw(Long id, BigDecimal adjustAmount, int api) {
         JCardEntity cardEntity = jCardDao.selectById(id);
+        this.prepaidWithdraw(cardEntity, adjustAmount, api);
+    }
+
+    // 预付费卡-提现
+    public void prepaidWithdraw(JCardEntity cardEntity, BigDecimal adjustAmount, int api) {
 
         // 如果卡有充提进行中
         JVpaAdjustEntity processing = jVpaAdjustDao.selectOne(Wrappers.<JVpaAdjustEntity>lambdaQuery()
@@ -616,6 +626,7 @@ public class JCardManager {
         BigDecimal newAuth = cardEntity.getAuthmaxamount().subtract(adjustAmount);
 
         JVpaAdjustEntity adjustEntity = ConvertUtils.sourceToTarget(cardEntity, JVpaAdjustEntity.class);
+        adjustEntity.setApi(api);
         adjustEntity.setId(null);
         adjustEntity.setCreateDate(null);
         adjustEntity.setUpdateDate(null);
@@ -659,14 +670,19 @@ public class JCardManager {
         }
     }
 
-    // 共享子卡设置额度
-    public void setQuota(Long id, BigDecimal authmaxamount, Integer authmaxcount) {
+    public void setQuota(Long id, BigDecimal authmaxamount, Integer authmaxcount, int api) {
         JCardEntity cardEntity = jCardDao.selectById(id);
+        this.setQuota(cardEntity, authmaxamount, authmaxcount, api);
+    }
+
+    // 共享子卡设置额度
+    public void setQuota(JCardEntity cardEntity, BigDecimal authmaxamount, Integer authmaxcount, int api) {
         BigDecimal oldAuth = cardEntity.getAuthmaxamount();
         BigDecimal newAuth = authmaxamount;
         BigDecimal adjustAmount = newAuth.subtract(oldAuth);
 
         JVpaAdjustEntity adjustEntity = ConvertUtils.sourceToTarget(cardEntity, JVpaAdjustEntity.class);
+        adjustEntity.setApi(api);
         adjustEntity.setId(null);
         adjustEntity.setMarketproduct(ZinConstant.MP_VPA_SHARE);
         adjustEntity.setCreateDate(null);

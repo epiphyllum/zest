@@ -16,6 +16,7 @@ import io.renren.zapi.ApiContext;
 import io.renren.zapi.vpa.dto.*;
 import io.renren.zcommon.CommonUtils;
 import io.renren.zcommon.ZestConfig;
+import io.renren.zmanager.JCardManager;
 import io.renren.zmanager.JVpaManager;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,8 @@ public class ApiVpaService {
 
     @Resource
     private JVpaManager jVpaManager;
+    @Resource
+    private JCardManager jCardManager;
     @Resource
     private JVpaJobDao jVpaJobDao;
     @Resource
@@ -57,6 +60,34 @@ public class ApiVpaService {
         NewShareJobRes res = new NewShareJobRes();
         Result<NewShareJobRes> result = new Result<>();
         result.setData(res);
+        return result;
+    }
+
+    private JCardEntity getCard(String cardno) {
+        return jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
+                .eq(JCardEntity::getCardno, cardno)
+        );
+    }
+
+    //  设置共享子卡额度
+    public Result<SetQuotaRes> setQuota(SetQuotaReq request, ApiContext context) {
+        Result<SetQuotaRes> result = new Result<>();
+        JCardEntity card = getCard(request.getCardno());
+        jCardManager.setQuota(card, request.getAuthmaxamount(), request.getAuthmaxcount(), 1);
+        return result;
+    }
+
+    // 预防费卡充值
+    public Result<PrepaidChargeRes> prepaidCharge(PrepaidChargeReq request, ApiContext context) {
+        Result<PrepaidChargeRes> result = new Result<>();
+        jCardManager.prepaidCharge(getCard(request.getCardno()), request.getAmount(), 1);
+        return result;
+    }
+
+    // 预防费卡提现
+    public Result<PrepaidWithdrawRes> prepaidWithdraw(PrepaidWithdrawReq request, ApiContext context) {
+        Result<PrepaidWithdrawRes> result = new Result<>();
+        jCardManager.prepaidWithdraw(getCard(request.getCardno()), request.getAmount(), 1);
         return result;
     }
 

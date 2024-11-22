@@ -49,6 +49,10 @@ public class JVpaAdjustDTO implements Serializable {
 
     @Schema(description = "状态")
     private String state;
+    @Schema(description = "商户单号")
+    private String meraplid;
+    @Schema(description = "API")
+    private Integer api;
 
     @Schema(description = "创建者")
     private Long creator;

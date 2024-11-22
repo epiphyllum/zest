@@ -321,7 +321,7 @@ public class JCardController {
     @LogOperation("预付费卡充值")
     @PreAuthorize("hasAuthority('zorg:jcard:prepaidCharge')")
     public Result prepaidCharge(@RequestParam("id") Long id, @RequestParam("adjustAmount") BigDecimal adjustAmount) {
-        jCardManager.prepaidCharge(id, adjustAmount);
+        jCardManager.prepaidCharge(id, adjustAmount, 0);
         return Result.ok;
     }
 
@@ -330,7 +330,7 @@ public class JCardController {
     @LogOperation("预付费卡提现")
     @PreAuthorize("hasAuthority('zorg:jcard:prepaidWithdraw')")
     public Result prepaidWithdraw(@RequestParam("id") Long id, @RequestParam("adjustAmount") BigDecimal adjustAmount) {
-        jCardManager.prepaidWithdraw(id, adjustAmount);
+        jCardManager.prepaidWithdraw(id, adjustAmount, 0);
         return Result.ok;
     }
 
@@ -342,7 +342,7 @@ public class JCardController {
                            @RequestParam("authmaxamount") BigDecimal authmaxamount,
                            @RequestParam(value = "authmaxcount", required = false) Integer authmaxcount
     ) {
-        jCardManager.setQuota(id, authmaxamount, authmaxcount);
+        jCardManager.setQuota(id, authmaxamount, authmaxcount, 0);
         return Result.ok;
     }
 

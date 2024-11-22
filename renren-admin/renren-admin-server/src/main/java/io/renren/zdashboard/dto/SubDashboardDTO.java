@@ -7,8 +7,9 @@ import java.util.List;
 
 @Data
 public class SubDashboardDTO {
-    private StatItem balanceSummary; // 账户情况
-    private StatItem today; // 今日
-    private StatItem monthStat; // 本月
-    private List<PrepaidCardStat> prepaidCardStats;  // 预防卡钱包
+    private String currency;                         //
+    private StatItem balanceSummary;                 // 账户情况
+    private StatItem todayStat;                          // 今日
+    private StatItem monthStat;                      // 本月
+    private List<PrepaidCardStat> prepaidStatList;  // 预防卡钱包
 }

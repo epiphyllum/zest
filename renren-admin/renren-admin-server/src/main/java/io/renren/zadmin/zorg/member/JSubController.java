@@ -104,6 +104,7 @@ public class JSubController {
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
         JSubEntity jSubEntity = ConvertUtils.sourceToTarget(dto, JSubEntity.class);
+        jSubEntity.setApi(0);
         jSubManager.save(jSubEntity);
         return new Result();
     }
