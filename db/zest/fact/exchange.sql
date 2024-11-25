@@ -34,6 +34,7 @@ create table j_exchange
     exfxrate       decimal(18, 6),                -- 执行汇率
 
     -- basic
+    stat_date        date comment '完成日期',
     creator        bigint comment '创建者',
     create_date    datetime comment '创建时间',
     updater        bigint comment '更新者',

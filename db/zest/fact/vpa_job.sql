@@ -45,6 +45,7 @@ create table j_vpa_job
     meraplid             varchar(32)    not null comment '商户发起的meraplid, 我们用id',
     applyid              varchar(32)    null comment '通联返回',
     -- basic
+    stat_date            date comment '',
     creator              bigint comment '创建者',
     create_date          datetime comment '创建时间',
     updater              bigint comment '更新者',

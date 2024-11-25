@@ -16,8 +16,7 @@ select sum(merchant_charge)  as charge,
        sub_name,
        currency,
        marketproduct,
-
-       date(create_date)     as stat_date
+       stat_date
 from j_deposit
 where state = '04'
 group by stat_date, agent_id, agent_name, merchant_id, merchant_name, sub_id, sub_name, currency, marketproduct;

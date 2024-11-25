@@ -18,6 +18,7 @@ create table j_vpa_adjust
     new_quota     decimal(18, 2) not null comment '调整后额度',
     state         varchar(2)     not null default '00' comment '调整状态',
     -- basic
+    stat_date     date comment '',
     creator       bigint comment '创建者',
     create_date   datetime comment '创建时间',
     updater       bigint comment '更新者',

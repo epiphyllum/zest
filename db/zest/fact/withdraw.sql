@@ -32,6 +32,7 @@ create table j_withdraw
     stateexplain     varchar(200),
 
     -- basic
+    stat_date        date comment '完成日期',
     creator          bigint comment '创建者',
     create_date      datetime comment '创建时间',
     updater          bigint comment '更新者',

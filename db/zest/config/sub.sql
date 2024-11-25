@@ -65,6 +65,5 @@ create table j_sub
 create index idx_j_sub_1 on j_sub (create_date);
 create index idx_j_sub_2 on j_sub (agent_id, create_date);
 create index idx_j_sub_3 on j_sub (merchant_id, create_date);
-create index idx_j_sub_4 on j_sub (meraplid);
-create index idx_j_sub_5 on j_card (merchant_id, meraplid);
+create index idx_j_sub_4 on j_sub (merchant_id, meraplid);
 

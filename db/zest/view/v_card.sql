@@ -4,7 +4,7 @@ create view v_card as
 select count(1)          as total_card,
        sum(fee) as fee,
        sum(merchantfee) as merchantfee,
-       date(create_date) as stat_date,
+       stat_date,
        currency,
        marketproduct,
        merchant_id,

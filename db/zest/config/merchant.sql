@@ -61,12 +61,13 @@ create table j_merchant
     mcc                varchar(6)    not null comment '商户类型',                           -- dict
 
     public_key         varchar(1024) null comment '商户公钥',
+    sensitive_key      varchar(64)   null comment '敏感秘钥',
     webhook            varchar(128) comment '商户通知地址',
     white_ip           varchar(256) comment '接口IP白名单',
 
     -- 接口权限
     permissions        varchar(256)  not null default '{"payInfo":1,"cardWithdraw":1}',
-    currency_list      varchar(128) not null default '["HKD", "USD"]',
+    currency_list      varchar(128)  not null default '["HKD", "USD"]',
 
     -- basic
     creator            bigint comment '创建者',

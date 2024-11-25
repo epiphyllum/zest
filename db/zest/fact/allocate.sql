@@ -18,6 +18,8 @@ create table j_allocate
     amount        decimal(18, 2) not null comment '金额',
     currency      varchar(3)     not null comment '币种',
 
+    --
+    stat_date     date comment '完成日期',
     creator       bigint comment '创建者',
     create_date   datetime comment '创建时间',
     updater       bigint comment '更新者',

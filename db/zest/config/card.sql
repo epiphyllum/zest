@@ -11,6 +11,10 @@ create table j_card
     merchant_name        varchar(50)    not null comment '商户',
     sub_id               bigint         not null comment '子商户id',
     sub_name             varchar(50)    not null comment '子商户',
+
+    wallet_id            bigint         null comment '钱包ID',
+    wallet_name          varchar(50)    null comment '钱包名称',
+
     api                  int            not null default 1,
 
     --
@@ -80,8 +84,8 @@ create table j_card
     feecurrency          varchar(3) comment '申请费用币种',                         -- 	feecurrency	String	3	O
     cardno               varchar(30) comment '卡号',                                -- 	cardno	String	30	O	申请成功后返回
     state                varchar(2)              default '00' comment '卡申请状态', --
-    stateexplain          varchar(200) comment '解释',
-    cardstate           varchar(2)              default '00' comment '',           -- '卡状态'
+    stateexplain         varchar(200) comment '解释',
+    cardstate            varchar(2)              default '00' comment '',           -- '卡状态'
     balance              decimal(18, 2) comment '卡余额',                           -- 可以收到授权通知后查询
 
     --
@@ -113,6 +117,7 @@ create table j_card
     prepaid_available    decimal(18, 2),
 
     -- basic
+    stat_date            date comment '完成日期',
     creator              bigint comment '创建者',
     create_date          datetime comment '创建时间',
     updater              bigint comment '更新者',

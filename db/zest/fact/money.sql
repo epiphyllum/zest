@@ -47,6 +47,7 @@ create table j_money
     notify_status       int         not null default 0 comment '',
     notify_count        int         not null default 0,
 
+    stat_date        date comment '完成日期',
     creator             bigint comment '创建者',
     create_date         datetime comment '创建时间',
     updater             bigint comment '更新者',
