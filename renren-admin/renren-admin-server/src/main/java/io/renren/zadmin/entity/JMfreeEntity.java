@@ -25,6 +25,9 @@ public class JMfreeEntity extends BaseEntity {
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date updateDate;
 
+    // 完成日期
+    private Date statDate;
+
     //
     private Long agentId;
     private String agentName;

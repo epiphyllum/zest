@@ -1,5 +1,6 @@
 package io.renren.zadmin.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import com.baomidou.mybatisplus.annotation.*;
@@ -24,6 +25,8 @@ public class JAllocateEntity extends BaseEntity {
     private Long updater;
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date updateDate;
+
+    private Date statDate;
 
     // ID(6)
     private Long agentId;

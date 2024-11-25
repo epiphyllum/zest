@@ -9,6 +9,8 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.Date;
+
 // 释放商户担保金
 @Service
 public class JMfreeManager {
@@ -27,6 +29,7 @@ public class JMfreeManager {
         entity.setAgentId(merchant.getAgentId());
         entity.setAgentName(merchant.getAgentName());
         entity.setMerchantName(merchant.getCusname());
+        entity.setStatDate(new Date());
         tx.executeWithoutResult(st -> {
             jMfreeDao.insert(entity);
             ledgerMfree.ledgeMfree(entity);

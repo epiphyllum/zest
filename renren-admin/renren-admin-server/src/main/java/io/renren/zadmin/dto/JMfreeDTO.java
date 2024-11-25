@@ -22,6 +22,18 @@ public class JMfreeDTO implements Serializable {
 
     @Schema(description = "ID")
     private Long id;
+    @Schema(description = "创建者")
+    private Long creator;
+    @Schema(description = "创建时间")
+    private Date createDate;
+    @Schema(description = "更新者")
+    private Long updater;
+    @Schema(description = "更新时间")
+    private Date updateDate;
+
+    //
+    @Schema(description = "完成日期")
+    private Date statDate;
 
     @Schema(description = "代理ID")
     private Long agentId;
@@ -32,17 +44,10 @@ public class JMfreeDTO implements Serializable {
     private Long merchantId;
     @Schema(description = "商户")
     private String merchantName;
+
     @Schema(description = "金额")
     private BigDecimal amount;
     @Schema(description = "币种")
     private String currency;
-    @Schema(description = "创建者")
-    private Long creator;
-    @Schema(description = "创建时间")
-    private Date createDate;
-    @Schema(description = "更新者")
-    private Long updater;
-    @Schema(description = "更新时间")
-    private Date updateDate;
 
 }

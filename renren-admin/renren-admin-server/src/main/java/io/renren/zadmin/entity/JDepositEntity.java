@@ -25,6 +25,8 @@ public class JDepositEntity extends BaseEntity {
     private Long updater;
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date updateDate;
+    // 完成日期
+    private Date statDate;
 
     // ID(6)
     private Long agentId;

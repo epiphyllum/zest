@@ -25,6 +25,9 @@ public class JExchangeEntity extends BaseEntity {
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date updateDate;
 
+    // 完成日期
+    private Date statDate;
+
     // 属于商户(2)
     private Long agentId;
     private String agentName;

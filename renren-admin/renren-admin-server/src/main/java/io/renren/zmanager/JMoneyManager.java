@@ -1,6 +1,5 @@
 package io.renren.zmanager;
 
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.ConvertUtils;
@@ -15,23 +14,17 @@ import io.renren.zapi.allocate.dto.MoneyNotify;
 import io.renren.zbalance.ledgers.LedgerMoneyIn;
 import io.renren.zcommon.CommonUtils;
 import io.renren.zcommon.ZapiConstant;
-import io.renren.zcommon.ZestConfig;
 import io.renren.zcommon.ZinConstant;
 import io.renren.zin.accountmanage.ZinAccountManageNotifyService;
 import io.renren.zin.accountmanage.dto.TMoneyInNotify;
-import io.renren.zin.file.ZinFileService;
 import io.renren.zin.umbrella.ZinUmbrellaService;
 import io.renren.zin.umbrella.dto.*;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import java.util.Date;
 
 @Service
 @Slf4j
@@ -180,6 +173,7 @@ public class JMoneyManager {
                         .set(JMoneyEntity::getAgentName, jMaccountEntity.getAgentName())
                         .set(JMoneyEntity::getMerchantId, jMaccountEntity.getMerchantId())
                         .set(JMoneyEntity::getMerchantName, jMaccountEntity.getMerchantName())
+                        .set(JMoneyEntity::getStatDate, new Date())
                 );
                 if (update != 1) {
                     throw new RenException("匹配失败");

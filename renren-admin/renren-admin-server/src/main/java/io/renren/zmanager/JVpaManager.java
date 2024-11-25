@@ -28,6 +28,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
@@ -203,7 +204,7 @@ public class JVpaManager {
     }
 
     // 填充卡列表, 初始额度调整列表
-    public void vpaInitFill(JVpaJobEntity entity, List<JCardEntity> cards, List<JVpaAdjustEntity> adjusts, JCardEntity mainCard) {
+    public void vpaInitFill(JVpaJobEntity entity, List<JCardEntity> cards, List<JVpaAdjustEntity> adjusts, JCardEntity mainCard, Date statDate) {
         JFeeConfigEntity feeConfig = jCommon.getFeeConfig(entity.getMerchantId(), entity.getMarketproduct());
 
         BigDecimal merchantFee = entity.getMerchantfee().divide(new BigDecimal(entity.getNum()), 2, RoundingMode.HALF_UP);
@@ -246,6 +247,9 @@ public class JVpaManager {
             jCardEntity.setMerchantfee(merchantFee);
             jCardEntity.setFee(feeConfig.getCostCardFee());
 
+            // 完成日期
+            jCardEntity.setStatDate(statDate);
+
             // cvv加密入库
             jCardEntity.setCvv(CommonUtils.encryptSensitiveString(jCardEntity.getCvv(), zestConfig.getAccessConfig().getSensitiveKey(), "UTF-8"));
 
@@ -267,6 +271,11 @@ public class JVpaManager {
 
             adjustItem.setCardno(jCardEntity.getCardno());
             adjustItem.setMaincardno(jCardEntity.getMaincardno());
+
+            // 完成日期
+            adjustItem.setStatDate(statDate);
+
+
             log.info("adjustItem:{}", adjustItem);
             adjusts.add(adjustItem);
         }
@@ -298,12 +307,15 @@ public class JVpaManager {
             List<JCardEntity> jCardEntities = ConvertUtils.sourceToTarget(vpaInfoItems, JCardEntity.class);
             List<JVpaAdjustEntity> adjustEntities = new ArrayList<>(entity.getNum());
 
+            // 完成日期
+            Date statDate = new Date();
+
             // 期限卡: 额度记录
             if (entity.getCycle().equals(ZinConstant.VPA_CYCLE_DEADLINE) ||
                     entity.getCycle().equals(ZinConstant.VPA_CYCLE_PERIODICAL) ||
                     (entity.getCycle().equals(ZinConstant.VPA_CYCLE_ONCE) && entity.getFeecurrency().equals("Y"))
             ) {
-                vpaInitFill(entity, jCardEntities, adjustEntities, mainCard);
+                vpaInitFill(entity, jCardEntities, adjustEntities, mainCard, statDate);
             }
 
             // 插入卡表， 记账扣费, 更新任务状态:  200
@@ -324,6 +336,7 @@ public class JVpaManager {
                             .eq(JVpaJobEntity::getId, entity.getId())
                             .eq(JVpaJobEntity::getState, prevState)
                             .set(JVpaJobEntity::getState, ZinConstant.CARD_APPLY_SUCCESS)
+                            .set(JVpaJobEntity::getState, statDate)
                     );
                     // 记账
                     if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_SHARE)) {
@@ -347,9 +360,11 @@ public class JVpaManager {
                 });
             }
 
+            entity.setState(response.getState());
             // vpa我们对外接口还没提供
-            if (notify || entity.getApi().equals(1)) {
-                // todo
+            if (notify ) {
+                JMerchantEntity merchant = jMerchantDao.selectById(entity.getMerchantId());
+                apiNotify.vpaJobNotify(entity, merchant);
             }
         }
         // 非失败 -> 失败

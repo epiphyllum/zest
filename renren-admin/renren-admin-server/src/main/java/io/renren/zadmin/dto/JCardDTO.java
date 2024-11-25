@@ -31,6 +31,10 @@ public class JCardDTO implements Serializable {
     @Schema(description = "更新时间")
     private Date updateDate;
 
+    //
+    @Schema(description = "完成日期")
+    private Date statDate;
+
     @Schema(description = "对外卡产品")
     private String marketproduct;
     @Schema(description = "主卡")

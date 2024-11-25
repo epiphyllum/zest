@@ -1,6 +1,5 @@
 package io.renren.zmanager;
 
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.ConvertUtils;
@@ -25,9 +24,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.HashMap;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 @Service
@@ -35,8 +33,6 @@ import java.util.concurrent.CompletableFuture;
 public class JDepositManager {
     @Resource
     private JCommon jCommon;
-    @Resource
-    private ZinFileService zinFileService;
     @Resource
     private TransactionTemplate tx;
     @Resource
@@ -199,6 +195,8 @@ public class JDepositManager {
             entity.setSecuritycurrency(response.getSecuritycurrency());
             entity.setFee(response.getFee());
             entity.setFeecurrency(response.getFeecurrency());
+            Date statDate = new Date();
+            entity.setStatDate(statDate);
             try {
                 Boolean execute = tx.execute(st -> {
                     int update = jDepositDao.update(null, Wrappers.<JDepositEntity>lambdaUpdate()
@@ -207,6 +205,7 @@ public class JDepositManager {
                             .set(JDepositEntity::getSecurityamount, response.getSecurityamount())
                             .set(JDepositEntity::getSecuritycurrency, response.getSecuritycurrency())
                             .set(JDepositEntity::getFee, response.getFee())
+                            .set(JDepositEntity::getStatDate, statDate)
                             .set(JDepositEntity::getFeecurrency, response.getFeecurrency())
                             .set(JDepositEntity::getState, newState)
                     );

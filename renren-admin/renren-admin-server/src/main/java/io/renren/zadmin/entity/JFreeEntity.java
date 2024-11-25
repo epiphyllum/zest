@@ -25,6 +25,9 @@ public class JFreeEntity extends BaseEntity {
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date updateDate;
 
+    // 完成日期
+    private Date statDate;
+
     private BigDecimal amount;
     private String currency;
     private String applyid;

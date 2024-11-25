@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 @Service
 public class JAllocateManager {
@@ -51,6 +52,7 @@ public class JAllocateManager {
         if (vaAccount.getBalance().compareTo(entity.getAmount()) < 0) {
             throw new RenException("账户余额不足, 账户余额:" + vaAccount.getBalance());
         }
+        entity.setStatDate(new Date());
         tx.executeWithoutResult(status -> {
             jAllocateDao.insert(entity);
             ledgerAllocation.ledgeM2s(entity);
@@ -68,6 +70,7 @@ public class JAllocateManager {
             throw new RenException("子商户账户余额不足, 余额:" + subVaAccount.getBalance());
         }
 
+        entity.setStatDate(new Date());
         tx.executeWithoutResult(status -> {
             jAllocateDao.insert(entity);
             ledgerAllocation.ledgeS2m(entity);

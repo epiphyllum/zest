@@ -33,10 +33,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
@@ -285,7 +282,7 @@ public class JCardManager {
         query.setMeraplid(jCardEntity.getTxnid());
         TCardApplyResponse response = zinCardApplyService.cardApplyQuery(query);
 
-        // 从非失败  -> 失败,  处理退款
+        //
         String prevState = jCardEntity.getState();
         String nextState = response.getState();
 
@@ -301,6 +298,9 @@ public class JCardManager {
 
         // 不成功 -> 成功
         if (!ZinConstant.isCardApplySuccess(prevState) && ZinConstant.isCardApplySuccess(nextState)) {
+
+            // 完成时间
+            updateWrapper.set(JCardEntity::getStatDate, new Date());
 
             // 调用下通联获取cvv2 + expiredate
             TCardPayInfoRequest req = new TCardPayInfoRequest();
@@ -436,7 +436,6 @@ public class JCardManager {
 
     // 卡余额
     public void balanceCard(JCardEntity jCardEntity) {
-
         TCardBalanceRequest request = new TCardBalanceRequest();
         request.setCardno(jCardEntity.getCardno());
         TCardBalanceResponse response = zinCardMoneyService.balance(request);
@@ -445,7 +444,6 @@ public class JCardManager {
         update.setBalance(response.getBalance());
         jCardEntity.setBalance(response.getBalance());
         jCardDao.updateById(update);
-
     }
 
     // 查询某张卡的余额
@@ -568,6 +566,7 @@ public class JCardManager {
                         .eq(JVpaAdjustEntity::getId, adjustEntity.getId())
                         .eq(JVpaAdjustEntity::getState, ZinConstant.VPA_ADJUST_UNKNOWN)
                         .set(JVpaAdjustEntity::getState, ZinConstant.VPA_ADJUST_SUCCESS)
+                        .set(JVpaAdjustEntity::getStatDate, new Date())  // 完成日期
                 );
                 if (update != 1) {
                     throw new RenException("更新调整失败");
@@ -649,6 +648,7 @@ public class JCardManager {
                         .eq(JVpaAdjustEntity::getId, adjustEntity.getId())
                         .eq(JVpaAdjustEntity::getState, ZinConstant.VPA_ADJUST_UNKNOWN)
                         .set(JVpaAdjustEntity::getState, ZinConstant.VPA_ADJUST_SUCCESS)
+                        .set(JVpaAdjustEntity::getStatDate, new Date())  // 完成日期
                 );
                 if (update != 1) {
                     throw new RenException("更新调整失败");
@@ -714,6 +714,7 @@ public class JCardManager {
                         .eq(JVpaAdjustEntity::getId, adjustEntity.getId())
                         .eq(JVpaAdjustEntity::getState, ZinConstant.VPA_ADJUST_UNKNOWN)
                         .set(JVpaAdjustEntity::getState, ZinConstant.VPA_ADJUST_SUCCESS)
+                        .set(JVpaAdjustEntity::getStatDate, new Date())  // 完成日期
                 );
                 // 更新卡的当前额度
                 jCardDao.update(null, Wrappers.<JCardEntity>lambdaUpdate()

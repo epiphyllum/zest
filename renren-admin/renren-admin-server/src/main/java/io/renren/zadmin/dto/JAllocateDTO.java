@@ -21,6 +21,8 @@ public class JAllocateDTO implements Serializable {
     // 通用(5)
     @Schema(description = "ID")
     private Long id;
+
+
     @Schema(description = "创建者")
     private Long creator;
     @Schema(description = "创建时间")
@@ -29,6 +31,10 @@ public class JAllocateDTO implements Serializable {
     private Long updater;
     @Schema(description = "更新时间")
     private Date updateDate;
+
+    //
+    @Schema(description = "完成日期")
+    private Date statDate;
 
     // ID(6)
     @Schema(description = "代理id")

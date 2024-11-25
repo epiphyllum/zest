@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 @Service
 public class JExchangeManager {
@@ -78,8 +79,8 @@ public class JExchangeManager {
         String oldState = jExchangeEntity.getState();
         String newState = response.getState();
         // 状态从不成功到成功
-        if (ZinConstant.payApplyStateMap.get(oldState) != ZinConstant.STATE_SUCCESS &&
-                ZinConstant.payApplyStateMap.get(newState) == ZinConstant.STATE_SUCCESS) {
+        if (ZinConstant.payApplyStateMap.get(oldState) != ZinConstant.STATE_SUCCESS && ZinConstant.payApplyStateMap.get(newState) == ZinConstant.STATE_SUCCESS) {
+            update.setStatDate(new Date());
             Boolean execute = tx.execute(st -> {
                 int cnt = jExchangeDao.update(update, Wrappers.<JExchangeEntity>lambdaUpdate()
                         .eq(JExchangeEntity::getId, jExchangeEntity.getId())
@@ -103,8 +104,6 @@ public class JExchangeManager {
             // 其他情况,  只是简单更新
             jExchangeDao.updateById(update);
         }
-
-
     }
 
     /**

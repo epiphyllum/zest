@@ -86,6 +86,12 @@ public class JVpaJobDTO implements Serializable {
     private String meraplid;
     @Schema(description = "通联返回")
     private String applyid;
+
+    //
+    @Schema(description = "完成日期")
+    private Date statDate;
+
+    //
     @Schema(description = "创建者")
     private Long creator;
     @Schema(description = "创建时间")

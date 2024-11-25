@@ -111,10 +111,19 @@ public class ApiVpaService {
         res.setState(job.getState());
 
         // 发卡成功
+        if (!job.getState().equals(ZinConstant.CARD_APPLY_SUCCESS)) {
+           if (job.getApplyid() != null) {
+               // 再查一次
+               jVpaManager.query(job, false);
+           }
+        }
+
+        // 如果发卡成功
         if (job.getState().equals(ZinConstant.CARD_APPLY_SUCCESS)) {
             String vpaResult = this.getVpaResult(job);
             res.setEncrypted(vpaResult);
         }
+
         result.setData(res);
         return result;
     }

@@ -22,6 +22,10 @@ import io.renren.commons.mybatis.entity.BaseEntity;
 public class JVpaAdjustEntity extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
+    // 完成日期
+    private Date statDate;
+
+    //
     private Long agentId;
     private String agentName;
     private Long merchantId;

@@ -54,6 +54,10 @@ public class JVpaAdjustDTO implements Serializable {
     @Schema(description = "API")
     private Integer api;
 
+    //
+    @Schema(description = "完成日期")
+    private Date statDate;
+
     @Schema(description = "创建者")
     private Long creator;
     @Schema(description = "创建时间")

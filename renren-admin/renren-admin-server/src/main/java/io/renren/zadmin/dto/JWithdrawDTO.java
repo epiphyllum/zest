@@ -29,6 +29,10 @@ public class JWithdrawDTO implements Serializable {
     @Schema(description = "更新时间")
     private Date updateDate;
 
+    //
+    @Schema(description = "完成日期")
+    private Date statDate;
+
     // ID相关
     @Schema(description = "商户ID")
     private Long merchantId;

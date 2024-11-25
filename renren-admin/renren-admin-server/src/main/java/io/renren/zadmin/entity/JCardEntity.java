@@ -28,6 +28,9 @@ public class JCardEntity extends BaseEntity {
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date updateDate;
 
+    // 完成日期
+    private Date statDate;
+
     // ID(6)
     private Long agentId;
     private String agentName;

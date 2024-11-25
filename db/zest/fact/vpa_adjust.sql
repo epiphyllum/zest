@@ -10,14 +10,13 @@ create table j_vpa_adjust
     sub_id        bigint         not null comment '子商户ID',
     sub_name      varchar(50)    not null comment '子商户',
     -- 业务字段
+    marketproduct varchar(16)    not null comment '产品',
     maincardno    varchar(30)    not null comment '主卡卡号',
-    marketproduct varchar(16)    not null comment '卡产品',
     cardno        varchar(30)    not null comment 'vpa子卡',
     adjust_amount decimal(18, 2) not null comment '调整金额',
     old_quota     decimal(18, 2) not null comment '调整前额度',
     new_quota     decimal(18, 2) not null comment '调整后额度',
     state         varchar(2)     not null default '00' comment '调整状态',
-
     -- basic
     creator       bigint comment '创建者',
     create_date   datetime comment '创建时间',

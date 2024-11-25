@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -69,6 +70,7 @@ public class ZinAccountManageNotifyService {
                     .set(JMoneyEntity::getBid, notify.getBid())
                     .set(JMoneyEntity::getNid, notify.getNid())
                     .set(JMoneyEntity::getAmount, notify.getAmount())
+                    .set(JMoneyEntity::getStatDate, new Date())
             );
             if (cnt != 1) {
                 throw new RenException("入金通知处理失败");
@@ -150,6 +152,7 @@ public class ZinAccountManageNotifyService {
                     .set(JMoneyEntity::getAgentName, finalAgentName)
                     .set(JMoneyEntity::getMerchantId, finalMerchantId)
                     .set(JMoneyEntity::getMerchantName, finalMerchantName)
+                    .set(JMoneyEntity::getStatDate, new Date())
             );
             entity.setMerchantId(finalMerchantId);
             entity.setMerchantName(finalMerchantName);

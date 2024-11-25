@@ -32,6 +32,10 @@ public class JExchangeDTO implements Serializable {
     @Schema(description = "更新时间")
     private Date updateDate;
 
+    //
+    @Schema(description = "完成日期")
+    private Date statDate;
+
     // id相关(4)
     @Schema(description = "代理ID")
     private Long agentId;

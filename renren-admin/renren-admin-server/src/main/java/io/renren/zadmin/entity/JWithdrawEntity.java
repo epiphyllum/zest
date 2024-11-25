@@ -26,6 +26,9 @@ public class JWithdrawEntity extends BaseEntity {
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date updateDate;
 
+    // 完成日期
+    private Date statDate;
+
     // (6) ID相关
     private Long agentId;
     private String agentName;

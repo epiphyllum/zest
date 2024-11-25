@@ -23,6 +23,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -149,6 +150,8 @@ public class JWithdrawManager {
             entity.setFee(response.getFee());
             entity.setFeecurrency(response.getFeecurrency());
 
+            Date statDate = new Date();
+
             try {
                 Boolean execute = tx.execute(st -> {
                     int update = jWithdrawDao.update(null, Wrappers.<JWithdrawEntity>lambdaUpdate()
@@ -160,6 +163,7 @@ public class JWithdrawManager {
                             .set(JWithdrawEntity::getSecuritycurrency, response.getSecuritycurrency())
                             .set(JWithdrawEntity::getFee, response.getFee())
                             .set(JWithdrawEntity::getFeecurrency, response.getFeecurrency())
+                            .set(JWithdrawEntity::getStatDate, statDate)
                     );
                     if (update != 1) {
                         st.setRollbackOnly();

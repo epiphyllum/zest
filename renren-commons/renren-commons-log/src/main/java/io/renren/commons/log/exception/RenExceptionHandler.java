@@ -27,6 +27,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -55,33 +57,48 @@ public class RenExceptionHandler {
     public Result handleRRException(RenException ex) {
         Result result = new Result();
         result.error(ex.getCode(), ex.getMsg());
-
         return result;
     }
 
+    // 缺少请求头
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public Result handleDuplicateKeyException(MissingRequestHeaderException ex) {
+        Result result = new Result();
+        result.error("缺少请求头:" + ex.getHeaderName());
+        return result;
+    }
+
+    // 请求方法不支持
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class )
+    public Result handleHttpMethodException(HttpRequestMethodNotSupportedException ex) {
+        Result result = new Result();
+        result.error("不支持请求方法:" + ex.getMethod());
+        return result;
+    }
+
+    // 唯一索引
     @ExceptionHandler(DuplicateKeyException.class)
     public Result handleDuplicateKeyException(DuplicateKeyException ex) {
         Result result = new Result();
         result.error(ErrorCode.DB_RECORD_EXISTS);
-
         return result;
     }
 
-
+    // 没有权限
     @ExceptionHandler(AccessDeniedException.class)
     public Result handleAccessDeniedException(Exception ex) {
         Result result = new Result();
         result.error(ErrorCode.FORBIDDEN);
-
         return result;
     }
 
+    /**
+     * 未预期的异常
+     */
     @ExceptionHandler(Exception.class)
     public Result handleException(Exception ex) {
         logger.error(ex.getMessage(), ex);
-
         saveLog(ex);
-
         return new Result().error();
     }
 
@@ -103,10 +120,8 @@ public class RenExceptionHandler {
         if (MapUtil.isNotEmpty(params)) {
             log.setRequestParams(JsonUtils.toJsonString(params));
         }
-
         //异常信息
         log.setErrorInfo(ExceptionUtils.getErrorStackTrace(ex));
-
         //保存到Redis队列里
         log.setCreateDate(new Date());
         logProducer.saveLog(log);

@@ -26,6 +26,9 @@ public class JMoneyEntity extends BaseEntity {
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date updateDate;
 
+    // 完成日期
+    private Date statDate;
+
     // (4) ID
     private Long agentId;
     private String agentName;
