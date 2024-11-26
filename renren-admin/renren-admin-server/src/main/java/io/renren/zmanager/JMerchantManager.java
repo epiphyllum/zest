@@ -183,9 +183,12 @@ public class JMerchantManager {
 
         // 还没有通过
         if (!merchant.getState().equals(ZinConstant.MERCHANT_STATE_REGISTER)) {
+            log.info("商户尚未注册, 可以做修改");
             jMerchantService.update(dto);
             return;
         }
+
+        log.info("商户已经注册，查看币种修改情况...");
 
         // 原始币种列表
         String[] oldList = merchant.getCurrencyList().split(",");
@@ -202,6 +205,8 @@ public class JMerchantManager {
         Set<String> removed = new HashSet<String>(oldSet);
         added.removeAll(oldSet);
         removed.removeAll(newSet);
+
+        log.info("增加币种:{}, 减少币种:{}", added.size(), removed.size());
 
         // 如果有减少币种, 报错
         if (removed.size() > 0) {
@@ -220,10 +225,10 @@ public class JMerchantManager {
                 .eq(JSubEntity::getState, ZinConstant.MERCHANT_STATE_VERIFIED)
         );
         tx.executeWithoutResult(status -> {
+            // 更新商户信息
             jMerchantService.update(dto);
             // 新增加的币种
             for (String currency : added) {
-                // newBalance(merchant, BalanceType.getVaAccount(currency), currency);  // 创建va账户
                 ledgerUtil.newBalance(ZestConstant.USER_TYPE_MERCHANT, merchant.getCusname(), merchant.getId(), BalanceType.getVaAccount(currency), currency);
             }
             // 子商户增加币种

@@ -37,6 +37,8 @@ public class JMerchantDashboard {
     private VCardDao vCardDao;
     @Resource
     private JAuthDao jAuthDao;
+    @Resource
+    private JMoneyDao jMoneyDao;
 
     // 某个币种当前余额情况
     private BalanceItem getBalanceItem(List<JBalanceEntity> items, String currency) {
@@ -94,11 +96,14 @@ public class JMerchantDashboard {
                 .stream().collect(Collectors.groupingBy(VCardEntity::getCurrency));
         Map<String, List<JAuthEntity>> authMap = jAuthDao.selectDayOfMerchant(today, merchantId)
                 .stream().collect(Collectors.groupingBy(JAuthEntity::getCurrency));
+        Map<String, List<JMoneyEntity>> moneyMap = jMoneyDao.selectByDateOfMerchant(today, merchantId)
+                .stream().collect(Collectors.groupingBy(JMoneyEntity::getCurrency));
 
         Set<String> currencySet = new HashSet<>();
         currencySet.addAll(depositMap.keySet());
         currencySet.addAll(withdrawMap.keySet());
         currencySet.addAll(cardMap.keySet());
+        currencySet.addAll(moneyMap.keySet());
 
         Map<String, StatItem> map = new HashMap<>();
         for (String currency : currencySet) {
@@ -140,6 +145,14 @@ public class JMerchantDashboard {
                 log.info("消费记录: {}", jAuthEntity);
                 item.setSettlecount(jAuthEntity.getId());
                 item.setSettleamount(jAuthEntity.getSettleamount());
+            }
+
+            // 入金数据
+            List<JMoneyEntity> moneyEntities = moneyMap.get(currency);
+            if (moneyEntities != null && moneyEntities.size() > 0) {
+                JMoneyEntity jMoneyEntity = moneyEntities.get(0);
+                item.setInMoney(jMoneyEntity.getAmount());
+                item.setInMoneyCount(jMoneyEntity.getId());
             }
 
             if (item.getSettleamount() == null) {

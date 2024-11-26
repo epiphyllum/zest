@@ -1,8 +1,8 @@
 drop table if exists j_stat;
 create table j_stat
 (
-    id                  bigint      not null,
-    md5                 varchar(32) not null,
+    id                  bigint         not null,
+    md5                 varchar(32)    not null,
 
     -- 维度信息
     agent_id            bigint comment '代理ID',
@@ -34,6 +34,10 @@ create table j_stat
     total_card          bigint comment '发卡量',
     card_fee            decimal(18, 2) comment '开卡费用',
     aip_card_fee        decimal(18, 2) comment '开卡成本',
+
+    -- 结算数据
+    settleamount        decimal(18, 2) not null default 0,
+    settlecount         bigint         not null default 0,
 
     primary key (id)
 ) engine = innodb

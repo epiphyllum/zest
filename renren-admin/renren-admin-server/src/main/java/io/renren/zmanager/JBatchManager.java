@@ -30,6 +30,8 @@ public class JBatchManager {
     @Resource
     private JBatchDao jBatchDao;
     @Resource
+    private JMoneyDao jMoneyDao;
+    @Resource
     private JStatDao jStatDao;
     @Resource
     private JStatService jStatService;
@@ -54,7 +56,6 @@ public class JBatchManager {
 
     private void checkStatDate(Date date) {
         Date next = new Date(date.getTime() + 1000 * 60 * 60 * 24);
-
         Long depositProcess = jDepositDao.selectCount(Wrappers.<JDepositEntity>lambdaQuery()
                 .eq(JDepositEntity::getState, "")
                 .ge(JDepositEntity::getCreateDate, date)
@@ -244,7 +245,6 @@ public class JBatchManager {
         }
     }
 
-
     /**
      * 填充维度信息
      */
@@ -390,7 +390,7 @@ public class JBatchManager {
         String entryDate = dateStr.replaceAll("-", "");
 
         // 检查是否可以统计
-        checkStatDate(date);
+        // checkStatDate(date);
 
         // 拿到任务
         JBatchEntity batchEntity = newBatchItem(date, ZestConstant.BATCH_TYPE_STAT);
@@ -402,6 +402,7 @@ public class JBatchManager {
         Map<String, VDepositEntity> depositMap = new HashMap<>();
         Map<String, VWithdrawEntity> withdrawMap = new HashMap<>();
         Map<String, JAuthedEntity> authedMap = new HashMap<>();
+        Map<String, JMoneyEntity>  moneyMap = new HashMap<>();
         Set<String> allKeys = new HashSet<>();
 
         // 卡统计, 充值统计, 提现统计,结算统计
@@ -461,7 +462,6 @@ public class JBatchManager {
                 .set(JBatchEntity::getMemo, memo));
 
     }
-
 
     /**
      * 批处理任务

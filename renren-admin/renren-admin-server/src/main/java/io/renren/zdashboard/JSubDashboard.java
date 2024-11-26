@@ -37,6 +37,8 @@ public class JSubDashboard {
     private VCardDao vCardDao;
     @Resource
     private JAuthDao jAuthDao;
+    @Resource
+    private JAllocateDao jAllocateDao;
 
     // 某个币种当前余额情况
     private BalanceItem getBalanceItem(List<JBalanceEntity> items, String currency) {
@@ -85,6 +87,13 @@ public class JSubDashboard {
         Map<String, List<JAuthEntity>> authMap = jAuthDao.selectDayOfSub(today, subId)
                 .stream().collect(Collectors.groupingBy(JAuthEntity::getCurrency));
 
+        Map<String, List<JAllocateEntity>> collect = jAllocateDao.selectByDateOfSub(today, subId)
+                .stream().collect(Collectors.groupingBy(JAllocateEntity::getType));
+        Map<String, List<JAllocateEntity>> inMoneyMap = collect.getOrDefault("m2s", List.of())
+                .stream().collect(Collectors.groupingBy(JAllocateEntity::getCurrency));
+        Map<String, List<JAllocateEntity>> outMoneyMap = collect.getOrDefault("s2m", List.of())
+                .stream().collect(Collectors.groupingBy(JAllocateEntity::getCurrency));
+
         Set<String> currencySet = new HashSet<>();
         currencySet.addAll(depositMap.keySet());
         currencySet.addAll(withdrawMap.keySet());
@@ -131,6 +140,24 @@ public class JSubDashboard {
                 item.setSettlecount(jAuthEntity.getId());
                 item.setSettleamount(jAuthEntity.getSettleamount());
             }
+
+            // 入金数据
+            List<JAllocateEntity> inEntities = inMoneyMap.get(currency);
+            if (inEntities != null && inEntities.size() > 0) {
+                JAllocateEntity jAllocateEntity = inEntities.get(0);
+                item.setInMoney(jAllocateEntity.getAmount());
+                item.setInMoneyCount(jAllocateEntity.getId());
+            }
+
+            // 出金数据
+            List<JAllocateEntity> outEntities = outMoneyMap.get(currency);
+            if (outEntities != null && outEntities.size() > 0) {
+                JAllocateEntity jAllocateEntity = outEntities.get(0);
+                item.setOutMoney(jAllocateEntity.getAmount());
+                item.setOutMoneyCount(jAllocateEntity.getId());
+            }
+
+
             item.setStatDate(today);
             item.setCurrency(currency);
 

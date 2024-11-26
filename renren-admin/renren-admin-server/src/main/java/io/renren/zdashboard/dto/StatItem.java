@@ -29,6 +29,11 @@ public class StatItem {
     // 交易数据
     private Long settlecount;                  // 交易笔数
     private BigDecimal settleamount;           // 交易金额
+    // 入金
+    private BigDecimal inMoney;                // 入金金额
+    private Long inMoneyCount;                 // 入金笔数
+    private BigDecimal outMoney;               // 出金金额
+    private Long outMoneyCount;                // 出金笔数
     // 日期
     @JsonFormat(pattern = DateUtils.DATE_PATTERN)
     private Date statDate;

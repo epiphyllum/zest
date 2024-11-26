@@ -174,7 +174,7 @@ public class ApiService {
             log.debug("开发环境, 不校验签名");
         } else {
             if (merchant.getWhiteIp().indexOf(ip) == -1) {
-                log.error("{} is forbidden from {}", merchant.getCusname(), ip);
+                log.error("{}不允许从{}访问", merchant.getCusname(), ip);
                 throw new RenException("forbidden ip: " + ip);
             }
             verify(body, reqId, merchant, sign);
@@ -194,8 +194,6 @@ public class ApiService {
 
         try {
             Object req = objectMapper.readValue(body, apiMeta.getReqClass());
-            // todo: validate request
-            // ValidatorUtils.validateEntity(req);
             Logger logger = CommonUtils.getLogger(merchant.getCusname());
             ApiContext context = new ApiContext(merchant, logger);
             Result<?> result = (Result) apiMeta.getMethod().invoke(apiMeta.getInstance(), req, context);
@@ -204,7 +202,7 @@ public class ApiService {
         } catch (JsonProcessingException e) {
             apiLogger.logPacketException(packetEntity, e);
             e.printStackTrace();
-            throw new RenException("invalid json");
+            throw new RenException("数据格式错误");
         } catch (InvocationTargetException e) {
             Throwable cause = e.getCause();
             if (cause instanceof RenException) {
@@ -213,7 +211,7 @@ public class ApiService {
                 throw ex;
             } else {
                 e.printStackTrace();
-                throw new RenException("unknown exception");
+                throw new RenException("未知异常");
             }
         } catch (IllegalAccessException e) {
             apiLogger.logPacketException(packetEntity, e);

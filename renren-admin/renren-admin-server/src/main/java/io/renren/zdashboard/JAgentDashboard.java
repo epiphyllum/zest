@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class JAgentDashboard {
     @Resource
+    private JMoneyDao jMoneyDao;
+    @Resource
     private JBalanceDao jBalanceDao;
     @Resource
     private JSubDao jSubDao;
@@ -92,6 +94,8 @@ public class JAgentDashboard {
                 .stream().collect(Collectors.groupingBy(VCardEntity::getCurrency));
         Map<String, List<JAuthEntity>> authMap = jAuthDao.selectDayOfAgent(today, agentId)
                 .stream().collect(Collectors.groupingBy(JAuthEntity::getCurrency));
+        Map<String, List<JMoneyEntity>> moneyMap = jMoneyDao.selectByDateOfMerchant(today, agentId)
+                .stream().collect(Collectors.groupingBy(JMoneyEntity::getCurrency));
 
         Set<String> currencySet = new HashSet<>();
         currencySet.addAll(depositMap.keySet());
@@ -139,6 +143,15 @@ public class JAgentDashboard {
                 item.setSettlecount(jAuthEntity.getId());
                 item.setSettleamount(jAuthEntity.getSettleamount());
             }
+
+            // 入金数据
+            List<JMoneyEntity> moneyEntities = moneyMap.get(currency);
+            if (moneyEntities != null && moneyEntities.size() > 0) {
+                JMoneyEntity jMoneyEntity = moneyEntities.get(0);
+                item.setInMoneyCount(jMoneyEntity.getId());
+                item.setInMoney(jMoneyEntity.getAmount());
+            }
+
             item.setStatDate(today);
             item.setCurrency(currency);
 

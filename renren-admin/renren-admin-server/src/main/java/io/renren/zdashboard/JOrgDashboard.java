@@ -23,6 +23,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class JOrgDashboard {
     @Resource
+    private JMoneyDao jMoneyDao;
+    @Resource
     private JVaDao jVaDao;
     @Resource
     private JVaManager jVaManager;
@@ -109,11 +111,14 @@ public class JOrgDashboard {
                 .stream().collect(Collectors.groupingBy(VCardEntity::getCurrency));
         Map<String, List<JAuthEntity>> authMap = jAuthDao.selectDayOfOperation(today)
                 .stream().collect(Collectors.groupingBy(JAuthEntity::getCurrency));
+        Map<String, List<JMoneyEntity>> moneyMap = jMoneyDao.selectByDateOfOperation(today)
+                .stream().collect(Collectors.groupingBy(JMoneyEntity::getCurrency));
 
         Set<String> currencySet = new HashSet<>();
         currencySet.addAll(depositMap.keySet());
         currencySet.addAll(withdrawMap.keySet());
         currencySet.addAll(cardMap.keySet());
+        currencySet.addAll(moneyMap.keySet());
 
         Map<String, StatItem> map = new HashMap<>();
         for (String currency : currencySet) {
@@ -163,6 +168,15 @@ public class JOrgDashboard {
                 item.setSettlecount(jAuthEntity.getId());
                 item.setSettleamount(jAuthEntity.getSettleamount());
             }
+
+            // 入金数据
+            List<JMoneyEntity> moneyEntities = moneyMap.get(currency);
+            if (moneyEntities != null && moneyEntities.size() > 0) {
+                JMoneyEntity jMoneyEntity = moneyEntities.get(0);
+                item.setInMoneyCount(jMoneyEntity.getId());
+                item.setInMoney(jMoneyEntity.getAmount());
+            }
+
             item.setStatDate(today);
             item.setCurrency(currency);
 
