@@ -12,6 +12,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -150,6 +151,14 @@ public class JSubDashboard {
         Map<String, List<StatItem>> map = new HashMap<>();
         collect.forEach((currency, items) -> {
             List<StatItem> statItems = ConvertUtils.sourceToTarget(items, StatItem.class);
+            for (StatItem statItem : statItems) {
+                if (statItem.getSettleamount() == null) {
+                    statItem.setSettleamount(BigDecimal.ZERO);
+                }
+                if (statItem.getSettlecount() == null) {
+                    statItem.setSettlecount(0L);
+                }
+            }
             log.info("monthMap {} -> {}", currency, items.size());
             map.put(currency, statItems);
         });

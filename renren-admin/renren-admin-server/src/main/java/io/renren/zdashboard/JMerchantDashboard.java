@@ -161,6 +161,14 @@ public class JMerchantDashboard {
         Map<String, List<StatItem>> map = new HashMap<>();
         collect.forEach((currency, items) -> {
             List<StatItem> statItems = ConvertUtils.sourceToTarget(items, StatItem.class);
+            for (StatItem statItem : statItems) {
+                if (statItem.getSettleamount() == null) {
+                    statItem.setSettleamount(BigDecimal.ZERO);
+                }
+                if (statItem.getSettlecount() == null) {
+                    statItem.setSettlecount(0L);
+                }
+            }
             log.info("monthMap {} -> {}", currency, items.size());
             map.put(currency, statItems);
         });
