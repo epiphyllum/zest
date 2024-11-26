@@ -196,7 +196,7 @@ public class JMerchantManager {
         oldSet.addAll(List.of(oldList));
 
         // 新币种列表
-        String[] newList = merchant.getCurrencyList().split(",");
+        String[] newList = dto.getCurrencyList().split(",");
         Set<String> newSet = new HashSet<>();
         newSet.addAll(List.of(newList));
 
