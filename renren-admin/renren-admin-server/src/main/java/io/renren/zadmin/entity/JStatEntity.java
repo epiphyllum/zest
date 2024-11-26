@@ -44,4 +44,8 @@ public class JStatEntity {
     private BigDecimal cardFee;
     private BigDecimal aipCardFee;
 
+    //
+    private BigDecimal settleamount;
+    private Long settlecount;
+
 }

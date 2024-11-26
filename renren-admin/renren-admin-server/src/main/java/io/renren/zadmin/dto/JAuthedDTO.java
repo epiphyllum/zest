@@ -29,6 +29,8 @@ public class JAuthedDTO implements Serializable {
     private String merchantName;
     private Long subId;
     private String subName;
+    private String marketproduct;
+
     private String cardno;
     private String trxtype;
     private String trxdir;

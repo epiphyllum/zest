@@ -66,4 +66,9 @@ public class JStatDTO implements Serializable {
     private BigDecimal cardFee;
     @Schema(description = "开卡成本")
     private BigDecimal aipCardFee;
+
+    @Schema(description = "结算金额")
+    private BigDecimal settleamount;
+    @Schema(description = "结算笔数")
+    private Long settlecount;
 }

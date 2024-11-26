@@ -216,6 +216,7 @@ public class JBatchManager {
      * 收集提现数据
      */
     private void gatherWithdraw(List<VWithdrawEntity> vWithdrawEntities, Set<String> allKeys, Map<String, VWithdrawEntity> map) {
+
         for (VWithdrawEntity vWithdrawEntity : vWithdrawEntities) {
             String key = vWithdrawEntity.getAgentName() + vWithdrawEntity.getAgentId()
                     + vWithdrawEntity.getMerchantName() + vWithdrawEntity.getMerchantId()
@@ -225,13 +226,35 @@ public class JBatchManager {
             map.put(key, vWithdrawEntity);
             allKeys.add(key);
         }
+
+    }
+
+    /**
+     * 收集结算数据
+     */
+    private void gatherAuthed(List<JAuthedEntity> jAuthedEntities, Set<String> allKeys, Map<String, JAuthedEntity> map) {
+        for (JAuthedEntity jAuthedEntity : jAuthedEntities) {
+            String key = jAuthedEntity.getAgentName() + jAuthedEntity.getAgentId()
+                    + jAuthedEntity.getMerchantName() + jAuthedEntity.getMerchantId()
+                    + jAuthedEntity.getSubName() + jAuthedEntity.getSubId()
+                    + jAuthedEntity.getMarketproduct()
+                    + jAuthedEntity.getEntrycurrency();
+            map.put(key, jAuthedEntity);
+            allKeys.add(key);
+        }
     }
 
 
     /**
      * 填充维度信息
      */
-    private void setFields(VWithdrawEntity withdrawEntity, VCardEntity cardEntity, VDepositEntity depositEntity, JStatEntity statEntity) {
+    private void setFields(
+            VWithdrawEntity withdrawEntity,
+            VCardEntity cardEntity,
+            VDepositEntity depositEntity,
+            JAuthedEntity jAuthedEntity,
+            JStatEntity statEntity
+    ) {
         boolean isKeySet = false;
         if (depositEntity != null) {
             if (!isKeySet) {
@@ -279,7 +302,7 @@ public class JBatchManager {
             statEntity.setTotalCard(0L);
         }
         if (withdrawEntity != null) {
-            if (isKeySet) {
+            if (!isKeySet) {
                 statEntity.setAgentName(withdrawEntity.getAgentName());
                 statEntity.setMerchantName(withdrawEntity.getAgentName());
                 statEntity.setSubName(withdrawEntity.getAgentName());
@@ -298,6 +321,23 @@ public class JBatchManager {
             statEntity.setWithdrawCharge(BigDecimal.ZERO);
             statEntity.setAipWithdrawCharge(BigDecimal.ZERO);
         }
+        if (jAuthedEntity != null) {
+            if (!isKeySet) {
+                statEntity.setAgentName(jAuthedEntity.getAgentName());
+                statEntity.setMerchantName(jAuthedEntity.getAgentName());
+                statEntity.setSubName(jAuthedEntity.getAgentName());
+                statEntity.setAgentId(jAuthedEntity.getAgentId());
+                statEntity.setMerchantId(jAuthedEntity.getMerchantId());
+                statEntity.setSubId(jAuthedEntity.getSubId());
+                statEntity.setMarketproduct(jAuthedEntity.getMarketproduct());
+                statEntity.setCurrency(jAuthedEntity.getEntrycurrency());
+            }
+            statEntity.setSettleamount(jAuthedEntity.getEntryamount());
+            statEntity.setSettlecount(jAuthedEntity.getId());
+        } else {
+            statEntity.setSettleamount(BigDecimal.ZERO);
+            statEntity.setSettlecount(0L);
+        }
     }
 
     /**
@@ -309,6 +349,7 @@ public class JBatchManager {
             Map<String, VCardEntity> cardMap,
             Map<String, VDepositEntity> depositMap,
             Map<String, VWithdrawEntity> withdrawMap,
+            Map<String, JAuthedEntity> authedMap,
             int batchSize,
             Date date,
             String dateStr
@@ -320,11 +361,14 @@ public class JBatchManager {
             VWithdrawEntity withdrawEntity = withdrawMap.get(key);
             VCardEntity cardEntity = cardMap.get(key);
             VDepositEntity depositEntity = depositMap.get(key);
+            JAuthedEntity authedEntity =authedMap.get(key);
+
             JStatEntity statEntity = new JStatEntity();
+
             String md5Key = DigestUtil.md5Hex(key + dateStr);
             statEntity.setMd5(md5Key);
             statEntity.setStatDate(date);
-            setFields(withdrawEntity, cardEntity, depositEntity, statEntity);
+            setFields(withdrawEntity, cardEntity, depositEntity, authedEntity, statEntity);
             curBatch.add(statEntity);
             if (curBatch.size() == batchSize) {
                 batchList.add(curBatch);
@@ -343,6 +387,7 @@ public class JBatchManager {
     // 生成某一天的数据
     public void statBatch(String dateStr) {
         Date date = DateUtils.parse(dateStr, DateUtils.DATE_PATTERN);
+        String entryDate = dateStr.replaceAll("-", "");
 
         // 检查是否可以统计
         checkStatDate(date);
@@ -356,22 +401,25 @@ public class JBatchManager {
         Map<String, VCardEntity> cardMap = new HashMap<>();
         Map<String, VDepositEntity> depositMap = new HashMap<>();
         Map<String, VWithdrawEntity> withdrawMap = new HashMap<>();
+        Map<String, JAuthedEntity> authedMap = new HashMap<>();
         Set<String> allKeys = new HashSet<>();
 
-        // 卡统计, 充值统计, 提现统计
+        // 卡统计, 充值统计, 提现统计,结算统计
         List<VCardEntity> cardList = vCardDao.selectByDate(date);
         List<VDepositEntity> vDepositEntities = vDepositDao.selectByDate(date);
         List<VWithdrawEntity> vWithdrawEntities = vWithdrawDao.selectByDate(date);
+        List<JAuthedEntity> jAuthedEntities = jAuthedDao.selectByDate(entryDate);
 
         // 收集
         gatherCard(cardList, allKeys, cardMap);
         gatherDeposit(vDepositEntities, allKeys, depositMap);
         gatherWithdraw(vWithdrawEntities, allKeys, withdrawMap);
+        gatherAuthed(jAuthedEntities, allKeys, authedMap);
 
         // 收集并拆分批次
         int batchSize = 1000;
         List<List<JStatEntity>> batchList = new ArrayList<>();
-        int total = gatherStatBatchList(batchList, allKeys, cardMap, depositMap, withdrawMap, batchSize, date, dateStr);
+        int total = gatherStatBatchList(batchList, allKeys, cardMap, depositMap, withdrawMap, authedMap,batchSize, date, dateStr);
         String memo = String.format("合并统计, 充值交易:%d, 提现交易:%d, 发卡交易:%d, 合并:%d, 批次:%d",
                 vDepositEntities.size(), vWithdrawEntities.size(), cardList.size(), total, batchList.size()
         );
@@ -413,6 +461,7 @@ public class JBatchManager {
                 .set(JBatchEntity::getMemo, memo));
 
     }
+
 
     /**
      * 批处理任务

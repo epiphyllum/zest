@@ -32,6 +32,7 @@ public class JAuthedEntity extends BaseEntity {
     private String merchantName;
     private Long subId;
     private String subName;
+    private String marketproduct;
 
     // info
     private String cardno;

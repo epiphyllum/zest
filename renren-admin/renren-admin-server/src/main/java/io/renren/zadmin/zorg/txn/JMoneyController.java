@@ -142,7 +142,7 @@ public class JMoneyController {
     @GetMapping("confirm")
     @Operation(summary = "确认申请单")
     @LogOperation("确认申请单")
-    @PreAuthorize("hasAuthority('zorg:jmoney:update')")
+    @PreAuthorize("hasAuthority('zorg:jmoney:confirm')")
     public Result confirm(
             @RequestParam("id") Long id,
             @RequestParam("transferfid") String transferfid,

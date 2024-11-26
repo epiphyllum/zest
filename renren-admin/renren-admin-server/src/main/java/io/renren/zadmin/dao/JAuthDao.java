@@ -132,10 +132,8 @@ public interface JAuthDao extends BaseDao<JAuthEntity> {
                                select sum(if(trxcode = 'Auth' && trxdir = '101014', settleamount, 0)) -
                                sum(if(trxcode = 'ReturnOL' && trxdir = '101013', settleamount, 0)) -
                                sum(if(trxcode = 'Auth' && trxdir = '101013', settleamount, 0)) as settleamount,
-                               
                                sum(if(trxcode = 'Auth' && trxdir = '101014', 1, 0)) -
                                sum(if(trxcode = 'ReturnOL' && trxdir = '101013', 1, 0)) as id,
-                               
                                currency
                         from j_auth
                         where state = '00' and
