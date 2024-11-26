@@ -20,7 +20,7 @@ create table j_maccount
     idtype         varchar(2) comment '证件类型',
     idno           varchar(30) comment '证件号码 账户类型为个人时必填',
     cardno         varchar(30) comment '账户号码',
-    cardname       varchar(100) comment '账户名称',
+    cardname       varchar(120) comment '账户名称',
     tel            varchar(20) comment '联系人电话',
     email          varchar(50) comment '联系人邮箱',
     accountaddr    varchar(100) comment '联系人详细地址',

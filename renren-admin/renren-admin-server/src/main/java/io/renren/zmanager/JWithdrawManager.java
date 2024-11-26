@@ -240,7 +240,6 @@ public class JWithdrawManager {
 
     /**
      * 通知商户
-     *
      * @param id
      */
     public void notify(Long id) {

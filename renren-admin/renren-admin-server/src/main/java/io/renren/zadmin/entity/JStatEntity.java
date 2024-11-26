@@ -37,11 +37,11 @@ public class JStatEntity {
     private BigDecimal aipCardSum;
     private BigDecimal aipCharge;
     private BigDecimal aipDeposit;
-
     private BigDecimal withdraw;
     private BigDecimal withdrawCharge;
     private BigDecimal aipWithdrawCharge;
     private Long totalCard;
     private BigDecimal cardFee;
     private BigDecimal aipCardFee;
+
 }

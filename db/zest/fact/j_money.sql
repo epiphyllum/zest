@@ -18,7 +18,7 @@ create table j_money
 
     -- 要求的来账信息
     cardno              varchar(30),                          -- 账户号码
-    cardname            varchar(16),                          -- 账户名称
+    cardname            varchar(120),                          -- 账户名称
 
     -- 确认时提供: 申请金额, 转账凭证
     apply_amount        decimal(18, 2),

@@ -50,6 +50,5 @@ public class JVaManager {
                 jVaDao.insert(jVaEntity);
             }
         }
-
     }
 }
