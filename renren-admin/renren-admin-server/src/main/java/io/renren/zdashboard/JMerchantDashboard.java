@@ -141,6 +141,14 @@ public class JMerchantDashboard {
                 item.setSettlecount(jAuthEntity.getId());
                 item.setSettleamount(jAuthEntity.getSettleamount());
             }
+
+            if (item.getSettleamount() == null) {
+                item.setSettleamount(BigDecimal.ZERO);
+            }
+            if (item.getSettlecount() == null) {
+                item.setSettlecount(0L);
+            }
+
             item.setStatDate(today);
             item.setCurrency(currency);
             map.put(currency, item);

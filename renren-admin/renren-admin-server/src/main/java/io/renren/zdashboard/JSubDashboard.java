@@ -133,6 +133,14 @@ public class JSubDashboard {
             }
             item.setStatDate(today);
             item.setCurrency(currency);
+
+            if (item.getSettleamount() == null) {
+                item.setSettleamount(BigDecimal.ZERO);
+            }
+            if (item.getSettlecount() == null) {
+                item.setSettlecount(0L);
+            }
+
             map.put(currency, item);
         }
         return map;
