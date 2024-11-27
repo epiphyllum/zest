@@ -29,7 +29,7 @@ public class StatItem {
     // 交易数据
     private Long settlecount;                  // 交易笔数
     private BigDecimal settleamount;           // 交易金额
-    // 入金
+    // 入金: 商户|代理|机构
     private BigDecimal inMoney;                // 入金金额
     private Long inMoneyCount;                 // 入金笔数
     private BigDecimal outMoney;               // 出金金额

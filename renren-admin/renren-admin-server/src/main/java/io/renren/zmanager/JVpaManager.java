@@ -41,8 +41,6 @@ public class JVpaManager {
     @Resource
     private JCommon jCommon;
     @Resource
-    private ObjectMapper objectMapper;
-    @Resource
     private LedgerUtil ledgerUtil;
     @Resource
     private JSubDao jSubDao;
@@ -336,7 +334,7 @@ public class JVpaManager {
                             .eq(JVpaJobEntity::getId, entity.getId())
                             .eq(JVpaJobEntity::getState, prevState)
                             .set(JVpaJobEntity::getState, ZinConstant.CARD_APPLY_SUCCESS)
-                            .set(JVpaJobEntity::getState, statDate)
+                            .set(JVpaJobEntity::getStatDate, statDate)
                     );
                     // 记账
                     if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_SHARE)) {

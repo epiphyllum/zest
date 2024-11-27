@@ -6,6 +6,7 @@ import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.zadmin.dao.*;
 import io.renren.zadmin.entity.*;
 import io.renren.zdashboard.dto.BalanceItem;
+import io.renren.zdashboard.dto.InMoneyItem;
 import io.renren.zdashboard.dto.StatItem;
 import io.renren.zdashboard.dto.MerchantDashboardDTO;
 import jakarta.annotation.Resource;
@@ -20,7 +21,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class JMerchantDashboard {
+public class JDashboardMerchant {
     @Resource
     private JBalanceDao jBalanceDao;
     @Resource
@@ -196,6 +197,26 @@ public class JMerchantDashboard {
         return map;
     }
 
+    // 近30天入金
+    private Map<String, List<InMoneyItem>> monthInMoneyMap(Date today, Long merchantId) {
+        Map<String, List<JMoneyEntity>> collect = jMoneyDao.selectLatestOfMerchant(today, merchantId)
+                .stream()
+                .collect(Collectors.groupingBy(JMoneyEntity::getCurrency));
+        Map<String, List<InMoneyItem>> map = new HashMap<>();
+        collect.forEach((currency, items) -> {
+            List<InMoneyItem> inMoneyItems = new ArrayList<>();
+            for (JMoneyEntity item : items) {
+                InMoneyItem inMoneyItem = new InMoneyItem();
+                inMoneyItem.setAmount(item.getAmount());
+                inMoneyItem.setCount(item.getId());
+                inMoneyItem.setStatDate(item.getStatDate());
+                inMoneyItems.add(inMoneyItem);
+            }
+            map.put(currency, inMoneyItems);
+        });
+        return map;
+    }
+
     // dashboard
     public Map<String, MerchantDashboardDTO> dashboard(Date today, Long merchantId) {
 
@@ -213,6 +234,11 @@ public class JMerchantDashboard {
         // 当月情况
         CompletableFuture<Map<String, List<StatItem>>> monthMapFuture = CompletableFuture.supplyAsync(() -> {
             return monthMap(today, merchantId);
+        });
+
+        // 近30天入金情况
+        CompletableFuture<Map<String, List<InMoneyItem>>> monthInMoneyMapFuture = CompletableFuture.supplyAsync(() -> {
+            return monthInMoneyMap(today, merchantId);
         });
 
         CompletableFuture<Void> allFuture = CompletableFuture.allOf(balanceMapFuture, todayMapFuture, monthMapFuture);
@@ -235,6 +261,8 @@ public class JMerchantDashboard {
             Map<String, StatItem> todayMap = todayMapFuture.get();
             // 当月情况
             Map<String, List<StatItem>> monthMap = monthMapFuture.get();
+            // 当月入金情况
+            Map<String, List<InMoneyItem>> monthInMoneyMap = monthInMoneyMapFuture.get();
             // 返回值
             Map<String, MerchantDashboardDTO> map = new HashMap<>();
 
@@ -242,12 +270,14 @@ public class JMerchantDashboard {
             currencySet.addAll(balanceMap.keySet());
             currencySet.addAll(todayMap.keySet());
             currencySet.addAll(monthMap.keySet());
+            currencySet.addAll(monthInMoneyMap.keySet());
 
             for (String currency : currencySet) {
                 MerchantDashboardDTO dto = new MerchantDashboardDTO();
                 dto.setBalanceSummary(balanceMap.get(currency));
                 dto.setMonthStat(monthMap.get(currency));
                 dto.setTodayStat(todayMap.get(currency));
+                dto.setMoneyStat(monthInMoneyMap.get(currency));
                 map.put(currency, dto);
             }
             return map;

@@ -6,6 +6,7 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.core.FileAppender;
 import com.baomidou.mybatisplus.core.incrementer.DefaultIdentifierGenerator;
 import io.renren.commons.tools.exception.RenException;
+import io.renren.commons.tools.utils.DateUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -14,6 +15,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.text.DecimalFormat;
+import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class CommonUtils {
@@ -36,6 +38,10 @@ public class CommonUtils {
             number = number / 36;
         }
         return sb.toString();
+    }
+
+    public static Date todayDate() {
+        return DateUtils.parse(DateUtils.format(new Date(), DateUtils.DATE_PATTERN), DateUtils.DATE_PATTERN);
     }
 
     /**

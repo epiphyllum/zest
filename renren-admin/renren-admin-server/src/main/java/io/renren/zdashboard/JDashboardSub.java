@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class JSubDashboard {
+public class JDashboardSub {
     @Resource
     private JBalanceDao jBalanceDao;
     @Resource
