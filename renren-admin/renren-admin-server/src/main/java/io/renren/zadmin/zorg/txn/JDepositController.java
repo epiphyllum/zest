@@ -94,11 +94,13 @@ public class JDepositController {
         // 验证google
         if (false) {
             UserDetail user = SecurityUser.getUser();
+
             GoogleAuthenticator gAuth = new GoogleAuthenticator();
             boolean authorized = gAuth.authorize(user.getTotpKey(), Integer.parseInt(dto.getOtp()));
             if (!authorized) {
                 throw new RenException("谷歌验证码错误");
             }
+
         }
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);

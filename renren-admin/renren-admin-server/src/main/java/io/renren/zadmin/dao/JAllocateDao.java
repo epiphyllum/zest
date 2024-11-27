@@ -40,12 +40,14 @@ public interface JAllocateDao extends BaseDao<JAllocateEntity> {
             sum(amount) as amount,
             count(1) as id,
             currency,
-            type
+            type,
+            stat_date
             from j_allocate
             where sub_id = #{subId} and stat_date >= #{beginDate}
             group by
             currency,
-            type
+            type,
+            stat_date
             """)
     List<JAllocateEntity> selectLatestOfSub(@Param("beginDate") Date beginDate, @Param("subId") Long subId);
 }

@@ -15,6 +15,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.text.DecimalFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -42,6 +43,14 @@ public class CommonUtils {
 
     public static Date todayDate() {
         return DateUtils.parse(DateUtils.format(new Date(), DateUtils.DATE_PATTERN), DateUtils.DATE_PATTERN);
+    }
+
+    public static Date dateSubtract(Date input, int n) {
+        Calendar calendar = Calendar.getInstance(); // 获取当前日期的Calendar实例
+        calendar.setTime(input);
+        calendar.add(Calendar.DAY_OF_MONTH, n); // 向当前日期减去30天
+        Date output = calendar.getTime();
+        return output;
     }
 
     /**

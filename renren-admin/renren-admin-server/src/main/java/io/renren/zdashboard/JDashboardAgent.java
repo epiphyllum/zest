@@ -5,6 +5,7 @@ import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.zadmin.dao.*;
 import io.renren.zadmin.entity.*;
+import io.renren.zcommon.CommonUtils;
 import io.renren.zdashboard.dto.AgentDashboardDTO;
 import io.renren.zdashboard.dto.BalanceItem;
 import io.renren.zdashboard.dto.InMoneyItem;
@@ -170,9 +171,7 @@ public class JDashboardAgent {
 
     // 过去30天统计
     private Map<String, List<StatItem>> monthMap(Date today, Long agentId) {
-        Calendar calendar = Calendar.getInstance(); // 获取当前日期的Calendar实例
-        calendar.add(Calendar.DAY_OF_MONTH, -30); // 向当前日期减去30天
-        Date beginDate = calendar.getTime();
+        Date beginDate = CommonUtils.dateSubtract(today, -30);
 
         Map<String, List<JStatEntity>> collect = jStatDao.selectLastMonthOfAgent(beginDate, agentId)
                 .stream()
@@ -197,7 +196,10 @@ public class JDashboardAgent {
 
     // 近30天入金
     private Map<String, List<InMoneyItem>> monthInMoneyMap(Date today, Long agentId) {
-        Map<String, List<JMoneyEntity>> collect = jMoneyDao.selectLatestOfAgent(today, agentId)
+
+        Date beginDate = CommonUtils.dateSubtract(today, -30);
+
+        Map<String, List<JMoneyEntity>> collect = jMoneyDao.selectLatestOfAgent(beginDate, agentId)
                 .stream()
                 .collect(Collectors.groupingBy(JMoneyEntity::getCurrency));
         Map<String, List<InMoneyItem>> map = new HashMap<>();

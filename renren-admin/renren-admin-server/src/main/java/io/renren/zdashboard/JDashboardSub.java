@@ -5,7 +5,9 @@ import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.zadmin.dao.*;
 import io.renren.zadmin.entity.*;
+import io.renren.zcommon.CommonUtils;
 import io.renren.zdashboard.dto.BalanceItem;
+import io.renren.zdashboard.dto.InMoneyItem;
 import io.renren.zdashboard.dto.StatItem;
 import io.renren.zdashboard.dto.SubDashboardDTO;
 import jakarta.annotation.Resource;
@@ -173,14 +175,10 @@ public class JDashboardSub {
 
     // 过去30天统计
     private Map<String, List<StatItem>> monthMap(Date today, Long subId) {
-        Calendar calendar = Calendar.getInstance(); // 获取当前日期的Calendar实例
-        calendar.add(Calendar.DAY_OF_MONTH, -30); // 向当前日期减去30天
-        Date beginDate = calendar.getTime();
-
+        Date beginDate = CommonUtils.dateSubtract(today, -30);
         Map<String, List<JStatEntity>> collect = jStatDao.selectLastMonthOfSub(beginDate, subId)
                 .stream()
                 .collect(Collectors.groupingBy(JStatEntity::getCurrency));
-
         Map<String, List<StatItem>> map = new HashMap<>();
         collect.forEach((currency, items) -> {
             List<StatItem> statItems = ConvertUtils.sourceToTarget(items, StatItem.class);
@@ -194,6 +192,27 @@ public class JDashboardSub {
             }
             log.info("monthMap {} -> {}", currency, items.size());
             map.put(currency, statItems);
+        });
+        return map;
+    }
+
+    // 过去30天统计
+    private Map<String, List<InMoneyItem>> inMoneyMap(Date today, Long subId) {
+        Date beginDate = CommonUtils.dateSubtract(today, -30);
+        Map<String, List<JAllocateEntity>> collect = jAllocateDao.selectLatestOfSub(beginDate, subId)
+                .stream()
+                .collect(Collectors.groupingBy(JAllocateEntity::getCurrency));
+        Map<String, List<InMoneyItem>> map = new HashMap<>();
+        collect.forEach((currency, items) -> {
+            List<InMoneyItem> inMoneyItems = new ArrayList<>();
+            for (JAllocateEntity item : items) {
+                InMoneyItem inMoneyItem = new InMoneyItem();
+                inMoneyItem.setStatDate(item.getStatDate());
+                inMoneyItem.setCount(item.getId());
+                inMoneyItem.setAmount(item.getAmount());
+                inMoneyItems.add(inMoneyItem);
+            }
+            map.put(currency, inMoneyItems);
         });
         return map;
     }
@@ -217,7 +236,12 @@ public class JDashboardSub {
             return monthMap(today, subId);
         });
 
-        CompletableFuture<Void> allFuture = CompletableFuture.allOf(balanceMapFuture, todayMapFuture, monthMapFuture);
+        // 当月
+        CompletableFuture<Map<String, List<InMoneyItem>>> inMoneyMapFuture = CompletableFuture.supplyAsync(() -> {
+            return inMoneyMap(today, subId);
+        });
+
+        CompletableFuture<Void> allFuture = CompletableFuture.allOf(balanceMapFuture, todayMapFuture, monthMapFuture, inMoneyMapFuture);
         try {
             allFuture.get();
         } catch (InterruptedException e) {
@@ -233,6 +257,8 @@ public class JDashboardSub {
             Map<String, StatItem> todayMap = todayMapFuture.get();
             // 当月情况
             Map<String, List<StatItem>> monthMap = monthMapFuture.get();
+            // 当月情况
+            Map<String, List<InMoneyItem>> inMoneyMap = inMoneyMapFuture.get();
             // 返回值
             Map<String, SubDashboardDTO> map = new HashMap<>();
             JSubEntity subEntity = jSubDao.selectById(subId);
@@ -247,6 +273,7 @@ public class JDashboardSub {
                 dto.setBalanceSummary(balanceMap.get(currency));
                 dto.setMonthStat(monthMap.get(currency));
                 dto.setTodayStat(todayMap.get(currency));
+                dto.setMoneyStat(inMoneyMap.get(currency));
                 if (dto.getTodayStat() == null) {
                     dto.setTodayStat(StatItem.zero(currency, today));
                 }

@@ -1,13 +1,16 @@
 package io.renren.zmanager;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.warrenstrange.googleauth.GoogleAuthenticator;
 import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.ConvertUtils;
+import io.renren.commons.tools.utils.Result;
 import io.renren.dao.SysDeptDao;
 import io.renren.entity.SysDeptEntity;
-import io.renren.zadmin.dao.JBalanceDao;
 import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.dao.JSubDao;
 import io.renren.zadmin.dto.JMerchantDTO;
@@ -16,9 +19,9 @@ import io.renren.zadmin.entity.JSubEntity;
 import io.renren.zadmin.service.JMerchantService;
 import io.renren.zbalance.BalanceType;
 import io.renren.zbalance.LedgerUtil;
+import io.renren.zcommon.ZestConfig;
 import io.renren.zcommon.ZestConstant;
 import io.renren.zcommon.ZinConstant;
-import io.renren.zin.file.ZinFileService;
 import io.renren.zin.sub.ZinSubService;
 import io.renren.zin.sub.dto.TSubCreateRequest;
 import io.renren.zin.sub.dto.TSubCreateResponse;
@@ -26,13 +29,10 @@ import io.renren.zin.sub.dto.TSubQuery;
 import io.renren.zin.sub.dto.TSubQueryResponse;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -54,6 +54,8 @@ public class JMerchantManager {
     private JSubManager jSubManager;
     @Resource
     private LedgerUtil ledgerUtil;
+    @Resource
+    private ZestConfig zestConfig;
 
     public JMerchantEntity save(JMerchantDTO dto) {
 
@@ -237,4 +239,37 @@ public class JMerchantManager {
             }
         });
     }
+
+    public Map<String, String> getConfig(Long merchantId) {
+        String platformKey = zestConfig.getPublicKey();
+        JMerchantEntity merchant = jMerchantDao.selectById(merchantId);
+        Map<String, String> config = new HashMap<>();
+        config.put("platformKey", platformKey);
+        config.put("webhook", merchant.getWebhook());
+        config.put("publicKey", merchant.getPublicKey());
+        config.put("sensitiveKey", merchant.getSensitiveKey());
+        config.put("whiteIp", merchant.getWhiteIp());
+        return config;
+    }
+
+    public void setConfig(String key, String value, int otp) {
+        UserDetail user = SecurityUser.getUser();
+        GoogleAuthenticator gAuth = new GoogleAuthenticator();
+        boolean authorized = gAuth.authorize(user.getTotpKey(), otp);
+        if (!authorized) {
+            throw new RenException("谷歌验证码错误");
+        }
+        LambdaUpdateWrapper<JMerchantEntity> wrapper = Wrappers.<JMerchantEntity>lambdaUpdate().eq(JMerchantEntity::getId, user.getId());
+        if (key.equals("webhook")) {
+            wrapper.set(JMerchantEntity::getWebhook, value);
+        } else if (key.equals("whiteIp")) {
+            wrapper.set(JMerchantEntity::getWhiteIp, value);
+        } else if (key.equals("sensitiveKey")) {
+            wrapper.set(JMerchantEntity::getSensitiveKey, value);
+        } else if (key.equals("publicKey")) {
+            wrapper.set(JMerchantEntity::getPublicKey, value);
+        }
+        jMerchantDao.update(null, wrapper);
+    }
+
 }

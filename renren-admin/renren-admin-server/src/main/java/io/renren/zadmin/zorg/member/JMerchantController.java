@@ -32,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -181,6 +182,24 @@ public class JMerchantController {
     public Result queryAllinpay(@RequestParam("id") Long id) {
         JMerchantEntity jMerchantEntity = jMerchantDao.selectById(id);
         jMerchantManager.query(jMerchantEntity);
+        return new Result();
+    }
+
+    @GetMapping("config")
+    public Result<Map<String, String>> config() {
+        UserDetail user = SecurityUser.getUser();
+        if (!user.getUserType().equals(ZestConstant.USER_TYPE_MERCHANT)) {
+            throw new RenException("没有权限访问");
+        }
+        Map<String, String> config = jMerchantManager.getConfig(user.getDeptId());
+        Result<Map<String, String>> result = new Result<>();
+        result.setData(config);
+        return result;
+    }
+
+    @GetMapping("setConfig")
+    public Result setConfig(@RequestParam("key") String key, @RequestParam("value") String value, @RequestParam("otp") int otp) {
+        jMerchantManager.setConfig(key, value, otp);
         return new Result();
     }
 
