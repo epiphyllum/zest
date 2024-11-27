@@ -18,4 +18,22 @@ public class BalanceItem {
 
     private String currency;         // 币种
     private BigDecimal balance;      // 账户余额
+
+    public static BalanceItem zero(String currency) {
+        BalanceItem item = new BalanceItem();
+        item.setBalance(BigDecimal.ZERO);
+        item.setCurrency(currency);
+
+        item.setAipCharge(BigDecimal.ZERO);
+        item.setAipCardSum(BigDecimal.ZERO);
+        item.setAipDeposit(BigDecimal.ZERO);
+        item.setAipCardFee(BigDecimal.ZERO);
+
+        item.setCharge(BigDecimal.ZERO);
+        item.setCardSum(BigDecimal.ZERO);
+        item.setDeposit(BigDecimal.ZERO);
+        item.setCardFee(BigDecimal.ZERO);
+
+        return item;
+    }
 }

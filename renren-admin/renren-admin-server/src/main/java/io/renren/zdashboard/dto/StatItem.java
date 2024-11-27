@@ -1,6 +1,7 @@
 package io.renren.zdashboard.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import feign.FeignException;
 import io.renren.commons.tools.utils.DateUtils;
 import lombok.Data;
 
@@ -37,4 +38,29 @@ public class StatItem {
     // 日期
     @JsonFormat(pattern = DateUtils.DATE_PATTERN)
     private Date statDate;
+
+    public static StatItem zero(String currency, Date statDate) {
+        StatItem item = new StatItem();
+        item.setSettlecount(0L);
+        item.setSettleamount(BigDecimal.ZERO);
+        item.setInMoney(BigDecimal.ZERO);
+        item.setInMoneyCount(0L);
+        item.setOutMoney(BigDecimal.ZERO);
+        item.setOutMoneyCount(0L);
+        item.setAipCharge(BigDecimal.ZERO);
+        item.setCharge(BigDecimal.ZERO);
+        item.setWithdraw(BigDecimal.ZERO);
+        item.setWithdrawCharge(BigDecimal.ZERO);
+        item.setDeposit(BigDecimal.ZERO);
+        item.setAipDeposit(BigDecimal.ZERO);
+        item.setTotalCard(0L);
+        item.setCardFee(BigDecimal.ZERO);
+        item.setAipCardFee(BigDecimal.ZERO);
+        item.setCardSum(BigDecimal.ZERO);
+        item.setAipCardSum(BigDecimal.ZERO);
+        item.setStatDate(statDate);
+        item.setCurrency(currency);
+        item.setAipWithdrawCharge(BigDecimal.ZERO);
+        return item;
+    }
 }

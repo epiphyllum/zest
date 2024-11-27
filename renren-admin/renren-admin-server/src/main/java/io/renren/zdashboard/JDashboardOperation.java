@@ -48,8 +48,7 @@ public class JDashboardOperation {
 
     // 某个币种当前余额情况
     private BalanceItem balanceStatItem(List<JBalanceEntity> items, String currency) {
-        BalanceItem item = new BalanceItem();
-        item.setCurrency(currency);
+        BalanceItem item = BalanceItem.zero(currency);
 
         BigDecimal va = null;
         BigDecimal subVa = null;
@@ -124,7 +123,7 @@ public class JDashboardOperation {
         Map<String, StatItem> map = new HashMap<>();
         for (String currency : currencySet) {
             log.info("todayMap-准备币种: {}", currency);
-            StatItem item = new StatItem();
+            StatItem item = StatItem.zero(currency, today);
 
             // 充值
             List<VDepositEntity> vDepositEntities = depositMap.get(currency);
@@ -320,6 +319,9 @@ public class JDashboardOperation {
                 dto.setBalanceSummary(balanceMap.get(currency));
                 dto.setMonthStat(monthMap.get(currency));
                 dto.setTodayStat(todayMap.get(currency));
+                if (dto.getTodayStat() == null) {
+                    dto.setTodayStat(StatItem.zero(currency, today));
+                }
                 dto.setVa(vaMap.get(currency));
                 dto.setMoneyStat(monthInMoneyMap.get(currency));
                 map.put(currency, dto);
