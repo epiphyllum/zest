@@ -1,0 +1,11 @@
+package io.renren.zwallet.dto;
+
+import lombok.Data;
+
+import java.math.BigDecimal;
+
+@Data
+public class WalletWithdrawResponse {
+    private BigDecimal amount; // 充值金额
+    private String currency;   // 充值币种
+}

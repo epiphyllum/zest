@@ -23,14 +23,15 @@ public class JAuthedDTO implements Serializable {
     private Long id;
     private Long agentId;
     private String agentName;
-    @Schema(description = "商户ID")
     private Long merchantId;
-    @Schema(description = "商户名称")
     private String merchantName;
     private Long subId;
     private String subName;
     private String marketproduct;
 
+    private Long walletId;
+
+    private String maincardno;
     private String cardno;
     private String trxtype;
     private String trxdir;
@@ -46,6 +47,7 @@ public class JAuthedDTO implements Serializable {
     private String authcode;
     private String logkv;
     private String mcc;
+
     @Schema(description = "创建者")
     private Long creator;
     @Schema(description = "创建时间")

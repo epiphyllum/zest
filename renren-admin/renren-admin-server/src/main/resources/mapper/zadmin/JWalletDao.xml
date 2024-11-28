@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.zadmin.dao.JWalletDao">
+
+    <resultMap type="io.renren.zadmin.entity.JWalletEntity" id="jWalletMap">
+        <result property="id" column="id"/>
+        <result property="agentId" column="agent_id"/>
+        <result property="agentName" column="agent_name"/>
+        <result property="merchantId" column="merchant_id"/>
+        <result property="merchantName" column="merchant_name"/>
+        <result property="subId" column="sub_id"/>
+        <result property="subName" column="sub_name"/>
+        <result property="api" column="api"/>
+        <result property="walletName" column="wallet_name"/>
+        <result property="maincardno" column="maincardno"/>
+        <result property="creator" column="creator"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updater" column="updater"/>
+        <result property="updateDate" column="update_date"/>
+    </resultMap>
+
+</mapper>

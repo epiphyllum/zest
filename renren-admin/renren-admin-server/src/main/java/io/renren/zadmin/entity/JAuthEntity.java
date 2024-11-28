@@ -35,7 +35,9 @@ public class JAuthEntity extends BaseEntity {
     private String marketproduct;
 
     private Long walletId;
-    private String walletName;
+
+    // 主卡
+    private String maincardno;
 
     // 业务字段
     private String logkv;

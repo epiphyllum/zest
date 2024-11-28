@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.renren.commons.mybatis.service.impl.CrudServiceImpl;
 import io.renren.commons.tools.constant.Constant;
 import io.renren.commons.tools.page.PageData;
+import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.zadmin.dao.JCardDao;
 import io.renren.zadmin.dto.JCardDTO;
 import io.renren.zadmin.entity.JCardEntity;
@@ -38,6 +39,13 @@ public class JCardServiceImpl extends CrudServiceImpl<JCardDao, JCardEntity, JCa
                 applyFilter(params)
         );
         return getPageData(page, JCardDTO.class);
+    }
+
+    @Override
+    public List<JCardDTO> list(Map<String, Object> params) {
+        QueryWrapper<JCardEntity> wrapper = getWrapper(params);
+        List<JCardEntity> jCardEntities = baseDao.selectList(wrapper);
+        return ConvertUtils.sourceToTarget(jCardEntities, JCardDTO.class);
     }
 
     @Override

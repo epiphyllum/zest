@@ -46,7 +46,7 @@ public class ApiVpaService {
     public Result<NewPrepaidJobRes> newPrepaidJob(NewPrepaidJobReq request, ApiContext context) {
         JVpaJobEntity entity = ConvertUtils.sourceToTarget(request, JVpaJobEntity.class);
         entity.setMarketproduct(ZinConstant.MP_VPA_PREPAID);
-        entity.setCycle(ZinConstant.VPA_CYCLE_DEADLINE);  // 预付费卡一定是期限卡
+        entity.setCycle(ZinConstant.VPA_CYCLE_DEADLINE);  //钱包子卡一定是期限卡
         jVpaManager.save(entity);
         jVpaManager.submit(entity);
         NewPrepaidJobRes res = new NewPrepaidJobRes();

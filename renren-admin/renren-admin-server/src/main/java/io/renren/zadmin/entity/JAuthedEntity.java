@@ -34,6 +34,10 @@ public class JAuthedEntity extends BaseEntity {
     private String subName;
     private String marketproduct;
 
+    private Long walletId;
+
+    //
+    private String maincardno;
     // info
     private String cardno;
     private String trxtype;

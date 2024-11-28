@@ -122,7 +122,7 @@ public class JVpaManager {
         );
         String mainCardExpiredate = mainCard.getExpiredate();
 
-        // 预付费卡有效期设置为活动截止日期
+        //钱包子卡有效期设置为活动截止日期
         if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_PREPAID)) {
             entity.setCardexpiredate(entity.getEnddate());
         }

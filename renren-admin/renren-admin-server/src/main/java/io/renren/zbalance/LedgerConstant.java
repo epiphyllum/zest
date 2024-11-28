@@ -31,14 +31,14 @@ public class LedgerConstant {
     public static final int FACT_VPA_SHARE_OPEN_UNFREEZE_SUB_VA = 50101;      // 2. 子商户va解冻
     public static final int FACT_VPA_SHARE_OPEN_CONFIRM_SUB_VA = 50102;       // 3. 子商户va确认
     public static final int FACT_VPA_SHARE_OPEN_IN_CARD_FEE = 50103;          // 4. 子商户费用账户+
-    public static final int FACT_VPA_SHARE_OPEN_IN_AIP_CARD_FEE = 50104;      // 5. 通联开卡费
+    public static final int FACT_VPA_SHARE_OPEN_IN_AIP_CARD_FEE = 50104;      // 5. 通联开卡费 - 0
     // vpa预付费卡开卡
     public static final int ORIGIN_VPA_PREPAID_OPEN = 502;                    // vpa预付费子卡开卡
     public static final int FACT_VPA_PREPAID_FREEZE_SUB_VA = 50200;           // 1. 子商户va账户 冻结
     public static final int FACT_VPA_PREPAID_OPEN_UNFREEZE_SUB_VA = 50201;    // 2. 子商户va账户 冻结
     public static final int FACT_VPA_PREPAID_OPEN_CONFIRM_SUB_VA = 50202;     // 3. 子商户va账户 冻结
     public static final int FACT_VPA_PREPAID_OPEN_IN_SUB_FEE = 50203;         // 4. 子商户va账户 冻结
-    public static final int FACT_VPA_PREPAID_OPEN_IN_AIP_CARD_FEE = 50204;    // 5. 通联开卡成本
+    public static final int FACT_VPA_PREPAID_OPEN_IN_AIP_CARD_FEE = 50204;    // 5. 通联开卡成本 - 0
     // 卡充值
     public static final int ORIGIN_TYPE_CARD_CHARGE = 600;                    // 卡充值
     public static final int FACT_CARD_CHARGE_FREEZE_SUB_VA = 60000;           // 0. 冻结va资金
@@ -51,22 +51,49 @@ public class LedgerConstant {
     public static final int FACT_CARD_CHARGE_IN_AIP_CHARGE = 60007;           // 7. 通联累计充值手续费
     public static final int FACT_CARD_CHARGE_IN_AIP_CARD_SUM = 60008;         // 8. 通联累计手续费
     public static final int FACT_CARD_CHARGE_IN_PREPAID_MAIN = 60009;         // 9. 如果是预付费卡: 需要入金预付费主卡账户
+
     // 预付子卡费卡-批量开卡充值: 需要操作对应主卡
-    public static final int ORIGIN_TYPE_PREPAID_OPEN_CHARGE = 601;                       // 预付费卡批量开卡卡充值
+    public static final int ORIGIN_TYPE_PREPAID_OPEN_CHARGE = 601;                       //钱包子卡批量开卡卡充值
     public static final int FACT_PREPAID_OPEN_CHARGE_FREEZE_PREPAID_QUOTA = 60100;       // 1. 预付费主卡额度 冻结
     public static final int FACT_PREPAID_OPEN_CHARGE_UNFREEZE_PREPAID_QUOTA = 60101;     // 2. 预付费主卡额度 解冻
     public static final int FACT_PREPAID_OPEN_CHARGE_CONFIRM_PREPAID_QUOTA = 60102;      // 3. 预付费主卡额度 确认
-    public static final int FACT_PREPAID_OPEN_CHARGE_IN_PREPAID_SUM = 60103;             // 4. 预付费卡发卡总额
-    // 预付费卡-单卡充值: 需要操作对应主卡
-    public static final int ORIGIN_TYPE_PREPAID_CHARGE = 602;                            // 预付费卡充值
+    public static final int FACT_PREPAID_OPEN_CHARGE_IN_PREPAID_SUM = 60103;             // 4.钱包子卡发卡总额
+    //钱包子卡-单卡充值: 需要操作对应主卡
+    public static final int ORIGIN_TYPE_PREPAID_CHARGE = 602;                            //钱包子卡充值
     public static final int FACT_PREPAID_CHARGE_FREEZE_PREPAID_QUOTA = 60200;            // 1. 预付费主卡额度 冻结
     public static final int FACT_PREPAID_CHARGE_UNFREEZE_PREPAID_QUOTA = 60201;          // 2. 预付费主卡额度 解结.
     public static final int FACT_PREPAID_CHARGE_CONFIRM_PREPAID_QUOTA = 60202;           // 3. 预付费主卡额度 确认
-    public static final int FACT_PREPAID_CHARGE_IN_PREPAID_SUM = 60203;                  // 4.  预付费卡发卡总额
-    // 预付费卡提现: 操作对应主卡
-    public static final int ORIGIN_TYPE_PREPAID_WITHDRAW = 603;                          // 预付费卡提现
+    public static final int FACT_PREPAID_CHARGE_IN_PREPAID_SUM = 60203;                  // 4. 钱包子卡发卡总额
+    //钱包子卡提现: 操作对应主卡
+    public static final int ORIGIN_TYPE_PREPAID_WITHDRAW = 603;                          //钱包子卡提现
     public static final int FACT_PREPAID_WITHDRAW_IN_PREPAID_QUOTA = 60300;              // 1: 调增主卡剩余额度
     public static final int FACT_PREPAID_WITHDRAW_OUT_PREPAID_SUM = 60301;               // 2: 发卡总额减
+    // 钱包充值
+    public static final int ORIGIN_TYPE_WALLET_CHARGE = 610;                             // 钱包充值
+    public static final int FACT_WALLET_CHARGE_FREEZE_WALLET_QUOTA = 61000;              // 钱包主卡冻结
+    public static final int FACT_WALLET_CHARGE_UNFREEZE_WALLET_QUOTA = 61001;            // 钱包主卡解冻
+    public static final int FACT_WALLET_CHARGE_CONFIRM_WALLET_QUOTA = 61002;             // 钱包主卡确认
+    public static final int FACT_WALLET_CHARGE_IN_WALLET = 61003;                        // 钱包入金
+    // 钱包提现
+    public static final int ORIGIN_TYPE_WALLET_WITHDRAW = 620;                           // 钱包提现
+    public static final int FACT_WALLET_WITHDRAW_OUT_WALLET = 62000;                     // 钱包冻结
+    public static final int FACT_WALLET_WITHDRAW_IN_WALLET_QUOTA = 62001;                // 钱包主卡入金
+    // 钱包子卡-批量开卡充值: 需要操作对应主卡
+    public static final int ORIGIN_TYPE_WALLET_CARD_OPEN_CHARGE = 604;                  // 钱包子卡-批量开卡卡充值
+    public static final int FACT_WALLET_CARD_OPEN_CHARGE_FREEZE_WALLET = 60400;         // 1. 预付费主卡额度 冻结
+    public static final int FACT_WALLET_CARD_OPEN_CHARGE_UNFREEZE_WALLET = 60401;       // 2. 预付费主卡额度 解冻
+    public static final int FACT_WALLET_CARD_OPEN_CHARGE_CONFIRM_WALLET = 60402;        // 3. 预付费主卡额度 确认
+    public static final int FACT_WALLET_CARD_OPEN_CHARGE_IN_WALLET_SUM = 60403;         // 4.钱包子卡发卡总额
+    // 钱包子卡-单卡充值: 需要操作对应主卡
+    public static final int ORIGIN_TYPE_WALLET_CARD_CHARGE = 605;                           // 钱包子卡-卡充值
+    public static final int FACT_WALLET_CARD_CHARGE_FREEZE_WALLET = 60500;                  // 1. 预付费主卡额度 冻结
+    public static final int FACT_WALLET_CARD_CHARGE_UNFREEZE_WALLET = 60501;                // 2. 预付费主卡额度 解结.
+    public static final int FACT_WALLET_CARD_CHARGE_CONFIRM_WALLET = 60502;                 // 3. 预付费主卡额度 确认
+    public static final int FACT_WALLET_CARD_CHARGE_IN_WALLET_SUM = 60503;                  // 4. 钱包子卡发卡总额
+    // 钱包子卡-提现: 操作对应主卡
+    public static final int ORIGIN_TYPE_WALLET_CARD_WITHDRAW = 606;                         // 钱包子卡-卡提现
+    public static final int FACT_WALLET_CARD_WITHDRAW_IN_WALLET  = 60600;                   // 1: 调增钱包剩余额度
+    public static final int FACT_WALLET_CARD_WITHDRAW_OUT_WALLET_SUM = 60601;               // 2: 发卡总额减
     // 卡提现
     public static final int ORIGIN_TYPE_CARD_WITHDRAW = 700;                             // 卡提现
     public static final int FACT_CARD_WITHDRAW_IN_SUB_VA = 70001;                        // 3. 子商户-VA+

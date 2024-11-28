@@ -24,7 +24,7 @@ public class LedgerPrepaidWithdraw {
     @Resource
     private JCardDao jCardDao;
 
-    // 预付费卡 单笔提现(调整主卡可用额度)
+    //钱包子卡 单笔提现(调整主卡可用额度)
     public void ledgePrepaidWithdraw(JVpaAdjustEntity entity) {
         String maincardno = entity.getMaincardno();
         JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()

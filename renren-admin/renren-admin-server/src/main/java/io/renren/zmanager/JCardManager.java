@@ -81,10 +81,8 @@ public class JCardManager {
     public void fillBySub(JCardEntity entity) {
         Long subId = entity.getSubId();
         JSubEntity subEntity = jSubDao.selectById(subId);
-
         entity.setAgentId(subEntity.getAgentId());
         entity.setAgentName(subEntity.getAgentName());
-
         entity.setMerchantName(subEntity.getMerchantName());
         entity.setMerchantId(subEntity.getMerchantId());
         entity.setSubName(subEntity.getCusname());
@@ -138,9 +136,10 @@ public class JCardManager {
         // 填充开卡成本与收费
         fillMerchantFee(entity, merchant);
 
-        // 共享主卡, 预付费主卡, 需要提交额外字段
+        // 共享主卡, 预付费主卡, 钱包主卡, 需要提交额外字段
         if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN) ||
-                entity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_PREPAID)
+                entity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_PREPAID) ||
+                entity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_WALLET)
         ) {
             if (entity.getProcurecontent() == null || entity.getPayeeaccount() == null || entity.getAgmfid() == null) {
                 throw new RenException("交易对手, 采购合同, 采购内容必填");
@@ -210,7 +209,7 @@ public class JCardManager {
         });
     }
 
-    // 共享主卡 | 预付费主卡
+    // 共享主卡 | 预付费主卡 | 钱包主卡
     public void saveVpaMain(JCardEntity entity) {
         tx.executeWithoutResult(status -> {
             jCardDao.insert(entity);
@@ -250,6 +249,7 @@ public class JCardManager {
         if (entity.getMarketproduct().equals(ZinConstant.MP_VCC_MAIN_VIRTUAL) ||
                 entity.getMarketproduct().equals(ZinConstant.MP_VCC_MAIN_REAL) ||
                 entity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN) ||
+                entity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_WALLET) ||
                 entity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_PREPAID)
         ) {
             // 主卡申请
@@ -521,7 +521,7 @@ public class JCardManager {
         this.prepaidCharge(cardEntity, adjustAmount, api);
     }
 
-    // 预付费卡-充值
+    //钱包子卡-充值
     public void prepaidCharge(JCardEntity cardEntity, BigDecimal adjustAmount, int api) {
         JVpaAdjustEntity processing = jVpaAdjustDao.selectOne(Wrappers.<JVpaAdjustEntity>lambdaQuery()
                 .eq(JVpaAdjustEntity::getState, ZinConstant.VPA_ADJUST_UNKNOWN)
@@ -605,7 +605,7 @@ public class JCardManager {
         this.prepaidWithdraw(cardEntity, adjustAmount, api);
     }
 
-    // 预付费卡-提现
+    //钱包子卡-提现
     public void prepaidWithdraw(JCardEntity cardEntity, BigDecimal adjustAmount, int api) {
 
         // 如果卡有充提进行中

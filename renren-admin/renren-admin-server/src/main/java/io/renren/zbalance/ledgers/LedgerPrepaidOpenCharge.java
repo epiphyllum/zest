@@ -22,7 +22,7 @@ public class LedgerPrepaidOpenCharge {
     @Resource
     private JCardDao jCardDao;
 
-    // 预付费卡-批量开卡充值(调整主卡可以额度)
+    //钱包子卡-批量开卡充值(调整主卡可以额度)
     public void ledgePrepaidOpenChargeFreeze(JVpaJobEntity entity) {
         // 找到主卡
         String maincardno = entity.getMaincardno();
@@ -38,7 +38,7 @@ public class LedgerPrepaidOpenCharge {
 
     }
 
-    // 预付费卡 批量充值解冻(调整主卡可用额度)
+    //钱包子卡 批量充值解冻(调整主卡可用额度)
     public void ledgePrepaidOpenChargeUnFreeze(JVpaJobEntity entity) {
         // 找到主卡
         String maincardno = entity.getMaincardno();
@@ -51,7 +51,7 @@ public class LedgerPrepaidOpenCharge {
         ledgerUtil.unFreezeUpdate(prepaidBalance, LedgerConstant.ORIGIN_TYPE_PREPAID_OPEN_CHARGE, LedgerConstant.FACT_PREPAID_OPEN_CHARGE_UNFREEZE_PREPAID_QUOTA, entity.getId(), factMemo, factAmount);
     }
 
-    // 预付费卡 批量开卡充值确认(调整主卡可用额度)
+    //钱包子卡 批量开卡充值确认(调整主卡可用额度)
     public void ledgePrepaidOpenCharge(JVpaJobEntity entity) {
         // 找到主卡
         String maincardno = entity.getMaincardno();

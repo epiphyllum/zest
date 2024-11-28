@@ -111,6 +111,7 @@ public class LedgerUtil {
 
     /**
      * 冻结
+     *
      * @return
      */
     public void freezeUpdate(JBalanceEntity balance, int originType, int factType, Long factId, String factMemo, BigDecimal factAmount) {
@@ -234,6 +235,7 @@ public class LedgerUtil {
                 .eq(JBalanceEntity::getBalanceType, BalanceType.getSubVaAccount(currency))
         );
     }
+
     // 子商户-保证金
     public JBalanceEntity getDepositAccount(Long ownerId, String currency) {
         return jBalanceDao.selectOne(Wrappers.<JBalanceEntity>lambdaQuery()
@@ -329,6 +331,30 @@ public class LedgerUtil {
         return jBalanceDao.selectOne(Wrappers.<JBalanceEntity>lambdaQuery()
                 .eq(JBalanceEntity::getOwnerId, ownerId)
                 .eq(JBalanceEntity::getBalanceType, BalanceType.getAipTxnAccount(currency))
+        );
+    }
+
+    // 钱包主卡 额度账户
+    public JBalanceEntity getWalletQuotaAccount(Long ownerId, String currency) {
+        return jBalanceDao.selectOne(Wrappers.<JBalanceEntity>lambdaQuery()
+                .eq(JBalanceEntity::getOwnerId, ownerId)
+                .eq(JBalanceEntity::getBalanceType, BalanceType.getWalletQuotaAccount(currency))
+        );
+    }
+
+    // 钱包发卡总额
+    public JBalanceEntity getWalletSumAccount(Long ownerId, String currency) {
+        return jBalanceDao.selectOne(Wrappers.<JBalanceEntity>lambdaQuery()
+                .eq(JBalanceEntity::getOwnerId, ownerId)
+                .eq(JBalanceEntity::getBalanceType, BalanceType.getWalletSumAccount(currency))
+        );
+    }
+
+    // 钱包账户
+    public JBalanceEntity getWalletAccount(Long ownerId, String currency) {
+        return jBalanceDao.selectOne(Wrappers.<JBalanceEntity>lambdaQuery()
+                .eq(JBalanceEntity::getOwnerId, ownerId)
+                .eq(JBalanceEntity::getBalanceType, BalanceType.getWalletAccount(currency))
         );
     }
 

@@ -65,7 +65,7 @@ public class ZinCardTxnNotifyService {
         // 如果是-钱包卡
         if (card.getMarketproduct().equals(ZinConstant.MP_VPA_WALLET)) {
             entity.setWalletId(card.getWalletId());
-            entity.setWalletName(card.getWalletName());
+            entity.setMaincardno(card.getMaincardno());
         }
 
         Long id = DefaultIdentifierGenerator.getInstance().nextId(entity);

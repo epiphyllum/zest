@@ -170,8 +170,9 @@ public class ZinConstant {
     public static final String MP_VPA_MAIN = "VpaMain";                  // 共享主卡
     public static final String MP_VPA_MAIN_PREPAID = "VpaMainPrepaid";   // 预付费主卡
     public static final String MP_VPA_SHARE = "VpaShare";                // 共享子卡 ： VPA通联标准功能
-    public static final String MP_VPA_PREPAID = "VpaPrepaid";            // 预付费卡
-    public static final String MP_VPA_WALLET = "VpaWallet";              // 钱包卡
+    public static final String MP_VPA_PREPAID = "VpaPrepaid";            //钱包子卡
+    public static final String MP_VPA_MAIN_WALLET = "VpaMainWallet";     // 钱包主卡
+    public static final String MP_VPA_WALLET = "VpaWallet";              // 钱包子卡
 
     //  币种 -> 市场产品 -> 通联产品
     public static Map<String, Map<String, String>> marketProdcutMap = new HashMap<>() {{
@@ -180,10 +181,15 @@ public class ZinConstant {
                     put(MP_VCC_MAIN_VIRTUAL, "001201");
                     put(MP_VCC_REAL, "001001");
                     put(MP_VCC_VIRTUAL, "001201");
+                    // 共享卡
                     put(MP_VPA_MAIN, "021201");
-                    put(MP_VPA_MAIN_PREPAID, "021201");
                     put(MP_VPA_SHARE, "021201");
+                    // 预防费卡
+                    put(MP_VPA_MAIN_PREPAID, "021201");
                     put(MP_VPA_PREPAID, "021201");
+                    // 钱包卡
+                    put(MP_VPA_MAIN_WALLET, "021201");
+                    put(MP_VPA_WALLET, "021201");
                 }}
         );
     }};

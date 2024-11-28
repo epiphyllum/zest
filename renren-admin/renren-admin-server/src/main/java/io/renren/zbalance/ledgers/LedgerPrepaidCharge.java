@@ -24,7 +24,7 @@ public class LedgerPrepaidCharge {
     @Resource
     private JCardDao jCardDao;
 
-    // 预付费卡-单笔充值(调整主卡可以额度)
+    //钱包子卡-单笔充值(调整主卡可以额度)
     public void ledgePrepaidChargeFreeze(JVpaAdjustEntity entity) {
         String maincardno = entity.getMaincardno();
         JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
@@ -38,7 +38,7 @@ public class LedgerPrepaidCharge {
         ledgerUtil.freezeUpdate(prepaidQuota, LedgerConstant.ORIGIN_TYPE_PREPAID_CHARGE, LedgerConstant.FACT_PREPAID_CHARGE_FREEZE_PREPAID_QUOTA, entity.getId(), factMemo, factAmount);
     }
 
-    // 预付费卡 单笔充值解冻(调整主卡可用额度)
+    //钱包子卡 单笔充值解冻(调整主卡可用额度)
     public void ledgePrepaidChargeUnFreeze(JVpaAdjustEntity entity) {
         String maincardno = entity.getMaincardno();
         JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
@@ -52,7 +52,7 @@ public class LedgerPrepaidCharge {
         ledgerUtil.unFreezeUpdate(prepaidQuota, LedgerConstant.ORIGIN_TYPE_PREPAID_CHARGE, LedgerConstant.FACT_PREPAID_CHARGE_UNFREEZE_PREPAID_QUOTA, entity.getId(), factMemo, factAmount);
     }
 
-    // 预付费卡 单笔开卡充值确认(调整主卡可用额度)
+    //钱包子卡 单笔开卡充值确认(调整主卡可用额度)
     public void ledgePrepaidCharge(JVpaAdjustEntity entity) {
         String maincardno = entity.getMaincardno();
         JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery().eq(JCardEntity::getCardno, maincardno));

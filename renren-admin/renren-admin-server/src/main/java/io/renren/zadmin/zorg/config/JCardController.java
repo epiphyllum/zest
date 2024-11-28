@@ -110,6 +110,16 @@ public class JCardController {
         return new Result<PageData<JCardDTO>>().ok(page);
     }
 
+    @GetMapping("list")
+    @Operation(summary = "信息")
+    @PreAuthorize("hasAuthority('zorg:jcard:list')")
+    public Result<List<JCardDTO>> list(@RequestParam Map<String, Object> params) {
+        List<JCardDTO> list = jCardService.list(params);
+        Result<List<JCardDTO>> result = new Result<>();
+        result.setData(list);
+        return result;
+    }
+
     @GetMapping("{id}")
     @Operation(summary = "信息")
     @PreAuthorize("hasAuthority('zorg:jcard:info')")
