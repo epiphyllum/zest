@@ -40,6 +40,8 @@ public class JWalletDTO implements Serializable {
     private String email;
     @Schema(description = "密码")
     private String password;
+    @Schema(description = "接入密钥")
+    private String accessKey;
 
     @Schema(description = "totp_key")
     private String totpKey;

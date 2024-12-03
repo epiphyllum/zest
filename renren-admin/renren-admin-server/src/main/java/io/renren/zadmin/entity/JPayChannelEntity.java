@@ -33,6 +33,9 @@ public class JPayChannelEntity extends BaseEntity {
     private BigDecimal floor;
     private BigDecimal ceiling;
 
+    private Integer enabled;    // 启用
+    private Integer weight;     // 权重
+
     private String channelCode; // 渠道代码
     private String channelName; // 渠道名称
     private String stlCurrency; // 结算币种

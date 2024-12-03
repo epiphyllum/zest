@@ -129,6 +129,7 @@ public interface JAuthDao extends BaseDao<JAuthEntity> {
 
     // 当日统计数据 - 机构
     @Select("""
+                               
                                select sum(if(trxcode = 'Auth' && trxdir = '101014', settleamount, 0)) -
                                sum(if(trxcode = 'ReturnOL' && trxdir = '101013', settleamount, 0)) -
                                sum(if(trxcode = 'Auth' && trxdir = '101013', settleamount, 0)) as settleamount,
@@ -141,5 +142,73 @@ public interface JAuthDao extends BaseDao<JAuthEntity> {
             group by currency
                         """)
     List<JAuthEntity> selectDayOfOperation(@Param("day") Date day);
+
+    // 按MCC分类-子商户
+    @Select("""
+            select sum(if(trxcode = 'Auth' && trxdir = '101014', settleamount, 0)) -
+                   sum(if(trxcode = 'ReturnOL' && trxdir = '101013', settleamount, 0)) -
+                   sum(if(trxcode = 'Auth' && trxdir = '101013', settleamount, 0)) as settleamount,
+                   sum(if(trxcode = 'Auth' && trxdir = '101014', 1, 0)) -
+                   sum(if(trxcode = 'ReturnOL' && trxdir = '101013', 1, 0)) as id,
+                   currency,
+                   mcc
+            from j_auth
+            where state = '00' and
+            date(trxtime) = #{day} and
+            sub_id = #{subId}
+            group by currency, mcc
+            """)
+    List<JAuthEntity> selectDayMccOfSub(@Param("day") Date day, @Param("subId") Long subId);
+
+
+    // 按MCC分类-商户
+    @Select("""
+            select sum(if(trxcode = 'Auth' && trxdir = '101014', settleamount, 0)) -
+                   sum(if(trxcode = 'ReturnOL' && trxdir = '101013', settleamount, 0)) -
+                   sum(if(trxcode = 'Auth' && trxdir = '101013', settleamount, 0)) as settleamount,
+                   sum(if(trxcode = 'Auth' && trxdir = '101014', 1, 0)) -
+                   sum(if(trxcode = 'ReturnOL' && trxdir = '101013', 1, 0)) as id,
+                   currency,
+                   mcc
+            from j_auth
+            where state = '00' and
+            date(trxtime) = #{day} and
+            merchant_id = #{merchantId}
+            group by currency, mcc
+            """)
+    List<JAuthEntity> selectDayMccOfMerchant(@Param("day") Date day, @Param("merchantId") Long merchantId);
+
+    // 按MCC分类-代理
+    @Select("""
+            select sum(if(trxcode = 'Auth' && trxdir = '101014', settleamount, 0)) -
+                   sum(if(trxcode = 'ReturnOL' && trxdir = '101013', settleamount, 0)) -
+                   sum(if(trxcode = 'Auth' && trxdir = '101013', settleamount, 0)) as settleamount,
+                   sum(if(trxcode = 'Auth' && trxdir = '101014', 1, 0)) -
+                   sum(if(trxcode = 'ReturnOL' && trxdir = '101013', 1, 0)) as id,
+                   currency,
+                   mcc
+            from j_auth
+            where state = '00' and
+            date(trxtime) = #{day} and 
+            agent_id = #{agentId}
+            group by currency, mcc
+            """)
+    List<JAuthEntity> selectDayMccOfAgent(@Param("day") Date day, @Param("agentId") Long agentId);
+
+    // 按MCC分类-机构
+    @Select("""
+            select sum(if(trxcode = 'Auth' && trxdir = '101014', settleamount, 0)) -
+                   sum(if(trxcode = 'ReturnOL' && trxdir = '101013', settleamount, 0)) -
+                   sum(if(trxcode = 'Auth' && trxdir = '101013', settleamount, 0)) as settleamount,
+                   sum(if(trxcode = 'Auth' && trxdir = '101014', 1, 0)) -
+                   sum(if(trxcode = 'ReturnOL' && trxdir = '101013', 1, 0)) as id,
+                   currency,
+                   mcc
+            from j_auth
+            where state = '00' and
+            date(trxtime) = #{day}
+            group by currency, mcc
+            """)
+    List<JAuthEntity> selectDayMccOfOperation(@Param("day") Date day);
 
 }

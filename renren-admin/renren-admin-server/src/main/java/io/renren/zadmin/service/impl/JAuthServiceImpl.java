@@ -8,7 +8,13 @@ import io.renren.commons.tools.page.PageData;
 import io.renren.zadmin.dao.JAuthDao;
 import io.renren.zadmin.dto.JAuthDTO;
 import io.renren.zadmin.entity.JAuthEntity;
+import io.renren.zadmin.entity.JAuthedEntity;
+import io.renren.zadmin.entity.JWalletEntity;
+import io.renren.zadmin.entity.JWalletTxnEntity;
 import io.renren.zadmin.service.JAuthService;
+import io.renren.zwallet.config.WalletLoginInterceptor;
+import io.renren.zwallet.dto.WalletCardTxnItem;
+import io.renren.zwallet.dto.WalletTxnItem;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -50,5 +56,16 @@ public class JAuthServiceImpl extends CrudServiceImpl<JAuthDao, JAuthEntity, JAu
         return wrapper;
     }
 
+    @Override
+    public PageData<WalletCardTxnItem> walletPage(Map<String, Object> params) {
+        JWalletEntity walletEntity = WalletLoginInterceptor.walletUser();
+        QueryWrapper<JAuthEntity> wrapper = applyFilter(params);
+        wrapper.eq("wallet_id", walletEntity.getId());
 
+        IPage<JAuthEntity> page = baseDao.selectPage(
+                getPage(params, Constant.CREATE_DATE, false),
+                wrapper
+        );
+        return getPageData(page, WalletCardTxnItem.class);
+    }
 }

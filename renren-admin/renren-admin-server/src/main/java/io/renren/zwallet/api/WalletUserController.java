@@ -3,7 +3,6 @@ package io.renren.zwallet.api;
 
 import io.renren.commons.tools.utils.Result;
 import io.renren.zmanager.JWalletManager;
-import io.renren.zwallet.dto.WalletInfo;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,10 +47,27 @@ public class WalletUserController {
      * 发送otp
      */
     @GetMapping("emailOTP")
-    public Result<String> emailOTP(@RequestParam("email") String email) {
+    public Result emailOTP(@RequestParam("email") String email) {
         jWalletManager.emailOTP(email);
-        Result<String> result = new Result<>();
-        result.setData("success");
-        return result;
+        return new Result();
     }
+
+    /**
+     * 修改密码
+     */
+    @GetMapping("change")
+    public Result change(@RequestParam("newPass") String newPass, @RequestParam("otp") String otp) {
+        jWalletManager.change(newPass, otp);
+        return new Result();
+    }
+
+    /**
+     * 重置密码
+     */
+    @GetMapping("reset")
+    public Result reset(@RequestParam("email") String email) {
+        jWalletManager.reset(email);
+        return new Result();
+    }
+
 }

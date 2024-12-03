@@ -9,7 +9,7 @@ import io.renren.zcommon.CommonUtils;
 import io.renren.zdashboard.dto.BalanceItem;
 import io.renren.zdashboard.dto.InMoneyItem;
 import io.renren.zdashboard.dto.StatItem;
-import io.renren.zdashboard.dto.MerchantDashboardDTO;
+import io.renren.zdashboard.dto.DashboardMerchantDTO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -58,6 +58,8 @@ public class JDashboardMerchant {
                 item.setCardSum(balanceEntity.getBalance());
             } else if (balanceEntity.getBalanceType().startsWith("SUB_VA_")) {
                 item.setBalance(balanceEntity.getBalance());
+            } else if (balanceEntity.getBalanceType().startsWith("CARD_COUNT")) {
+                item.setTotalCard(balanceEntity.getBalance().longValue());
             } else if (balanceEntity.getBalanceType().startsWith("VA_")) {
                 merchantVa = balanceEntity.getBalance();
             }
@@ -69,7 +71,6 @@ public class JDashboardMerchant {
     // 当前余额
     private Map<String, BalanceItem> balanceMap(Long merchantId) {
         Map<String, BalanceItem> map = new HashMap<>();
-
         List<Long> subIdList = jSubDao.selectList(Wrappers.<JSubEntity>lambdaQuery()
                 .eq(JSubEntity::getMerchantId, merchantId)
                 .select(JSubEntity::getId)
@@ -84,6 +85,17 @@ public class JDashboardMerchant {
                     BalanceItem item = getBalanceItem(items, currency);
                     map.put(currency, item);
                     log.info("balanceMap: {} -> {}", currency, item);
+                });
+        return map;
+    }
+
+    // 清算笔数 + 清算金额
+    private Map<String, JStatEntity> settleMap(Long merchantId) {
+        Map<String, JStatEntity> map = new HashMap<>();
+        jStatDao.selectSumOfMerchant(merchantId)
+                .stream().collect(Collectors.groupingBy(JStatEntity::getCurrency))
+                .forEach((currency, items) -> {
+                    map.put(currency, items.get(0));
                 });
         return map;
     }
@@ -219,12 +231,17 @@ public class JDashboardMerchant {
     }
 
     // dashboard
-    public Map<String, MerchantDashboardDTO> dashboard(Date today, Long merchantId) {
+    public Map<String, DashboardMerchantDTO> dashboard(Date today, Long merchantId) {
 
 
         // 账户情况
         CompletableFuture<Map<String, BalanceItem>> balanceMapFuture = CompletableFuture.supplyAsync(() -> {
             return balanceMap(merchantId);
+        });
+
+        // 清算情况
+        CompletableFuture<Map<String, JStatEntity>> settleMapFuture = CompletableFuture.supplyAsync(() -> {
+            return settleMap(merchantId);
         });
 
         // 当日情况
@@ -260,12 +277,16 @@ public class JDashboardMerchant {
             Map<String, BalanceItem> balanceMap = balanceMapFuture.get();
             // 当日情况
             Map<String, StatItem> todayMap = todayMapFuture.get();
+            // 清算情况
+            Map<String, JStatEntity> settleMap = settleMapFuture.get();
             // 当月情况
             Map<String, List<StatItem>> monthMap = monthMapFuture.get();
             // 当月入金情况
             Map<String, List<InMoneyItem>> monthInMoneyMap = monthInMoneyMapFuture.get();
+
+            JMerchantEntity merchant = jMerchantDao.selectById(merchantId);
             // 返回值
-            Map<String, MerchantDashboardDTO> map = new HashMap<>();
+            Map<String, DashboardMerchantDTO> map = new HashMap<>();
 
             Set<String> currencySet = new HashSet<>();
             currencySet.addAll(balanceMap.keySet());
@@ -274,8 +295,21 @@ public class JDashboardMerchant {
             currencySet.addAll(monthInMoneyMap.keySet());
 
             for (String currency : currencySet) {
-                MerchantDashboardDTO dto = new MerchantDashboardDTO();
-                dto.setBalanceSummary(balanceMap.get(currency));
+                DashboardMerchantDTO dto = new DashboardMerchantDTO();
+                dto.setToday(today);
+                dto.setName(merchant.getCusname());
+
+                BalanceItem balanceItem = balanceMap.get(currency);
+                JStatEntity statEntity = settleMap.get(currency);
+                if (statEntity != null) {
+                    balanceItem.setSettleamount(statEntity.getSettleamount());
+                    balanceItem.setSettlecount(statEntity.getSettlecount());
+                } else {
+                    balanceItem.setSettleamount(BigDecimal.ZERO);
+                    balanceItem.setSettlecount(0L);
+                }
+                dto.setBalanceSummary(balanceItem);
+
                 dto.setMonthStat(monthMap.get(currency));
                 dto.setTodayStat(todayMap.get(currency));
                 if (dto.getTodayStat() == null) {

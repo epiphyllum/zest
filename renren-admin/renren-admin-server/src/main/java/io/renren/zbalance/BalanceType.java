@@ -34,13 +34,20 @@ public class BalanceType {
     public static String getCardFeeAccount(String currency) {
         return "CARD_FEE_" + currency;
     }
+
     // 子商户-卡汇总充值资金
     public static String getCardSumAccount(String currency) {
         return "CARD_SUM_" + currency;
     }
+
     // 子商户-交易费用(收入)
     public static String getTxnAccount(String currency) {
         return "TXN_" + currency;
+    }
+
+    // 子商户-发卡总数
+    public static String getCardCountAccount(String currency) {
+        return "CARD_COUNT_" + currency;
     }
 
     // 子商户-Aip累计发起充值金额

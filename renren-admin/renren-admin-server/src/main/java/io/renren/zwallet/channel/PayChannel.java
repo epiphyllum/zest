@@ -2,17 +2,19 @@ package io.renren.zwallet.channel;
 
 import io.renren.zadmin.entity.JPayChannelEntity;
 import io.renren.zadmin.entity.JWalletTxnEntity;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 // 支付渠道定义
 public interface PayChannel {
     /**
      * 初始化
-     * @param channelEntity
      */
-    void init(JPayChannelEntity channelEntity);
+    void setContext(ChannelContext context);
 
     /**
      * 充值
+     *
      * @param txnEntity
      */
     void charge(JWalletTxnEntity txnEntity);
@@ -20,5 +22,5 @@ public interface PayChannel {
     /**
      * 充值回调
      */
-    void chargeNotified(JWalletTxnEntity txnEntity);
+    void chargeNotified(JWalletTxnEntity txnEntity, HttpServletResponse response);
 }

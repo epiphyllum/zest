@@ -260,6 +260,14 @@ public class LedgerUtil {
         );
     }
 
+    // 子商户-发卡总额
+    public JBalanceEntity getCardCountAccount(Long ownerId, String currency) {
+        return jBalanceDao.selectOne(Wrappers.<JBalanceEntity>lambdaQuery()
+                .eq(JBalanceEntity::getOwnerId, ownerId)
+                .eq(JBalanceEntity::getBalanceType, BalanceType.getCardCountAccount(currency))
+        );
+    }
+
     // 子商户-开卡费账户
     public JBalanceEntity getCardFeeAccount(Long ownerId, String currency) {
         return jBalanceDao.selectOne(Wrappers.<JBalanceEntity>lambdaQuery()

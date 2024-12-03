@@ -75,8 +75,6 @@ public class JWalletController {
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
         JWalletEntity walletEntity = ConvertUtils.sourceToTarget(dto, JWalletEntity.class);
-
-
         jWalletManager.save(walletEntity);
         return new Result();
     }

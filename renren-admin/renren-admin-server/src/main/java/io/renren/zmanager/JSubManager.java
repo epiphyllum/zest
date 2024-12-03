@@ -195,7 +195,8 @@ public class JSubManager {
     public void openSubVa(JSubEntity entity, Collection<String> currencyList) {
         // 创建管理账户 - 按币种来: 15 * 6
         for (String currency : currencyList) {
-            ledgerUtil.newBalance(ZestConstant.USER_TYPE_SUB, entity.getCusname(), entity.getId(), BalanceType.getSubVaAccount(currency), currency);  // 子商户va
+            ledgerUtil.newBalance(ZestConstant.USER_TYPE_SUB, entity.getCusname(), entity.getId(), BalanceType.getSubVaAccount(currency), currency);      // 子商户va
+            ledgerUtil.newBalance(ZestConstant.USER_TYPE_SUB, entity.getCusname(), entity.getId(), BalanceType.getCardCountAccount(currency), currency);  // 子商户发卡数
             // 子商户
             ledgerUtil.newBalance(ZestConstant.USER_TYPE_SUB,entity.getCusname(), entity.getId(), BalanceType.getDepositAccount(currency), currency);    // 子商户保证
             ledgerUtil.newBalance(ZestConstant.USER_TYPE_SUB,entity.getCusname(), entity.getId(), BalanceType.getChargeAccount(currency), currency);     // 子商户充值手续费

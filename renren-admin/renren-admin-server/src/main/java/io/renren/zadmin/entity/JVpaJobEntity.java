@@ -63,6 +63,8 @@ public class JVpaJobEntity extends BaseEntity {
     private String email;
     private String cardexpiredate;
 
+    private Long walletId;
+
     // 商户单号, 申请单号
     private String meraplid;
     private String applyid;

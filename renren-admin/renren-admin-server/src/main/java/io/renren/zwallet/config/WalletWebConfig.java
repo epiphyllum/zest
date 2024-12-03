@@ -17,9 +17,9 @@ public class WalletWebConfig implements WebMvcConfigurer {
                 .excludePathPatterns(
                         "/zwallet/api/user/login",
                         "/zwallet/api/user/register",
-                        "/zwallet/api/user/recover",
-                        "/zwallet/api/user/sendOTP",
-                        "/zwallet/api/user/config"
+                        "/zwallet/api/user/reset",
+                        "/zwallet/api/user/change",
+                        "/zwallet/api/user/emailOTP"
                 );
     }
 }

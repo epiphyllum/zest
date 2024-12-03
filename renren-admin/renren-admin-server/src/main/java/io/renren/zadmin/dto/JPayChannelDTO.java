@@ -42,6 +42,11 @@ public class JPayChannelDTO implements Serializable {
     @Schema(description = "封顶")
     private BigDecimal ceiling;
 
+    @Schema(description = "启用标志")
+    private Integer enabled;
+    @Schema(description = "权重")
+    private Integer weight;
+
     @Schema(description = "渠道代码")
     private String channelCode;
     @Schema(description = "渠道名称")

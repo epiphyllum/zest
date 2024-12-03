@@ -15,4 +15,5 @@ ignore_urls:
   - /zupload/files/**
   - /zin/webhook/**
   - /zapi/**
+  - /zwallet/**
   - /health

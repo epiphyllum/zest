@@ -13,19 +13,4 @@ import org.apache.ibatis.annotations.Select;
  */
 @Mapper
 public interface JCardDao extends BaseDao<JCardEntity> {
-
-
-    // 最近6个月发卡数量(机构) 柱状图
-    @Select("")
-    void cardStatLast6Month();
-
-    // 最近6个月发卡数量(代理), 柱状图
-    @Select("")
-    void cardStatLast6MonthByAgent();
-
-    // 最近6个月发卡数量(商户), 柱状图
-    @Select("")
-    void cardStatLast6MonthByMerchant();
-
-
 }

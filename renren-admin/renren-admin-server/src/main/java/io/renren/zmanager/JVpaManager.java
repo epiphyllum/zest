@@ -12,6 +12,7 @@ import io.renren.zapi.vpa.dto.JobItem;
 import io.renren.zbalance.LedgerUtil;
 import io.renren.zbalance.ledgers.LedgerOpenVpaPrepaid;
 import io.renren.zbalance.ledgers.LedgerOpenVpaShare;
+import io.renren.zbalance.ledgers.LedgerOpenVpaWallet;
 import io.renren.zcommon.CommonUtils;
 import io.renren.zcommon.ZestConfig;
 import io.renren.zcommon.ZinConstant;
@@ -22,6 +23,7 @@ import io.renren.zin.file.dto.DownloadVpaRequest;
 import io.renren.zin.file.dto.VpaInfoItem;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -72,6 +74,8 @@ public class JVpaManager {
     private JCardManager jCardManager;
     @Resource
     private JFeeConfigDao jFeeConfigDao;
+    @Autowired
+    private LedgerOpenVpaWallet ledgerOpenVpaWallet;
 
     //
     private void checkExpiredate(JVpaJobEntity entity, String mainCardExpiredate) {
@@ -336,12 +340,16 @@ public class JVpaManager {
                             .set(JVpaJobEntity::getState, ZinConstant.CARD_APPLY_SUCCESS)
                             .set(JVpaJobEntity::getStatDate, statDate)
                     );
+
                     // 记账
                     if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_SHARE)) {
                         ledgerOpenVpaShare.ledgeOpenShareVpa(entity);
                     } else if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_PREPAID)) {
                         ledgerOpenVpaPrepaid.ledgeOpenVpaPrepaid(entity);
-                    } else {
+                    } else if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_WALLET)) {
+                        ledgerOpenVpaWallet.ledgeOpenVpaWallet(entity);
+                    }
+                    else {
                         throw new RenException("未知发卡类型");
                     }
                 });

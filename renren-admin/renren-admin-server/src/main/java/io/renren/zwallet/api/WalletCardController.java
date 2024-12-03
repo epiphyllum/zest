@@ -1,14 +1,15 @@
 package io.renren.zwallet.api;
 
 import io.renren.commons.tools.utils.Result;
+import io.renren.zwallet.config.WalletLoginInterceptor;
+import io.renren.zwallet.dto.WalletCardChargeRequest;
 import io.renren.zwallet.dto.WalletCardMoneyItem;
+import io.renren.zwallet.dto.WalletCardWithdrawRequest;
+import io.renren.zwallet.dto.WalletCardOpenRequest;
 import io.renren.zwallet.manager.JWalletCardManager;
 import jakarta.annotation.Resource;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -21,35 +22,39 @@ public class WalletCardController {
     /**
      * 开卡
      */
-    @RequestMapping("open")
-    public void open() {
+    @PostMapping("open")
+    public Result<Long> open(@RequestBody WalletCardOpenRequest request) {
+        Long jobId = jWalletCardManager.open(request, WalletLoginInterceptor.walletUser());
+        Result<Long> result = new Result<>();
+        result.setData(jobId);
+        return result;
+    }
+
+    /**
+     * 开卡查询
+     */
+    @GetMapping("openQuery")
+    public Result openQuery(@RequestParam("id") Long id) {
+        jWalletCardManager.openQuery(id, WalletLoginInterceptor.walletUser());
+        return new Result();
     }
 
     /**
      * 发起卡充值
      */
-    @RequestMapping("charge")
-    public Result<String> charge(@RequestParam("amount") BigDecimal amount, @RequestParam("cardno") String cardno) {
-        String payUrl = jWalletCardManager.charge(amount, cardno);
+    @PostMapping("charge")
+    public Result charge(@RequestBody WalletCardChargeRequest request) {
+        jWalletCardManager.charge(request, WalletLoginInterceptor.walletUser());
         Result<String> result = new Result();
-        result.setData(payUrl);
         return result;
     }
 
     /**
      * 卡提现
      */
-    @RequestMapping("withdraw")
-    public Result withdraw(@RequestParam("amount") BigDecimal amount, @RequestParam("cardno") String cardno) {
-        jWalletCardManager.withdraw(amount, cardno);
+    @PostMapping("withdraw")
+    public Result withdraw(@RequestBody WalletCardWithdrawRequest request) {
+        jWalletCardManager.withdraw(request, WalletLoginInterceptor.walletUser());
         return new Result();
-    }
-
-    /**
-     * 卡充值提现列表
-     */
-    @RequestMapping("transactions")
-    public Result<List<WalletCardMoneyItem>> list() {
-        return null;
     }
 }

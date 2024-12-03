@@ -10,11 +10,11 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 /**
-* j_vpa_log
-*
-* @author epiphyllum epiphyllum.zhou@gmail.com
-* @since 3.0 2024-11-01
-*/
+ * j_vpa_log
+ *
+ * @author epiphyllum epiphyllum.zhou@gmail.com
+ * @since 3.0 2024-11-01
+ */
 @Data
 @Schema(description = "j_vpa_log")
 public class JVpaJobDTO implements Serializable {
@@ -86,6 +86,9 @@ public class JVpaJobDTO implements Serializable {
     private String meraplid;
     @Schema(description = "通联返回")
     private String applyid;
+
+    @Schema(description = "钱包ID")
+    private Long walletId;
 
     //
     @Schema(description = "完成日期")

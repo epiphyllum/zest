@@ -14,12 +14,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 @Slf4j
 public class WalletLoginInterceptor implements HandlerInterceptor {
 
-//    @Resource
-//    private WingoConfig wingoConfig;
-
     private JWalletDao jWalletDao;
-
-
     public static final ThreadLocal<JWalletEntity> threadLocal = new ThreadLocal<>();
 
     public static JWalletEntity walletUser() {
@@ -40,19 +35,7 @@ public class WalletLoginInterceptor implements HandlerInterceptor {
                 log.error("用户不存在: {}", userId);
                 throw new RenException("非法用户");
             }
-
-//            // 防止夸机构的数据错乱!!!!
-//            Map<String, String> mapping = wingoConfig.getDeptMapping();
-//            if (mapping == null) {
-//                log.error("can not get mapping from host: {}", IpUtils.getDomain());
-//                throw new RenException("invalid user");
-//            }
-//            Long deptId = Long.parseLong(mapping.get("deptId"));
-//            if (!walletEntity.getDeptId().equals(deptId)) {
-//                log.error("dept does not match");
-//                throw new RenException("invalid user");
-//            }
-
+            // todo 数据隔离
             threadLocal.set(walletEntity);
             return true;
         } catch (Exception e) {

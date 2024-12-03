@@ -15,10 +15,10 @@ import io.renren.zdashboard.JDashboardAgent;
 import io.renren.zdashboard.JDashboardMerchant;
 import io.renren.zdashboard.JDashboardOperation;
 import io.renren.zdashboard.JDashboardSub;
-import io.renren.zdashboard.dto.AgentDashboardDTO;
-import io.renren.zdashboard.dto.MerchantDashboardDTO;
-import io.renren.zdashboard.dto.OrgDashboardDTO;
-import io.renren.zdashboard.dto.SubDashboardDTO;
+import io.renren.zdashboard.dto.DashboardAgentDTO;
+import io.renren.zdashboard.dto.DashboardMerchantDTO;
+import io.renren.zdashboard.dto.DashboardOperationDTO;
+import io.renren.zdashboard.dto.DashboardSubDTO;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -52,21 +52,21 @@ public class DashboardController {
 
     // 机构dashboard
     @GetMapping("operation")
-    public Result<Map<String, OrgDashboardDTO>> org() {
+    public Result<Map<String, DashboardOperationDTO>> org() {
         UserDetail user = SecurityUser.getUser();
         if (!user.getUserType().equals(ZestConstant.USER_TYPE_OPERATION)) {
             throw new RenException("请求非法");
         }
 
-        Map<String, OrgDashboardDTO> dashboard = jDashboardOperation.dashboard(CommonUtils.todayDate());
-        Result<Map<String, OrgDashboardDTO>> result = new Result<>();
+        Map<String, DashboardOperationDTO> dashboard = jDashboardOperation.dashboard(CommonUtils.todayDate());
+        Result<Map<String, DashboardOperationDTO>> result = new Result<>();
         result.setData(dashboard);
         return result;
     }
 
     // 代理dashboard
     @GetMapping("agent")
-    public Result<Map<String, AgentDashboardDTO>> agent(@RequestParam(value = "agentId", required = false) Long agentId) {
+    public Result<Map<String, DashboardAgentDTO>> agent(@RequestParam(value = "agentId", required = false) Long agentId) {
         UserDetail user = SecurityUser.getUser();
         if (agentId == null) {
             if (!user.getUserType().equals(ZestConstant.USER_TYPE_AGENT)) {
@@ -78,15 +78,15 @@ public class DashboardController {
                 throw new RenException("请求非法");
             }
         }
-        Map<String, AgentDashboardDTO> dashboard = jDashboardAgent.dashboard(CommonUtils.todayDate(), agentId);
-        Result<Map<String, AgentDashboardDTO>> result = new Result<>();
+        Map<String, DashboardAgentDTO> dashboard = jDashboardAgent.dashboard(CommonUtils.todayDate(), agentId);
+        Result<Map<String, DashboardAgentDTO>> result = new Result<>();
         result.setData(dashboard);
         return result;
     }
 
     // 商户dashboard
     @GetMapping("merchant")
-    public Result<Map<String, MerchantDashboardDTO>> merchant(@RequestParam(value = "merchantId", required = false) Long merchantId) {
+    public Result<Map<String, DashboardMerchantDTO>> merchant(@RequestParam(value = "merchantId", required = false) Long merchantId) {
         UserDetail user = SecurityUser.getUser();
         if (merchantId == null) {
             if (!user.getUserType().equals(ZestConstant.USER_TYPE_MERCHANT)) {
@@ -110,15 +110,15 @@ public class DashboardController {
             }
             // 机构查看
         }
-        Map<String, MerchantDashboardDTO> dashboard = jDashboardMerchant.dashboard(CommonUtils.todayDate(), merchantId);
-        Result<Map<String, MerchantDashboardDTO>> result = new Result<>();
+        Map<String, DashboardMerchantDTO> dashboard = jDashboardMerchant.dashboard(CommonUtils.todayDate(), merchantId);
+        Result<Map<String, DashboardMerchantDTO>> result = new Result<>();
         result.setData(dashboard);
         return result;
     }
 
     // 子商户dashboard
     @GetMapping("sub")
-    public Result<Map<String, SubDashboardDTO>> sub(@RequestParam(value = "subId", required = false) Long subId) {
+    public Result<Map<String, DashboardSubDTO>> sub(@RequestParam(value = "subId", required = false) Long subId) {
         UserDetail user = SecurityUser.getUser();
         if (subId == null) {
             if (!user.getUserType().equals(ZestConstant.USER_TYPE_SUB)) {
@@ -157,8 +157,8 @@ public class DashboardController {
             // 机构查看
         }
         try {
-            Map<String, SubDashboardDTO> dashboard = jDashboardSub.dashboard(CommonUtils.todayDate(), subId);
-            Result<Map<String, SubDashboardDTO>> result = new Result<>();
+            Map<String, DashboardSubDTO> dashboard = jDashboardSub.dashboard(CommonUtils.todayDate(), subId);
+            Result<Map<String, DashboardSubDTO>> result = new Result<>();
             result.setData(dashboard);
             return result;
         } catch (Exception ex) {

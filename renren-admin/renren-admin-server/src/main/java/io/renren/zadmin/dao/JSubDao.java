@@ -4,6 +4,9 @@ import io.renren.commons.mybatis.dao.BaseDao;
 import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zadmin.entity.JSubEntity;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
 
 /**
 * j_merchant
@@ -13,5 +16,4 @@ import org.apache.ibatis.annotations.Mapper;
 */
 @Mapper
 public interface JSubDao extends BaseDao<JSubEntity> {
-	
 }

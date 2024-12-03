@@ -8,7 +8,7 @@ import io.renren.zadmin.entity.*;
 import io.renren.zcommon.CommonUtils;
 import io.renren.zdashboard.dto.BalanceItem;
 import io.renren.zdashboard.dto.InMoneyItem;
-import io.renren.zdashboard.dto.OrgDashboardDTO;
+import io.renren.zdashboard.dto.DashboardOperationDTO;
 import io.renren.zdashboard.dto.StatItem;
 import io.renren.zmanager.JVaManager;
 import jakarta.annotation.Resource;
@@ -66,6 +66,8 @@ public class JDashboardOperation {
                 item.setCardSum(balanceEntity.getBalance());
             } else if (balanceEntity.getBalanceType().startsWith("SUB_VA_")) {
                 subVa = balanceEntity.getBalance();
+            } else if (balanceEntity.getBalanceType().startsWith("CARD_COUNT")) {
+                item.setTotalCard(balanceEntity.getBalance().longValue());
             } else if (balanceEntity.getBalanceType().startsWith("VA_")) {
                 va = balanceEntity.getBalance();
             }
@@ -98,6 +100,17 @@ public class JDashboardOperation {
                     BalanceItem item = balanceStatItem(items, currency);
                     map.put(currency, item);
                     log.info("balanceMap: {} -> {}", currency, item);
+                });
+        return map;
+    }
+
+    // 清算笔数 + 清算金额
+    private Map<String, JStatEntity> settleMap() {
+        Map<String, JStatEntity> map = new HashMap<>();
+        jStatDao.selectSumOfOperation()
+                .stream().collect(Collectors.groupingBy(JStatEntity::getCurrency))
+                .forEach((currency, items) -> {
+                    map.put(currency, items.get(0));
                 });
         return map;
     }
@@ -257,11 +270,16 @@ public class JDashboardOperation {
     }
 
     // dashboard
-    public Map<String, OrgDashboardDTO> dashboard(Date today) {
+    public Map<String, DashboardOperationDTO> dashboard(Date today) {
 
         // 账户情况
         CompletableFuture<Map<String, BalanceItem>> balanceMapFuture = CompletableFuture.supplyAsync(() -> {
             return balanceMap();
+        });
+
+        // 清算情况
+        CompletableFuture<Map<String, JStatEntity>> settleMapFuture = CompletableFuture.supplyAsync(() -> {
+            return settleMap();
         });
 
         // 当日情况
@@ -296,6 +314,8 @@ public class JDashboardOperation {
         try {
             // 账户情况
             Map<String, BalanceItem> balanceMap = balanceMapFuture.get();
+            // 清算情况
+            Map<String, JStatEntity> settleMap = settleMapFuture.get();
             // 当日情况
             Map<String, StatItem> todayMap = todayMapFuture.get();
             // 当月情况
@@ -312,11 +332,24 @@ public class JDashboardOperation {
             currencySet.addAll(monthInMoneyMap.keySet());
 
             // 返回值
-            Map<String, OrgDashboardDTO> map = new HashMap<>();
+            Map<String, DashboardOperationDTO> map = new HashMap<>();
 
             for (String currency : currencySet) {
-                OrgDashboardDTO dto = new OrgDashboardDTO();
-                dto.setBalanceSummary(balanceMap.get(currency));
+                DashboardOperationDTO dto = new DashboardOperationDTO();
+
+                BalanceItem balanceItem = balanceMap.get(currency);
+                JStatEntity statEntity = settleMap.get(currency);
+
+                if (statEntity != null) {
+                    balanceItem.setSettleamount(statEntity.getSettleamount());
+                    balanceItem.setSettlecount(statEntity.getSettlecount());
+                } else {
+                    balanceItem.setSettleamount(BigDecimal.ZERO);
+                    balanceItem.setSettlecount(0L);
+                }
+
+                dto.setBalanceSummary(balanceItem);
+
                 dto.setMonthStat(monthMap.get(currency));
                 dto.setTodayStat(todayMap.get(currency));
                 if (dto.getTodayStat() == null) {

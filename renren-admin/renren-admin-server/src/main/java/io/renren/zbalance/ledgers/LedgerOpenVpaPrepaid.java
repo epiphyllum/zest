@@ -68,6 +68,12 @@ public class LedgerOpenVpaPrepaid {
         // 预付费主卡额度
         log.info("预付费卡批量开卡, 确认主卡额度账户....");
         ledgerPrepaidOpenCharge.ledgePrepaidOpenCharge(entity);
+
+        // 子商户发卡数量增加
+        JBalanceEntity cardCount = ledgerUtil.getCardCountAccount(entity.getSubId(), entity.getCurrency());
+        ledgerUtil.ledgeUpdate(cardCount, LedgerConstant.ORIGIN_CARD_OPEN,
+                LedgerConstant.FACT_CARD_OPEN_IN_CARD_COUNT, entity.getId(), "批量开" + entity.getNum() + "张卡", new BigDecimal(entity.getNum()));
+
     }
 }
 

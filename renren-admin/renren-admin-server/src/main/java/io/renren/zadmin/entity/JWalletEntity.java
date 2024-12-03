@@ -32,8 +32,12 @@ public class JWalletEntity extends BaseEntity {
     private String phone;      // 手机号:  不用于注册
     private String email;      // 邮箱
     private String password;   // 密码
+    private String accessKey;
+
     private String totpKey;    // google
     private String totpStatus; // google
+
+    // usdt收款
     private String usdtAddress;// usdt地址
     private String usdtKey;    // 秘钥
 

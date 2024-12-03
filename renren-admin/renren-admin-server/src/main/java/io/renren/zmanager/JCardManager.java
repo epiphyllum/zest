@@ -319,12 +319,13 @@ public class JCardManager {
             JMerchantEntity merchant = jMerchantDao.selectById(jCardEntity.getMerchantId());
             // vcc虚拟卡， vcc实体卡, 共享主卡, 预付费主卡, 四种卡有收费有收费处理
             String mpType = jCardEntity.getMarketproduct();
-            if (mpType.equals(ZinConstant.MP_VCC_VIRTUAL) ||
-                    mpType.equals(ZinConstant.MP_VCC_REAL) ||
-                    mpType.equals(ZinConstant.MP_VPA_MAIN) ||
-                    mpType.equals(ZinConstant.MP_VPA_MAIN_PREPAID)
-            ) {
-                tx.executeWithoutResult(status -> {
+            tx.executeWithoutResult(status -> {
+
+                if (mpType.equals(ZinConstant.MP_VCC_VIRTUAL) ||
+                        mpType.equals(ZinConstant.MP_VCC_REAL) ||
+                        mpType.equals(ZinConstant.MP_VPA_MAIN) ||
+                        mpType.equals(ZinConstant.MP_VPA_MAIN_PREPAID)
+                ) {
                     // 预付费主卡, 需要做剩余额度账户管理, 建立预付费主卡, 剩余额度管理账户
                     if (jCardEntity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_PREPAID)) {
                         this.newPrepaidQuotaBalance(jCardEntity);
@@ -332,11 +333,11 @@ public class JCardManager {
                     }
                     jCardDao.update(null, updateWrapper);
                     ledgerOpenCard.ledgeOpenCard(jCardEntity);
-                });
-            } else {
-                // 其他卡没有收费处理
-                jCardDao.update(null, updateWrapper);
-            }
+                } else {
+                    // 其他卡没有收费处理
+                    jCardDao.update(null, updateWrapper);
+                }
+            });
             // 发卡成功, 查询更新状态
             jCardEntity.setCardno(response.getCardno());
             this.queryCard(jCardEntity);
@@ -515,14 +516,28 @@ public class JCardManager {
         jCardDao.updateById(update);
     }
 
+    // 钱包卡
+    public void walletCardCharge(Long id, BigDecimal adjustAmount) {
+        JCardEntity cardEntity = jCardDao.selectById(id);
+        this.vpaCharge(cardEntity, adjustAmount, 0, ZinConstant.MP_VPA_WALLET);
+    }
 
+    public void walletCardCharge(JCardEntity cardEntity, BigDecimal adjustAmount) {
+        this.vpaCharge(cardEntity, adjustAmount, 0, ZinConstant.MP_VPA_WALLET);
+    }
+
+    // 预付费卡
     public void prepaidCharge(Long id, BigDecimal adjustAmount, int api) {
         JCardEntity cardEntity = jCardDao.selectById(id);
-        this.prepaidCharge(cardEntity, adjustAmount, api);
+        this.vpaCharge(cardEntity, adjustAmount, api, ZinConstant.MP_VPA_PREPAID);
+    }
+
+    public void prepaidCharge(JCardEntity cardEntity, BigDecimal adjustAmount, int api) {
+        vpaCharge(cardEntity, adjustAmount, api, ZinConstant.MP_VPA_PREPAID);
     }
 
     //钱包子卡-充值
-    public void prepaidCharge(JCardEntity cardEntity, BigDecimal adjustAmount, int api) {
+    public void vpaCharge(JCardEntity cardEntity, BigDecimal adjustAmount, int api, String marketproduct) {
         JVpaAdjustEntity processing = jVpaAdjustDao.selectOne(Wrappers.<JVpaAdjustEntity>lambdaQuery()
                 .eq(JVpaAdjustEntity::getState, ZinConstant.VPA_ADJUST_UNKNOWN)
                 .eq(JVpaAdjustEntity::getCardno, cardEntity.getCardno())
@@ -530,9 +545,9 @@ public class JCardManager {
         if (processing != null) {
             BigDecimal amount = processing.getAdjustAmount();
             if (amount.compareTo(BigDecimal.ZERO) > 0) {
-                throw new RenException("有一笔" + amount + "充值进行中");
+                throw new RenException("有一笔" + amount + "充值/提现进行中");
             }
-            throw new RenException("有一笔" + amount + "提现进行中");
+            throw new RenException("有一笔" + amount + "充值/提现进行中");
         }
 
         BigDecimal oldAuth = cardEntity.getAuthmaxamount();
@@ -544,7 +559,7 @@ public class JCardManager {
         adjustEntity.setUpdateDate(null);
         adjustEntity.setCreator(null);
         adjustEntity.setUpdater(null);
-        adjustEntity.setMarketproduct(ZinConstant.MP_VPA_PREPAID);
+        adjustEntity.setMarketproduct(marketproduct);
         adjustEntity.setAdjustAmount(adjustAmount);
         adjustEntity.setOldQuota(oldAuth);
         adjustEntity.setNewQuota(newAuth);
@@ -600,13 +615,26 @@ public class JCardManager {
         }
     }
 
+    public void walletCardWithdraw(Long id, BigDecimal adjustAmount) {
+        JCardEntity cardEntity = jCardDao.selectById(id);
+        vpaWithdraw(cardEntity, adjustAmount, 0, ZinConstant.MP_VPA_WALLET);
+    }
+
+    public void walletCardWithdraw(JCardEntity cardEntity, BigDecimal adjustAmount) {
+        vpaWithdraw(cardEntity, adjustAmount, 0, ZinConstant.MP_VPA_WALLET);
+    }
+
     public void prepaidWithdraw(Long id, BigDecimal adjustAmount, int api) {
         JCardEntity cardEntity = jCardDao.selectById(id);
-        this.prepaidWithdraw(cardEntity, adjustAmount, api);
+        vpaWithdraw(cardEntity, adjustAmount, api, ZinConstant.MP_VPA_PREPAID);
+    }
+
+    public void prepaidWithdraw(JCardEntity cardEntity, BigDecimal adjustAmount, int api) {
+        vpaWithdraw(cardEntity, adjustAmount, api, ZinConstant.MP_VPA_PREPAID);
     }
 
     //钱包子卡-提现
-    public void prepaidWithdraw(JCardEntity cardEntity, BigDecimal adjustAmount, int api) {
+    public void vpaWithdraw(JCardEntity cardEntity, BigDecimal adjustAmount, int api, String marketproduct) {
 
         // 如果卡有充提进行中
         JVpaAdjustEntity processing = jVpaAdjustDao.selectOne(Wrappers.<JVpaAdjustEntity>lambdaQuery()
@@ -631,7 +659,7 @@ public class JCardManager {
         adjustEntity.setUpdateDate(null);
         adjustEntity.setCreator(null);
         adjustEntity.setUpdater(null);
-        adjustEntity.setMarketproduct(ZinConstant.MP_VPA_PREPAID);
+        adjustEntity.setMarketproduct(marketproduct);
         adjustEntity.setAdjustAmount(adjustAmount.negate());
         adjustEntity.setOldQuota(oldAuth);
         adjustEntity.setNewQuota(newAuth);

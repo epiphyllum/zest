@@ -43,10 +43,10 @@ public interface JAuthedDao extends BaseDao<JAuthedEntity> {
                                agent_id
                         from j_authed
                         where state = '00' and
-                        date(trxtime) = #{today}
+                        date(trxtime) = #{day}
             group by agent_id, agent_name, merchant_id, merchant_name, sub_id, sub_name, currency, marketproduct;
                         """)
-    JAuthedEntity selectDay(Date today);
+    JAuthedEntity selectDay(@Param("day") Date day);
 
     // 当日统计数据 - 子商户
     @Select("""
@@ -61,13 +61,12 @@ public interface JAuthedDao extends BaseDao<JAuthedEntity> {
                         from j_authed
                         where state = '00' and
                         sub_id = #{subId} and
-                        date(trxtime) = #{day}
+                        date(trxtime) >= #{beginDate}
             group by currency
                         """)
-    List<JAuthedEntity> selectDayOfSub(@Param("day") Date today, @Param("subId") Long subId);
+    List<JAuthedEntity> selectLatestOfSub(@Param("beginDate") Date beginDate, @Param("subId") Long subId);
 
-
-    // 当日统计数据 - 商户
+    // 最近统计数据 - 商户
     @Select("""
                                select sum(if(trxcode = 'Auth' && trxdir = '101014', entryamount, 0)) -
                                sum(if(trxcode = 'ReturnOL' && trxdir = '101013', entryamount, 0)) -
@@ -80,12 +79,12 @@ public interface JAuthedDao extends BaseDao<JAuthedEntity> {
                         from j_authed
                         where state = '00' and
                         merchant_id = #{merchantId} and
-                        date(trxtime) = #{day}
+                        date(trxtime) >= #{beginDate}
             group by currency
                         """)
-    List<JAuthedEntity> selectDayOfMerchant(@Param("day") Date day, @Param("merchantId") Long merchantId);
+    List<JAuthedEntity> selectLatestOfMerchant(@Param("beginDate") Date beginDate, @Param("merchantId") Long merchantId);
 
-    // 当日统计数据 - 代理
+    // 最近统计 - 代理
     @Select("""
                                select sum(if(trxcode = 'Auth' && trxdir = '101014', entryamount, 0)) -
                                sum(if(trxcode = 'ReturnOL' && trxdir = '101013', entryamount, 0)) -
@@ -98,24 +97,26 @@ public interface JAuthedDao extends BaseDao<JAuthedEntity> {
                         from j_authed
                         where state = '00' and
                         agent_id = #{agentId} and
-                        date(trxtime) = #{day}
+                        date(trxtime) >= #{beginDate}
             group by currency
                         """)
-    List<JAuthedEntity> selectDayOfAgent(@Param("day") Date day, @Param("agentId") Long agentId);
+    List<JAuthedEntity> selectLatestOfAgent(@Param("beginDate") Date beginDate, @Param("agentId") Long agentId);
 
-    // 当日统计数据 - 机构
+    // 最近统计数据 - 机构
     @Select("""
-                               select sum(if(trxcode = 'Auth' && trxdir = '101014', entryamount, 0)) -
-                               sum(if(trxcode = 'ReturnOL' && trxdir = '101013', entryamount, 0)) -
-                               sum(if(trxcode = 'Auth' && trxdir = '101013', entryamount, 0)) as settleamount,
-                               sum(if(trxcode = 'Auth' && trxdir = '101014', 1, 0)) -
-                               sum(if(trxcode = 'ReturnOL' && trxdir = '101013', 1, 0)) as id,
-                               currency
-                        from j_authed
-                        where state = '00' and
-                        date(trxtime) = #{day}
+            select sum(if(trxcode = 'Auth' && trxdir = '101014', entryamount, 0)) -
+                   sum(if(trxcode = 'ReturnOL' && trxdir = '101013', entryamount, 0)) -
+                   sum(if(trxcode = 'Auth' && trxdir = '101013', entryamount, 0)) as settleamount,
+                   sum(if(trxcode = 'Auth' && trxdir = '101014', 1, 0)) -
+                   sum(if(trxcode = 'ReturnOL' && trxdir = '101013', 1, 0)) as id,
+                   currency
+                   from
+                       j_authed
+                   where 
+                       state = '00' and trxtime >= #{beginDate}
             group by currency
-                        """)
-    List<JAuthedEntity> selectDayOfOperation(@Param("day") Date day);
+            """
+    )
+    List<JAuthedEntity> selectLatestOfOperation(@Param("beginDate") Date beginDate);
 	
 }

@@ -1,11 +1,20 @@
 package io.renren.zadmin.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.renren.commons.mybatis.service.impl.CrudServiceImpl;
+import io.renren.commons.tools.constant.Constant;
+import io.renren.commons.tools.page.PageData;
 import io.renren.zadmin.dao.JAuthedDao;
 import io.renren.zadmin.dto.JAuthedDTO;
+import io.renren.zadmin.entity.JAuthEntity;
 import io.renren.zadmin.entity.JAuthedEntity;
+import io.renren.zadmin.entity.JWalletEntity;
+import io.renren.zadmin.entity.JWalletTxnEntity;
 import io.renren.zadmin.service.JAuthedService;
+import io.renren.zwallet.config.WalletLoginInterceptor;
+import io.renren.zwallet.dto.WalletCardTxnItem;
+import io.renren.zwallet.dto.WalletTxnItem;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -32,5 +41,19 @@ public class JAuthedServiceImpl extends CrudServiceImpl<JAuthedDao, JAuthedEntit
         return wrapper;
     }
 
+
+    @Override
+    public PageData<WalletCardTxnItem> walletPage(Map<String, Object> params) {
+        JWalletEntity walletEntity = WalletLoginInterceptor.walletUser();
+        QueryWrapper<JAuthedEntity> wrapper = applyFilter(params);
+        wrapper.eq("wallet_id", walletEntity.getId());
+
+        IPage<JAuthedEntity> page = baseDao.selectPage(
+                getPage(params, Constant.CREATE_DATE, false),
+                wrapper
+        );
+        return getPageData(page, WalletCardTxnItem.class);
+
+    }
 
 }

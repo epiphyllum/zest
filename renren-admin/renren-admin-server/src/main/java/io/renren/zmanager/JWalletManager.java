@@ -12,10 +12,8 @@ import io.renren.zadmin.entity.JSubEntity;
 import io.renren.zadmin.entity.JWalletEntity;
 import io.renren.zbalance.BalanceType;
 import io.renren.zbalance.LedgerUtil;
-import io.renren.zcommon.CommonUtils;
-import io.renren.zcommon.JwtUtil;
-import io.renren.zcommon.ZestConstant;
-import io.renren.zcommon.ZinConstant;
+import io.renren.zcommon.*;
+import io.renren.zwallet.config.WalletLoginInterceptor;
 import jakarta.annotation.Resource;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
@@ -26,6 +24,9 @@ import java.util.Random;
 
 @Service
 public class JWalletManager {
+
+    @Resource
+    private MailService mailService;
     @Resource
     private JWalletDao jWalletDao;
     @Resource
@@ -50,17 +51,24 @@ public class JWalletManager {
         entity.setSubName(subEntity.getCusname());
     }
 
+    // 保存钱包
     public void save(JWalletEntity walletEntity) {
         fillBySub(walletEntity);
         jWalletDao.insert(walletEntity);
     }
 
+    // 发送otp
     public void emailOTP(String email) {
         String otp = genOTP();
+        String domain = CommonUtils.getDomain();
+        JSubEntity subEntity = jSubDao.selectOne(Wrappers.<JSubEntity>lambdaQuery()
+                .eq(JSubEntity::getAddress, domain)
+        );
         redisUtils.set(email, otp, 300);
-        // todo 发送邮件
+        mailService.sendMail(subEntity.getId(), email, "subject", "content");
     }
 
+    // 生成OTP
     private static String CHARACTERS = "0123456789";
 
     private String genOTP() {
@@ -138,11 +146,13 @@ public class JWalletManager {
     }
 
     private void fillByDomain(JWalletEntity entity) {
+
         String domain = CommonUtils.getDomain();
         // todo: 依据域名来找到子商户
         JSubEntity subEntity = jSubDao.selectOne(Wrappers.<JSubEntity>lambdaQuery()
                 .eq(JSubEntity::getAddress, domain)
         );
+
         entity.setAgentId(subEntity.getAgentId());
         entity.setAgentName(subEntity.getAgentName());
         entity.setMerchantName(subEntity.getMerchantName());
@@ -173,24 +183,35 @@ public class JWalletManager {
     }
 
     // 修改密码
-    private void changePassword(String email, String newPass, String otp) {
-        String savedOTP = (String) redisUtils.get(email);
+    public void change(String newPass, String otp) {
+        JWalletEntity user = WalletLoginInterceptor.walletUser();
+        String savedOTP = (String) redisUtils.get(user.getEmail());
         if (!otp.equals(savedOTP)) {
             throw new RenException("验证码错误");
         }
-        JWalletEntity walletEntity = jWalletDao.selectOne(
-                Wrappers.<JWalletEntity>lambdaQuery().eq(JWalletEntity::getEmail, email)
-        );
-        if (walletEntity == null) {
-            throw new RenException("用户不存在");
-        }
         String hashPass = DigestUtil.md5Hex(newPass);
         JWalletEntity update = new JWalletEntity();
-        update.setId(walletEntity.getId());
+        update.setId(user.getId());
         update.setPassword(hashPass);
         jWalletDao.updateById(update);
     }
 
-    private void userInfo(JWalletEntity entity) {
+    // reset
+    public void reset(String email) {
+        JWalletEntity walletEntity = jWalletDao.selectOne(Wrappers.<JWalletEntity>lambdaQuery()
+                .eq(JWalletEntity::getEmail, email)
+        );
+        if (walletEntity == null) {
+            throw new RenException("用户不存在");
+        }
+
+        String newPass = "";
+        String hashPass = DigestUtil.md5Hex(newPass);
+
+        jWalletDao.update(null, Wrappers.<JWalletEntity>lambdaUpdate()
+                .eq(JWalletEntity::getId, walletEntity.getId())
+                .set(JWalletEntity::getPassword, hashPass)
+        );
     }
+
 }

@@ -57,6 +57,12 @@ public class LedgerOpenVpaShare {
         // 子商户-开卡费用账户
         JBalanceEntity cardFee = ledgerUtil.getCardFeeAccount(entity.getSubId(), entity.getProductcurrency());
         ledgerUtil.ledgeUpdate(cardFee, LedgerConstant.ORIGIN_VPA_SHARE_OPEN, LedgerConstant.FACT_VPA_SHARE_OPEN_IN_CARD_FEE, entity.getId(), factMemo, merchantFee);
+
+        // 子商户发卡数量增加
+        JBalanceEntity cardCount = ledgerUtil.getCardCountAccount(entity.getSubId(), entity.getCurrency());
+        ledgerUtil.ledgeUpdate(cardCount, LedgerConstant.ORIGIN_CARD_OPEN,
+                LedgerConstant.FACT_CARD_OPEN_IN_CARD_COUNT, entity.getId(), "开卡1张", new BigDecimal(entity.getNum()));
+
     }
 }
 

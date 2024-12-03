@@ -112,6 +112,55 @@ public interface JStatDao extends BaseDao<JStatEntity> {
              where stat_date >= #{beginDate}
              group by currency, stat_date
             """)
+
     List<JStatEntity> selectLastMonthOfOperation(@Param("beginDate") Date beginDate);
+
+    //  子商户
+    @Select("""
+             select
+             sum(settleamount) as settleamount,
+             sum(settlecount) as settlecount,
+             currency
+             
+             from j_stat
+             where sub_id = #{subId}
+             group by currency
+            """)
+    List<JStatEntity> selectSumOfSub(@Param("subId") Long subId);
+
+    //  商户
+    @Select("""
+             select
+             sum(settleamount) as settleamount,
+             sum(settlecount) as settlecount,
+             currency
+             from j_stat
+             where merchant_id = #{merchantId}
+             group by currency
+            """)
+    List<JStatEntity> selectSumOfMerchant(@Param("merchantId") Long merchantId);
+
+    //  代理
+    @Select("""
+             select
+             sum(settleamount) as settleamount,
+             sum(settlecount) as settlecount,
+             currency
+             from j_stat
+             where agent_id = #{agentId}
+             group by currency
+            """)
+    List<JStatEntity> selectSumOfAgent(@Param("agentId") Long agentId);
+
+    //  机构
+    @Select("""
+             select
+             sum(settleamount) as settleamount,
+             sum(settlecount) as settlecount,
+             currency
+             from j_stat
+             group by currency
+            """)
+    List<JStatEntity> selectSumOfOperation();
 
 }

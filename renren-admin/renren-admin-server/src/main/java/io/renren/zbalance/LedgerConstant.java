@@ -23,8 +23,9 @@ public class LedgerConstant {
     public static final int FACT_CARD_OPEN_FREEZE_SUB_VA = 50000;             // 1. 子商户va冻结
     public static final int FACT_CARD_OPEN_UNFREEZE_SUB_VA = 50001;           // 2. 子商户va解冻
     public static final int FACT_CARD_OPEN_CONFIRM_SUB_VA = 50002;            // 3. 子商户va确认
-    public static final int FACT_CARD_OPEN_IN_CARD_FEE = 50003;                // 4. 子商户-开卡费用账户
+    public static final int FACT_CARD_OPEN_IN_CARD_FEE = 50003;               // 4. 子商户-开卡费用账户
     public static final int FACT_CARD_OPEN_IN_AIP_CARD_FEE = 50004;           // 5. 通联开卡费
+    public static final int FACT_CARD_OPEN_IN_CARD_COUNT = 5005;              // 6. 开卡统计
     // vpa共享子卡开卡
     public static final int ORIGIN_VPA_SHARE_OPEN = 501;                      // vpa共享子卡开卡
     public static final int FACT_VPA_SHARE_OPEN_FREEZE_SUB_VA = 50100;        // 1. 子商户va冻结
