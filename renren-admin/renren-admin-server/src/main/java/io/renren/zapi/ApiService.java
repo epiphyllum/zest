@@ -30,23 +30,13 @@ import jakarta.annotation.Resource;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.RequestEntity;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 @Service
 @Slf4j
@@ -169,9 +159,8 @@ public class ApiService {
         }
 
         // 开发环境不验证签名
-        if (zestConfig.isDev() && sign.equals("dev-sign")) {
-            // 测试暂时不验证签名
-            log.debug("开发环境, 不校验签名");
+        if (merchant.getDebug().equals(1)) {
+            log.debug("开发环境, 不校验签名: 不检查IP");
         } else {
             if (merchant.getWhiteIp().indexOf(ip) == -1) {
                 log.error("{}不允许从{}访问", merchant.getCusname(), ip);

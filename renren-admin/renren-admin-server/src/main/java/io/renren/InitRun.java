@@ -23,7 +23,7 @@ public class InitRun implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         initConfig();
-        jVaManager.refresh(); // 更新余额
+//        jVaManager.refresh(); // 更新余额
     }
 
     public void initConfig() {

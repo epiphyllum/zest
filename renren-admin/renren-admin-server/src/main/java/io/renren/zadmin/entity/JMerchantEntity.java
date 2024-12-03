@@ -83,6 +83,7 @@ public class JMerchantEntity extends BaseEntity {
 
     // (1)管理
     private Integer enabled;
+    private Integer debug;
 
     // (7)商户接入参数, 只有商户有， 子商户没有
     private String mcc;

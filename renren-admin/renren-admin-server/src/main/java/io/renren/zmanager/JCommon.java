@@ -12,6 +12,7 @@ public class JCommon {
     @Resource
     private JFeeConfigDao jFeeConfigDao;
 
+    // 产品成本与收入配置
     public JFeeConfigEntity getFeeConfig(Long merchantId, String marketproduct) {
         // 产品费用配置
         JFeeConfigEntity feeConfig = jFeeConfigDao.selectOne(Wrappers.<JFeeConfigEntity>lambdaQuery()

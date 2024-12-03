@@ -11,18 +11,18 @@ import java.util.Date;
 import java.util.List;
 
 /**
-* j_authed
-*
-* @author epiphyllum epiphyllum.zhou@gmail.com
-* @since 3.0 2024-10-11
-*/
+ * j_authed
+ *
+ * @author epiphyllum epiphyllum.zhou@gmail.com
+ * @since 3.0 2024-10-11
+ */
 @Mapper
 public interface JAuthedDao extends BaseDao<JAuthedEntity> {
 
     @Select("""
             select * from j_authed where entrydate = #{dateStr}
             """)
-    List<JAuthedEntity> selectByDate(@Param("date") String dateStr);
+    List<JAuthedEntity> selectByDate(@Param("dateStr") String dateStr);
 
     // 当日统计数据 -
     @Select("""
@@ -118,5 +118,5 @@ public interface JAuthedDao extends BaseDao<JAuthedEntity> {
             """
     )
     List<JAuthedEntity> selectLatestOfOperation(@Param("beginDate") Date beginDate);
-	
+
 }

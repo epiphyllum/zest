@@ -349,6 +349,8 @@ public class JDashboardOperation {
                 }
 
                 dto.setBalanceSummary(balanceItem);
+                dto.setName("机构");
+                dto.setToday(today);
 
                 dto.setMonthStat(monthMap.get(currency));
                 dto.setTodayStat(todayMap.get(currency));

@@ -3,7 +3,6 @@ package io.renren.zmanager;
 
 import cn.hutool.core.lang.Pair;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.ConvertUtils;
@@ -26,7 +25,6 @@ import io.renren.zin.cardmoney.dto.TCardBalanceRequest;
 import io.renren.zin.cardmoney.dto.TCardBalanceResponse;
 import io.renren.zin.cardstate.ZinCardStateService;
 import io.renren.zin.cardstate.dto.*;
-import io.renren.zin.file.ZinFileService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -246,6 +244,8 @@ public class JCardManager {
     // 提交通联
     public void submit(JCardEntity entity) {
         String applyid = null;
+
+        // 虚拟主卡, 实体主卡, vpa共享主卡, vpa预付费主卡, vpa钱包主卡
         if (entity.getMarketproduct().equals(ZinConstant.MP_VCC_MAIN_VIRTUAL) ||
                 entity.getMarketproduct().equals(ZinConstant.MP_VCC_MAIN_REAL) ||
                 entity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN) ||

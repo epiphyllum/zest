@@ -106,6 +106,9 @@ public class JMerchantDTO implements Serializable {
     // 启用禁用
     @Schema(description = "启用")
     private Integer enabled;
+    @Schema(description = "调试模式")
+    private Integer debug;
+
 
     // 接入参数
     @Schema(description = "商户类型")

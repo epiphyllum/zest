@@ -80,7 +80,7 @@ public class JBatchController {
 
     @GetMapping("rerun")
     @Operation(summary = "重新运行批处理")
-    @LogOperation("重新允许批处理")
+    @LogOperation("重新运行批处理")
     @PreAuthorize("hasAuthority('zorg:jbatch:rerun')")
     public Result rerun(@RequestParam("id") Long id) {
         CompletableFuture.runAsync(() -> {

@@ -187,6 +187,7 @@ public class JBatchManager {
      * 收集发卡数据
      */
     private void gatherCard(List<VCardEntity> cardList, Set<String> allKeys, Map<String, VCardEntity> map) {
+        log.info("收集卡数据...");
         for (VCardEntity vCardEntity : cardList) {
             String key = vCardEntity.getAgentName() + vCardEntity.getAgentId()
                     + vCardEntity.getMerchantName() + vCardEntity.getMerchantId()
@@ -202,6 +203,7 @@ public class JBatchManager {
      * 收集充值数据
      */
     private void gatherDeposit(List<VDepositEntity> vDepositEntities, Set<String> allKeys, Map<String, VDepositEntity> map) {
+        log.info("收集充值数据...");
         for (VDepositEntity vDepositEntity : vDepositEntities) {
             String key = vDepositEntity.getAgentName() + vDepositEntity.getAgentId()
                     + vDepositEntity.getMerchantName() + vDepositEntity.getMerchantId()
@@ -217,7 +219,7 @@ public class JBatchManager {
      * 收集提现数据
      */
     private void gatherWithdraw(List<VWithdrawEntity> vWithdrawEntities, Set<String> allKeys, Map<String, VWithdrawEntity> map) {
-
+        log.info("收集代付数据...");
         for (VWithdrawEntity vWithdrawEntity : vWithdrawEntities) {
             String key = vWithdrawEntity.getAgentName() + vWithdrawEntity.getAgentId()
                     + vWithdrawEntity.getMerchantName() + vWithdrawEntity.getMerchantId()
@@ -234,6 +236,7 @@ public class JBatchManager {
      * 收集结算数据
      */
     private void gatherAuthed(List<JAuthedEntity> jAuthedEntities, Set<String> allKeys, Map<String, JAuthedEntity> map) {
+        log.info("收集结算数据...");
         for (JAuthedEntity jAuthedEntity : jAuthedEntities) {
             String key = jAuthedEntity.getAgentName() + jAuthedEntity.getAgentId()
                     + jAuthedEntity.getMerchantName() + jAuthedEntity.getMerchantId()
@@ -386,11 +389,10 @@ public class JBatchManager {
 
     // 生成某一天的数据
     public void statBatch(String dateStr) {
+        log.info("运行日统计...");
+
         Date date = DateUtils.parse(dateStr, DateUtils.DATE_PATTERN);
         String entryDate = dateStr.replaceAll("-", "");
-
-        // 检查是否可以统计
-        // checkStatDate(date);
 
         // 拿到任务
         JBatchEntity batchEntity = newBatchItem(date, ZestConstant.BATCH_TYPE_STAT);
@@ -398,18 +400,18 @@ public class JBatchManager {
             throw new RenException("重复执行");
         }
 
-        Map<String, VCardEntity> cardMap = new HashMap<>();
-        Map<String, VDepositEntity> depositMap = new HashMap<>();
-        Map<String, VWithdrawEntity> withdrawMap = new HashMap<>();
-        Map<String, JAuthedEntity> authedMap = new HashMap<>();
-        Map<String, JMoneyEntity>  moneyMap = new HashMap<>();
-        Set<String> allKeys = new HashSet<>();
+        Map<String, VCardEntity> cardMap = new HashMap<>();  // 卡统计
+        Map<String, VDepositEntity> depositMap = new HashMap<>();  // 充值统计
+        Map<String, VWithdrawEntity> withdrawMap = new HashMap<>(); // 提现统计
+        Map<String, JAuthedEntity> authedMap = new HashMap<>(); // 结算统计
+        Set<String> allKeys = new HashSet<>();  // 所有key
 
         // 卡统计, 充值统计, 提现统计,结算统计
         List<VCardEntity> cardList = vCardDao.selectByDate(date);
         List<VDepositEntity> vDepositEntities = vDepositDao.selectByDate(date);
         List<VWithdrawEntity> vWithdrawEntities = vWithdrawDao.selectByDate(date);
-        List<JAuthedEntity> jAuthedEntities = jAuthedDao.selectByDate(entryDate);
+        List<JAuthedEntity> jAuthedEntities = jAuthedDao.selectByDate(dateStr);
+        log.info("开始收集...");
 
         // 收集
         gatherCard(cardList, allKeys, cardMap);
@@ -420,7 +422,17 @@ public class JBatchManager {
         // 收集并拆分批次
         int batchSize = 1000;
         List<List<JStatEntity>> batchList = new ArrayList<>();
-        int total = gatherStatBatchList(batchList, allKeys, cardMap, depositMap, withdrawMap, authedMap,batchSize, date, dateStr);
+
+        log.info("开始合并...");
+        int total = gatherStatBatchList(batchList, allKeys,
+                cardMap,
+                depositMap,
+                withdrawMap,
+                authedMap,
+                batchSize,
+                date,
+                dateStr
+        );
         String memo = String.format("合并统计, 充值交易:%d, 提现交易:%d, 发卡交易:%d, 合并:%d, 批次:%d",
                 vDepositEntities.size(), vWithdrawEntities.size(), cardList.size(), total, batchList.size()
         );
@@ -481,8 +493,13 @@ public class JBatchManager {
      * 重新运行批处理
      */
     public void rerun(Long id) {
-        JBatchEntity batchEntity = jBatchDao.selectById(id);
-        String dateStr = DateUtils.format(batchEntity.getBatchDate(), DateUtils.DATE_PATTERN);
-        run(batchEntity.getBatchType(), dateStr);
+        try {
+            JBatchEntity batchEntity = jBatchDao.selectById(id);
+            String dateStr = DateUtils.format(batchEntity.getBatchDate(), DateUtils.DATE_PATTERN);
+            run(batchEntity.getBatchType(), dateStr);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw ex;
+        }
     }
 }
