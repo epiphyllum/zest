@@ -320,6 +320,7 @@ public class JDashboardMerchant {
             }
             return map;
         } catch (Exception ex) {
+            ex.printStackTrace();
             throw new RenException("系统错误");
         }
     }

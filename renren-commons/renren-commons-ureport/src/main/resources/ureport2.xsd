@@ -244,7 +244,7 @@
 			<element name="dataset-value" type="tns:dataset-value" minOccurs="0" maxOccurs="1"></element>
 			<element name="chart-value" type="tns:chart-value" minOccurs="0" maxOccurs="1"></element>
 			<element name="cell-style" type="tns:cell-style" minOccurs="0" maxOccurs="1"></element>
-			<element name="condition-property-item" type="tns:condition-property-item" maxOccurs="1" minOccurs="0"></element>
+			<element name="condition-property-walletCard" type="tns:condition-property-walletCard" maxOccurs="1" minOccurs="0"></element>
 			<element name="link-parameter" type="tns:link-parameter" maxOccurs="unbounded" minOccurs="0"></element>
 		</sequence>
 		<attribute name="name" type="string" use="required"></attribute>
@@ -278,7 +278,7 @@
 		</attribute>
 	</complexType>
 	
-	<complexType name="condition-property-item">
+	<complexType name="condition-property-walletCard">
 		<sequence>
 			<element name="condition" type="tns:condition" maxOccurs="unbounded" minOccurs="0"></element>
 			<element name="link-parameter" type="tns:link-parameter" maxOccurs="unbounded" minOccurs="0"></element>
@@ -747,7 +747,7 @@
 	<complexType name="dataset-value">
 		<sequence>
 			<element name="condition" type="tns:condition" maxOccurs="unbounded" minOccurs="0"></element>
-			<element name="group-item" type="tns:group-item" maxOccurs="unbounded" minOccurs="0"></element>
+			<element name="group-walletCard" type="tns:group-walletCard" maxOccurs="unbounded" minOccurs="0"></element>
 		</sequence>
 		<attribute name="dataset-name" type="string" use="required"></attribute>
 		<attribute name="aggregate" type="string" use="required"></attribute>
@@ -771,7 +771,7 @@
 	
 	<complexType name="link-parameter-value" mixed="true"></complexType>
 	
-	<complexType name="group-item">
+	<complexType name="group-walletCard">
 		<sequence>
 			<element name="condition" type="tns:condition" minOccurs="1" maxOccurs="unbounded"></element>
 		</sequence>

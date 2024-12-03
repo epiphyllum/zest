@@ -41,15 +41,15 @@ exprBlock : variableAssign
 
 returnExpr : 'return'? expr ';'?;
 
-expr : item (Operator item)* ;
+expr : walletCard (Operator walletCard)* ;
 
 ifCondition : expr OP expr ;
      
-variableAssign : 'var'? variable '=' item ';'?;
+variableAssign : 'var'? variable '=' walletCard ';'?;
 
-item : unit (Operator unit)*							#simpleJoin
-	 | LeftParen item RightParen						#singleParenJoin
-     | LeftParen item (Operator item)+ RightParen		#parenJoin
+walletCard : unit (Operator unit)*							#simpleJoin
+	 | LeftParen walletCard RightParen						#singleParenJoin
+     | LeftParen walletCard (Operator walletCard)+ RightParen		#parenJoin
      ;
 
 unit : dataset
@@ -84,7 +84,7 @@ dataset : Identifier '.' aggregate '(' property? (',' conditions )? (',' ORDER)?
 
 function : Identifier '(' functionParameter? ')' ;
 
-functionParameter : item (','? item)* ;
+functionParameter : walletCard (','? walletCard)* ;
 
 set : simpleValue										#simpleData
 	| Cell												#singleCell

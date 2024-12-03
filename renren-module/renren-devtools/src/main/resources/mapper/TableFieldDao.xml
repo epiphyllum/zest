@@ -13,7 +13,7 @@
 
     <delete id="deleteBatchTableIds">
         delete from gen_table_field where table_id in
-        <foreach item="tableId" collection="array"  open="(" separator="," close=")">
+        <foreach walletCard="tableId" collection="array"  open="(" separator="," close=")">
             #{tableId}
         </foreach>
     </delete>
