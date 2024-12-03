@@ -13,7 +13,7 @@ create table j_authed
     marketproduct varchar(16) not null comment '卡产品',
 
     wallet_id     bigint comment '钱包id',
-    wallet_name   varchar(50) comment '钱包用户',
+    maincardno    varchar(50) comment '主卡',
 
     -- info
     cardno        varchar(16)    not null, -- 卡号	cardno	String	16	Y

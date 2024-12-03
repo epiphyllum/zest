@@ -56,6 +56,7 @@ create table j_merchant
     state              varchar(2) comment '状态',                                           -- state	String	2	Y	04：审核成功; 05：审核失败; 其他情况为空;
     -- extra management:
     enabled            int           not null default 1 comment '启用',
+    debug              int           not null default 0 comment '调试模式',
 
     -- 商户接入参数
     mcc                varchar(6)    not null comment '商户类型',                           -- dict

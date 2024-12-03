@@ -9,6 +9,7 @@ create table j_vpa_adjust
     merchant_name varchar(50)    not null comment '商户',   -- 商户
     sub_id        bigint         not null comment '子商户ID',
     sub_name      varchar(50)    not null comment '子商户',
+
     -- 业务字段
     marketproduct varchar(16)    not null comment '产品',
     maincardno    varchar(30)    not null comment '主卡卡号',

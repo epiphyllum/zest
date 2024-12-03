@@ -53,8 +53,7 @@ create table j_sub
     api                int    not null default 1,
 
     -- basic
-    creator
-                       bigint comment '创建者',
+    creator bigint comment '创建者',
     create_date        datetime comment '创建时间',
     updater            bigint comment '更新者',
     update_date        datetime comment '更新时间',

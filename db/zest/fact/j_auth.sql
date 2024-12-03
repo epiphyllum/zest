@@ -14,7 +14,8 @@ create table j_auth
 
     -- todo: 钱包
     wallet_id      bigint comment '钱包id',
-    wallet_name    varchar(50) comment '钱包用户',
+    --
+    maincardno    varchar(50) comment '主卡',
 
     cardno         varchar(16) not null comment '卡号',
     logkv          varchar(50) comment '流水号',
