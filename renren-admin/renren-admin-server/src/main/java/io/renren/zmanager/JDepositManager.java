@@ -243,10 +243,12 @@ public class JDepositManager {
         }
 
         if (notify || entity.getApi().equals(1)) {
-            log.info("API交易, 通知商户, notify:{}", notify);
-            JMerchantEntity merchant = jMerchantDao.selectById(entity.getMerchantId());
-            JDepositEntity freshEntity = jDepositDao.selectById(entity.getId());
-            apiNotify.cardChargeNotify(freshEntity, merchant);
+            CompletableFuture.runAsync( () -> {
+                log.info("API交易, 通知商户, notify:{}", notify);
+                JMerchantEntity merchant = jMerchantDao.selectById(entity.getMerchantId());
+                JDepositEntity freshEntity = jDepositDao.selectById(entity.getId());
+                apiNotify.cardChargeNotify(freshEntity, merchant);
+            });
         }
     }
 

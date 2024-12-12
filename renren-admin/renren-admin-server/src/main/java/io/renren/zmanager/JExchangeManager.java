@@ -18,6 +18,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class JExchangeManager {
@@ -96,9 +97,11 @@ public class JExchangeManager {
             });
             // 是否通知商户
             if (notify && execute) {
-                JExchangeEntity entity = jExchangeDao.selectById(jExchangeEntity.getId());
-                JMerchantEntity merchant = jMerchantDao.selectById(entity.getMerchantId());
-                apiNotify.exchangeNotify(entity, merchant);
+                CompletableFuture.runAsync(() -> {
+                    JExchangeEntity entity = jExchangeDao.selectById(jExchangeEntity.getId());
+                    JMerchantEntity merchant = jMerchantDao.selectById(entity.getMerchantId());
+                    apiNotify.exchangeNotify(entity, merchant);
+                });
             }
         } else {
             // 其他情况,  只是简单更新

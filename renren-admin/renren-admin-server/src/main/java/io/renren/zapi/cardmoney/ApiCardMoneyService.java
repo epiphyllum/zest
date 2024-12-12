@@ -44,6 +44,10 @@ public class ApiCardMoneyService {
             throw new RenException("cardno does not exists");
         }
 
+        if (!card.getSubId().equals(request.getSubId())) {
+            throw new RenException(request.getCardno() + "不属于子商户:" + request.getSubId());
+        }
+
         JMerchantEntity merchant = context.getMerchant();
 
         Long subId = request.getSubId();

@@ -389,8 +389,10 @@ public class JCardManager {
         // 是否需要通知api商户
         if (notify || jCardEntity.getApi().equals(1)) {
             // 通知商户
-            JCardEntity entity = jCardDao.selectById(jCardEntity.getId());
-            apiNotify.cardNewNotify(entity, merchant);
+            CompletableFuture.runAsync(() -> {
+                JCardEntity entity = jCardDao.selectById(jCardEntity.getId());
+                apiNotify.cardNewNotify(entity, merchant);
+            });
         }
         return;
     }
@@ -448,9 +450,11 @@ public class JCardManager {
             // 通知商户
             if (notify) {
                 // 发卡状态更新
-                JCardEntity entity = jCardDao.selectById(jCardEntity.getId());
-                JMerchantEntity merchant = jMerchantDao.selectById(jCardEntity.getMerchantId());
-                apiNotify.cardChangeNotify(entity, merchant);
+                CompletableFuture.runAsync(() -> {
+                    JCardEntity entity = jCardDao.selectById(jCardEntity.getId());
+                    JMerchantEntity merchant = jMerchantDao.selectById(jCardEntity.getMerchantId());
+                    apiNotify.cardChangeNotify(entity, merchant);
+                });
             }
             return;
         }
