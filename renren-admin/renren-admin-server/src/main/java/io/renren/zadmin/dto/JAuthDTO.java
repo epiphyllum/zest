@@ -48,6 +48,8 @@ public class JAuthDTO implements Serializable {
 
     @Schema(description = "钱包ID")
     private Long walletId;
+    @Schema(description = "钱包")
+    private Long walletName;
     @Schema(description = "主卡")
     private String maincardno;
 
