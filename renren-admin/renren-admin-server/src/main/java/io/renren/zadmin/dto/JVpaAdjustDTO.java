@@ -40,6 +40,16 @@ public class JVpaAdjustDTO implements Serializable {
     private String cardno;
     @Schema(description = "vpa主卡")
     private String maincardno;
+    @Schema(description = "主卡id")
+    private String maincardid;
+    @Schema(description = "币种")
+    private String currency;
+
+    @Schema(description = "钱包ID")
+    private Long walletId;
+    @Schema(description = "钱包")
+    private String walletName;
+
     @Schema(description = "调整金额")
     private BigDecimal adjustAmount;
     @Schema(description = "调整期额度")

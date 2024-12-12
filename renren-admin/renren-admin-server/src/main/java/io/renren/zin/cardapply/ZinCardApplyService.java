@@ -57,4 +57,9 @@ public class ZinCardApplyService {
     public TCardUpdateSceneResponse cardUpdateScene(TCardUpdateScene request) {
         return requester.request(uniqueId(), "/gcpapi/card/cardupdatescene", request, TCardUpdateSceneResponse.class);
     }
+
+    // 查询卡的场景信息: 3011
+    public TCardSceneQueryResponse cardSceneQuery(TCardSceneQuery request) {
+        return requester.request(uniqueId(), "/gcpapi/card/getcardscene", request, TCardSceneQueryResponse.class);
+    }
 }

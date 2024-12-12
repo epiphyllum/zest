@@ -55,6 +55,8 @@ public class JDepositDTO implements Serializable {
     private String marketproduct;
     @Schema(description = "卡号")
     private String cardno;
+    @Schema(description = "钱包ID")
+    private String walletId;
     @Schema(description = "付款id")
     private String payerid;
     @Schema(description = "金额")

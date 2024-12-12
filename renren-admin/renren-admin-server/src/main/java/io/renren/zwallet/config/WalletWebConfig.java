@@ -22,4 +22,6 @@ public class WalletWebConfig implements WebMvcConfigurer {
                         "/zwallet/api/user/emailOTP"
                 );
     }
+
+
 }

@@ -39,6 +39,7 @@ public class JPayChannelEntity extends BaseEntity {
     private String channelCode; // 渠道代码
     private String channelName; // 渠道名称
     private String stlCurrency; // 结算币种
+    private String payCurrency; // 结算币种
     private String merchantNo;  // 接入商户号
 
     private String apiUrl;

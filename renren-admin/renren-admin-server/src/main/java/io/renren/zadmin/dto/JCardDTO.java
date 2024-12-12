@@ -39,6 +39,9 @@ public class JCardDTO implements Serializable {
     private String marketproduct;
     @Schema(description = "主卡")
     private String maincardno;
+    @Schema(description = "主卡id")
+    private Long maincardid;
+
     @Schema(description = "钱包ID")
     private Long walletId;
     @Schema(description = "钱包名")

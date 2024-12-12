@@ -7,6 +7,7 @@ import io.renren.zin.ZinRequester;
 import io.renren.zin.file.dto.DownloadVpaRequest;
 import io.renren.zin.file.dto.VpaInfoItem;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,7 @@ import java.util.List;
 import static io.renren.zcommon.CommonUtils.uniqueId;
 
 @Service
+@Slf4j
 public class ZinFileService {
     @Resource
     private ZinRequester requester;
@@ -71,12 +73,15 @@ public class ZinFileService {
     public List<VpaInfoItem> downloadVapInfoAes(DownloadVpaRequest request) {
         byte[] download = requester.download(uniqueId(), "/gcpapi/file/downvapinfoaes", request);
         String raw = CommonUtils.decryptSensitiveBytes(download, zestConfig.getAccessConfig().getSensitiveKey());
+        log.info("vpa子卡信息下载数据: {}", raw);
         String[] split = raw.split("\n");
         List<VpaInfoItem> items  = new ArrayList<>();
         for (int i = 1; i < split.length; i++) {
+
             String line = split[i].replaceAll("\"", "");
             String[] fields = line.split(",");
             VpaInfoItem item = new VpaInfoItem(fields[0], fields[1], fields[2]);
+            log.info("vpa item: {}", item);
             items.add(item);
         }
         return items;

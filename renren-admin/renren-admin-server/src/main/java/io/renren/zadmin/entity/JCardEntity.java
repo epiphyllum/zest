@@ -43,6 +43,7 @@ public class JCardEntity extends BaseEntity {
     //
     private String marketproduct;
     private String maincardno;
+    private Long maincardid;
     private Long walletId;
     private String walletName;
 

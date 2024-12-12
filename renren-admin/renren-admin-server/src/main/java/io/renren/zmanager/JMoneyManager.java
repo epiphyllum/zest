@@ -11,7 +11,7 @@ import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zadmin.entity.JMoneyEntity;
 import io.renren.zapi.ApiNotifyService;
 import io.renren.zapi.allocate.dto.MoneyNotify;
-import io.renren.zbalance.ledgers.LedgerMoneyIn;
+import io.renren.zbalance.ledgers.Ledger100MoneyIn;
 import io.renren.zcommon.CommonUtils;
 import io.renren.zcommon.ZapiConstant;
 import io.renren.zcommon.ZinConstant;
@@ -40,7 +40,7 @@ public class JMoneyManager {
     @Resource
     private TransactionTemplate tx;
     @Resource
-    private LedgerMoneyIn ledgerMoneyIn;
+    private Ledger100MoneyIn ledger100MoneyIn;
     @Resource
     private ApiNotifyService apiNotifyService;
     @Resource
@@ -178,7 +178,7 @@ public class JMoneyManager {
                 if (update != 1) {
                     throw new RenException("匹配失败");
                 }
-                ledgerMoneyIn.ledgeMoneyIn(moneyEntity);
+                ledger100MoneyIn.ledgeMoneyIn(moneyEntity);
             });
         } catch (Exception ex) {
             log.error("记账失败: {}", moneyEntity);

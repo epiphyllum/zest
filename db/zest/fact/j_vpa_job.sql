@@ -34,6 +34,7 @@ create table j_vpa_job
     feecurrency          varchar(3)     not null default 0 comment '通联手续费币种',
     -- 创建相关信息
     maincardno           varchar(30)    not null comment '主卡(共享主卡)',
+    maincardid           long           not null comment '主卡ID',
     num                  int            not null comment '开卡数量',
     email                varchar(30)    not null comment '邮箱',
     cardexpiredate       varchar(10)    not null comment '卡有效期',
@@ -41,6 +42,7 @@ create table j_vpa_job
     marketproduct        varchar(16)    not null comment '产品',
     productcurrency      varchar(3)     not null comment '本币币种',
     wallet_id            bigint comment '钱包ID',
+    wallet_name          varchar(64) comment '钱包',
 
     -- 接口
     meraplid             varchar(32)    not null comment '商户发起的meraplid, 我们用id',
@@ -58,4 +60,4 @@ create table j_vpa_job
 create index idx_j_vpa_job_1 on j_vpa_job (merchant_id, create_date);
 create index idx_j_vpa_job_2 on j_vpa_job (applyid);
 -- 唯一索引
-create unique index idx_j_vpa_job_1 on j_vpa_job (sub_id, meraplid);
+create unique index uidx_j_vpa_job_1 on j_vpa_job (sub_id, meraplid);

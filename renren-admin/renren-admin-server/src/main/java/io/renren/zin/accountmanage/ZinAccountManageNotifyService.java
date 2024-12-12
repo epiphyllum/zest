@@ -8,7 +8,7 @@ import io.renren.zadmin.dao.JMoneyDao;
 import io.renren.zadmin.entity.JMaccountEntity;
 import io.renren.zadmin.entity.JMoneyEntity;
 import io.renren.zapi.ApiNotify;
-import io.renren.zbalance.ledgers.LedgerMoneyIn;
+import io.renren.zbalance.ledgers.Ledger100MoneyIn;
 import io.renren.zcommon.ZinConstant;
 import io.renren.zin.accountmanage.dto.TMoneyInNotify;
 import jakarta.annotation.Resource;
@@ -29,7 +29,7 @@ public class ZinAccountManageNotifyService {
     @Resource
     private TransactionTemplate tx;
     @Resource
-    private LedgerMoneyIn ledgerMoneyIn;
+    private Ledger100MoneyIn ledger100MoneyIn;
     @Resource
     private ApiNotify apiNotify;
 
@@ -79,7 +79,7 @@ public class ZinAccountManageNotifyService {
             // 重新查回来
             JMoneyEntity entity = jMoneyDao.selectById(jMoneyEntity.getId());
             try {
-                ledgerMoneyIn.ledgeMoneyIn(entity);
+                ledger100MoneyIn.ledgeMoneyIn(entity);
             } catch (Exception ex) {
                 log.error("记账失败, 入金记录:{}", entity);
                 ex.printStackTrace();
@@ -156,7 +156,7 @@ public class ZinAccountManageNotifyService {
             );
             entity.setMerchantId(finalMerchantId);
             entity.setMerchantName(finalMerchantName);
-            ledgerMoneyIn.ledgeMoneyIn(entity);
+            ledger100MoneyIn.ledgeMoneyIn(entity);
         });
 
         return true;

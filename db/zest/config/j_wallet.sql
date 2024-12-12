@@ -11,6 +11,15 @@ create table j_wallet
     sub_name      varchar(50) not null comment '子商户',
 
     -- 钱包主体
+    hkd_level     varchar(16) comment '钱包等级: basic, premium',
+    usd_level     varchar(16) comment '钱包等级: basic, premium',
+
+    -- 账户升级后, 用户专属主卡
+    hkd_cardno    varchar(30) comment '港币主卡',
+    hkd_cardid    bigint,
+    usd_cardno    varchar(30) comment '美金主卡',
+    usd_cardid    bigint,
+    --
     phone         varchar(50) comment '手机号',
     email         varchar(50) comment '邮箱',
     password      varchar(64) comment '密码',
@@ -20,13 +29,9 @@ create table j_wallet
     -- 接入参数
     access_key    varchar(128) comment '接入密钥',
 
-    -- usdt钱包地址, 可能还有其他数字钱包地址
-    usdt_address  varchar(128) comment '钱包地址',
-    usdt_key      varchar(256) comment '钱包秘钥: 加密后的',
-
-    -- 港币+美金
-    hkd_cardno    varchar(30) comment '港币主卡',
-    usd_cardno    varchar(30) comment '美金主卡',
+     -- 分销体系
+     -- p1 bigint comment '直接上级',
+     -- p2 bigint comment '间接上级',
 
     -- basic
     creator       bigint comment '创建者',
@@ -40,3 +45,6 @@ create table j_wallet
 create index idx_j_wallet_1 on j_wallet (agent_id, merchant_id, sub_id, create_date);
 create index idx_j_wallet_2 on j_wallet (merchant_id, sub_id, create_date);
 create index idx_j_wallet_3 on j_wallet (sub_id, create_date);
+-- 唯一索引
+create unique index uidx_j_wallet_0 on j_wallet (sub_id, email);
+create unique index uidx_j_wallet_1 on j_wallet (sub_id, phone);

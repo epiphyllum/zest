@@ -14,6 +14,7 @@ create table j_withdraw
 
     meraplid         varchar(32)    not null comment '申请单流水',
     marketproduct    varchar(17)    not null comment '产品',
+    wallet_id        bigint         null comment '钱包ID',
     cardno           varchar(30)    not null comment '卡号',
     payeeid          varchar(30) comment '交易对手',
     currency         varchar(3) comment '币种',
@@ -25,7 +26,7 @@ create table j_withdraw
     securityamount   decimal(18, 2),
     securitycurrency varchar(3) comment '币种',
 
-    merchantfee      decimal(18,2) comment '商户手续费',
+    merchantfee      decimal(18, 2) comment '商户手续费',
 
     -- extra
     `state`          varchar(2)     not null default 0 comment '状态',

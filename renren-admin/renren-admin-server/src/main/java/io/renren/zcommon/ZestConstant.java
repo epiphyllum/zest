@@ -10,6 +10,7 @@ public class ZestConstant {
     public static final String USER_TYPE_SUB = "sub";
     public static final String USER_TYPE_PREPAID = "prepaid";
     public static final String USER_TYPE_WALLET = "wallet";
+    public static final String USER_TYPE_WCARD = "wcard";
 
     public static boolean isOperation() {
         return USER_TYPE_OPERATION.equals(SecurityUser.getUser().getUserType());

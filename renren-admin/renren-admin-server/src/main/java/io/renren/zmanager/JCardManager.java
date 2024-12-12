@@ -11,9 +11,7 @@ import io.renren.zadmin.entity.*;
 import io.renren.zapi.ApiNotify;
 import io.renren.zbalance.BalanceType;
 import io.renren.zbalance.LedgerUtil;
-import io.renren.zbalance.ledgers.LedgerOpenCard;
-import io.renren.zbalance.ledgers.LedgerPrepaidCharge;
-import io.renren.zbalance.ledgers.LedgerPrepaidWithdraw;
+import io.renren.zbalance.ledgers.*;
 import io.renren.zcommon.CommonUtils;
 import io.renren.zcommon.ZestConfig;
 import io.renren.zcommon.ZestConstant;
@@ -39,6 +37,10 @@ import java.util.function.Consumer;
 @Slf4j
 public class JCardManager {
     @Resource
+    private JWalletTxnDao jWalletTxnDao;
+    @Resource
+    private JWalletDao jWalletDao;
+    @Resource
     private JCommon jCommon;
     @Resource
     private ZinCardApplyService zinCardApplyService;
@@ -57,8 +59,6 @@ public class JCardManager {
     @Resource
     private JMerchantDao jMerchantDao;
     @Resource
-    private LedgerOpenCard ledgerOpenCard;
-    @Resource
     private LedgerUtil ledgerUtil;
     @Resource
     private ZestConfig zestConfig;
@@ -67,9 +67,15 @@ public class JCardManager {
     @Resource
     private JBalanceDao jBalanceDao;
     @Resource
-    private LedgerPrepaidWithdraw ledgerPrepaidWithdraw;
+    private Ledger500OpenCard ledger500OpenCard;
     @Resource
-    private LedgerPrepaidCharge ledgerPrepaidCharge;
+    private Ledger603PrepaidWithdraw ledger603PrepaidWithdraw;
+    @Resource
+    private Ledger602PrepaidCharge ledger602PrepaidCharge;
+    @Resource
+    private Ledger605WalletCardCharge ledger605WalletCardCharge;
+    @Resource
+    private Ledger606WalletCardWithdraw ledger606WalletCardWithdraw;
     @Resource
     private JVpaAdjustDao jVpaAdjustDao;
     @Resource
@@ -87,7 +93,7 @@ public class JCardManager {
     }
 
     public void fillMerchantFee(JCardEntity entity, JMerchantEntity merchant) {
-        JFeeConfigEntity feeConfig = jCommon.getFeeConfig(merchant.getId(), entity.getMarketproduct());
+        JFeeConfigEntity feeConfig = jCommon.getFeeConfig(merchant.getId(), entity.getMarketproduct(), entity.getCurrency());
         entity.setFee(feeConfig.getCostCardFee());
         entity.setMerchantfee(feeConfig.getCardFee());
     }
@@ -129,8 +135,10 @@ public class JCardManager {
 
         // 填充子相关方ID
         this.fillBySub(entity);
+
         // 查询商户
         JMerchantEntity merchant = jMerchantDao.selectById(entity.getMerchantId());
+
         // 填充开卡成本与收费
         fillMerchantFee(entity, merchant);
 
@@ -139,6 +147,11 @@ public class JCardManager {
                 entity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_PREPAID) ||
                 entity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_WALLET)
         ) {
+            // 开卡协议
+            entity.setPayeeaccount(merchant.getVpaPayeeaccount());
+            entity.setProcurecontent(merchant.getVpaProcurecontent());
+            entity.setAgmfid(merchant.getVpaCardFid());
+
             if (entity.getProcurecontent() == null || entity.getPayeeaccount() == null || entity.getAgmfid() == null) {
                 throw new RenException("交易对手, 采购合同, 采购内容必填");
             }
@@ -203,7 +216,7 @@ public class JCardManager {
         // 入库 + 冻结记账
         tx.executeWithoutResult(status -> {
             jCardDao.insert(entity);
-            ledgerOpenCard.ledgeOpenCardFreeze(entity);
+            ledger500OpenCard.ledgeOpenCardFreeze(entity);
         });
     }
 
@@ -211,7 +224,7 @@ public class JCardManager {
     public void saveVpaMain(JCardEntity entity) {
         tx.executeWithoutResult(status -> {
             jCardDao.insert(entity);
-            ledgerOpenCard.ledgeOpenCardFreeze(entity);
+            ledger500OpenCard.ledgeOpenCardFreeze(entity);
         });
     }
 
@@ -237,6 +250,19 @@ public class JCardManager {
         jBalanceEntity.setOwnerName(entity.getCardno());
         jBalanceEntity.setOwnerType(ZestConstant.USER_TYPE_PREPAID);
         jBalanceEntity.setBalanceType(BalanceType.getPrepaidSumAccount(entity.getCurrency()));
+        jBalanceEntity.setCurrency(entity.getCurrency());
+        jBalanceDao.insert(jBalanceEntity);
+    }
+
+    /**
+     * 创建预付费卡发卡额
+     */
+    private void newWalletSumBalance(JCardEntity entity) {
+        JBalanceEntity jBalanceEntity = new JBalanceEntity();
+        jBalanceEntity.setOwnerId(entity.getId());
+        jBalanceEntity.setOwnerName(entity.getCardno());
+        jBalanceEntity.setOwnerType(ZestConstant.USER_TYPE_WCARD);
+        jBalanceEntity.setBalanceType(BalanceType.getWalletSumAccount(entity.getCurrency()));
         jBalanceEntity.setCurrency(entity.getCurrency());
         jBalanceDao.insert(jBalanceEntity);
     }
@@ -275,6 +301,101 @@ public class JCardManager {
         entity.setApplyid(applyid);
     }
 
+    public void querySuccess(JCardEntity jCardEntity,
+                             TCardApplyResponse response,
+                             LambdaUpdateWrapper<JCardEntity> updateWrapper,
+                             boolean notify
+    ) {
+        // 完成时间
+        updateWrapper.set(JCardEntity::getStatDate, new Date());
+        // 调用下通联获取cvv2 + expiredate
+        TCardPayInfoRequest req = new TCardPayInfoRequest();
+        req.setCardno(response.getCardno());
+        TCardPayInfoResponse resp = zinCardApplyService.cardPayInfo(req);
+        String cvv = resp.getCvv();
+        String expiredate = resp.getExpiredate();
+        // 有效期解密保存
+        String decryptedExpiredate = CommonUtils.decryptSensitiveString(expiredate, zestConfig.getAccessConfig().getSensitiveKey(), "UTF-8");
+        updateWrapper.set(JCardEntity::getCvv, cvv)
+                .set(JCardEntity::getExpiredate, decryptedExpiredate);
+        // 备用
+        jCardEntity.setCardno(response.getCardno());
+        jCardEntity.setFee(response.getFee());  // 通联实际费用
+        jCardEntity.setFeecurrency(response.getFeecurrency());
+        JMerchantEntity merchant = jMerchantDao.selectById(jCardEntity.getMerchantId());
+        // vcc虚拟卡， vcc实体卡, 共享主卡, 预付费主卡, 四种卡有收费有收费处理
+        String mpType = jCardEntity.getMarketproduct();
+        tx.executeWithoutResult(status -> {
+            if (mpType.equals(ZinConstant.MP_VCC_VIRTUAL) ||
+                    mpType.equals(ZinConstant.MP_VCC_REAL) ||
+                    mpType.equals(ZinConstant.MP_VPA_MAIN) ||
+                    mpType.equals(ZinConstant.MP_VPA_MAIN_PREPAID) ||
+                    mpType.equals(ZinConstant.MP_VPA_MAIN_WALLET)
+            ) {
+                // 预付费主卡, 需要做剩余额度账户管理
+                if (jCardEntity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_PREPAID)) {
+                    this.newPrepaidQuotaBalance(jCardEntity);
+                    this.newPrepaidSumBalance(jCardEntity);
+                }
+                // 钱包主卡
+                else if (jCardEntity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_WALLET)) {
+                    this.newWalletSumBalance(jCardEntity);
+                    // 钱包用户的主卡
+                    if (jCardEntity.getWalletId() != null) {
+                        // 港币
+                        if (jCardEntity.getCurrency().equals("HKD")) {
+                            jWalletDao.update(null, Wrappers.<JWalletEntity>lambdaUpdate()
+                                    .eq(JWalletEntity::getId, jCardEntity.getWalletId())
+                                    .set(JWalletEntity::getHkdLevel, ZinConstant.WALLET_LEVEL_PREMIUM)
+                                    .set(JWalletEntity::getHkdCardno, response.getCardno())
+                                    .set(JWalletEntity::getHkdCardid, jCardEntity.getId())
+                            );
+                        }
+                        // 美元
+                        else if (jCardEntity.getCurrency().equals("USD")) {
+                            jWalletDao.update(null, Wrappers.<JWalletEntity>lambdaUpdate()
+                                    .eq(JWalletEntity::getId, jCardEntity.getWalletId())
+                                    .set(JWalletEntity::getUsdLevel, ZinConstant.WALLET_LEVEL_PREMIUM)
+                                    .set(JWalletEntity::getUsdCardno, response.getCardno())
+                                    .set(JWalletEntity::getUsdCardid, jCardEntity.getId())
+                            );
+                        }
+
+                        // 钱包账户upgrade交易状态更新
+                        JWalletTxnEntity jWalletTxnEntity = jWalletTxnDao.selectOne(Wrappers.<JWalletTxnEntity>lambdaQuery()
+                                .eq(JWalletTxnEntity::getWalletId, jCardEntity.getWalletId())
+                                .eq(JWalletTxnEntity::getTxnCode, ZinConstant.WALLET_TXN_UPGRADE)
+                                .eq(JWalletTxnEntity::getState, ZinConstant.WALLET_TXN_STATUS_NEW)
+                        );
+                        jWalletTxnDao.update(null, Wrappers.<JWalletTxnEntity>lambdaUpdate()
+                                .eq(JWalletTxnEntity::getId, jWalletTxnEntity.getId())
+                                .set(JWalletTxnEntity::getState, ZinConstant.WALLET_TXN_STATUS_SUCCESS)
+                        );
+
+                    }
+                }
+                jCardDao.update(null, updateWrapper);
+                ledger500OpenCard.ledgeOpenCard(jCardEntity);
+            } else {
+                // 其他卡没有收费处理
+                jCardDao.update(null, updateWrapper);
+            }
+        });
+        // 发卡成功, 查询更新状态
+        jCardEntity.setCardno(response.getCardno());
+        this.queryCard(jCardEntity);
+        // 更新余额
+        this.balanceCard(jCardEntity);
+        // 是否需要通知api商户
+        if (notify || jCardEntity.getApi().equals(1)) {
+            // 通知商户
+            JCardEntity entity = jCardDao.selectById(jCardEntity.getId());
+            apiNotify.cardNewNotify(entity, merchant);
+        }
+        return;
+    }
+
+
     // 查询发卡状态
     public void query(JCardEntity jCardEntity, boolean notify) {
         TCardApplyQuery query = new TCardApplyQuery();
@@ -282,7 +403,6 @@ public class JCardManager {
         query.setMeraplid(jCardEntity.getTxnid());
         TCardApplyResponse response = zinCardApplyService.cardApplyQuery(query);
 
-        //
         String prevState = jCardEntity.getState();
         String nextState = response.getState();
 
@@ -298,59 +418,8 @@ public class JCardManager {
 
         // 不成功 -> 成功
         if (!ZinConstant.isCardApplySuccess(prevState) && ZinConstant.isCardApplySuccess(nextState)) {
-
-            // 完成时间
-            updateWrapper.set(JCardEntity::getStatDate, new Date());
-
-            // 调用下通联获取cvv2 + expiredate
-            TCardPayInfoRequest req = new TCardPayInfoRequest();
-            req.setCardno(response.getCardno());
-            TCardPayInfoResponse resp = zinCardApplyService.cardPayInfo(req);
-            String cvv = resp.getCvv();
-            String expiredate = resp.getExpiredate();
-            // 有效期解密保存
-            String decryptedExpiredate = CommonUtils.decryptSensitiveString(expiredate, zestConfig.getAccessConfig().getSensitiveKey(), "UTF-8");
-            updateWrapper.set(JCardEntity::getCvv, cvv)
-                    .set(JCardEntity::getExpiredate, decryptedExpiredate);
-            // 备用
-            jCardEntity.setCardno(response.getCardno());
-            jCardEntity.setFee(response.getFee());  // 通联实际费用
-            jCardEntity.setFeecurrency(response.getFeecurrency());
-            JMerchantEntity merchant = jMerchantDao.selectById(jCardEntity.getMerchantId());
-            // vcc虚拟卡， vcc实体卡, 共享主卡, 预付费主卡, 四种卡有收费有收费处理
-            String mpType = jCardEntity.getMarketproduct();
-            tx.executeWithoutResult(status -> {
-
-                if (mpType.equals(ZinConstant.MP_VCC_VIRTUAL) ||
-                        mpType.equals(ZinConstant.MP_VCC_REAL) ||
-                        mpType.equals(ZinConstant.MP_VPA_MAIN) ||
-                        mpType.equals(ZinConstant.MP_VPA_MAIN_PREPAID)
-                ) {
-                    // 预付费主卡, 需要做剩余额度账户管理, 建立预付费主卡, 剩余额度管理账户
-                    if (jCardEntity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_PREPAID)) {
-                        this.newPrepaidQuotaBalance(jCardEntity);
-                        this.newPrepaidSumBalance(jCardEntity);
-                    }
-                    jCardDao.update(null, updateWrapper);
-                    ledgerOpenCard.ledgeOpenCard(jCardEntity);
-                } else {
-                    // 其他卡没有收费处理
-                    jCardDao.update(null, updateWrapper);
-                }
-            });
-            // 发卡成功, 查询更新状态
-            jCardEntity.setCardno(response.getCardno());
-            this.queryCard(jCardEntity);
-            // 更新余额
-            this.balanceCard(jCardEntity);
-            // 是否需要通知api商户
-            if (notify || jCardEntity.getApi().equals(1)) {
-                // 通知商户
-                JCardEntity entity = jCardDao.selectById(jCardEntity.getId());
-                apiNotify.cardNewNotify(entity, merchant);
-            }
+            querySuccess(jCardEntity, response, updateWrapper, notify);
             return;
-
         }
 
         // 非失败 -> 失败
@@ -358,15 +427,32 @@ public class JCardManager {
             // 解冻释放
             tx.executeWithoutResult(status -> {
                 jCardDao.update(null, updateWrapper);
-                ledgerOpenCard.ledgeOpenCardUnFreeze(jCardEntity);
+                ledger500OpenCard.ledgeOpenCardUnFreeze(jCardEntity);
+                // 钱包主卡
+                if (jCardEntity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_WALLET)) {
+                    // 属于账户升级
+                    if (jCardEntity.getWalletId() != null) {
+                        // 钱包账户upgrade交易状态更新
+                        JWalletTxnEntity jWalletTxnEntity = jWalletTxnDao.selectOne(Wrappers.<JWalletTxnEntity>lambdaQuery()
+                                .eq(JWalletTxnEntity::getWalletId, jCardEntity.getWalletId())
+                                .eq(JWalletTxnEntity::getTxnCode, ZinConstant.WALLET_TXN_UPGRADE)
+                                .eq(JWalletTxnEntity::getState, ZinConstant.WALLET_TXN_STATUS_NEW)
+                        );
+                        jWalletTxnDao.update(null, Wrappers.<JWalletTxnEntity>lambdaUpdate()
+                                .eq(JWalletTxnEntity::getId, jWalletTxnEntity.getId())
+                                .set(JWalletTxnEntity::getState, ZinConstant.WALLET_TXN_STATUS_FAIL)
+                        );
+                    }
+                }
             });
             // 通知商户
-            if (notify || jCardEntity.getApi().equals(1)) {
+            if (notify) {
                 // 发卡状态更新
                 JCardEntity entity = jCardDao.selectById(jCardEntity.getId());
                 JMerchantEntity merchant = jMerchantDao.selectById(jCardEntity.getMerchantId());
                 apiNotify.cardChangeNotify(entity, merchant);
             }
+            return;
         }
         // 其他情况
         jCardDao.update(null, updateWrapper);
@@ -517,13 +603,13 @@ public class JCardManager {
     }
 
     // 钱包卡
-    public void walletCardCharge(Long id, BigDecimal adjustAmount) {
+    public boolean walletCardCharge(Long id, BigDecimal adjustAmount) {
         JCardEntity cardEntity = jCardDao.selectById(id);
-        this.vpaCharge(cardEntity, adjustAmount, 0, ZinConstant.MP_VPA_WALLET);
+        return this.vpaCharge(cardEntity, adjustAmount, 0, ZinConstant.MP_VPA_WALLET);
     }
 
-    public void walletCardCharge(JCardEntity cardEntity, BigDecimal adjustAmount) {
-        this.vpaCharge(cardEntity, adjustAmount, 0, ZinConstant.MP_VPA_WALLET);
+    public boolean walletCardCharge(JCardEntity cardEntity, BigDecimal adjustAmount) {
+        return this.vpaCharge(cardEntity, adjustAmount, 0, ZinConstant.MP_VPA_WALLET);
     }
 
     // 预付费卡
@@ -536,8 +622,45 @@ public class JCardManager {
         vpaCharge(cardEntity, adjustAmount, api, ZinConstant.MP_VPA_PREPAID);
     }
 
+    private void vpaChargeSuccess(JVpaAdjustEntity adjustEntity, JCardEntity cardEntity, BigDecimal newAuth) {
+        tx.executeWithoutResult(st -> {
+            int update = jVpaAdjustDao.update(null, Wrappers.<JVpaAdjustEntity>lambdaUpdate()
+                    .eq(JVpaAdjustEntity::getId, adjustEntity.getId())
+                    .eq(JVpaAdjustEntity::getState, ZinConstant.VPA_ADJUST_UNKNOWN)
+                    .set(JVpaAdjustEntity::getState, ZinConstant.VPA_ADJUST_SUCCESS)
+                    .set(JVpaAdjustEntity::getStatDate, new Date())  // 完成日期
+            );
+            if (update != 1) {
+                throw new RenException("更新调整失败");
+            }
+            // 更新卡的当前额度
+            jCardDao.update(null, Wrappers.<JCardEntity>lambdaUpdate()
+                    .eq(JCardEntity::getId, cardEntity.getId())
+                    .set(JCardEntity::getAuthmaxamount, newAuth)
+            );
+
+            String marketproduct = adjustEntity.getMarketproduct();
+
+            // confirm记账
+            if (marketproduct.equals(ZinConstant.MP_VPA_PREPAID)) {
+                ledger602PrepaidCharge.ledgePrepaidCharge(adjustEntity);
+            } else if (marketproduct.equals(ZinConstant.MP_VPA_WALLET)) {
+                ledger605WalletCardCharge.ledgeWalletCardCharge(adjustEntity);
+            }
+        });
+
+        // 查询更新卡余额
+        CompletableFuture.runAsync(() -> {
+            this.balanceCard(cardEntity);
+        });
+    }
+
     //钱包子卡-充值
-    public void vpaCharge(JCardEntity cardEntity, BigDecimal adjustAmount, int api, String marketproduct) {
+    public boolean vpaCharge(JCardEntity cardEntity, BigDecimal adjustAmount, int api, String marketproduct) {
+        if (!marketproduct.equals(ZinConstant.MP_VPA_PREPAID) && !marketproduct.equals(ZinConstant.MP_VPA_WALLET)) {
+            throw new RenException("卡产品非法");
+        }
+
         JVpaAdjustEntity processing = jVpaAdjustDao.selectOne(Wrappers.<JVpaAdjustEntity>lambdaQuery()
                 .eq(JVpaAdjustEntity::getState, ZinConstant.VPA_ADJUST_UNKNOWN)
                 .eq(JVpaAdjustEntity::getCardno, cardEntity.getCardno())
@@ -565,41 +688,54 @@ public class JCardManager {
         adjustEntity.setNewQuota(newAuth);
         adjustEntity.setState(ZinConstant.VPA_ADJUST_UNKNOWN);
         adjustEntity.setMaincardno(cardEntity.getMaincardno());
+        adjustEntity.setMaincardid(cardEntity.getMaincardid());
+        adjustEntity.setWalletId(cardEntity.getWalletId());
+        adjustEntity.setWalletName(cardEntity.getWalletName());
+
         jVpaAdjustDao.insert(adjustEntity);
 
         // 冻结
         tx.executeWithoutResult(st -> {
-            ledgerPrepaidCharge.ledgePrepaidChargeFreeze(adjustEntity);
+            // 预付费子卡
+            if (marketproduct.equals(ZinConstant.MP_VPA_PREPAID)) {
+                ledger602PrepaidCharge.ledgePrepaidChargeFreeze(adjustEntity);
+            }
+            // 钱包子卡
+            else if (marketproduct.equals(ZinConstant.MP_VPA_WALLET)) {
+                ledger605WalletCardCharge.ledgeWalletCardChargeFreeze(adjustEntity);
+            }
+            // 钱包子卡
+            else {
+                throw new RenException("不支持的产品类型");
+            }
         });
 
         // 发起变更
         try {
             TCardUpdateScene request = new TCardUpdateScene(cardEntity.getCurrency(), cardEntity.getCardno(), newAuth, null);
             TCardUpdateSceneResponse response = zinCardApplyService.cardUpdateScene(request);
-            tx.executeWithoutResult(st -> {
-                int update = jVpaAdjustDao.update(null, Wrappers.<JVpaAdjustEntity>lambdaUpdate()
-                        .eq(JVpaAdjustEntity::getId, adjustEntity.getId())
-                        .eq(JVpaAdjustEntity::getState, ZinConstant.VPA_ADJUST_UNKNOWN)
-                        .set(JVpaAdjustEntity::getState, ZinConstant.VPA_ADJUST_SUCCESS)
-                        .set(JVpaAdjustEntity::getStatDate, new Date())  // 完成日期
-                );
-                if (update != 1) {
-                    throw new RenException("更新调整失败");
-                }
-                // 更新卡的当前额度
-                jCardDao.update(null, Wrappers.<JCardEntity>lambdaUpdate()
-                        .eq(JCardEntity::getId, cardEntity.getId())
-                        .set(JCardEntity::getAuthmaxamount, newAuth)
-                );
 
-                // confirm记账
-                ledgerPrepaidCharge.ledgePrepaidCharge(adjustEntity);
-            });
-            CompletableFuture.runAsync(() -> {
-                this.balanceCard(cardEntity);
-            });
+            // 通联成功了, 记账+更新
+            vpaChargeSuccess(adjustEntity, cardEntity, newAuth);
+
+            // 更新场景成功
+            return true;
         } catch (Exception ex) {
 
+            // 查询通联
+            TCardSceneQuery request = new TCardSceneQuery();
+            request.setCardno(cardEntity.getCardno());
+            TCardSceneQueryResponse response = zinCardApplyService.cardSceneQuery(request);
+            log.info("查询授权为: {}, 期望授权: {}", response.getAuthmaxamount(), newAuth);
+
+            // 调整成功
+            if (response.getAuthmaxcount().equals(newAuth)) {
+                // 通联成功了, 记账+更新
+                vpaChargeSuccess(adjustEntity, cardEntity, newAuth);
+                return true;
+            }
+
+            // 通联失败了
             tx.executeWithoutResult(st -> {
                 int update = jVpaAdjustDao.update(null, Wrappers.<JVpaAdjustEntity>lambdaUpdate()
                         .eq(JVpaAdjustEntity::getId, adjustEntity.getId())
@@ -609,9 +745,14 @@ public class JCardManager {
                 if (update != 1) {
                     throw new RenException("回滚失败");
                 }
-                // 查询通联修改是否成功， 再确定是否解冻释放, 更新调整失败
-                ledgerPrepaidCharge.ledgePrepaidChargeUnFreeze(adjustEntity);
+
+                if (marketproduct.equals(ZinConstant.MP_VPA_PREPAID)) {
+                    ledger602PrepaidCharge.ledgePrepaidChargeUnFreeze(adjustEntity);
+                } else if (marketproduct.equals(ZinConstant.MP_VPA_WALLET)) {
+                    ledger605WalletCardCharge.ledgeWalletCardChargeUnFreeze(adjustEntity);
+                }
             });
+            return false;
         }
     }
 
@@ -635,6 +776,9 @@ public class JCardManager {
 
     //钱包子卡-提现
     public void vpaWithdraw(JCardEntity cardEntity, BigDecimal adjustAmount, int api, String marketproduct) {
+        if (!marketproduct.equals(ZinConstant.MP_VPA_PREPAID) && !marketproduct.equals(ZinConstant.MP_VPA_WALLET)) {
+            throw new RenException("卡产品非法");
+        }
 
         // 如果卡有充提进行中
         JVpaAdjustEntity processing = jVpaAdjustDao.selectOne(Wrappers.<JVpaAdjustEntity>lambdaQuery()
@@ -687,7 +831,11 @@ public class JCardManager {
                         .set(JCardEntity::getAuthmaxamount, newAuth)
                 );
                 // confirm记账
-                ledgerPrepaidWithdraw.ledgePrepaidWithdraw(adjustEntity);
+                if (marketproduct.equals(ZinConstant.MP_VPA_PREPAID)) {
+                    ledger603PrepaidWithdraw.ledgePrepaidWithdraw(adjustEntity);
+                } else {
+                    ledger606WalletCardWithdraw.ledgeWalletCardWithdraw(adjustEntity);
+                }
             });
             CompletableFuture.runAsync(() -> {
                 this.balanceCard(cardEntity);
@@ -764,4 +912,15 @@ public class JCardManager {
         }
     }
 
+    // 取消发卡
+    public void cancel(Long id) {
+        JCardEntity cardEntity = jCardDao.selectById(id);
+        tx.executeWithoutResult(status -> {
+            jCardDao.update(null, Wrappers.<JCardEntity>lambdaUpdate()
+                    .eq(JCardEntity::getId, cardEntity.getId())
+                    .set(JCardEntity::getState, ZinConstant.CARD_APPLY_CLOSE)
+            );
+            ledger500OpenCard.ledgeOpenCardUnFreeze(cardEntity);
+        });
+    }
 }

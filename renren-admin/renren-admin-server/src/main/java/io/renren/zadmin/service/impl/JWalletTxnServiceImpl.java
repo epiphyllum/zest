@@ -30,22 +30,22 @@ import java.util.Map;
 public class JWalletTxnServiceImpl extends CrudServiceImpl<JWalletTxnDao, JWalletTxnEntity, JWalletTxnDTO> implements JWalletTxnService {
 
     @Override
-    public QueryWrapper<JWalletTxnEntity> getWrapper(Map<String, Object> params){
+    public QueryWrapper<JWalletTxnEntity> getWrapper(Map<String, Object> params) {
         QueryWrapper<JWalletTxnEntity> wrapper = new QueryWrapper<>();
 
-        String agentId = (String)params.get("agentId");
+        String agentId = (String) params.get("agentId");
         wrapper.eq(StringUtils.isNotBlank(agentId), "agent_id", agentId);
 
-        String merchantId = (String)params.get("merchantId");
+        String merchantId = (String) params.get("merchantId");
         wrapper.eq(StringUtils.isNotBlank(merchantId), "merchant_id", merchantId);
 
-        String subId = (String)params.get("subId");
+        String subId = (String) params.get("subId");
         wrapper.eq(StringUtils.isNotBlank(subId), "sub_id", subId);
 
-        String maincardno = (String)params.get("maincardno");
+        String maincardno = (String) params.get("maincardno");
         wrapper.eq(StringUtils.isNotBlank(maincardno), "maincardno", maincardno);
 
-        String channelId = (String)params.get("channelId");
+        String channelId = (String) params.get("channelId");
         wrapper.eq(StringUtils.isNotBlank(channelId), "channel_id", channelId);
 
 
@@ -58,13 +58,23 @@ public class JWalletTxnServiceImpl extends CrudServiceImpl<JWalletTxnDao, JWalle
         // 钱包id过滤
         QueryWrapper<JWalletTxnEntity> wrapper = applyFilter(params);
         wrapper.eq("wallet_id", walletEntity.getId());
-
         IPage<JWalletTxnEntity> page = baseDao.selectPage(
                 getPage(params, Constant.CREATE_DATE, false),
                 wrapper
         );
         return getPageData(page, WalletTxnItem.class);
+    }
 
+    @Override
+    public PageData<WalletTxnItem> walletPage(Map<String, Object> params, Long walletId) {
+        // 钱包id过滤
+        QueryWrapper<JWalletTxnEntity> wrapper = applyFilter(params);
+        wrapper.eq("wallet_id", walletId);
+        IPage<JWalletTxnEntity> page = baseDao.selectPage(
+                getPage(params, Constant.CREATE_DATE, false),
+                wrapper
+        );
+        return getPageData(page, WalletTxnItem.class);
     }
 
 }

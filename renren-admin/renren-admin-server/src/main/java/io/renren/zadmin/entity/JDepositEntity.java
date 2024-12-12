@@ -1,5 +1,6 @@
 package io.renren.zadmin.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import com.baomidou.mybatisplus.annotation.*;
@@ -41,6 +42,7 @@ public class JDepositEntity extends BaseEntity {
     private String meraplid;
     private String marketproduct;
     private String cardno;
+    private String walletId;
     private String payerid;
     private BigDecimal amount;
     private String payeeaccount;
@@ -52,10 +54,10 @@ public class JDepositEntity extends BaseEntity {
     private BigDecimal txnAmount;        // 发起充值金额
     private BigDecimal merchantDeposit;  // 商户担保金
     private BigDecimal merchantCharge;   // 商户充值手续费
-    private BigDecimal depositRate;     // 商户保证金比例
-    private BigDecimal chargeRate;      // 商户充值手续费比例
-    private BigDecimal costDepositRate; // 成本-保证金比例
-    private BigDecimal costChargeRate;  // 成本-充值手续费比例
+    private BigDecimal depositRate;      // 商户保证金比例
+    private BigDecimal chargeRate;       // 商户充值手续费比例
+    private BigDecimal costDepositRate;  // 成本-保证金比例
+    private BigDecimal costChargeRate;   // 成本-充值手续费比例
 
     // 记录返回
     private BigDecimal securityamount;   // 通联保证金

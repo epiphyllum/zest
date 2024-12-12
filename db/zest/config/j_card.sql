@@ -21,6 +21,8 @@ create table j_card
     marketproduct        varchar(16) comment '对外卡产品',
     --
     maincardno           varchar(30) comment 'vpa main card no',                    --
+    maincardid           bigint comment '主卡id',
+
     -- request
     cardtype             varchar(2) comment '卡片种类',                             --	cardtype	String	2	Y	1：虚拟卡，（产品类型为：通华金服VISA虚拟卡、通华VPA电子卡）4：虚实同发，（产品类型为：通华金服VISA公务卡、万商义乌VISA商务卡）
     cardholdertype       varchar(3) comment '持卡人身份',                           -- 1：法人持有 0：其他管理员
@@ -130,6 +132,6 @@ create index idx_j_card_1 on j_card (merchant_id, create_date);
 create index idx_j_card_2 on j_card (sub_id, create_date);
 create index idx_j_card_3 on j_card (agent_id, create_date);
 create index idx_j_card_4 on j_card (applyid);
-create index idx_j_card_5 on j_card (merchant_id, meraplid);
 -- 唯一索引
 create unique index uidx_j_card_0 on j_card (txnid);
+create unique index uidx_j_card_1 on j_card (merchant_id, meraplid);

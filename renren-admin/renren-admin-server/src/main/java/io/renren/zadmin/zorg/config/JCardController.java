@@ -150,6 +150,15 @@ public class JCardController {
         return new Result();
     }
 
+    @GetMapping("cancel")
+    @Operation(summary = "取消发卡")
+    @LogOperation("取消发卡")
+    @PreAuthorize("hasAuthority('zorg:jcard:cancel')")
+    public Result cancel(@RequestParam("id") Long id) {
+        jCardManager.cancel(id);
+        return new Result();
+    }
+
     @PutMapping
     @Operation(summary = "修改")
     @LogOperation("修改")

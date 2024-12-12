@@ -53,6 +53,8 @@ public class JPayChannelDTO implements Serializable {
     private String channelName;
     @Schema(description = "结算币种")
     private String stlCurrency;
+    @Schema(description = "交易币种")
+    private String payCurrency;
     @Schema(description = "商户号")
     private String merchantNo;
 

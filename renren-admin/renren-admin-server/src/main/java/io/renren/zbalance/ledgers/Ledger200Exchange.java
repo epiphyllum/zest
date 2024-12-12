@@ -4,7 +4,6 @@ import io.renren.zadmin.dao.JCardDao;
 import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.entity.JBalanceEntity;
 import io.renren.zadmin.entity.JExchangeEntity;
-import io.renren.zbalance.LedgerConstant;
 import io.renren.zbalance.LedgerUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -14,13 +13,16 @@ import java.math.BigDecimal;
 
 @Service
 @Slf4j
-public class LedgerExchange {
-    @Resource
-    private JMerchantDao jMerchantDao;
+public class Ledger200Exchange {
+    // 换汇
+    public static final int ORIGIN_TYPE_EXCHANGE = 200;                       // 换汇
+    public static final int FACT_EXCHANGE_FREEZE_VA = 20001;                  // 1. 冻结
+    public static final int FACT_EXCHANGE_UNFREEZE_VA = 20002;                // 2. 解冻
+    public static final int FACT_EXCHANGE_CONFIRM_VA = 20003;                 // 3. 确认  -100AUD
+    public static final int FACT_EXCHANGE_IN_VA = 20004;                      // 4. 确认  +500HKD
+
     @Resource
     private LedgerUtil ledgerUtil;
-    @Resource
-    private JCardDao jCardDao;
 
     // 换汇冻结
     public void ledgeExchangeFreeze(JExchangeEntity entity) {
@@ -28,7 +30,7 @@ public class LedgerExchange {
         JBalanceEntity outBalance = ledgerUtil.getVaAccount(merchantId, entity.getPayerccy());
         String factMemo = "冻结-换汇" + entity.getAmount() + entity.getPayerccy();
         BigDecimal factAmount = entity.getAmount();
-        ledgerUtil.freezeUpdate(outBalance, LedgerConstant.ORIGIN_TYPE_EXCHANGE, LedgerConstant.FACT_EXCHANGE_FREEZE_VA, entity.getId(), factMemo, factAmount);
+        ledgerUtil.freezeUpdate(outBalance, ORIGIN_TYPE_EXCHANGE, FACT_EXCHANGE_FREEZE_VA, entity.getId(), factMemo, factAmount);
     }
 
     // 换汇解冻
@@ -37,7 +39,7 @@ public class LedgerExchange {
         JBalanceEntity outBalance = ledgerUtil.getVaAccount(merchantId, entity.getPayerccy());
         String factMemo = "解冻-换汇" + entity.getAmount() + entity.getPayerccy();
         BigDecimal factAmount = entity.getAmount();
-        ledgerUtil.unFreezeUpdate(outBalance, LedgerConstant.ORIGIN_TYPE_EXCHANGE, LedgerConstant.FACT_EXCHANGE_UNFREEZE_VA, entity.getId(), factMemo, factAmount);
+        ledgerUtil.unFreezeUpdate(outBalance, ORIGIN_TYPE_EXCHANGE, FACT_EXCHANGE_UNFREEZE_VA, entity.getId(), factMemo, factAmount);
     }
 
     // 原始凭证: 换汇
@@ -47,11 +49,11 @@ public class LedgerExchange {
         BigDecimal factAmount = entity.getSettleamount();
         // 卖出币种: 确认冻结
         JBalanceEntity outBalance = ledgerUtil.getVaAccount(merchantId, entity.getPayerccy());
-        ledgerUtil.confirmUpdate(outBalance, LedgerConstant.ORIGIN_TYPE_EXCHANGE, LedgerConstant.FACT_EXCHANGE_CONFIRM_VA, entity.getId(), factMemo, entity.getAmount());
+        ledgerUtil.confirmUpdate(outBalance, ORIGIN_TYPE_EXCHANGE, FACT_EXCHANGE_CONFIRM_VA, entity.getId(), factMemo, entity.getAmount());
 
         // 买入币种: 入账
         JBalanceEntity targetVa = ledgerUtil.getVaAccount(merchantId, entity.getPayeeccy());
-        ledgerUtil.ledgeUpdate(targetVa, LedgerConstant.ORIGIN_TYPE_EXCHANGE, LedgerConstant.FACT_EXCHANGE_IN_VA, entity.getId(), factMemo, factAmount);
+        ledgerUtil.ledgeUpdate(targetVa, ORIGIN_TYPE_EXCHANGE, FACT_EXCHANGE_IN_VA, entity.getId(), factMemo, factAmount);
     }
 
 }

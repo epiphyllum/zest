@@ -1,7 +1,5 @@
 package io.renren.zcommon;
 
-import io.renren.zadmin.zorg.config.JCardController;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -107,6 +105,7 @@ public class ZinConstant {
     public static final String CARD_APPLY_NEW_DJ = "00";            // 新建卡的状态的状态: 我方新增状态
 
     public static boolean isCardApplyFail(String state) {
+        // "02", "05", "07"
         return state.equals(CARD_APPLY_VERIFY_FAIL) ||
                 state.equals(CARD_APPLY_FAIL) ||
                 state.equals(CARD_APPLY_CLOSE);
@@ -199,13 +198,24 @@ public class ZinConstant {
     public static final String VPA_CYCLE_PERIODICAL = "2";    // 周期
     public static final String VPA_CYCLE_ONCE = "3";          // 期限
     // VPA卡场景变更结果
-    public static final String VPA_ADJUST_SUCCESS = "55"; //
     public static final String VPA_ADJUST_UNKNOWN = "00"; //
+    public static final String VPA_ADJUST_SUCCESS = "55"; //
     public static final String VPA_ADJUST_FAIL = "99";
 
-    // 钱包交易: 给钱包充值, 给钱包提现
-    public static final String WALLET_CHARGE = "charge";
-    public static final String WALLET_WITHDRAW = "withdraw";
+    // 钱包交易: 给钱包充值, 给钱包提现, 账户升级
+    public static final String WALLET_TXN_CHARGE = "charge";
+    public static final String WALLET_TXN_WITHDRAW = "withdraw";
+    public static final String WALLET_TXN_UPGRADE = "upgrade";
+
+    // 钱包交易状态
+    public static final String WALLET_TXN_STATUS_NEW = "00";  // 新建
+    public static final String WALLET_TXN_STATUS_SUCCESS = "01";  // 新建
+    public static final String WALLET_TXN_STATUS_FAIL = "02";  // 新建
+
+
+    // 钱包账户等级:  hkd_level, usd_level
+    public static final String WALLET_LEVEL_BASIC = "basic";
+    public static final String WALLET_LEVEL_PREMIUM = "premium";
 }
 
 

@@ -7,9 +7,12 @@ import io.renren.zcommon.ZestConfig;
 import io.renren.zmanager.JVaManager;
 import jakarta.annotation.Resource;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Properties;
 
 @Component
 public class InitRun implements CommandLineRunner {
@@ -38,4 +41,6 @@ public class InitRun implements CommandLineRunner {
         entity.setVccMainVirtual("0000");
         jConfigDao.insert(entity);
     }
+
+
 }

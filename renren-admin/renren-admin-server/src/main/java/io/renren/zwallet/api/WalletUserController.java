@@ -2,45 +2,40 @@ package io.renren.zwallet.api;
 
 
 import io.renren.commons.tools.utils.Result;
-import io.renren.zmanager.JWalletManager;
+import io.renren.zwallet.dto.WalletConfigInfo;
+import io.renren.zwallet.dto.WalletLoginRequest;
+import io.renren.zwallet.manager.JWalletUserManager;
 import jakarta.annotation.Resource;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import static io.renren.zwallet.config.WalletLoginInterceptor.walletUser;
 
 @RestController
-@RequestMapping("wallet/api/user")
+@RequestMapping("zwallet/api/user")
 public class WalletUserController {
     @Resource
-    private JWalletManager jWalletManager;
+    private JWalletUserManager jWalletUserManager;
 
     /**
-     * 用户登录
+     * 注册
      */
-    @GetMapping("login")
-    public Result<String> login(
-            @RequestParam("phone") String phone,
-            @RequestParam("password") String password,
-            @RequestParam("otp") String otp
-    ) {
-        String token = jWalletManager.login(phone, password, otp);
+    @PostMapping("register")
+    public Result<String> register(@RequestBody WalletLoginRequest request) {
+        String token = jWalletUserManager.register(request);
         Result<String> result = new Result<>();
         result.setData(token);
         return result;
     }
 
     /**
-     * 注册
+     * 用户登录
      */
-    @GetMapping("register")
-    public Result register(
-            @RequestParam("email") String email,
-            @RequestParam("password") String password,
-            @RequestParam("otp") String otp
-    ) {
-        jWalletManager.register(email, password, otp);
-        return new Result();
+    @PostMapping("login")
+    public Result<String> login(@RequestBody WalletLoginRequest request) {
+        String token = jWalletUserManager.login(request);
+        Result<String> result = new Result<>();
+        result.setData(token);
+        return result;
     }
 
     /**
@@ -48,7 +43,7 @@ public class WalletUserController {
      */
     @GetMapping("emailOTP")
     public Result emailOTP(@RequestParam("email") String email) {
-        jWalletManager.emailOTP(email);
+        jWalletUserManager.emailOTP(email);
         return new Result();
     }
 
@@ -57,7 +52,7 @@ public class WalletUserController {
      */
     @GetMapping("change")
     public Result change(@RequestParam("newPass") String newPass, @RequestParam("otp") String otp) {
-        jWalletManager.change(newPass, otp);
+        jWalletUserManager.change(newPass, otp);
         return new Result();
     }
 
@@ -66,8 +61,28 @@ public class WalletUserController {
      */
     @GetMapping("reset")
     public Result reset(@RequestParam("email") String email) {
-        jWalletManager.reset(email);
+        jWalletUserManager.reset(email);
         return new Result();
+    }
+
+    /**
+     * 秘钥设置
+     */
+    @GetMapping("accessKey")
+    public Result accessKey(@RequestParam("accessKey") String accessKey) {
+        jWalletUserManager.setAccessKey(accessKey, walletUser());
+        return new Result();
+    }
+
+    /**
+     * 全局配置
+     */
+    @GetMapping("config")
+    public Result<WalletConfigInfo> config() {
+        WalletConfigInfo walletConfigInfo = jWalletUserManager.walletConfigInfo(walletUser());
+        Result<WalletConfigInfo> result = new Result<>();
+        result.setData(walletConfigInfo);
+        return result;
     }
 
 }

@@ -16,4 +16,5 @@ import java.util.Map;
  */
 public interface JWalletTxnService extends CrudService<JWalletTxnEntity, JWalletTxnDTO> {
     PageData<WalletTxnItem> walletPage(Map<String, Object> params);
+    PageData<WalletTxnItem> walletPage(Map<String, Object> params, Long walletId);
 }

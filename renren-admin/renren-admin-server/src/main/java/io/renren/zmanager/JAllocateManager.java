@@ -16,7 +16,7 @@ import io.renren.zadmin.entity.JBalanceEntity;
 import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zadmin.entity.JSubEntity;
 import io.renren.zbalance.LedgerUtil;
-import io.renren.zbalance.ledgers.LedgerAllocation;
+import io.renren.zbalance.ledgers.Ledger300Allocation;
 import io.renren.zcommon.ZapiConstant;
 import io.renren.zcommon.ZestConstant;
 import jakarta.annotation.Resource;
@@ -38,7 +38,7 @@ public class JAllocateManager {
     @Resource
     public TransactionTemplate tx;
     @Resource
-    public LedgerAllocation ledgerAllocation;
+    public Ledger300Allocation ledger300Allocation;
     @Resource
     public LedgerUtil ledgerUtil;
 
@@ -55,7 +55,7 @@ public class JAllocateManager {
         entity.setStatDate(new Date());
         tx.executeWithoutResult(status -> {
             jAllocateDao.insert(entity);
-            ledgerAllocation.ledgeM2s(entity);
+            ledger300Allocation.ledgeM2s(entity);
             JBalanceEntity after = ledgerUtil.getVaAccount(entity.getMerchantId(), entity.getCurrency());
             if (after.getBalance().compareTo(BigDecimal.ZERO) < 0) {
                 throw new RenException("商户账户余额不足" );
@@ -73,7 +73,7 @@ public class JAllocateManager {
         entity.setStatDate(new Date());
         tx.executeWithoutResult(status -> {
             jAllocateDao.insert(entity);
-            ledgerAllocation.ledgeS2m(entity);
+            ledger300Allocation.ledgeS2m(entity);
             JBalanceEntity after = ledgerUtil.getSubVaAccount(entity.getSubId(), entity.getCurrency());
             if (after.getBalance().compareTo(BigDecimal.ZERO) < 0) {
                 throw new RenException("子商户账户余额不足");

@@ -1,41 +1,63 @@
 package io.renren.zwallet.api;
 
 import io.renren.commons.tools.utils.Result;
+import io.renren.zadmin.entity.JCardEntity;
 import io.renren.zwallet.config.WalletLoginInterceptor;
-import io.renren.zwallet.dto.WalletCardChargeRequest;
-import io.renren.zwallet.dto.WalletCardMoneyItem;
-import io.renren.zwallet.dto.WalletCardWithdrawRequest;
-import io.renren.zwallet.dto.WalletCardOpenRequest;
+import io.renren.zwallet.dto.*;
 import io.renren.zwallet.manager.JWalletCardManager;
+import io.renren.zwallet.manager.JWalletTxnManager;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.math.BigDecimal;
 
 @RestController
-@RequestMapping("zwallet/card")
+@RequestMapping("zwallet/api/card")
 public class WalletCardController {
-
     @Resource
     private JWalletCardManager jWalletCardManager;
+    @Resource
+    private JWalletTxnManager jWalletTxnManager;
 
     /**
      * 开卡
      */
-    @PostMapping("open")
-    public Result<Long> open(@RequestBody WalletCardOpenRequest request) {
-        Long jobId = jWalletCardManager.open(request, WalletLoginInterceptor.walletUser());
+    @PostMapping("openVpa")
+    public Result<Long> openVpa(@RequestBody WalletCardOpenRequest request) {
+        Long jobId = jWalletCardManager.openVpa(request, WalletLoginInterceptor.walletUser());
         Result<Long> result = new Result<>();
         result.setData(jobId);
         return result;
     }
 
     /**
-     * 开卡查询
+     * 实名卡|实体卡
+     */
+    @PostMapping("openVcc")
+    public Result<Long> openVcc(@RequestBody JCardEntity entity) {
+        Long jobId = jWalletCardManager.openVcc(entity, WalletLoginInterceptor.walletUser());
+        Result<Long> result = new Result<>();
+        result.setData(jobId);
+        return result;
+    }
+
+    /**
+     * 开卡查询: 匿名卡
+     */
+    @GetMapping("openVpaQuery")
+    public Result<String> openVpaQuery(@RequestParam("id") Long id) {
+        String state = jWalletCardManager.openVpaQuery(id, WalletLoginInterceptor.walletUser());
+        Result<String> result = new Result<>();
+        result.setData(state);
+        return result;
+    }
+
+    /**
+     * 开卡查询: 实名卡、实体卡
      */
     @GetMapping("openQuery")
-    public Result openQuery(@RequestParam("id") Long id) {
-        jWalletCardManager.openQuery(id, WalletLoginInterceptor.walletUser());
+    public Result openVccQuery(@RequestParam("id") Long id) {
+        jWalletCardManager.openVccQuery(id, WalletLoginInterceptor.walletUser());
         return new Result();
     }
 
@@ -44,7 +66,7 @@ public class WalletCardController {
      */
     @PostMapping("charge")
     public Result charge(@RequestBody WalletCardChargeRequest request) {
-        jWalletCardManager.charge(request, WalletLoginInterceptor.walletUser());
+        jWalletCardManager.chargeCard(request, WalletLoginInterceptor.walletUser());
         Result<String> result = new Result();
         return result;
     }
@@ -54,7 +76,18 @@ public class WalletCardController {
      */
     @PostMapping("withdraw")
     public Result withdraw(@RequestBody WalletCardWithdrawRequest request) {
-        jWalletCardManager.withdraw(request, WalletLoginInterceptor.walletUser());
+        jWalletCardManager.withdrawCard(request, WalletLoginInterceptor.walletUser());
         return new Result();
+    }
+
+    /**
+     * 查询卡余额
+     */
+    @GetMapping("balance")
+    public Result<BigDecimal> balance(@RequestParam("cardno") String cardno) {
+        BigDecimal balance = jWalletCardManager.balance(cardno);
+        Result<BigDecimal> result = new Result<>();
+        result.setData(balance);
+        return result;
     }
 }

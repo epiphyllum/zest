@@ -8,7 +8,7 @@ import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.entity.JExchangeEntity;
 import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zapi.ApiNotify;
-import io.renren.zbalance.ledgers.LedgerExchange;
+import io.renren.zbalance.ledgers.Ledger200Exchange;
 import io.renren.zcommon.ZinConstant;
 import io.renren.zin.exchange.ZinExchangeService;
 import io.renren.zin.exchange.dto.*;
@@ -31,7 +31,7 @@ public class JExchangeManager {
     @Resource
     private TransactionTemplate tx;
     @Resource
-    private LedgerExchange ledgerExchange;
+    private Ledger200Exchange ledger200Exchange;
     @Resource
     private ApiNotify apiNotify;
 
@@ -42,7 +42,7 @@ public class JExchangeManager {
         entity.setState(ZinConstant.PAY_APPLY_NEW_DJ);  // 内部状态新建
         tx.executeWithoutResult(status -> {
             jExchangeDao.insert(entity);
-            ledgerExchange.ledgeExchangeFreeze(entity);
+            ledger200Exchange.ledgeExchangeFreeze(entity);
         });
     }
 
@@ -91,7 +91,7 @@ public class JExchangeManager {
                 }
                 jExchangeEntity.setExfee(response.getFee());
                 jExchangeEntity.setExfxrate(response.getFxrate());
-                ledgerExchange.ledgeExchange(jExchangeEntity);
+                ledger200Exchange.ledgeExchange(jExchangeEntity);
                 return true;
             });
             // 是否通知商户
@@ -148,7 +148,7 @@ public class JExchangeManager {
             if (update != 1) {
                 throw new RenException("取消换汇失败");
             }
-            ledgerExchange.ledgeExchangeUnFreeze(entity);
+            ledger200Exchange.ledgeExchangeUnFreeze(entity);
         });
     }
 

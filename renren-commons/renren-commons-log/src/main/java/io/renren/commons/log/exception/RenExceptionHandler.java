@@ -29,6 +29,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MissingRequestHeaderException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -60,11 +61,22 @@ public class RenExceptionHandler {
         return result;
     }
 
+    //
+    // 缺少必填参数
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public Result handleMissingParameter(MissingServletRequestParameterException ex) {
+        Result result = new Result();
+        result.setMsg("缺少请求字段:" + ex.getParameterName());
+        result.setCode(400);
+        return result;
+    }
+
     // 缺少请求头
     @ExceptionHandler(MissingRequestHeaderException.class)
-    public Result handleDuplicateKeyException(MissingRequestHeaderException ex) {
+    public Result handleMissingHeader(MissingRequestHeaderException ex) {
         Result result = new Result();
-        result.error("缺少请求头:" + ex.getHeaderName());
+        result.setMsg("缺少请求头:" + ex.getHeaderName());
+        result.setCode(400);
         return result;
     }
 
@@ -72,7 +84,8 @@ public class RenExceptionHandler {
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class )
     public Result handleHttpMethodException(HttpRequestMethodNotSupportedException ex) {
         Result result = new Result();
-        result.error("不支持请求方法:" + ex.getMethod());
+        result.setMsg("不支持请求方法:" + ex.getMethod());
+        result.setCode(400);
         return result;
     }
 

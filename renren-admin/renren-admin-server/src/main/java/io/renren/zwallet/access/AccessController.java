@@ -9,16 +9,19 @@ import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.page.PageData;
 import io.renren.commons.tools.utils.Result;
 import io.renren.zadmin.dao.JWalletDao;
+import io.renren.zadmin.entity.JCardEntity;
 import io.renren.zadmin.entity.JWalletEntity;
 import io.renren.zadmin.service.JAuthService;
 import io.renren.zadmin.service.JAuthedService;
 import io.renren.zadmin.service.JWalletTxnService;
+import io.renren.zcommon.ZestConfig;
 import io.renren.zwallet.dto.*;
 import io.renren.zwallet.manager.JWalletCardManager;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -26,6 +29,7 @@ import java.util.Map;
 // 钱包接入API
 @RestController
 @RequestMapping("zwallet/access")
+@Slf4j
 public class AccessController {
 
     @Resource
@@ -41,11 +45,22 @@ public class AccessController {
     @Resource
     private JWalletTxnService jWalletTxnService;
 
+    @Resource
+    private ZestConfig zestConfig;
+
     private <T> Pair<T, JWalletEntity> validateRequest(String sign, Long walletId, String body, Class<T> clazz) throws JsonProcessingException {
         JWalletEntity walletEntity = jWalletDao.selectById(walletId);
-        String calcSign = DigestUtil.md5Hex(body + walletId + walletEntity.getAccessKey());
-        if (!calcSign.equals(sign)) {
-            throw new RenException("签名错误");
+
+        if (zestConfig.isDev()) {
+            log.info("测试环境");
+            if (!sign.equals("dev")) {
+                throw new RenException("签名错误");
+            }
+        } else {
+            String calcSign = DigestUtil.md5Hex(body + walletId + walletEntity.getAccessKey());
+            if (!calcSign.equals(sign)) {
+                throw new RenException("签名错误");
+            }
         }
         if (clazz.equals(void.class)) {
             return Pair.of(null, walletEntity);
@@ -55,31 +70,60 @@ public class AccessController {
     }
 
     /**
-     * 开卡
+     * 匿名卡-开卡
      */
-    @PostMapping("open")
-    public Result<Long> open(
+    @PostMapping("openVpa")
+    public Result<Long> openVpa(
             @RequestHeader("x-sign") String sign,
             @RequestHeader("x-wallet-id") Long walletId,
             @RequestBody String body) throws JsonProcessingException {
         Pair<WalletCardOpenRequest, JWalletEntity> pair = this.validateRequest(sign, walletId, body, WalletCardOpenRequest.class);
-        Long jobId = jWalletCardManager.open(pair.getKey(), pair.getValue());
+        Long jobId = jWalletCardManager.openVpa(pair.getKey(), pair.getValue());
         Result<Long> result = new Result<>();
         result.setData(jobId);
         return result;
     }
 
     /**
-     * 开卡查询
+     * 实名卡-开卡
      */
-    @PostMapping("openQuery")
-    public Result openQuery(
+    @PostMapping("openVcc")
+    public Result<Long> openVcc(
+            @RequestHeader("x-sign") String sign,
+            @RequestHeader("x-wallet-id") Long walletId,
+            @RequestBody String body) throws JsonProcessingException {
+        Pair<JCardEntity, JWalletEntity> pair = this.validateRequest(sign, walletId, body, JCardEntity.class);
+        Long jobId = jWalletCardManager.openVcc(pair.getKey(), pair.getValue());
+        Result<Long> result = new Result<>();
+        result.setData(jobId);
+        return result;
+    }
+
+    /**
+     * 开卡查询: 匿名卡
+     */
+    @PostMapping("openVpaQuery")
+    public Result openVpaQuery(
             @RequestHeader("x-sign") String sign,
             @RequestHeader("x-wallet-id") Long walletId,
             @RequestBody String body
     ) throws JsonProcessingException {
         Pair<WalletCardOpenQuery, JWalletEntity> pair = this.validateRequest(sign, walletId, body, WalletCardOpenQuery.class);
-        jWalletCardManager.openQuery(pair.getKey().getId(), pair.getValue());
+        jWalletCardManager.openVpaQuery(pair.getKey().getId(), pair.getValue());
+        return new Result();
+    }
+
+    /**
+     * 开卡查询: 实名卡 + 实体卡
+     */
+    @PostMapping("openVccQuery")
+    public Result openVccQuery(
+            @RequestHeader("x-sign") String sign,
+            @RequestHeader("x-wallet-id") Long walletId,
+            @RequestBody String body
+    ) throws JsonProcessingException {
+        Pair<WalletCardOpenQuery, JWalletEntity> pair = this.validateRequest(sign, walletId, body, WalletCardOpenQuery.class);
+        jWalletCardManager.openVccQuery(pair.getKey().getId(), pair.getValue());
         return new Result();
     }
 
@@ -91,7 +135,7 @@ public class AccessController {
                          @RequestHeader("x-sign") String sign,
                          @RequestHeader("x-wallet-id") Long walletId) throws JsonProcessingException {
         Pair<WalletCardChargeRequest, JWalletEntity> pair = this.validateRequest(sign, walletId, body, WalletCardChargeRequest.class);
-        jWalletCardManager.charge(pair.getKey(), pair.getValue());
+        jWalletCardManager.chargeCard(pair.getKey(), pair.getValue());
         Result<String> result = new Result();
         return result;
     }
@@ -111,7 +155,7 @@ public class AccessController {
             @RequestHeader("x-wallet-id") Long walletId
     ) throws JsonProcessingException {
         this.validateRequest(sign, walletId, "", void.class);
-        PageData<WalletTxnItem> walletTxnItemPageData = jWalletTxnService.walletPage(params);
+        PageData<WalletTxnItem> walletTxnItemPageData = jWalletTxnService.walletPage(params, walletId);
         Result<PageData<WalletTxnItem>> result = new Result<>();
         result.setData(walletTxnItemPageData);
         return result;
@@ -133,7 +177,7 @@ public class AccessController {
             @RequestParam Map<String, Object> params
     ) throws JsonProcessingException {
         this.validateRequest(sign, walletId, "", void.class);
-        PageData<WalletCardTxnItem> walletCardTxnItemPageData = jAuthService.walletPage(params);
+        PageData<WalletCardTxnItem> walletCardTxnItemPageData = jAuthService.walletPage(params, walletId);
         Result<PageData<WalletCardTxnItem>> result = new Result<>();
         result.setData(walletCardTxnItemPageData);
         return result;
@@ -155,7 +199,7 @@ public class AccessController {
             @RequestParam Map<String, Object> params
     ) throws JsonProcessingException {
         this.validateRequest(sign, walletId, "", void.class);
-        PageData<WalletCardTxnItem> walletCardTxnItemPageData = jAuthedService.walletPage(params);
+        PageData<WalletCardTxnItem> walletCardTxnItemPageData = jAuthedService.walletPage(params, walletId);
         Result<PageData<WalletCardTxnItem>> result = new Result<>();
         result.setData(walletCardTxnItemPageData);
         return result;

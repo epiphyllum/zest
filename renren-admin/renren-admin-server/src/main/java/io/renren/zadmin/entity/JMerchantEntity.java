@@ -85,6 +85,7 @@ public class JMerchantEntity extends BaseEntity {
     private Integer enabled;
     private Integer debug;
 
+
     // (7)商户接入参数, 只有商户有， 子商户没有
     private String mcc;
     private String currencyList;
@@ -93,4 +94,10 @@ public class JMerchantEntity extends BaseEntity {
     private String sensitiveKey;
     private String webhook;
     private String whiteIp;
+
+    // 开卡 充值 参数
+    private String vpaCardFid;
+    private String vpaChargeFid;
+    private String vpaPayeeaccount;
+    private String vpaProcurecontent;
 }

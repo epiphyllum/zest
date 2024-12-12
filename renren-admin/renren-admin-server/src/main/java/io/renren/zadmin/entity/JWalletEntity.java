@@ -28,21 +28,21 @@ public class JWalletEntity extends BaseEntity {
     private Long subId;
     private String subName;
 
+    private String hkdLevel;      // 钱包等级:  basic, premium
+    private String usdLevel;      // 钱包等级:  basic, premium
+    private String hkdCardno;  // 港币主卡
+    private String usdCardno;  // 美元主卡
+    private String hkdCardid;  // 港币主卡
+    private String usdCardid;  // 美元主卡
+
     // 个人信息
     private String phone;      // 手机号:  不用于注册
     private String email;      // 邮箱
     private String password;   // 密码
-    private String accessKey;
+    private String accessKey;  // 接口处理
 
     private String totpKey;    // google
     private String totpStatus; // google
-
-    // usdt收款
-    private String usdtAddress;// usdt地址
-    private String usdtKey;    // 秘钥
-
-    private String hkdCardno;  // 港币主卡
-    private String usdCardno;  // 美元主卡
 
     // audit
     @TableField(fill = FieldFill.INSERT_UPDATE)

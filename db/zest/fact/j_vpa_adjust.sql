@@ -12,8 +12,12 @@ create table j_vpa_adjust
 
     -- 业务字段
     marketproduct varchar(16)    not null comment '产品',
+    maincardid    bigint         not null comment '',
     maincardno    varchar(30)    not null comment '主卡卡号',
+    currency      varchar(3)     not null comment '币种',
     cardno        varchar(30)    not null comment 'vpa子卡',
+    wallet_id     bigint,
+    wallet_name   varchar(64),
     adjust_amount decimal(18, 2) not null comment '调整金额',
     old_quota     decimal(18, 2) not null comment '调整前额度',
     new_quota     decimal(18, 2) not null comment '调整后额度',

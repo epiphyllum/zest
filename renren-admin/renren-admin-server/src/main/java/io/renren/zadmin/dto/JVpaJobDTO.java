@@ -72,6 +72,8 @@ public class JVpaJobDTO implements Serializable {
 
     @Schema(description = "主卡")
     private String maincardno;
+    @Schema(description = "主卡ID")
+    private String maincardid;
     @Schema(description = "卡产品")
     private String marketproduct;
     @Schema(description = "本币币种")
@@ -89,6 +91,8 @@ public class JVpaJobDTO implements Serializable {
 
     @Schema(description = "钱包ID")
     private Long walletId;
+    @Schema(description = "钱包")
+    private String walletName;
 
     //
     @Schema(description = "完成日期")

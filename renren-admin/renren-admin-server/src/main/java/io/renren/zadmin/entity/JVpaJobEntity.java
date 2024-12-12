@@ -57,6 +57,7 @@ public class JVpaJobEntity extends BaseEntity {
     private String feecurrency;
 
     private String maincardno;
+    private Long maincardid;
     private String marketproduct;
     private String productcurrency;
     private Integer num;
@@ -64,6 +65,7 @@ public class JVpaJobEntity extends BaseEntity {
     private String cardexpiredate;
 
     private Long walletId;
+    private String walletName;
 
     // 商户单号, 申请单号
     private String meraplid;

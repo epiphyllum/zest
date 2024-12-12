@@ -13,9 +13,9 @@ create table j_wallet_txn
 
     --
     wallet_id     bigint         not null comment '钱包ID',
-    maincardno    varchar(30)    not null comment '钱包主卡',
+    wallet_name   varchar(64)    not null comment '钱包用户',
 
-    channel_id    bigint comment '收款渠道',
+    channel_id    bigint         not null comment '收款渠道',
     channel_name  varchar(16)    not null comment 'USDT渠道, OneWay渠道',
 
     currency      varchar(3)     not null comment '本币币种:HKD|USD, 如果是USD就上账到USD, 如果是HKD就上账到HKD',
@@ -26,9 +26,12 @@ create table j_wallet_txn
 
     -- 交易信息
     txn_code      varchar(16)    not null comment 'charge:充值|withdraw:提现',
-    txn_amount    decimal(18, 2) not null comment '交易金额${currency}',
-    txn_cost      decimal(18, 2) not null default 0 comment '渠道成本',
-    usdt_address  varchar(128)   not null comment '收款地址:usdt_address, 如果是收U的话',
+    pay_amount    decimal(18, 2) not null comment '交易金额${currency}',
+    pay_currency  varchar(4)     not null comment '收款币种',
+    pay_cost      decimal(18, 2) not null default 0 comment '渠道成本',
+
+    -- 状态
+    state         varchar(2),
 
     -- basic
     creator       bigint comment '创建者',

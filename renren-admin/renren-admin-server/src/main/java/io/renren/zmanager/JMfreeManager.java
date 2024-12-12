@@ -4,7 +4,7 @@ import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.dao.JMfreeDao;
 import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zadmin.entity.JMfreeEntity;
-import io.renren.zbalance.ledgers.LedgerMfree;
+import io.renren.zbalance.ledgers.Ledger900Mfree;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -17,7 +17,7 @@ public class JMfreeManager {
     @Resource
     private JMfreeDao jMfreeDao;
     @Resource
-    private LedgerMfree ledgerMfree;
+    private Ledger900Mfree ledger900Mfree;
     @Resource
     private JMerchantDao jMerchantDao;
 
@@ -32,7 +32,7 @@ public class JMfreeManager {
         entity.setStatDate(new Date());
         tx.executeWithoutResult(st -> {
             jMfreeDao.insert(entity);
-            ledgerMfree.ledgeMfree(entity);
+            ledger900Mfree.ledgeMfree(entity);
         });
     }
 }

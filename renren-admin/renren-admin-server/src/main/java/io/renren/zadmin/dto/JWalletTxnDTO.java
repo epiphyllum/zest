@@ -10,11 +10,11 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 /**
-* j_wallet_txn
-*
-* @author epiphyllum epiphyllum.zhou@gmail.com
-* @since 3.0 2024-11-28
-*/
+ * j_wallet_txn
+ *
+ * @author epiphyllum epiphyllum.zhou@gmail.com
+ * @since 3.0 2024-11-28
+ */
 @Data
 @Schema(description = "j_wallet_txn")
 public class JWalletTxnDTO implements Serializable {
@@ -37,8 +37,9 @@ public class JWalletTxnDTO implements Serializable {
     private Integer api;
     @Schema(description = "钱包ID")
     private Long walletId;
-    @Schema(description = "钱包主卡")
-    private String maincardno;
+    @Schema(description = "钱包ID")
+    private String walletName;
+
     @Schema(description = "收款渠道")
     private Long channelId;
     @Schema(description = "USDT渠道, OneWay渠道")
@@ -49,12 +50,17 @@ public class JWalletTxnDTO implements Serializable {
     private BigDecimal stlAmount;
     @Schema(description = "charge:充值|withdraw:提现")
     private String txnCode;
-    @Schema(description = "交易金额${currency}")
-    private BigDecimal txnAmount;
+
+    @Schema(description = "交易币种")
+    private String payCurrency;
+    @Schema(description = "支付金额")
+    private BigDecimal payAmount;
     @Schema(description = "渠道成本")
-    private BigDecimal txnCost;
-    @Schema(description = "收款地址:usdt_address, 如果是收U的话")
-    private String usdtAddress;
+    private BigDecimal payCost;
+
+    @Schema(description = "状态")
+    private String state;
+
     @Schema(description = "创建者")
     private Long creator;
     @Schema(description = "创建时间")

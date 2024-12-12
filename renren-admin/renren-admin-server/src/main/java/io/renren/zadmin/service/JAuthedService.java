@@ -16,4 +16,5 @@ import java.util.Map;
  */
 public interface JAuthedService extends CrudService<JAuthedEntity, JAuthedDTO> {
     PageData<WalletCardTxnItem> walletPage(Map<String, Object> params);
+    PageData<WalletCardTxnItem> walletPage(Map<String, Object> params, Long walletId);
 }

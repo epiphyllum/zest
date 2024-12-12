@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -34,6 +35,19 @@ public class JWalletDTO implements Serializable {
     @Schema(description = "子商户")
     private String subName;
 
+    @Schema(description = "等级")
+    private String usdLevel;
+    @Schema(description = "等级")
+    private String hkdLevel;
+    @Schema(description = "主卡")
+    private String hkdCardno;  // 港币主卡
+    @Schema(description = "主卡")
+    private String usdCardno;  // 美元主卡
+    @Schema(description = "主卡")
+    private String hkdCardid;  // 港币主卡
+    @Schema(description = "主卡")
+    private String usdCardid;  // 港币主卡
+
     @Schema(description = "手机号")
     private String phone;
     @Schema(description = "邮箱")
@@ -47,15 +61,12 @@ public class JWalletDTO implements Serializable {
     private String totpKey;
     @Schema(description = "totp_status")
     private String totpStatus;
-    @Schema(description = "usdt_address")
-    private String usdtAddress;
-    @Schema(description = "usdt_key")
-    private String usdtKey;
 
-    @Schema(description = "港币主卡")
-    private String hkdCardno;
-    @Schema(description = "美元主卡")
-    private String usdCardno;
+    //  非数据库字段
+    @Schema(description = "hkdBalance")
+    private BigDecimal hkdBalance;
+    @Schema(description = "usdBalance")
+    private BigDecimal usdBalance;
 
     @Schema(description = "创建者")
     private Long creator;

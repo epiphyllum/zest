@@ -15,7 +15,7 @@ import io.renren.zadmin.dto.JWalletDTO;
 import io.renren.zadmin.entity.JWalletEntity;
 import io.renren.zadmin.excel.JWalletExcel;
 import io.renren.zadmin.service.JWalletService;
-import io.renren.zmanager.JWalletManager;
+import io.renren.zwallet.manager.JWalletUserManager;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -42,7 +42,7 @@ public class JWalletController {
     @Resource
     private JWalletService jWalletService;
     @Resource
-    private JWalletManager jWalletManager;
+    private JWalletUserManager jWalletUserManager;
 
     @GetMapping("page")
     @Operation(summary = "分页")
@@ -55,7 +55,8 @@ public class JWalletController {
     @PreAuthorize("hasAuthority('zorg:jwallet:page')")
     public Result<PageData<JWalletDTO>> page(@Parameter(hidden = true) @RequestParam Map<String, Object> params){
         PageData<JWalletDTO> page = jWalletService.page(params);
-
+        List<JWalletDTO> list = page.getList();
+        jWalletUserManager.attachBalance(list);
         return new Result<PageData<JWalletDTO>>().ok(page);
     }
 
@@ -75,7 +76,7 @@ public class JWalletController {
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
         JWalletEntity walletEntity = ConvertUtils.sourceToTarget(dto, JWalletEntity.class);
-        jWalletManager.save(walletEntity);
+        jWalletUserManager.save(walletEntity);
         return new Result();
     }
 

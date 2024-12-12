@@ -1,4 +1,4 @@
-package io.renren.zcommon;
+package io.renren.zwallet.manager;
 
 import cn.hutool.core.lang.Pair;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -24,22 +24,19 @@ public class MailService {
     private Map<Long, Pair<JWalletConfigEntity, JavaMailSenderImpl>> mailSenderMap = new ConcurrentHashMap<>();
 
     private Pair<JWalletConfigEntity, JavaMailSenderImpl> getMailSender(JWalletConfigEntity entity) {
-        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        mailSender.setHost(null);
-        mailSender.setPort(587);
-        mailSender.setUsername(null);
-        mailSender.setPassword(null);
-        mailSender.setProtocol("smtp");
-        Properties props = new Properties();
-        props.put("mail.transport.protocol", "smtp");
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.debug", "true");
-        props.put("mail.smtp.timeout", "30000");
-        props.put("mail.smtp.ssl.trust", "smtp.163.com");
-        props.put("mail.smtp.ssl.enable", "true");
-        mailSender.setJavaMailProperties(props);
-        return Pair.of(entity, mailSender);
+        JavaMailSenderImpl sender = new JavaMailSenderImpl();
+        sender.setHost(entity.getMailHost());
+        sender.setPort(Integer.parseInt(entity.getMailPort()));
+        sender.setUsername(entity.getMailUser());
+        sender.setPassword(entity.getMailPass());
+        sender.setProtocol("smtp");
+        sender.setDefaultEncoding("UTF-8");
+        Properties p = new Properties();
+        p.setProperty("mail.smtp.auth", "true");
+        p.setProperty("mail.smtp.ssl.enable", "true");
+        p.setProperty("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+        sender.setJavaMailProperties(p);
+        return Pair.of(entity, sender);
     }
 
     // 修改渠道配置
@@ -60,15 +57,13 @@ public class MailService {
         Pair<JWalletConfigEntity, JavaMailSenderImpl> item = mailSenderMap.get(subId);
         JWalletConfigEntity entity = item.getKey();
         JavaMailSenderImpl sender = item.getValue();
-        String from = null;
 
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(from); // 发件人:
+        message.setFrom(entity.getMailFrom()); // 发件人:
         message.setTo(to);
         message.setSubject(subject);
         message.setText(content);
         sender.send(message);
-
     }
 
     // 发送OTP
@@ -77,12 +72,11 @@ public class MailService {
         JWalletConfigEntity entity = item.getKey();
         JavaMailSenderImpl sender = item.getValue();
 
-        String subject = null;
-        String content = null;
-        String from = null;
+        String subject = "OTP";
+        String content = "OTP is " + otp;
 
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(from);
+        message.setFrom(entity.getMailFrom());
         message.setTo(to);
         message.setSubject(subject);
         message.setText(content);

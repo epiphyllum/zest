@@ -8,7 +8,7 @@ import io.renren.zadmin.dto.JDepositDTO;
 import io.renren.zadmin.entity.*;
 import io.renren.zadmin.service.JDepositService;
 import io.renren.zapi.ApiNotify;
-import io.renren.zbalance.ledgers.LedgerCardCharge;
+import io.renren.zbalance.ledgers.Ledger600CardCharge;
 import io.renren.zcommon.ZinConstant;
 import io.renren.zin.cardapply.ZinCardApplyService;
 import io.renren.zin.cardapply.dto.TCardApplyQuery;
@@ -16,7 +16,6 @@ import io.renren.zin.cardapply.dto.TCardApplyResponse;
 import io.renren.zin.cardmoney.ZinCardMoneyService;
 import io.renren.zin.cardmoney.dto.TDepositRequest;
 import io.renren.zin.cardmoney.dto.TDepositResponse;
-import io.renren.zin.file.ZinFileService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -36,7 +35,7 @@ public class JDepositManager {
     @Resource
     private TransactionTemplate tx;
     @Resource
-    private LedgerCardCharge ledgerCardCharge;
+    private Ledger600CardCharge ledger600CardCharge;
     @Resource
     private ZinCardMoneyService zinCardMoneyService;
     @Resource
@@ -138,9 +137,6 @@ public class JDepositManager {
     }
 
     public void saveAndSubmit(JDepositEntity entity, boolean submit) {
-        // 产品配置
-        JFeeConfigEntity feeConfig = jCommon.getFeeConfig(entity.getMerchantId(), entity.getMarketproduct());
-
         // 填充payerid, 什么币种的卡， 就用哪个通联va
         List<JVaEntity> jVaEntities = jVaDao.selectList(Wrappers.emptyWrapper());
         JVaEntity jVaEntity = jVaEntities.stream().filter(e -> e.getCurrency().equals(entity.getCurrency())).findFirst().get();
@@ -148,6 +144,17 @@ public class JDepositManager {
 
         // 填充代理, 商户信息
         JSubEntity subEntity = fillInfo(entity);
+
+        // 产品配置
+        JFeeConfigEntity feeConfig = jCommon.getFeeConfig(entity.getMerchantId(), entity.getMarketproduct(), entity.getCurrency());
+
+        // 商户
+        JMerchantEntity merchantEntity = jMerchantDao.selectById(entity.getMerchantId());
+
+        // 填充协议
+        entity.setPayeeaccount(merchantEntity.getVpaPayeeaccount());
+        entity.setAgmfid(merchantEntity.getVpaChargeFid());
+        entity.setProcurecontent(merchantEntity.getVpaProcurecontent());
 
         // 金额计算填充
         fixAmount(entity, feeConfig);
@@ -159,7 +166,7 @@ public class JDepositManager {
         try {
             tx.executeWithoutResult(st -> {
                 jDepositDao.insert(entity);
-                ledgerCardCharge.ledgeCardChargeFreeze(entity, subEntity);
+                ledger600CardCharge.ledgeCardChargeFreeze(entity, subEntity);
             });
         } catch (Exception ex) {
             log.error("充值记账失败, 充值记录:{}, 子商户:{}", entity, subEntity);
@@ -213,7 +220,7 @@ public class JDepositManager {
                         st.setRollbackOnly();
                         return false;
                     }
-                    ledgerCardCharge.ledgeCardCharge(entity, subEntity);
+                    ledger600CardCharge.ledgeCardCharge(entity, subEntity);
                     return true;
                 });
                 if (execute) {
@@ -269,7 +276,7 @@ public class JDepositManager {
         log.info("oldAmount: {}, newAmount: {}", entity.getAmount(), dto.getAmount());
         // 如果修改了金额: 需要重新计算发起金额
         if (entity.getAmount().compareTo(dto.getAmount()) != 0) {
-            JFeeConfigEntity feeConfig = jCommon.getFeeConfig(entity.getMerchantId(), entity.getMarketproduct());
+            JFeeConfigEntity feeConfig = jCommon.getFeeConfig(entity.getMerchantId(), entity.getMarketproduct(), entity.getCurrency());
             fixAmount(entity, feeConfig);
         }
         jDepositService.update(dto);
@@ -288,7 +295,7 @@ public class JDepositManager {
                         .eq(JDepositEntity::getId, entity.getId())
                         .set(JDepositEntity::getState, "07")
                 );
-                ledgerCardCharge.ledgeCardChargeUnFreeze(entity, subEntity);
+                ledger600CardCharge.ledgeCardChargeUnFreeze(entity, subEntity);
             });
         } catch (Exception ex) {
             log.error("充值作废失败, 记录:{}, 子商户:{}", entity, subEntity);

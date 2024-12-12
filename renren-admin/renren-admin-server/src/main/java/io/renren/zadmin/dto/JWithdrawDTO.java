@@ -52,6 +52,8 @@ public class JWithdrawDTO implements Serializable {
     private String marketproduct;
     @Schema(description = "卡号")
     private String cardno;
+    @Schema(description = "钱包ID")
+    private String walletId;
     @Schema(description = "交易对手")
     private String payeeid;
     @Schema(description = "缴纳金额")

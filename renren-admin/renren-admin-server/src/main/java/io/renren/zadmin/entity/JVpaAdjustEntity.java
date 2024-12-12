@@ -33,6 +33,12 @@ public class JVpaAdjustEntity extends BaseEntity {
     private Long subId;
     private String subName;
     private String maincardno;
+    private Long maincardid;
+    private String currency;
+
+    private Long walletId;
+    private String walletName;
+
     private String marketproduct;
     private String cardno;
     private BigDecimal adjustAmount;

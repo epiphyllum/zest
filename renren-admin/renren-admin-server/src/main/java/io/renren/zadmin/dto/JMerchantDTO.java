@@ -125,6 +125,17 @@ public class JMerchantDTO implements Serializable {
     private String webhook;
     @Schema(description = "whiteIp")
     private String whiteIp;
+
+    //
+    @Schema(description = "vpa卡开卡协议")
+    private String vpaCardFid;
+    @Schema(description = "vpa卡充值协议")
+    private String vpaChargeFid;
+    @Schema(description = "对手方")
+    private String vpaPayeeaccount;
+    @Schema(description = "采购内容")
+    private String vpaProcurecontent;
+
     // 基本
     @Schema(description = "创建者")
     private Long creator;

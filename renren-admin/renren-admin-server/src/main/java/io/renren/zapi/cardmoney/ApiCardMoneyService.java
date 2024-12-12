@@ -51,6 +51,7 @@ public class ApiCardMoneyService {
         entity.setMerchantId(merchant.getId());
         entity.setSubId(subId);
         entity.setCurrency(card.getCurrency());
+        entity.setMarketproduct(card.getMarketproduct());
         entity.setApi(1);
 
         // 保存

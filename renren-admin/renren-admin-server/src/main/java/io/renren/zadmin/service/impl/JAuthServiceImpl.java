@@ -61,11 +61,22 @@ public class JAuthServiceImpl extends CrudServiceImpl<JAuthDao, JAuthEntity, JAu
         JWalletEntity walletEntity = WalletLoginInterceptor.walletUser();
         QueryWrapper<JAuthEntity> wrapper = applyFilter(params);
         wrapper.eq("wallet_id", walletEntity.getId());
-
         IPage<JAuthEntity> page = baseDao.selectPage(
                 getPage(params, Constant.CREATE_DATE, false),
                 wrapper
         );
         return getPageData(page, WalletCardTxnItem.class);
     }
+
+    @Override
+    public PageData<WalletCardTxnItem> walletPage(Map<String, Object> params, Long walletId) {
+        QueryWrapper<JAuthEntity> wrapper = applyFilter(params);
+        wrapper.eq("wallet_id", walletId);
+        IPage<JAuthEntity> page = baseDao.selectPage(
+                getPage(params, Constant.CREATE_DATE, false),
+                wrapper
+        );
+        return getPageData(page, WalletCardTxnItem.class);
+    }
+
 }

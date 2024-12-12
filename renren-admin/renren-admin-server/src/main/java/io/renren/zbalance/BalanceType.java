@@ -71,28 +71,28 @@ public class BalanceType {
         return "AIP_TXN_" + currency;
     }
     ////////////////////////////////////////////////////////////////////////////////////
-    //钱包子卡主卡-额度
+    //预付费卡主卡-额度
     public static String getPrepaidQuotaAccount(String currency) {
-        return "PREPAID_QUOTA" + currency;
+        return "PREPAID_QUOTA_" + currency;
     }
-    //钱包子卡主卡-发卡总额
+    //预付费卡主卡-发卡总额
     public static String getPrepaidSumAccount(String currency) {
         return "PREPAID_SUM_" + currency;
     }
 
-    // 钱包主卡-额度
-    public static String getWalletQuotaAccount(String currency) {
-        return "WALLET_QUOTA" + currency;
-    }
+//    ////////////////////////////////////////////////////////////////////////////////////
+//    // 钱包主卡-额度
+//    public static String getWalletQuotaAccount(String currency) {
+//        return "WALLET_QUOTA_" + currency;
+//    }
 
     // 钱包主卡-发卡总额
     public static String getWalletSumAccount(String currency) {
-        return "WALLET_SUM" + currency;
+        return "WALLET_SUM_" + currency;
     }
 
     // 钱包账户
     public static String getWalletAccount(String currency) {
         return "WALLET_" + currency;
     }
-
 }

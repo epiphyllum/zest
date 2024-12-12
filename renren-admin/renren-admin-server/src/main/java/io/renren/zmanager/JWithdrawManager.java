@@ -7,7 +7,7 @@ import io.renren.zadmin.dao.*;
 import io.renren.zadmin.entity.*;
 import io.renren.zapi.ApiNotify;
 import io.renren.zbalance.LedgerUtil;
-import io.renren.zbalance.ledgers.LedgerCardWithdraw;
+import io.renren.zbalance.ledgers.Ledger700CardWithdraw;
 import io.renren.zcommon.ZinConstant;
 import io.renren.zin.cardapply.ZinCardApplyService;
 import io.renren.zin.cardapply.dto.TCardApplyQuery;
@@ -40,7 +40,7 @@ public class JWithdrawManager {
     @Resource
     private ApiNotify apiNotify;
     @Resource
-    private LedgerCardWithdraw ledgerCardWithdraw;
+    private Ledger700CardWithdraw ledger700CardWithdraw;
     @Resource
     private ZinCardMoneyService zinCardMoneyService;
     @Resource
@@ -111,7 +111,7 @@ public class JWithdrawManager {
         entity.setState("00");
 
         // 卡产品配置
-        JFeeConfigEntity feeConfig = jCommon.getFeeConfig(entity.getMerchantId(), entity.getMarketproduct());
+        JFeeConfigEntity feeConfig = jCommon.getFeeConfig(entity.getMerchantId(), entity.getMarketproduct(), entity.getCurrency());
 
         // 计算商户手续费
         BigDecimal merchantfee = entity.getAmount().multiply(feeConfig.getChargeRate()).setScale(2, RoundingMode.HALF_UP).negate();
@@ -169,7 +169,7 @@ public class JWithdrawManager {
                         st.setRollbackOnly();
                         return false;
                     }
-                    ledgerCardWithdraw.ledgeCardWithdraw(entity, subEntity);
+                    ledger700CardWithdraw.ledgeCardWithdraw(entity, subEntity);
                     return true;
                 });
                 if (execute) {
