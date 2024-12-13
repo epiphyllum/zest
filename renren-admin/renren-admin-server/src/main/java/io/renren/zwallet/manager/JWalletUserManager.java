@@ -96,7 +96,6 @@ public class JWalletUserManager {
 
     // 注册
     public String register(WalletLoginRequest request) {
-
         // 不是测试环境才需要验证otp
         if (!zestConfig.isDev()) {
             String savedOTP = (String) redisUtils.get(request.getEmail());
@@ -109,6 +108,10 @@ public class JWalletUserManager {
         walletEntity.setEmail(request.getEmail());
         walletEntity.setPassword(DigestUtil.md5Hex(request.getPassword()));
 
+        // 创建usdt钱包: todo
+        walletEntity.setUsdtKey(null);
+        walletEntity.setUsdtTrc20(null);
+
         // 设置ID
         fillByDomain(walletEntity);
 
@@ -116,13 +119,36 @@ public class JWalletUserManager {
         try {
             tx.executeWithoutResult(status -> {
                 jWalletDao.insert(walletEntity);
+
                 ledgerUtil.newBalance(
                         ZestConstant.USER_TYPE_WALLET, request.getEmail(), walletEntity.getId(),
                         BalanceType.getWalletAccount("HKD"), "HKD"
                 );
+
                 ledgerUtil.newBalance(
                         ZestConstant.USER_TYPE_WALLET, request.getEmail(), walletEntity.getId(),
                         BalanceType.getWalletAccount("USD"), "USD"
+                );
+
+                // USDT
+                ledgerUtil.newBalance(
+                        ZestConstant.USER_TYPE_WALLET, request.getEmail(), walletEntity.getId(),
+                        BalanceType.getWalletAccount("USDT"), "USDT"
+                );
+                // USDC
+                ledgerUtil.newBalance(
+                        ZestConstant.USER_TYPE_WALLET, request.getEmail(), walletEntity.getId(),
+                        BalanceType.getWalletAccount("USDC"), "USDC"
+                );
+                // BTC
+                ledgerUtil.newBalance(
+                        ZestConstant.USER_TYPE_WALLET, request.getEmail(), walletEntity.getId(),
+                        BalanceType.getWalletAccount("BTC"), "BTC"
+                );
+                // ETH
+                ledgerUtil.newBalance(
+                        ZestConstant.USER_TYPE_WALLET, request.getEmail(), walletEntity.getId(),
+                        BalanceType.getWalletAccount("ETH"), "ETH"
                 );
             });
         } catch (DuplicateKeyException e) {

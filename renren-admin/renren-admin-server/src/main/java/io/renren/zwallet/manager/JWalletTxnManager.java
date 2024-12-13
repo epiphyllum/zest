@@ -16,6 +16,7 @@ import io.renren.zcommon.CommonUtils;
 import io.renren.zcommon.ZestConfig;
 import io.renren.zcommon.ZinConstant;
 import io.renren.zmanager.JCardManager;
+import io.renren.zmanager.JExchangeManager;
 import io.renren.zwallet.channel.ChannelFactory;
 import io.renren.zwallet.channel.PayChannel;
 import io.renren.zwallet.dto.*;
@@ -48,6 +49,8 @@ public class JWalletTxnManager {
     private ZestConfig zestConfig;
     @Resource
     private JCardManager jCardManager;
+    @Resource
+    private JExchangeManager jExchangeManager;
 
     // 钱包详情
     public WalletInfo walletInfo(JWalletEntity entity) {
@@ -55,19 +58,35 @@ public class JWalletTxnManager {
         walletInfo.setHkdLevel(entity.getHkdLevel());
         walletInfo.setUsdLevel(entity.getUsdLevel());
 
+        // 法币账户
         JBalanceEntity walletAccountHkd = ledgerUtil.getWalletAccount(entity.getId(), "HKD");
         JBalanceEntity walletAccountUsd = ledgerUtil.getWalletAccount(entity.getId(), "USD");
 
+        // 数字货币账户
+        JBalanceEntity walletAccountUsdt = ledgerUtil.getWalletAccount(entity.getId(), "USDT");
+        JBalanceEntity walletAccountUsdc = ledgerUtil.getWalletAccount(entity.getId(), "USDC");
+        JBalanceEntity walletAccountBtc = ledgerUtil.getWalletAccount(entity.getId(), "BTC");
+        JBalanceEntity walletAccountEth = ledgerUtil.getWalletAccount(entity.getId(), "ETH");
+
+        // 余额设置
         walletInfo.setHkdBalance(walletAccountHkd.getBalance());
         walletInfo.setUsdBalance(walletAccountUsd.getBalance());
+        walletInfo.setUsdtBalance(walletAccountUsdt.getBalance());
+        walletInfo.setUsdcBalance(walletAccountUsdc.getBalance());
+        walletInfo.setBtcBalance(walletAccountBtc.getBalance());
+        walletInfo.setEthBalance(walletAccountEth.getBalance());
 
+        // 钱包参数
         JWalletConfigEntity jWalletConfigEntity = jWalletConfigDao.selectOne(Wrappers.<JWalletConfigEntity>lambdaQuery()
                 .eq(JWalletConfigEntity::getSubId, entity.getSubId())
         );
 
+        // 换算预估资产
         BigDecimal estimate = walletInfo.getHkdBalance()
                 .divide(jWalletConfigEntity.getHkdRate(), 2, RoundingMode.HALF_UP)
-                .add(walletInfo.getUsdBalance());
+                .add(walletInfo.getUsdBalance())
+                .add(walletInfo.getUsdtBalance())
+                .add(walletInfo.getUsdcBalance());
 
         walletInfo.setUsdEstimate(estimate);
         return walletInfo;
@@ -104,7 +123,7 @@ public class JWalletTxnManager {
                 walletHkdCards.add(walletCard);
             }
         }
-        // 美元钱包 + 美元卡
+        // 美元卡
         List<WalletCard> walletUsdCards = new ArrayList<>();
         List<JCardEntity> jCardUsdEntities = collect.get("USD");
         if (jCardUsdEntities != null && jCardUsdEntities.size() > 0) {
@@ -135,7 +154,7 @@ public class JWalletTxnManager {
         );
 
         // 创建账户升级交易
-        createUpgradeTxn(walletConfig, walletEntity, dto.getCurrency());
+        JWalletTxnEntity upgradeTxn = createUpgradeTxn(walletConfig, walletEntity, dto.getCurrency());
 
         // 创建主卡
         JCardEntity entity = ConvertUtils.sourceToTarget(dto, JCardEntity.class);
@@ -146,6 +165,7 @@ public class JWalletTxnManager {
         entity.setWalletId(walletEntity.getId());
         entity.setWalletName(walletEntity.getEmail());
         entity.setMarketproduct(ZinConstant.MP_VPA_WALLET);
+        entity.setRelateId(upgradeTxn.getId());
         jCardManager.save(entity);
 
         // 提交发卡行
@@ -153,7 +173,7 @@ public class JWalletTxnManager {
     }
 
     // 创建账户升级交易
-    private void createUpgradeTxn(JWalletConfigEntity walletConfig, JWalletEntity walletEntity, String currency) {
+    private JWalletTxnEntity createUpgradeTxn(JWalletConfigEntity walletConfig, JWalletEntity walletEntity, String currency) {
         BigDecimal payAmount = walletConfig.getUpgradeFee();  // 美金计费的
         BigDecimal stlAmount = null;
         if (currency.equals("HKD")) {
@@ -165,12 +185,10 @@ public class JWalletTxnManager {
         JWalletTxnEntity txnEntity = new JWalletTxnEntity();
         fillTxn(txnEntity, walletEntity);
         txnEntity.setTxnCode(ZinConstant.WALLET_TXN_UPGRADE);
-        txnEntity.setPayCurrency(currency);
-        txnEntity.setPayAmount(payAmount);
-        txnEntity.setCurrency(currency);
-        txnEntity.setStlAmount(stlAmount);
+        // todo
         txnEntity.setState(ZinConstant.WALLET_TXN_STATUS_NEW);  // 新建
         jWalletTxnDao.insert(txnEntity);
+        return txnEntity;
     }
 
     // 填充交易
@@ -188,34 +206,13 @@ public class JWalletTxnManager {
     // 钱包充值:
     public WalletChargeResponse chargeWallet(WalletChargeRequest request, JWalletEntity walletEntity) {
         WalletChargeResponse response = new WalletChargeResponse();
-
-        // 计算下金额
-        chargeWalletCalculation(request, walletEntity);
-
-        JWalletTxnEntity txnEntity = new JWalletTxnEntity();
-        // 填充
-        fillTxn(txnEntity, walletEntity);
-        txnEntity.setPayCurrency(request.getPayCurrency());
-        txnEntity.setPayAmount(request.getPayAmount());
-        txnEntity.setTxnCode(ZinConstant.WALLET_TXN_CHARGE);
-        txnEntity.setCurrency(request.getCurrency());
-        txnEntity.setStlAmount(request.getAmount());
-        txnEntity.setState(ZinConstant.WALLET_TXN_STATUS_NEW);  // 新建
-
-        // 路由获取支付渠道
-        PayChannel channel = channelFactory.getChannel(walletEntity.getSubId(), request.getPayCurrency(), request.getCurrency());
-        JPayChannelEntity config = channel.getConfig();
-        txnEntity.setChannelId(config.getId());
-        txnEntity.setChannelName(config.getChannelName());
-
-        // 入库
-        jWalletTxnDao.insert(txnEntity);
-
-        // 调用支付渠道, 获取支付地址
-        String payUrl = channel.charge(txnEntity);
-        response.setPayUrl(payUrl);
-        response.setId(txnEntity.getId());
-        return response;
+        if (request.getCurrency().equals("USDT")) {
+            if (request.getNetwork().equals("trc20")) {
+                response.setAddress(walletEntity.getUsdtTrc20());
+                return response;
+            }
+        }
+        throw new RenException("暂不支持");
     }
 
     // 钱包提现
@@ -223,77 +220,7 @@ public class JWalletTxnManager {
         throw new RenException("暂不支持, 请联系管理员");
     }
 
-    // 钱包充值预算: 充值1000HKD  需要多少USDT
-    public void chargeWalletCalculation(WalletChargeRequest request, JWalletEntity walletEntity) {
-        JWalletConfigEntity config = jWalletConfigDao.selectOne(Wrappers.<JWalletConfigEntity>lambdaQuery()
-                .eq(JWalletConfigEntity::getSubId, walletEntity.getSubId())
-        );
-        // USDT支付
-        if (request.getPayCurrency().equals("USDT")) {
-            if (request.getCurrency().equals("HKD")) {
-                BigDecimal hkdRate = config.getHkdRate();
-                BigDecimal chargeRate = config.getChargeRate();
-                log.info("amount: {}, HKD rate: {}, chargeRate: {}", request.getAmount(), hkdRate, chargeRate);
-                BigDecimal fee = request.getAmount().multiply(chargeRate);
-                BigDecimal total = fee.add(request.getAmount());
-                BigDecimal u = total.divide(hkdRate, 2, RoundingMode.HALF_UP);
-                request.setPayAmount(u);
-                return;
-            }
-            if (request.getCurrency().equals("USD")) {
-                // todo:
-            }
-        }
-
-        // 美金支付
-        if (request.getPayCurrency().equals("HKD")) {
-            if (!request.getCurrency().equals("HKD")) {
-                throw new RenException("币种错误");
-            }
-            // todo:
-        }
-
-        // 港币支付
-        if (request.getPayCurrency().equals("USD")) {
-            if (!request.getCurrency().equals("USD")) {
-                throw new RenException("币种错误");
-            }
-            // todo:
-        }
-
-        throw new RenException("请求错误");
+    // 换汇
+    public void exchange(WalletSwap exchange, JWalletEntity walletEntity) {
     }
-
-    // 充U, 充值132.49得到多少HKD
-    public void chargeWalletCalculationReverse(WalletChargeRequest request, JWalletEntity walletEntity) {
-
-        // 目前只支持USDT到法币反算
-        if (!request.getPayCurrency().equals("USDT")) {
-            throw new RenException("参数错误");
-        }
-
-        JWalletConfigEntity config = jWalletConfigDao.selectOne(Wrappers.<JWalletConfigEntity>lambdaQuery()
-                .eq(JWalletConfigEntity::getSubId, walletEntity.getSubId())
-        );
-
-        // 港币美金汇率
-        BigDecimal hkdRate = config.getHkdRate();
-
-        // 用户充值汇率
-        BigDecimal chargeRate = config.getChargeRate();
-
-        // 到账港币
-        if (request.getCurrency().equals("HKD")) {
-            BigDecimal payAmount = request.getPayAmount();
-            BigDecimal amount = payAmount.multiply(hkdRate).divide(BigDecimal.ONE.add(chargeRate), 2, RoundingMode.HALF_UP);
-            request.setAmount(amount);
-        }
-        // 到账美金
-        else if (request.getCurrency().equals("USD")) {
-            BigDecimal amount = request.getPayAmount();
-            request.setPayAmount(amount);
-        }
-    }
-
-
 }

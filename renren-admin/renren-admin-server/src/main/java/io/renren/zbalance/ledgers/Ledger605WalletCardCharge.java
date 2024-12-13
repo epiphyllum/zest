@@ -43,8 +43,6 @@ public class Ledger605WalletCardCharge {
 
     //钱包子卡-单笔充值解冻(解冻钱包余额)
     public void ledgeWalletCardChargeUnFreeze(JVpaAdjustEntity entity) {
-
-
         BigDecimal factAmount = entity.getAdjustAmount();
         String factMemo = String.format("解冻-单笔充值:%s", factAmount);
         // 记账
@@ -52,8 +50,6 @@ public class Ledger605WalletCardCharge {
 
         // 解冻钱包
         ledgerUtil.unFreezeUpdate(walletAccount, ORIGIN_TYPE_WALLET_CARD_CHARGE, FACT_WALLET_CARD_CHARGE_UNFREEZE_WALLET, entity.getId(), factMemo, factAmount);
-
-
     }
 
     // 钱包子卡-单笔充值确认

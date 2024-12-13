@@ -30,7 +30,7 @@ public class JAuthedDTO implements Serializable {
     private String marketproduct;
 
     private Long walletId;
-    private Long walletName;
+    private String walletName;
 
     private String maincardno;
     private String cardno;

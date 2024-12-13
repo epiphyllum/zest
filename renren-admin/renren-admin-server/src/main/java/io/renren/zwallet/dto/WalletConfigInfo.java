@@ -27,11 +27,16 @@ public class WalletConfigInfo {
     private BigDecimal vpaOpenFee;
     private BigDecimal vccOpenFee;
     private BigDecimal realOpenFee;
-    private BigDecimal upgradeFee;  // 账户升级费
+    // 月费
+    private BigDecimal vpaMonthFee;
+    private BigDecimal vccMonthFee;
+    private BigDecimal realMonthFee;
+    // 账户升级费
+    private BigDecimal upgradeFee;
+    // 港币汇率
+    private BigDecimal hkdRate;
     // 电报配置
     private String telegramKey;
     private String telegramGroup;
     private String telegramHelp;
-    // 港币汇率
-    private BigDecimal hkdRate;
 }

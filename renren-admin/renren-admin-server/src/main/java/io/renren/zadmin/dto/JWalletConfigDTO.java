@@ -38,6 +38,8 @@ public class JWalletConfigDTO implements Serializable {
     ////////////////////////////////////////////
     @Schema(description = "用户充值手续费率")
     private BigDecimal chargeRate;
+    @Schema(description = "用户提现手续费率")
+    private BigDecimal withdrawRate;
 
     @Schema(description = "最小充值港币")
     private BigDecimal minHkd;
@@ -56,6 +58,15 @@ public class JWalletConfigDTO implements Serializable {
     private BigDecimal vccOpenFee;
     @Schema(description = "实体卡开卡费")
     private BigDecimal realOpenFee;
+
+    ////////////////////////////////////////////
+    @Schema(description = "匿名卡月费")
+    private BigDecimal vpaMonthFee;
+    @Schema(description = "实名卡月费")
+    private BigDecimal vccMonthFee;
+    @Schema(description = "实体月费")
+    private BigDecimal realMonthFee;
+
     @Schema(description = "升级费用")
     private BigDecimal upgradeFee;
 

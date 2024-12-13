@@ -62,6 +62,16 @@ public class JWalletDTO implements Serializable {
     @Schema(description = "totp_status")
     private String totpStatus;
 
+    // usdt
+    @Schema(description = "usdtKey")
+    private String usdtKey;
+    @Schema(description = "usdtTrc20")
+    private String usdtTrc20;
+    @Schema(description = "usdtTrc20Ts")
+    private Long usdtTrc20Ts;
+    @Schema(description = "usdtTrc20Fetch")
+    private Date usdtTrc20Fetch;
+
     //  非数据库字段
     @Schema(description = "hkdBalance")
     private BigDecimal hkdBalance;

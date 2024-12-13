@@ -44,6 +44,12 @@ public class JWalletEntity extends BaseEntity {
     private String totpKey;    // google
     private String totpStatus; // google
 
+    // usdt
+    private String usdtKey;       // 私钥
+    private String usdtTrc20;     // 地址
+    private Long usdtTrc20Ts;     // 最后一笔交易时间
+    private Date usdtTrc20Fetch;  // 最近一次爬取时间
+
     // audit
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updater;

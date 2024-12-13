@@ -5,63 +5,63 @@
 <#list columnList as column>
   <#if column.form>
     <#if column.formType == 'text'>
-      <el-form-walletCard label="${column.comment!}" prop="${column.attrName}">
+      <el-form label="${column.comment!}" prop="${column.attrName}">
         <el-input v-model="dataForm.${column.attrName}" placeholder="${column.comment!}"></el-input>
-      </el-form-walletCard>
+      </el-form>
     <#elseif column.formType == 'textarea'>
-      <el-form-walletCard label="${column.comment!}" prop="${column.attrName}">
+      <el-form label="${column.comment!}" prop="${column.attrName}">
         <el-input type="textarea" v-model="dataForm.${column.attrName}"></el-input>
-      </el-form-walletCard>
+      </el-form>
     <#elseif column.formType == 'editor'>
-      <el-form-walletCard label="${column.comment!}" prop="${column.attrName}" style="height: 400px">
+      <el-form label="${column.comment!}" prop="${column.attrName}" style="height: 400px">
         <WangEditor v-model="dataForm.content"></WangEditor>
-      </el-form-walletCard>
+      </el-form>
       <#assign editor=true/>
       <#assign editorName="${column.attrName}"/>
     <#elseif column.formType == 'select'>
       <#if column.dictName??>
-      <el-form-walletCard label="${column.comment!}" prop="${column.attrName}">
+      <el-form label="${column.comment!}" prop="${column.attrName}">
         <ren-select v-model="dataForm.${column.attrName}" dict-type="${column.dictName}" placeholder="${column.comment!}"></ren-select>
-      </el-form-walletCard>
+      </el-form>
       <#else>
-      <el-form-walletCard label="${column.comment!}" prop="${column.attrName}">
+      <el-form label="${column.comment!}" prop="${column.attrName}">
         <el-select v-model="dataForm.${column.attrName}" placeholder="请选择">
           <el-option label="人人" value="0"></el-option>
         </el-select>
-      </el-form-walletCard>
+      </el-form>
       </#if>
     <#elseif column.formType == 'radio'>
       <#if column.dictName??>
-      <el-form-walletCard label="${column.comment!}" prop="${column.attrName}">
+      <el-form label="${column.comment!}" prop="${column.attrName}">
         <ren-radio-group v-model="dataForm.${column.attrName}" dict-type="${column.dictName}"></ren-radio-group>
-      </el-form-walletCard>
+      </el-form>
       <#else>
-      <el-form-walletCard label="${column.comment!}" prop="${column.attrName}">
+      <el-form label="${column.comment!}" prop="${column.attrName}">
         <el-radio-group v-model="dataForm.${column.attrName}">
           <el-radio :label="0">启用</el-radio>
           <el-radio :label="1">禁用</el-radio>
         </el-radio-group>
-      </el-form-walletCard>
+      </el-form>
       </#if>
     <#elseif column.formType == 'checkbox'>
-      <el-form-walletCard label="${column.comment!}" prop="${column.attrName}">
+      <el-form label="${column.comment!}" prop="${column.attrName}">
         <el-checkbox-group v-model="dataForm.${column.attrName}">
           <el-checkbox label="启用" name="type"></el-checkbox>
           <el-checkbox label="禁用" name="type"></el-checkbox>
         </el-checkbox-group>
-      </el-form-walletCard>
+      </el-form>
     <#elseif column.formType == 'date'>
-      <el-form-walletCard label="${column.comment!}" prop="${column.attrName}">
+      <el-form label="${column.comment!}" prop="${column.attrName}">
         <el-date-picker type="date" placeholder="${column.comment!}" v-model="dataForm.${column.attrName}" format="YYYY-MM-DD" value-format="YYYY-MM-DD"></el-date-picker>
-      </el-form-walletCard>
+      </el-form>
     <#elseif column.formType == 'datetime'>
-      <el-form-walletCard label="${column.comment!}" prop="${column.attrName}">
+      <el-form label="${column.comment!}" prop="${column.attrName}">
         <el-date-picker type="datetime" placeholder="${column.comment!}" v-model="dataForm.${column.attrName}" format="YYYY-MM-DD hh:mm:ss" value-format="YYYY-MM-DD hh:mm:ss"></el-date-picker>
-      </el-form-walletCard>
+      </el-form>
     <#else>
-      <el-form-walletCard label="${column.comment!}" prop="${column.attrName}">
+      <el-form label="${column.comment!}" prop="${column.attrName}">
         <el-input v-model="dataForm.${column.attrName}" placeholder="${column.comment!}"></el-input>
-      </el-form-walletCard>
+      </el-form>
     </#if>
   </#if>
 </#list>

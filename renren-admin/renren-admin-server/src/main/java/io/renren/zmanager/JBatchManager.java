@@ -111,6 +111,15 @@ public class JBatchManager {
         List<JAuthedEntity> curBatch = new ArrayList<>(1000);
         for (TAuthSettledResponse.Item item : response.getDatalist()) {
             JAuthedEntity entity = ConvertUtils.sourceToTarget(item, JAuthedEntity.class);
+
+            // 补充卡信息
+            JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
+                    .eq(JCardEntity::getCardno, entity.getCardno())
+            );
+            entity.setWalletId(cardEntity.getWalletId());
+            entity.setWalletName(cardEntity.getWalletName());
+
+            curBatch.add(entity);
             if (curBatch.size() == batchSize) {
                 batchList.add(curBatch);
                 curBatch = new ArrayList<>(1000);

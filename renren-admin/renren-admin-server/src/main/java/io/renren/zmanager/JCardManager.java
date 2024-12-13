@@ -362,13 +362,9 @@ public class JCardManager {
                         }
 
                         // 钱包账户upgrade交易状态更新
-                        JWalletTxnEntity jWalletTxnEntity = jWalletTxnDao.selectOne(Wrappers.<JWalletTxnEntity>lambdaQuery()
-                                .eq(JWalletTxnEntity::getWalletId, jCardEntity.getWalletId())
-                                .eq(JWalletTxnEntity::getTxnCode, ZinConstant.WALLET_TXN_UPGRADE)
-                                .eq(JWalletTxnEntity::getState, ZinConstant.WALLET_TXN_STATUS_NEW)
-                        );
                         jWalletTxnDao.update(null, Wrappers.<JWalletTxnEntity>lambdaUpdate()
-                                .eq(JWalletTxnEntity::getId, jWalletTxnEntity.getId())
+                                .eq(JWalletTxnEntity::getId, jCardEntity.getRelateId())
+                                .eq(JWalletTxnEntity::getState, ZinConstant.WALLET_TXN_STATUS_NEW)
                                 .set(JWalletTxnEntity::getState, ZinConstant.WALLET_TXN_STATUS_SUCCESS)
                         );
 
@@ -435,13 +431,9 @@ public class JCardManager {
                     // 属于账户升级
                     if (jCardEntity.getWalletId() != null) {
                         // 钱包账户upgrade交易状态更新
-                        JWalletTxnEntity jWalletTxnEntity = jWalletTxnDao.selectOne(Wrappers.<JWalletTxnEntity>lambdaQuery()
-                                .eq(JWalletTxnEntity::getWalletId, jCardEntity.getWalletId())
-                                .eq(JWalletTxnEntity::getTxnCode, ZinConstant.WALLET_TXN_UPGRADE)
-                                .eq(JWalletTxnEntity::getState, ZinConstant.WALLET_TXN_STATUS_NEW)
-                        );
                         jWalletTxnDao.update(null, Wrappers.<JWalletTxnEntity>lambdaUpdate()
-                                .eq(JWalletTxnEntity::getId, jWalletTxnEntity.getId())
+                                .eq(JWalletTxnEntity::getId, jCardEntity.getRelateId())
+                                .eq(JWalletTxnEntity::getState, ZinConstant.WALLET_TXN_STATUS_NEW)
                                 .set(JWalletTxnEntity::getState, ZinConstant.WALLET_TXN_STATUS_FAIL)
                         );
                     }
@@ -708,7 +700,7 @@ public class JCardManager {
             else if (marketproduct.equals(ZinConstant.MP_VPA_WALLET)) {
                 ledger605WalletCardCharge.ledgeWalletCardChargeFreeze(adjustEntity);
             }
-            // 钱包子卡
+            //
             else {
                 throw new RenException("不支持的产品类型");
             }

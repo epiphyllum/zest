@@ -3,9 +3,10 @@ package io.renren.zwallet.api;
 import io.renren.commons.tools.utils.Result;
 import io.renren.zadmin.entity.JCardEntity;
 import io.renren.zwallet.config.WalletLoginInterceptor;
-import io.renren.zwallet.dto.*;
+import io.renren.zwallet.dto.WalletCardChargeRequest;
+import io.renren.zwallet.dto.WalletCardOpenRequest;
+import io.renren.zwallet.dto.WalletCardWithdrawRequest;
 import io.renren.zwallet.manager.JWalletCardManager;
-import io.renren.zwallet.manager.JWalletTxnManager;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,8 +17,6 @@ import java.math.BigDecimal;
 public class WalletCardController {
     @Resource
     private JWalletCardManager jWalletCardManager;
-    @Resource
-    private JWalletTxnManager jWalletTxnManager;
 
     /**
      * 开卡

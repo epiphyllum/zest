@@ -3,7 +3,7 @@
     <el-form :inline="true" :model="state.dataForm" @keyup.enter="state.getDataList()">
     <#list columnList as column>
     <#if column.query>
-      <el-form-walletCard>
+      <el-form>
         <#if column.formType == 'text' || column.formType == 'textarea' || column.formType == 'editor'>
         <el-input v-model="state.dataForm.${column.attrName}" placeholder="${column.comment!}" clearable></el-input>
         <#elseif column.formType == 'select'>
@@ -29,21 +29,21 @@
         <#else>
         <el-input v-model="state.dataForm.${column.attrName}" placeholder="${column.comment!}" clearable></el-input>
         </#if>
-      </el-form-walletCard>
+      </el-form>
     </#if>
     </#list>
-      <el-form-walletCard>
+      <el-form>
         <el-button @click="state.getDataList()">{{ $t("query") }}</el-button>
-      </el-form-walletCard>
-      <el-form-walletCard>
+      </el-form>
+      <el-form>
         <el-button type="info" @click="state.exportHandle()">{{ $t("export") }}</el-button>
-      </el-form-walletCard>
-      <el-form-walletCard>
+      </el-form>
+      <el-form>
         <el-button v-if="state.hasPermission('${backendUrl}:${classname}:save')" type="primary" @click="addOrUpdateHandle()">{{ $t("add") }}</el-button>
-      </el-form-walletCard>
-      <el-form-walletCard>
+      </el-form>
+      <el-form>
         <el-button v-if="state.hasPermission('${backendUrl}:${classname}:delete')" type="danger" @click="state.deleteHandle()">{{ $t("deleteBatch") }}</el-button>
-      </el-form-walletCard>
+      </el-form>
     </el-form>
     <el-table v-loading="state.dataListLoading" :data="state.dataList" border @selection-change="state.dataListSelectionChangeHandle" style="width: 100%">
       <el-table-column type="selection" header-align="center" align="center" width="50"></el-table-column>

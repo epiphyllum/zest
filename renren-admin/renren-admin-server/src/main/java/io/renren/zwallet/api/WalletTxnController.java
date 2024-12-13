@@ -40,28 +40,6 @@ public class WalletTxnController {
         return result;
     }
 
-    /**
-     * 钱包充值-估算
-     */
-    @PostMapping("chargeCalculate")
-    public Result<WalletChargeRequest> chargeCalculate(@RequestBody WalletChargeRequest request) {
-        jWalletTxnManager.chargeWalletCalculation(request, WalletLoginInterceptor.walletUser());
-        Result<WalletChargeRequest> result = new Result<>();
-        result.setData(request);
-        return result;
-    }
-
-    /**
-     * 钱包充值-反向估算
-     */
-    @PostMapping("chargeCalculateReverse")
-    public Result<WalletChargeRequest> chargeCalculateReverse(@RequestBody WalletChargeRequest request) {
-        jWalletTxnManager.chargeWalletCalculationReverse(request, WalletLoginInterceptor.walletUser());
-        Result<WalletChargeRequest> result = new Result<>();
-        result.setData(request);
-        return result;
-    }
-
     // 钱包充值
     @PostMapping("withdraw")
     public Result<WalletWithdrawResponse> withdraw(@RequestBody WalletWithdrawRequest request) {
@@ -89,6 +67,14 @@ public class WalletTxnController {
         Result<WalletCardInfo> result = new Result<>();
         result.setData(info);
         return result;
+    }
+
+    // 钱包兑换
+    @PostMapping("swap")
+    public Result swap(@RequestBody WalletSwap walletSwap) {
+        JWalletEntity walletEntity = WalletLoginInterceptor.walletUser();
+        jWalletTxnManager.exchange(walletSwap, walletEntity);
+        return new Result();
     }
 
     // 升级账户

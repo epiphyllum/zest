@@ -140,4 +140,6 @@ public class JCardEntity extends BaseEntity {
     private String fixedamountflag;
     private String permitCurrency;
     private Long vpaJob;  // 对应到哪个job
+
+    private Long relateId;
 }

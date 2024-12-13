@@ -28,9 +28,9 @@ public class JWalletConfigEntity extends BaseEntity {
     private String merchantName;
     private Long subId;
     private String subName;
-
-    // 充值费比例
+    // 充值/提现:费例
     private BigDecimal chargeRate;
+    private BigDecimal withdrawRate;
     // 最小充值金额
     private BigDecimal minHkd;
     private BigDecimal minUsd;
@@ -41,20 +41,21 @@ public class JWalletConfigEntity extends BaseEntity {
     private BigDecimal vpaOpenFee;
     private BigDecimal vccOpenFee;
     private BigDecimal realOpenFee;
-    private BigDecimal upgradeFee;  // 账户升级费
-
+    // 月费
+    private BigDecimal vpaMonthFee;
+    private BigDecimal vccMonthFee;
+    private BigDecimal realMonthFee;
+    // 账户升级费
+    private BigDecimal upgradeFee;
     // 电报配置
     private String telegramKey;
     private String telegramGroup;
     private String telegramHelp;
-
     // 对外接口
     private String domain;
     private String protocol;
-
     // 港币汇率
     private BigDecimal hkdRate;
-
     // 邮箱配置与域名
     private String mailHost;
     private String mailPort;

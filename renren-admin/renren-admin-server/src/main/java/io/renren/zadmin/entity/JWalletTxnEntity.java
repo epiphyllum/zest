@@ -30,15 +30,14 @@ public class JWalletTxnEntity extends BaseEntity {
 
     private Long walletId;
     private String walletName;
-    private Long channelId;
-    private String channelName;
 
+    // 交易
+    private String fromAsset;
+    private String toAsset;
+    private BigDecimal fromAmount;
+    private BigDecimal toAmount;
     private String txnCode;
-    private String currency;
-    private BigDecimal stlAmount;
-    private BigDecimal payAmount;
-    private String payCurrency;
-    private BigDecimal payCost;
+    private String memo;
 
     private String state; // 交易状态
 

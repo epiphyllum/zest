@@ -7,7 +7,13 @@ public class BalanceType {
     public static List<String> CURRENCY_LIST = List.of(
             "HKD", "USD", "GBP", "JPY", "CAD"
             , "AUD", "SGD", "SEK", "CHF", "DKK"
-            , "NOK", "ZAR", "EUR", "NZD", "CNY"
+            , "NOK", "ZAR", "EUR", "NZD", "CNY",
+
+            // 数字货币
+            "USDT",
+            "USDC",
+            "BTC",
+            "ETH"
     );
 
     // 商户VA
@@ -79,12 +85,6 @@ public class BalanceType {
     public static String getPrepaidSumAccount(String currency) {
         return "PREPAID_SUM_" + currency;
     }
-
-//    ////////////////////////////////////////////////////////////////////////////////////
-//    // 钱包主卡-额度
-//    public static String getWalletQuotaAccount(String currency) {
-//        return "WALLET_QUOTA_" + currency;
-//    }
 
     // 钱包主卡-发卡总额
     public static String getWalletSumAccount(String currency) {

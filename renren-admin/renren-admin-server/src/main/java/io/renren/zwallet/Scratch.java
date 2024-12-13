@@ -1,12 +1,18 @@
 package io.renren.zwallet;
 
+import cn.hutool.core.lang.Pair;
+import io.renren.commons.tools.utils.Result;
+import io.renren.zwallet.coinsync.TronSync;
+import jakarta.annotation.Resource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Properties;
 
 @RestController
@@ -39,7 +45,17 @@ public class Scratch {
             e.printStackTrace();
             return "fail";
         }
-
         return "ok";
+    }
+
+    @Resource
+    private TronSync tronSync;
+
+    @GetMapping("syncTron")
+    public Result<TronSync.FetchResult> syncTron(@RequestParam("address") String address) {
+        TronSync.FetchResult fetch = tronSync.fetch(address);
+        Result<TronSync.FetchResult> result = new Result<>();
+        result.setData(fetch);
+        return result;
     }
 }
