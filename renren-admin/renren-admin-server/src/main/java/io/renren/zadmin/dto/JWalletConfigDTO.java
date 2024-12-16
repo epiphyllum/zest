@@ -69,6 +69,12 @@ public class JWalletConfigDTO implements Serializable {
 
     @Schema(description = "升级费用")
     private BigDecimal upgradeFee;
+    @Schema(description = "提U手续费")
+    private BigDecimal usdtWithdrawFee;   // 1USDT
+    @Schema(description = "兑换U手续比例")
+    private BigDecimal usdtSwapRate;   // 1USDT
+    @Schema(description = "实名认证费用")
+    private BigDecimal verifyFee;         // 0
 
     ////////////////////////////////////////////
     @Schema(description = "邮箱配置")
@@ -94,6 +100,19 @@ public class JWalletConfigDTO implements Serializable {
     private String telegramGroup;
     @Schema(description = "telegramHelp")
     private String telegramHelp;
+
+    @Schema(description = "telegramHelp")
+    private String tronUrl;
+
+    // 推广参数
+    @Schema(description = "一级开卡分佣比例")
+    private BigDecimal s1OpenRate;
+    @Schema(description = "二级开卡分佣比例")
+    private BigDecimal s2OpenRate;
+    @Schema(description = "一级充值分佣比例")
+    private BigDecimal s1ChargeRate;
+    @Schema(description = "二充值分佣比例")
+    private BigDecimal s2ChargeRate;
 
     ////////////////////////////////////////////
     @Schema(description = "创建者")

@@ -42,17 +42,17 @@ public class JWalletTxnDTO implements Serializable {
     private String walletName;
 
     @Schema(description = "钱包ID")
-    private String fromAsset;
+    private String fromCurrency;
     @Schema(description = "钱包ID")
-    private String toAsset;
+    private String toCurrency;
     @Schema(description = "钱包ID")
     private BigDecimal fromAmount;
     @Schema(description = "钱包ID")
     private BigDecimal toAmount;
     @Schema(description = "交易代码")
     private String txnCode;
-    @Schema(description = "memo")
-    private String memo;
+    @Schema(description = "txnMemo")
+    private String txnMemo;
 
     @Schema(description = "状态")
     private String state;

@@ -14,12 +14,14 @@ import io.renren.zcommon.*;
 import io.renren.zwallet.config.WalletLoginInterceptor;
 import io.renren.zwallet.dto.WalletConfigInfo;
 import io.renren.zwallet.dto.WalletLoginRequest;
+import io.renren.zwallet.scan.TronApi;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -29,6 +31,10 @@ import java.util.stream.Collectors;
 @Slf4j
 public class JWalletUserManager {
 
+    @Resource
+    private RedisUtils redisUtils;
+    @Resource
+    private TronApi tronApi;
     @Resource
     private JBalanceDao jBalanceDao;
     @Resource
@@ -43,8 +49,6 @@ public class JWalletUserManager {
     private JSubDao jSubDao;
     @Resource
     private JCardDao jCardDao;
-    @Resource
-    private RedisUtils redisUtils;
     @Resource
     private TransactionTemplate tx;
     @Resource
@@ -94,6 +98,20 @@ public class JWalletUserManager {
         return randomString.toString();
     }
 
+    // 创建虚拟账户
+    private void createBalances(String email, Long walletId) {
+        // 港币账户
+        ledgerUtil.newBalance(
+                ZestConstant.USER_TYPE_WALLET, email, walletId,
+                BalanceType.getWalletAccount("HKD"), "HKD"
+        );
+        // 美元账户
+        ledgerUtil.newBalance(
+                ZestConstant.USER_TYPE_WALLET, email, walletId,
+                BalanceType.getWalletAccount("USD"), "USD"
+        );
+    }
+
     // 注册
     public String register(WalletLoginRequest request) {
         // 不是测试环境才需要验证otp
@@ -108,48 +126,70 @@ public class JWalletUserManager {
         walletEntity.setEmail(request.getEmail());
         walletEntity.setPassword(DigestUtil.md5Hex(request.getPassword()));
 
-        // 创建usdt钱包: todo
-        walletEntity.setUsdtKey(null);
-        walletEntity.setUsdtTrc20(null);
-
         // 设置ID
         fillByDomain(walletEntity);
+
+        // 配置信息
+        JWalletConfigEntity config = jWalletConfigDao.selectOne(Wrappers.<JWalletConfigEntity>lambdaQuery()
+                .eq(JWalletConfigEntity::getSubId, walletEntity.getSubId())
+        );
+
+        // 创建USDT钱包
+        TronApi.Account account = tronApi.create(config);
+        walletEntity.setUsdtTrc20Key(account.getKey());           // 私钥
+        walletEntity.setUsdtTrc20Address(account.getAddress());   // 地址
+        walletEntity.setUsdtTrc20Fetch(new Date());               // 最近同步时间
+        walletEntity.setUsdtTrc20Ts(1L);                          // 链上最近时间
+
+        // 推荐码
+        Long refcode = redisUtils.hInc("refcode:" + walletEntity.getMerchantId(), walletEntity.getSubId().toString(), 1L);
+        walletEntity.setRefcode(refcode.toString());
+
+        // 上级
+        JWalletEntity parent = jWalletDao.selectOne(Wrappers.<JWalletEntity>lambdaQuery()
+                .eq(JWalletEntity::getRefcode, request.getRefcode())
+        );
+        if (parent != null) {
+            walletEntity.setP1(parent.getId());
+            walletEntity.setP2(parent.getP1());
+        }
+
+        // 上上级
+        JWalletEntity grandParent;
+        if (walletEntity.getP2() != null) {
+            grandParent = jWalletDao.selectById(walletEntity.getP2());
+        } else {
+            grandParent = null;
+        }
 
         // 创建钱包
         try {
             tx.executeWithoutResult(status -> {
+
+                // 插入
                 jWalletDao.insert(walletEntity);
 
-                ledgerUtil.newBalance(
-                        ZestConstant.USER_TYPE_WALLET, request.getEmail(), walletEntity.getId(),
-                        BalanceType.getWalletAccount("HKD"), "HKD"
-                );
+                // 开设账户
+                createBalances(request.getEmail(), walletEntity.getId());
 
-                ledgerUtil.newBalance(
-                        ZestConstant.USER_TYPE_WALLET, request.getEmail(), walletEntity.getId(),
-                        BalanceType.getWalletAccount("USD"), "USD"
-                );
-
-                // USDT
-                ledgerUtil.newBalance(
-                        ZestConstant.USER_TYPE_WALLET, request.getEmail(), walletEntity.getId(),
-                        BalanceType.getWalletAccount("USDT"), "USDT"
-                );
-                // USDC
-                ledgerUtil.newBalance(
-                        ZestConstant.USER_TYPE_WALLET, request.getEmail(), walletEntity.getId(),
-                        BalanceType.getWalletAccount("USDC"), "USDC"
-                );
-                // BTC
-                ledgerUtil.newBalance(
-                        ZestConstant.USER_TYPE_WALLET, request.getEmail(), walletEntity.getId(),
-                        BalanceType.getWalletAccount("BTC"), "BTC"
-                );
-                // ETH
-                ledgerUtil.newBalance(
-                        ZestConstant.USER_TYPE_WALLET, request.getEmail(), walletEntity.getId(),
-                        BalanceType.getWalletAccount("ETH"), "ETH"
-                );
+                // 上上级增加了二级推荐数
+                if (grandParent != null) {
+                    jWalletDao.update(null, Wrappers.<JWalletEntity>lambdaUpdate()
+                            .eq(JWalletEntity::getId, grandParent.getId())
+                            .set(JWalletEntity::getVersion, grandParent.getVersion())
+                            .set(JWalletEntity::getVersion, grandParent.getVersion() + 1)
+                            .set(JWalletEntity::getS2Count, grandParent.getS2Count() + 1)
+                    );
+                }
+                // 上级增加了一级推荐数
+                if (parent != null) {
+                    jWalletDao.update(null, Wrappers.<JWalletEntity>lambdaUpdate()
+                            .eq(JWalletEntity::getId, parent.getId())
+                            .set(JWalletEntity::getVersion, parent.getVersion())
+                            .set(JWalletEntity::getVersion, parent.getVersion() + 1)
+                            .set(JWalletEntity::getS2Count, parent.getS2Count() + 1)
+                    );
+                }
             });
         } catch (DuplicateKeyException e) {
             throw new RenException("邮箱已被注册");
@@ -157,13 +197,7 @@ public class JWalletUserManager {
         return JwtUtil.genToken(walletEntity);
     }
 
-    private JWalletConfigEntity getConfigBySubId(Long subId) {
-        JWalletConfigEntity config = jWalletConfigDao.selectOne(Wrappers.<JWalletConfigEntity>lambdaQuery()
-                .eq(JWalletConfigEntity::getSubId, subId)
-        );
-        return config;
-    }
-
+    // 工具域名, 获取所属子商户的配置
     private JWalletConfigEntity getConfigByDomain(String domain) {
         JWalletConfigEntity config = jWalletConfigDao.selectOne(Wrappers.<JWalletConfigEntity>lambdaQuery()
                 .eq(JWalletConfigEntity::getDomain, domain)
@@ -171,10 +205,10 @@ public class JWalletUserManager {
         return config;
     }
 
+    // 依据域名填充钱包ID相关信息
     private void fillByDomain(JWalletEntity entity) {
         String domain = CommonUtils.getDomain();
         log.info("访问域名:{}", domain);
-
         JWalletConfigEntity config = getConfigByDomain(domain);
         entity.setAgentId(config.getAgentId());
         entity.setAgentName(config.getAgentName());
@@ -223,7 +257,7 @@ public class JWalletUserManager {
         jWalletDao.updateById(update);
     }
 
-    // reset
+    // 重置密码
     public void reset(String email) {
         JWalletEntity walletEntity = jWalletDao.selectOne(Wrappers.<JWalletEntity>lambdaQuery()
                 .eq(JWalletEntity::getEmail, email)
@@ -241,7 +275,11 @@ public class JWalletUserManager {
         );
     }
 
+    // 钱包各个资产余额
     public void attachBalance(List<JWalletDTO> list) {
+        if (list == null || list.size() == 0) {
+            return;
+        }
         List<Long> ownerIdList = list.stream().map(JWalletDTO::getId).toList();
         Map<Long, List<JBalanceEntity>> collect = jBalanceDao.selectList(Wrappers.<JBalanceEntity>lambdaQuery()
                 .in(JBalanceEntity::getOwnerId, ownerIdList)
@@ -257,6 +295,7 @@ public class JWalletUserManager {
         }
     }
 
+    // 接入密钥
     public void setAccessKey(String accessKey, JWalletEntity jWalletEntity) {
         jWalletDao.update(null, Wrappers.<JWalletEntity>lambdaUpdate()
                 .eq(JWalletEntity::getId, jWalletEntity.getId())
@@ -264,6 +303,7 @@ public class JWalletUserManager {
         );
     }
 
+    //  全局配置
     public WalletConfigInfo walletConfigInfo(JWalletEntity jWalletEntity) {
         JWalletConfigEntity jWalletConfigEntity = jWalletConfigDao.selectOne(Wrappers.<JWalletConfigEntity>lambdaQuery()
                 .eq(JWalletConfigEntity::getSubId, jWalletEntity.getSubId())

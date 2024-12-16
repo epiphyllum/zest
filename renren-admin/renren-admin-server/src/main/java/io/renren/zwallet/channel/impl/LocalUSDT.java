@@ -1,10 +1,7 @@
 package io.renren.zwallet.channel.impl;
 
-import io.renren.zadmin.dao.JWalletDao;
-import io.renren.zadmin.dao.JWalletTxnDao;
-import io.renren.zadmin.entity.JWalletEntity;
 import io.renren.zadmin.entity.JWalletTxnEntity;
-import io.renren.zwallet.channel.AbstractPayChannel;
+import io.renren.zwallet.channel.AbstractSwapChannel;
 import io.renren.zwallet.channel.ChannelContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
@@ -14,9 +11,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 @Slf4j
-public class LocalUSDT extends AbstractPayChannel {
+public class LocalUSDT extends AbstractSwapChannel {
     @Override
-    public String charge(JWalletTxnEntity txnEntity) {
+    public String swap(JWalletTxnEntity txnEntity) {
         ChannelContext context = getContext();
         RestTemplate restTemplate = context.getRestTemplate();
 

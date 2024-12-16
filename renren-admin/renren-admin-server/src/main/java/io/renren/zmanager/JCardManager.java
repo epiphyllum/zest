@@ -23,6 +23,7 @@ import io.renren.zin.cardmoney.dto.TCardBalanceRequest;
 import io.renren.zin.cardmoney.dto.TCardBalanceResponse;
 import io.renren.zin.cardstate.ZinCardStateService;
 import io.renren.zin.cardstate.dto.*;
+import io.renren.zwallet.ZWalletConstant;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -346,7 +347,7 @@ public class JCardManager {
                         if (jCardEntity.getCurrency().equals("HKD")) {
                             jWalletDao.update(null, Wrappers.<JWalletEntity>lambdaUpdate()
                                     .eq(JWalletEntity::getId, jCardEntity.getWalletId())
-                                    .set(JWalletEntity::getHkdLevel, ZinConstant.WALLET_LEVEL_PREMIUM)
+                                    .set(JWalletEntity::getHkdLevel, ZWalletConstant.WALLET_LEVEL_PREMIUM)
                                     .set(JWalletEntity::getHkdCardno, response.getCardno())
                                     .set(JWalletEntity::getHkdCardid, jCardEntity.getId())
                             );
@@ -355,7 +356,7 @@ public class JCardManager {
                         else if (jCardEntity.getCurrency().equals("USD")) {
                             jWalletDao.update(null, Wrappers.<JWalletEntity>lambdaUpdate()
                                     .eq(JWalletEntity::getId, jCardEntity.getWalletId())
-                                    .set(JWalletEntity::getUsdLevel, ZinConstant.WALLET_LEVEL_PREMIUM)
+                                    .set(JWalletEntity::getUsdLevel, ZWalletConstant.WALLET_LEVEL_PREMIUM)
                                     .set(JWalletEntity::getUsdCardno, response.getCardno())
                                     .set(JWalletEntity::getUsdCardid, jCardEntity.getId())
                             );
@@ -364,8 +365,8 @@ public class JCardManager {
                         // 钱包账户upgrade交易状态更新
                         jWalletTxnDao.update(null, Wrappers.<JWalletTxnEntity>lambdaUpdate()
                                 .eq(JWalletTxnEntity::getId, jCardEntity.getRelateId())
-                                .eq(JWalletTxnEntity::getState, ZinConstant.WALLET_TXN_STATUS_NEW)
-                                .set(JWalletTxnEntity::getState, ZinConstant.WALLET_TXN_STATUS_SUCCESS)
+                                .eq(JWalletTxnEntity::getState, ZWalletConstant.WALLET_TXN_STATUS_NEW)
+                                .set(JWalletTxnEntity::getState, ZWalletConstant.WALLET_TXN_STATUS_SUCCESS)
                         );
 
                     }
@@ -433,8 +434,8 @@ public class JCardManager {
                         // 钱包账户upgrade交易状态更新
                         jWalletTxnDao.update(null, Wrappers.<JWalletTxnEntity>lambdaUpdate()
                                 .eq(JWalletTxnEntity::getId, jCardEntity.getRelateId())
-                                .eq(JWalletTxnEntity::getState, ZinConstant.WALLET_TXN_STATUS_NEW)
-                                .set(JWalletTxnEntity::getState, ZinConstant.WALLET_TXN_STATUS_FAIL)
+                                .eq(JWalletTxnEntity::getState, ZWalletConstant.WALLET_TXN_STATUS_NEW)
+                                .set(JWalletTxnEntity::getState, ZWalletConstant.WALLET_TXN_STATUS_FAIL)
                         );
                     }
                 }

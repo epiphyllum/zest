@@ -1,11 +1,11 @@
-package io.renren.zwallet.coinsync;
+package io.renren.zwallet.scan;
 
 
-import cn.hutool.core.lang.Pair;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.mysql.cj.xdevapi.FetchResult;
+import io.renren.zadmin.entity.JScanEntity;
+import io.renren.zadmin.entity.JWalletEntity;
 import jakarta.annotation.Resource;
 import lombok.Data;
 import org.springframework.http.ResponseEntity;
@@ -18,14 +18,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class TronSync {
+public class TronScan {
     @Resource
     private RestTemplate restTemplate;
 
-
     @Data
     public static class FetchResult {
-        //        List<JTronEntity> items;
+        List<JScanEntity> items;
         Long lastTimestamp;
         Integer total;
         Integer processing;
@@ -35,14 +34,14 @@ public class TronSync {
     public static BigDecimal million = new BigDecimal("1000000");
     public static String USDT_CONTRACT = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t";
 
-    public FetchResult fetch(String accountAddress) {
+    public FetchResult fetch(String accountAddress, JWalletEntity walletEntity) {
         ResponseEntity<String> forEntity = restTemplate.getForEntity(url + accountAddress, String.class);
         String body = forEntity.getBody();
         JSONObject jsonObject = JSON.parseObject(body);
         JSONArray tokenTransfers = jsonObject.getJSONArray("token_transfers");
         Integer rangeTotal = jsonObject.getInteger("rangeTotal");
 
-//        List<Item> items = new ArrayList<>();
+        List<JScanEntity> items = new ArrayList<>();
         Long ts = -1L;
         Integer processing = 0;
         for (Object tokenTransfer : tokenTransfers) {
@@ -70,21 +69,34 @@ public class TronSync {
 
             System.out.println(fromAddress + "|" + toAddress + "|" + timestamp + "|" + finalResult + "|" + flag + amount);
 
-//            Item item = new Item();
-//            item.setFromAddress(fromAddress);
-//            item.setToAddress(toAddress);
-//            item.setAmount(amount);
-//            item.setTimestamp(timestamp);
-//            item.setTransactionId(transactionId);
-//            item.setFlag(flag);
-//            items.add(item);
+            JScanEntity item = new JScanEntity();
+            item.setFromAddress(fromAddress);
+            item.setToAddress(toAddress);
+            item.setAmount(amount);
+            item.setTs(timestamp);
+            item.setTxid(transactionId);
+            item.setFlag(flag);
+            item.setCurrency("USDT");
+            item.setNetwork("trc20");
+            fillItem(item, walletEntity);
+            items.add(item);
         }
         FetchResult fetchResult = new FetchResult();
-//        fetchResult.setItems(items);
+        fetchResult.setItems(items);
         fetchResult.setLastTimestamp(ts);
         fetchResult.setTotal(rangeTotal);
         fetchResult.setProcessing(processing);
         return fetchResult;
+    }
+
+    private void fillItem(JScanEntity item, JWalletEntity walletEntity) {
+        item.setAgentId(walletEntity.getAgentId());
+        item.setMerchantId(walletEntity.getAgentId());
+        item.setSubId(walletEntity.getAgentId());
+        item.setAgentName(walletEntity.getAgentName());
+        item.setMerchantName(walletEntity.getMerchantName());
+        item.setSubName(walletEntity.getSubName());
+        item.setWalletId(walletEntity.getId());
     }
 }
 

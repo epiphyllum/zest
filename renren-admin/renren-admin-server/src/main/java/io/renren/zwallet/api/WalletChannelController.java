@@ -4,7 +4,7 @@ import io.renren.commons.tools.exception.RenException;
 import io.renren.zadmin.dao.JWalletTxnDao;
 import io.renren.zadmin.entity.JWalletTxnEntity;
 import io.renren.zwallet.channel.ChannelFactory;
-import io.renren.zwallet.channel.PayChannel;
+import io.renren.zwallet.channel.SwapChannel;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -33,12 +33,12 @@ public class WalletChannelController {
             HttpServletResponse response
     ) throws IOException {
         log.info("收到支付回调, 子商户:{}, 渠道:{}, 订单号:{}", subId, channelId, orderId);
-        PayChannel channel = channelFactory.getChannel(channelId);
+        SwapChannel channel = channelFactory.getChannel(channelId);
         JWalletTxnEntity jWalletTxnEntity = jWalletTxnDao.selectById(orderId);
         if (jWalletTxnEntity == null) {
             throw new RenException("回调非法, 订单号不能存在:" + orderId);
         }
-        channel.chargeNotified(jWalletTxnEntity,request, response);
+        channel.swapNotified(jWalletTxnEntity,request, response);
     }
 
 }

@@ -33,18 +33,18 @@ public class WalletTxnController {
 
     // 钱包充值: 返回一个payUrl
     @PostMapping("charge")
-    public Result<WalletChargeResponse> charge(@RequestBody WalletChargeRequest request) {
-        WalletChargeResponse response = jWalletTxnManager.chargeWallet(request, WalletLoginInterceptor.walletUser());
-        Result<WalletChargeResponse> result = new Result<>();
+    public Result<CoinChargeResponse> charge(@RequestBody CoinChargeRequest request) {
+        CoinChargeResponse response = jWalletTxnManager.chargeCoin(request, WalletLoginInterceptor.walletUser());
+        Result<CoinChargeResponse> result = new Result<>();
         result.setData(response);
         return result;
     }
 
     // 钱包充值
     @PostMapping("withdraw")
-    public Result<WalletWithdrawResponse> withdraw(@RequestBody WalletWithdrawRequest request) {
-        WalletWithdrawResponse response = jWalletTxnManager.withdrawWallet(request, WalletLoginInterceptor.walletUser());
-        Result<WalletWithdrawResponse> result = new Result<>();
+    public Result<CoinWithdrawResponse> withdraw(@RequestBody CoinWithdrawRequest request) {
+        CoinWithdrawResponse response = jWalletTxnManager.withdrawCoin(request, WalletLoginInterceptor.walletUser());
+        Result<CoinWithdrawResponse> result = new Result<>();
         result.setData(response);
         return result;
     }

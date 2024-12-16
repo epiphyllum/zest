@@ -28,25 +28,24 @@ public class JWalletConfigEntity extends BaseEntity {
     private String merchantName;
     private Long subId;
     private String subName;
-    // 充值/提现:费例
-    private BigDecimal chargeRate;
-    private BigDecimal withdrawRate;
-    // 最小充值金额
-    private BigDecimal minHkd;
-    private BigDecimal minUsd;
-    // va最小余额
-    private BigDecimal minVaHkd;
-    private BigDecimal minVaUsd;
-    // 开卡费
-    private BigDecimal vpaOpenFee;
-    private BigDecimal vccOpenFee;
-    private BigDecimal realOpenFee;
-    // 月费
-    private BigDecimal vpaMonthFee;
-    private BigDecimal vccMonthFee;
-    private BigDecimal realMonthFee;
-    // 账户升级费
-    private BigDecimal upgradeFee;
+    // 收费项
+    private BigDecimal chargeRate;      // 卡充值1%
+    private BigDecimal withdrawRate;    // 卡提现1%
+    private BigDecimal usdtWithdrawFee; // 提U手续费
+    private BigDecimal usdtSwapRate;    // 兑换U手续费
+    private BigDecimal verifyFee;       // 实名认证手续费
+    private BigDecimal vpaOpenFee;      // 开卡费
+    private BigDecimal vccOpenFee;      // 开卡费
+    private BigDecimal realOpenFee;     // 开卡费
+    private BigDecimal vpaMonthFee;     // 月费
+    private BigDecimal vccMonthFee;     // 月费
+    private BigDecimal realMonthFee;    // 月费
+    private BigDecimal upgradeFee;      // 账户升级费(USD)
+    // 限制
+    private BigDecimal minHkd;         // 卡片最小充值金额
+    private BigDecimal minUsd;         // 卡片最小充值金额
+    private BigDecimal minVaHkd;       // 商户va告警余额
+    private BigDecimal minVaUsd;       // 商户va告警余额
     // 电报配置
     private String telegramKey;
     private String telegramGroup;
@@ -62,6 +61,13 @@ public class JWalletConfigEntity extends BaseEntity {
     private String mailUser;
     private String mailPass;
     private String mailFrom;
+    // tron节点基地址
+    private String tronUrl;
+    // 推广参数
+    private BigDecimal s1OpenRate;
+    private BigDecimal s2OpenRate;
+    private BigDecimal s1ChargeRate;
+    private BigDecimal s2ChargeRate;
 
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updater;

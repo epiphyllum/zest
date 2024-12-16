@@ -17,9 +17,11 @@ import io.renren.zcommon.ZestConfig;
 import io.renren.zcommon.ZinConstant;
 import io.renren.zmanager.JCardManager;
 import io.renren.zmanager.JExchangeManager;
+import io.renren.zwallet.ZWalletConstant;
 import io.renren.zwallet.channel.ChannelFactory;
-import io.renren.zwallet.channel.PayChannel;
+import io.renren.zwallet.channel.SwapChannel;
 import io.renren.zwallet.dto.*;
+import io.renren.zwallet.scan.TronApi;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,8 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Service
@@ -51,6 +55,8 @@ public class JWalletTxnManager {
     private JCardManager jCardManager;
     @Resource
     private JExchangeManager jExchangeManager;
+    @Resource
+    private TronApi tronApi;
 
     // 钱包详情
     public WalletInfo walletInfo(JWalletEntity entity) {
@@ -62,34 +68,44 @@ public class JWalletTxnManager {
         JBalanceEntity walletAccountHkd = ledgerUtil.getWalletAccount(entity.getId(), "HKD");
         JBalanceEntity walletAccountUsd = ledgerUtil.getWalletAccount(entity.getId(), "USD");
 
-        // 数字货币账户
-        JBalanceEntity walletAccountUsdt = ledgerUtil.getWalletAccount(entity.getId(), "USDT");
-        JBalanceEntity walletAccountUsdc = ledgerUtil.getWalletAccount(entity.getId(), "USDC");
-        JBalanceEntity walletAccountBtc = ledgerUtil.getWalletAccount(entity.getId(), "BTC");
-        JBalanceEntity walletAccountEth = ledgerUtil.getWalletAccount(entity.getId(), "ETH");
-
         // 余额设置
         walletInfo.setHkdBalance(walletAccountHkd.getBalance());
         walletInfo.setUsdBalance(walletAccountUsd.getBalance());
-        walletInfo.setUsdtBalance(walletAccountUsdt.getBalance());
-        walletInfo.setUsdcBalance(walletAccountUsdc.getBalance());
-        walletInfo.setBtcBalance(walletAccountBtc.getBalance());
-        walletInfo.setEthBalance(walletAccountEth.getBalance());
 
         // 钱包参数
-        JWalletConfigEntity jWalletConfigEntity = jWalletConfigDao.selectOne(Wrappers.<JWalletConfigEntity>lambdaQuery()
+        JWalletConfigEntity config = jWalletConfigDao.selectOne(Wrappers.<JWalletConfigEntity>lambdaQuery()
                 .eq(JWalletConfigEntity::getSubId, entity.getSubId())
         );
 
+        // 获取数字货币余额
+        attachCoinBalance(walletInfo, entity, config);
+
         // 换算预估资产
         BigDecimal estimate = walletInfo.getHkdBalance()
-                .divide(jWalletConfigEntity.getHkdRate(), 2, RoundingMode.HALF_UP)
+                .divide(config.getHkdRate(), 2, RoundingMode.HALF_UP)
                 .add(walletInfo.getUsdBalance())
                 .add(walletInfo.getUsdtBalance())
                 .add(walletInfo.getUsdcBalance());
 
         walletInfo.setUsdEstimate(estimate);
         return walletInfo;
+    }
+
+    private void attachCoinBalance(WalletInfo walletInfo, JWalletEntity entity, JWalletConfigEntity config) {
+        CompletableFuture<BigDecimal> usdtFuture = CompletableFuture.supplyAsync(() -> {
+            BigDecimal usdtBalance = tronApi.balanceUsdt(config, entity.getUsdtTrc20Address());
+            return usdtBalance;
+        });
+        CompletableFuture<Void> completed = CompletableFuture.allOf(usdtFuture);
+        try {
+            completed.get();
+            BigDecimal usdtBalance = usdtFuture.get();
+            walletInfo.setUsdtBalance(usdtBalance);
+        } catch (InterruptedException e) {
+            throw new RenException("查询失败");
+        } catch (ExecutionException e) {
+            throw new RenException("查询失败");
+        }
     }
 
     // 卡信息
@@ -156,6 +172,15 @@ public class JWalletTxnManager {
         // 创建账户升级交易
         JWalletTxnEntity upgradeTxn = createUpgradeTxn(walletConfig, walletEntity, dto.getCurrency());
 
+        // 查看如何是否足够
+        JBalanceEntity walletAccount = ledgerUtil.getWalletAccount(walletConfig.getId(), dto.getCurrency());
+        if (walletAccount.getBalance().compareTo(upgradeTxn.getFromAmount()) < 0) {
+            throw new RenException("余额不足");
+        }
+
+        // 插入
+        jWalletTxnDao.insert(upgradeTxn);
+
         // 创建主卡
         JCardEntity entity = ConvertUtils.sourceToTarget(dto, JCardEntity.class);
         entity.setApi(0);
@@ -174,20 +199,25 @@ public class JWalletTxnManager {
 
     // 创建账户升级交易
     private JWalletTxnEntity createUpgradeTxn(JWalletConfigEntity walletConfig, JWalletEntity walletEntity, String currency) {
+        // 创建钱包交易
+        JWalletTxnEntity txnEntity = new JWalletTxnEntity();
+        fillTxn(txnEntity, walletEntity);
+
         BigDecimal payAmount = walletConfig.getUpgradeFee();  // 美金计费的
-        BigDecimal stlAmount = null;
+        BigDecimal stlAmount;
         if (currency.equals("HKD")) {
             stlAmount = payAmount.multiply(walletConfig.getHkdRate()).setScale(2, RoundingMode.HALF_UP);
         } else {
             stlAmount = payAmount;
         }
-        // 创建钱包交易
-        JWalletTxnEntity txnEntity = new JWalletTxnEntity();
-        fillTxn(txnEntity, walletEntity);
-        txnEntity.setTxnCode(ZinConstant.WALLET_TXN_UPGRADE);
-        // todo
-        txnEntity.setState(ZinConstant.WALLET_TXN_STATUS_NEW);  // 新建
-        jWalletTxnDao.insert(txnEntity);
+        txnEntity.setFromCurrency(currency);
+        txnEntity.setFromAmount(stlAmount);
+        txnEntity.setToCurrency(currency);
+        txnEntity.setToAmount(stlAmount);
+        txnEntity.setFee(stlAmount);
+
+        txnEntity.setTxnCode(ZWalletConstant.WALLET_TXN_UPGRADE);
+        txnEntity.setState(ZWalletConstant.WALLET_TXN_STATUS_NEW);  // 新建
         return txnEntity;
     }
 
@@ -203,24 +233,40 @@ public class JWalletTxnManager {
         txnEntity.setSubName(walletEntity.getSubName());
     }
 
-    // 钱包充值:
-    public WalletChargeResponse chargeWallet(WalletChargeRequest request, JWalletEntity walletEntity) {
-        WalletChargeResponse response = new WalletChargeResponse();
+    // 钱包数字充值: 返回地址
+    public CoinChargeResponse chargeCoin(CoinChargeRequest request, JWalletEntity walletEntity) {
+        CoinChargeResponse response = new CoinChargeResponse();
         if (request.getCurrency().equals("USDT")) {
             if (request.getNetwork().equals("trc20")) {
-                response.setAddress(walletEntity.getUsdtTrc20());
+                response.setAddress(walletEntity.getUsdtTrc20Address());
                 return response;
             }
         }
         throw new RenException("暂不支持");
     }
 
-    // 钱包提现
-    public WalletWithdrawResponse withdrawWallet(WalletWithdrawRequest request, JWalletEntity jWalletEntity) {
+    // 钱包数字货币提现
+    public CoinWithdrawResponse withdrawCoin(CoinWithdrawRequest request, JWalletEntity jWalletEntity) {
         throw new RenException("暂不支持, 请联系管理员");
     }
 
-    // 换汇
+    // 兑换: 数字货币 -> 法币
+    public void swap(WalletSwap swap, JWalletEntity walletEntity) {
+        JWalletConfigEntity config = jWalletConfigDao.selectOne(
+                Wrappers.<JWalletConfigEntity>lambdaQuery()
+                        .eq(JWalletConfigEntity::getSubId, walletEntity.getSubId())
+        );
+        JWalletTxnEntity txnEntity = ConvertUtils.sourceToTarget(swap, JWalletTxnEntity.class);
+        fillTxn(txnEntity, walletEntity);
+        // usdt -> hkd
+        if (swap.getToCurrency().equals("HKD")) {
+        }
+
+        SwapChannel channel = channelFactory.getChannel(walletEntity.getSubId(), swap.getFromCurrency(), swap.getToCurrency());
+        channel.swap(txnEntity);
+    }
+
+    // 换汇: 法币换法币:  HKD <--> USD: todo
     public void exchange(WalletSwap exchange, JWalletEntity walletEntity) {
     }
 }

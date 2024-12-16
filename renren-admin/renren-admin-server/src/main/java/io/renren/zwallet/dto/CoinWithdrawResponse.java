@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 
 // 钱包提现
 @Data
-public class WalletWithdrawResponse {
+public class CoinWithdrawResponse {
     private BigDecimal amount; // 提现金额
     private String currency;   // 提现币种: USD, HKD
 }

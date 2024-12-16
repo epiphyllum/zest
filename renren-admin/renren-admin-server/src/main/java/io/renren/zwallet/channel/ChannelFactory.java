@@ -8,7 +8,7 @@ import io.renren.zadmin.dao.JWalletConfigDao;
 import io.renren.zadmin.dao.JWalletDao;
 import io.renren.zadmin.dao.JWalletTxnDao;
 import io.renren.zadmin.entity.JPayChannelEntity;
-import io.renren.zbalance.ledgers.Ledger610WalletCharge;
+import io.renren.zwallet.scan.TronApi;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
@@ -33,11 +33,11 @@ public class ChannelFactory {
     @Resource
     private ObjectMapper objectMapper;
     @Resource
-    private Ledger610WalletCharge ledger610WalletCharge;
-    @Resource
     private TransactionTemplate tx;
     @Resource
     private JWalletDao jWalletDao;
+    @Resource
+    private TronApi tronApi;
 
     private ChannelContext channelContext;
 
@@ -50,17 +50,17 @@ public class ChannelFactory {
                 restTemplate,
                 objectMapper,
                 jWalletTxnDao,
-                ledger610WalletCharge,
+                tronApi,
                 tx
         );
     }
 
     // 创建支付渠道对象
-    private PayChannel createChannel(JPayChannelEntity channelEntity) {
+    private SwapChannel createChannel(JPayChannelEntity channelEntity) {
         try {
             String className = "io.renren.zwallet.channel.impl." + channelEntity.getChannelCode();
             Class<?> aClass = Class.forName(className);
-            PayChannel channel = (PayChannel) aClass.getDeclaredConstructor().newInstance();
+            SwapChannel channel = (SwapChannel) aClass.getDeclaredConstructor().newInstance();
             channel.setContext(channelContext);
             channel.setConfig(channelEntity);
             return channel;
@@ -71,7 +71,7 @@ public class ChannelFactory {
     }
 
     // 选择支付渠道
-    public PayChannel getChannel(Long subId, String payCurrency, String stlCurrency) {
+    public SwapChannel getChannel(Long subId, String payCurrency, String stlCurrency) {
         List<JPayChannelEntity> channels = jPayChannelDao.selectList(Wrappers.<JPayChannelEntity>lambdaQuery()
                 .eq(JPayChannelEntity::getSubId, subId)
                 .eq(JPayChannelEntity::getPayCurrency, payCurrency)
@@ -83,14 +83,14 @@ public class ChannelFactory {
         }
         int index = new Random().nextInt(channels.size());
         JPayChannelEntity jPayChannelEntity = channels.get(index);
-        PayChannel channel = createChannel(jPayChannelEntity);
+        SwapChannel channel = createChannel(jPayChannelEntity);
         return channel;
     }
 
     // 根据渠道ID获取支付渠道
-    public PayChannel getChannel(Long channelId) {
+    public SwapChannel getChannel(Long channelId) {
         JPayChannelEntity channelEntity = jPayChannelDao.selectById(channelId);
-        PayChannel channel = createChannel(channelEntity);
+        SwapChannel channel = createChannel(channelEntity);
         return channel;
     }
 

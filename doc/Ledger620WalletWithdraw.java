@@ -31,11 +31,11 @@ public class Ledger620WalletWithdraw {
     // 钱包-提现
     public void ledgeWalletWithdraw(JWalletTxnEntity entity) {
         // 记账: 钱包-
-        JBalanceEntity walletAccount = ledgerUtil.getWalletAccount(entity.getWalletId(), entity.getFromAsset());
+        JBalanceEntity walletAccount = ledgerUtil.getWalletAccount(entity.getWalletId(), entity.getFromCurrency());
         if (walletAccount.getBalance().compareTo(entity.getFromAmount()) < 0)  {
             throw new RenException("余额不足");
         }
-        String factMemo = String.format("提现:%s %s", entity.getFromAmount(), entity.getFromAsset());
+        String factMemo = String.format("提现:%s %s", entity.getFromAmount(), entity.getFromCurrency());
         BigDecimal factAmount = entity.getFromAmount();
         ledgerUtil.freezeUpdate(walletAccount, ORIGIN_TYPE_WALLET_WITHDRAW, FACT_WALLET_WITHDRAW_OUT_WALLET, entity.getId(), factMemo, factAmount);
     }

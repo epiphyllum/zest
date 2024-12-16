@@ -27,18 +27,18 @@ public class JWalletTxnEntity extends BaseEntity {
     private String merchantName;
     private Long subId;
     private String subName;
-
+    // 钱包
     private Long walletId;
     private String walletName;
-
     // 交易
-    private String fromAsset;
-    private String toAsset;
+    private String fromCurrency;
+    private String toCurrency;
     private BigDecimal fromAmount;
     private BigDecimal toAmount;
     private String txnCode;
-    private String memo;
-
+    private BigDecimal fee;
+    private String txnMemo;
+    //
     private String state; // 交易状态
 
     @TableField(fill = FieldFill.INSERT_UPDATE)

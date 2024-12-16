@@ -4,6 +4,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 
+// 钱包卡信息
 @Data
 public class WalletCard {
     private String cardno;             // 卡号

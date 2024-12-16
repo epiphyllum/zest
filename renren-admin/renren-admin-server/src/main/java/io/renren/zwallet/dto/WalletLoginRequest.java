@@ -7,4 +7,5 @@ public class WalletLoginRequest {
     private String email;
     private String password;
     private String otp;
+    private String refcode;
 }

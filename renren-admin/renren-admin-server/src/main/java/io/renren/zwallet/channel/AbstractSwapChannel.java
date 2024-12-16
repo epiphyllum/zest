@@ -2,7 +2,7 @@ package io.renren.zwallet.channel;
 
 import io.renren.zadmin.entity.JPayChannelEntity;
 
-public abstract class AbstractPayChannel implements PayChannel {
+public abstract class AbstractSwapChannel implements SwapChannel {
     private ChannelContext context;
     private JPayChannelEntity channelEntity;
 

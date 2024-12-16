@@ -10,6 +10,7 @@ import io.renren.zbalance.LedgerUtil;
 import io.renren.zcommon.CommonUtils;
 import io.renren.zcommon.ZinConstant;
 import io.renren.zmanager.*;
+import io.renren.zwallet.ZWalletConstant;
 import io.renren.zwallet.dto.WalletCardChargeRequest;
 import io.renren.zwallet.dto.WalletCardOpenRequest;
 import io.renren.zwallet.dto.WalletCardWithdrawRequest;
@@ -47,20 +48,17 @@ public class JWalletCardManager {
     private JCommon jCommon;
 
     private JCardEntity getMainCard(JWalletEntity walletEntity, String currency) {
-
         // 如果港币账户是高级账户
-        if (currency.equals("HKD") && walletEntity.getHkdLevel().equals(ZinConstant.WALLET_LEVEL_PREMIUM)) {
+        if (currency.equals("HKD") && walletEntity.getHkdLevel().equals(ZWalletConstant.WALLET_LEVEL_PREMIUM)) {
             log.info("使用用户专享HKD主卡");
             return jCardDao.selectById(walletEntity.getHkdCardid());
         }
-
         // 如果美元账户是高级账户
-        if (currency.equals("USD") && walletEntity.getUsdLevel().equals(ZinConstant.WALLET_LEVEL_PREMIUM)) {
+        if (currency.equals("USD") && walletEntity.getUsdLevel().equals(ZWalletConstant.WALLET_LEVEL_PREMIUM)) {
             log.info("使用用户专享USD主卡");
             return jCardDao.selectById(walletEntity.getUsdCardid());
         }
 
-        log.info("共享子商户主卡...");
         // 共享子商户的钱包主卡
         List<JCardEntity> jCardEntities = jCardDao.selectList(Wrappers.<JCardEntity>lambdaQuery()
                 .eq(JCardEntity::getSubId, walletEntity.getSubId())
@@ -68,7 +66,6 @@ public class JWalletCardManager {
                 .eq(JCardEntity::getMarketproduct, ZinConstant.MP_VPA_MAIN_WALLET)
                 .isNull(JCardEntity::getWalletId)
         );
-        // todo: 选择用哪个卡
         return jCardEntities.get(0);
     }
 
@@ -116,7 +113,7 @@ public class JWalletCardManager {
         job.setEnddate(expireDate);
         job.setBegindate(DateUtils.format(new Date(), DateUtils.DATE_PATTERN));
 
-        // 接收邮件: todo
+        // 接收邮件
         job.setEmail(walletEntity.getEmail());
 
         // 期限卡
