@@ -24,10 +24,10 @@ public class TronScan {
 
     @Data
     public static class FetchResult {
-        List<JScanEntity> items;
-        Long lastTimestamp;
-        Integer total;
-        Integer processing;
+        List<JScanEntity> items; // 记录
+        Long lastTimestamp;      // 最后时间戳
+        Integer total;           // 总笔数
+        Integer processing;      // 处理中的交易
     }
 
     public static String url = "https://apilist.tronscanapi.com/api/filter/trc20/transfers?limit=20&start=0&sort=-timestamp&count=true&filterTokenValue=0&relatedAddress=";

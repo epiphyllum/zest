@@ -2,7 +2,6 @@ package io.renren.zbalance.ledgers;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.zadmin.dao.JCardDao;
-import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.entity.JBalanceEntity;
 import io.renren.zadmin.entity.JCardEntity;
 import io.renren.zadmin.entity.JDepositEntity;
@@ -19,21 +18,19 @@ import java.math.BigDecimal;
 @Slf4j
 public class Ledger600CardCharge {
     // 卡充值
-    public static final int ORIGIN_TYPE_CARD_CHARGE = 600;                    // 卡充值
-    public static final int FACT_CARD_CHARGE_FREEZE_SUB_VA = 60000;           // 0. 冻结va资金
-    public static final int FACT_CARD_CHARGE_UNFREEZE_SUB_VA = 60001;         // 1. 解冻va资金
-    public static final int FACT_CARD_CHARGE_CONFIRM_SUB_VA = 60002;          // 2. 确认va资金
-    public static final int FACT_CARD_CHARGE_IN_CARD_SUM = 60003;             // 3. 子商户-卡汇总充值
-    public static final int FACT_CARD_CHARGE_IN_DEPOSIT = 60004;              // 4. 子商户-保证金收取
-    public static final int FACT_CARD_CHARGE_IN_CHARGE = 60005;               // 5. 子商户-保证金收取
-    public static final int FACT_CARD_CHARGE_IN_AIP_DEPOSIT = 60006;          // 6. 通联累计保证金
-    public static final int FACT_CARD_CHARGE_IN_AIP_CHARGE = 60007;           // 7. 通联累计充值手续费
-    public static final int FACT_CARD_CHARGE_IN_AIP_CARD_SUM = 60008;         // 8. 通联累计手续费
-    public static final int FACT_CARD_CHARGE_IN_PREPAID_QUOTA = 60009;         // 9. 如果是预付费卡: 需要入金预付费主卡账户
-    public static final int FACT_CARD_CHARGE_IN_WALLET_QUOTA = 60010;          // 10. 如果是钱包主卡: 需要入金
+    public static final int ORIGIN_TYPE_CARD_CHARGE = 600;               // 卡充值
+    public static final int FACT_CARD_CHARGE_FREEZE_SUB_VA = 60000;      // 0. 冻结va资金
+    public static final int FACT_CARD_CHARGE_UNFREEZE_SUB_VA = 60001;    // 1. 解冻va资金
+    public static final int FACT_CARD_CHARGE_CONFIRM_SUB_VA = 60002;     // 2. 确认va资金
+    public static final int FACT_CARD_CHARGE_IN_CARD_SUM = 60003;        // 3. 子商户-卡汇总充值
+    public static final int FACT_CARD_CHARGE_IN_DEPOSIT = 60004;         // 4. 子商户-保证金收取
+    public static final int FACT_CARD_CHARGE_IN_CHARGE = 60005;          // 5. 子商户-保证金收取
+    public static final int FACT_CARD_CHARGE_IN_AIP_DEPOSIT = 60006;     // 6. 通联累计保证金
+    public static final int FACT_CARD_CHARGE_IN_AIP_CHARGE = 60007;      // 7. 通联累计充值手续费
+    public static final int FACT_CARD_CHARGE_IN_AIP_CARD_SUM = 60008;    // 8. 通联累计手续费
+    public static final int FACT_CARD_CHARGE_IN_PREPAID_QUOTA = 60009;   // 9. 如果是预付费卡: 需要入金预付费主卡账户
+    public static final int FACT_CARD_CHARGE_IN_WALLET_QUOTA = 60010;    // 10. 如果是钱包主卡: 需要入金
 
-    @Resource
-    private JMerchantDao jMerchantDao;
     @Resource
     private LedgerUtil ledgerUtil;
     @Resource
@@ -80,7 +77,7 @@ public class Ledger600CardCharge {
                 entity.getAmount(), entity.getMerchantDeposit(), entity.getMerchantCharge());
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // 记账1: 子商户VA确认冻结
+        // 记账1: 子商户VA-确认冻结
         JBalanceEntity subVa = ledgerUtil.getSubVaAccount(sub.getId(), entity.getCurrency());
         ledgerUtil.confirmUpdate(subVa, ORIGIN_TYPE_CARD_CHARGE, FACT_CARD_CHARGE_CONFIRM_SUB_VA, entity.getId(), factMemo, factAmount);
 
@@ -89,44 +86,35 @@ public class Ledger600CardCharge {
         BigDecimal cardSumAmount = entity.getAmount();
         ledgerUtil.ledgeUpdate(cardSum, ORIGIN_TYPE_CARD_CHARGE, FACT_CARD_CHARGE_IN_CARD_SUM, entity.getId(), factMemo, cardSumAmount);
 
-        // 记账3: 子商户-保证金
+        // 记账3: 子商户-保证金总额
         JBalanceEntity deposit = ledgerUtil.getDepositAccount(sub.getId(), entity.getCurrency());
         ledgerUtil.ledgeUpdate(deposit, ORIGIN_TYPE_CARD_CHARGE, FACT_CARD_CHARGE_IN_DEPOSIT, entity.getId(), factMemo, entity.getMerchantDeposit());
 
-        // 记账4: 子商户-手续费
+        // 记账4: 子商户-手续费总额
         JBalanceEntity charge = ledgerUtil.getChargeAccount(sub.getId(), entity.getCurrency());
         ledgerUtil.ledgeUpdate(charge, ORIGIN_TYPE_CARD_CHARGE, FACT_CARD_CHARGE_IN_CHARGE, entity.getId(), factMemo, entity.getMerchantCharge());
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // 通联-累计充值金额
+        // 通联累计-充值金额总额
         JBalanceEntity aipCardSum = ledgerUtil.getAipCardSumAccount(sub.getId(), entity.getCurrency());
         ledgerUtil.ledgeUpdate(aipCardSum, ORIGIN_TYPE_CARD_CHARGE, FACT_CARD_CHARGE_IN_AIP_CARD_SUM, entity.getId(), factMemo, entity.getTxnAmount());
 
-        // 通联-累计保证金额
+        // 通联累计-保证金额
         JBalanceEntity depositSum = ledgerUtil.getAipDepositAccount(sub.getId(), entity.getCurrency());
         ledgerUtil.ledgeUpdate(depositSum, ORIGIN_TYPE_CARD_CHARGE, FACT_CARD_CHARGE_IN_AIP_DEPOSIT, entity.getId(), factMemo, entity.getSecurityamount());
 
-        // 通联-累计手续费金额
+        // 通联累计-手续费金额
         JBalanceEntity aipCharge = ledgerUtil.getAipChargeAccount(sub.getId(), entity.getCurrency());
         ledgerUtil.ledgeUpdate(aipCharge, ORIGIN_TYPE_CARD_CHARGE, FACT_CARD_CHARGE_IN_AIP_CHARGE, entity.getId(), factMemo, entity.getFee());
 
+        ///////////////////////////////////////////////////////////////////////////////////
         // 预付费主卡充值:
         if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_PREPAID)) {
-            JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
-                    .eq(JCardEntity::getCardno, entity.getCardno())
-            );
+            JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery().eq(JCardEntity::getCardno, entity.getCardno()));
+            // 预付费卡可发卡额度
             JBalanceEntity prepaidQuota = ledgerUtil.getPrepaidQuotaAccount(cardEntity.getId(), cardEntity.getCurrency());
             ledgerUtil.ledgeUpdate(prepaidQuota, ORIGIN_TYPE_CARD_CHARGE, FACT_CARD_CHARGE_IN_PREPAID_QUOTA, entity.getId(), factMemo, entity.getAmount());
         }
-
-//        // 钱包主卡充值
-//        else if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_WALLET)) {
-//            JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
-//                    .eq(JCardEntity::getCardno, entity.getCardno())
-//            );
-//            JBalanceEntity walletQuota = ledgerUtil.getWalletQuotaAccount(cardEntity.getId(), cardEntity.getCurrency());
-//            ledgerUtil.ledgeUpdate(walletQuota, ORIGIN_TYPE_CARD_CHARGE, FACT_CARD_CHARGE_IN_WALLET_QUOTA, entity.getId(), factMemo, entity.getAmount());
-//        }
-
     }
+
 }

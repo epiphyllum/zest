@@ -13,6 +13,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 
+/**
+ * 释放商户担保金
+ */
 @Service
 @Slf4j
 public class Ledger900Mfree {
@@ -22,11 +25,7 @@ public class Ledger900Mfree {
     public static final int FACT_MFREE_IN = 90002;                 // 2. 商户账户  +100HKD
 
     @Resource
-    private JMerchantDao jMerchantDao;
-    @Resource
     private LedgerUtil ledgerUtil;
-    @Resource
-    private JCardDao jCardDao;
 
     // 释放商户担保金
     public void ledgeMfree(JMfreeEntity entity) {

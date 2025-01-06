@@ -28,11 +28,12 @@ public class Ledger503OpenVpaWallet {
     public static int FACT_VPA_WALLET_OPEN_UNFREEZE_WALLET = 50306;
     public static int FACT_VPA_WALLET_OPEN_CONFIRM_WALLET = 50307;
 
+    // 开卡佣金记账
     @Resource
     private Ledger607WalletCommission ledger607WalletOpenCommission;
+    // 开卡充值记账
     @Resource
     private Ledger608WalletChargeCommission ledger608WalletChargeCommission;
-
 
     @Resource
     private JWalletDao jWalletDao;
@@ -56,11 +57,8 @@ public class Ledger503OpenVpaWallet {
         // 子商户va扣除费用冻结
         ledgerUtil.freezeUpdate(subVa, ORIGIN_VPA_WALLET_OPEN, FACT_VPA_WALLET_OPEN_FREEZE_SUB_VA, entity.getId(), factMemo, factAmount);
 
-        // 批量开卡: 主卡额度冻结
-        // ledger604WalletCardOpenCharge.ledgeWalletOpenChargeFreeze(entity);
-
         // 替商户记录钱包用户的帐
-        this.ledgeUserFreeze(entity);
+        this.ledgeWalletFreeze(entity);
     }
 
     // 解冻:批量-开通钱包子卡
@@ -74,7 +72,7 @@ public class Ledger503OpenVpaWallet {
         // ledger604WalletCardOpenCharge.ledgeWalletOpenChargeUnFreeze(entity);
 
         // 子商户用户记账
-        this.ledgeUserUnFreeze(entity);
+        this.ledgeWalletUnFreeze(entity);
     }
 
     // 确认: 钱包子卡开通成功
@@ -102,11 +100,13 @@ public class Ledger503OpenVpaWallet {
                 Ledger500OpenCard.FACT_CARD_OPEN_IN_CARD_COUNT, entity.getId(), factMemo, new BigDecimal(entity.getNum()));
 
         // 子商户用户记账
-        this.ledgeUser(entity);
+        this.ledgeWallet(entity);
     }
 
     ///////////////////////////
-    private void ledgeUserFreeze(JVpaJobEntity entity) {
+    // 钱包记账
+    ///////////////////////////
+    private void ledgeWalletFreeze(JVpaJobEntity entity) {
         JBalanceEntity wallet = ledgerUtil.getWalletAccount(entity.getWalletId(), entity.getProductcurrency());
 
         // 替子商户记账: 冻结钱包账户: 开卡收费 + 每张卡本身充值费用
@@ -120,7 +120,7 @@ public class Ledger503OpenVpaWallet {
                 .setScale(2, RoundingMode.HALF_UP);
 
         // 用户开卡费
-        BigDecimal cardFee = null;
+        BigDecimal cardFee;
         if (entity.getProductcurrency().equals("HKD")) {
             cardFee = jWalletConfigEntity.getVpaOpenFee()
                     .multiply(new BigDecimal(entity.getNum()))
@@ -145,7 +145,7 @@ public class Ledger503OpenVpaWallet {
         ledgerUtil.freezeUpdate(wallet, ORIGIN_VPA_WALLET_OPEN, FACT_VPA_WALLET_OPEN_FREEZE_WALLET, entity.getId(), factMemo, factAmount);
     }
 
-    private void ledgeUserUnFreeze(JVpaJobEntity entity) {
+    private void ledgeWalletUnFreeze(JVpaJobEntity entity) {
         JBalanceEntity wallet = ledgerUtil.getWalletAccount(entity.getWalletId(), entity.getProductcurrency());
         // 替子商户记账: 冻结钱包账户: 开卡收费 + 每张卡本身充值费用
         JWalletConfigEntity jWalletConfigEntity = jWalletConfigDao.selectOne(Wrappers.<JWalletConfigEntity>lambdaQuery()
@@ -157,14 +157,15 @@ public class Ledger503OpenVpaWallet {
                 .setScale(2, RoundingMode.HALF_UP);
         // 用户开卡费
         BigDecimal cardFee = jWalletConfigEntity.getVccOpenFee()
-                .multiply(new BigDecimal(entity.getNum())).setScale(2, RoundingMode.HALF_UP);
+                .multiply(new BigDecimal(entity.getNum()))
+                .setScale(2, RoundingMode.HALF_UP);
         // 充值手续费: 0 (因为是收款的时候就扣了充值手续费了)
         BigDecimal factAmount = principal.add(principal).add(cardFee);
         String factMemo = String.format("开通%d张卡, 总面值:%s, 开卡费:%s, 合计:%s", entity.getNum(), principal, cardFee, factAmount);
         ledgerUtil.unFreezeUpdate(wallet, ORIGIN_VPA_WALLET_OPEN, FACT_VPA_WALLET_OPEN_UNFREEZE_WALLET, entity.getId(), factMemo, factAmount);
     }
 
-    private void ledgeUser(JVpaJobEntity entity) {
+    private void ledgeWallet(JVpaJobEntity entity) {
         JBalanceEntity wallet = ledgerUtil.getWalletAccount(entity.getWalletId(), entity.getProductcurrency());
         // 替子商户记账: 冻结钱包账户: 开卡收费 + 每张卡本身充值费用
         JWalletConfigEntity walletConfig = jWalletConfigDao.selectOne(Wrappers.<JWalletConfigEntity>lambdaQuery()
@@ -181,18 +182,17 @@ public class Ledger503OpenVpaWallet {
         String factMemo = String.format("开通%d张卡, 总面值:%s, 开卡费:%s, 合计:%s", entity.getNum(), principal, cardFee, factAmount);
         ledgerUtil.confirmUpdate(wallet, ORIGIN_VPA_WALLET_OPEN, FACT_VPA_WALLET_OPEN_CONFIRM_WALLET, entity.getId(), factMemo, factAmount);
 
-        ledgeUserCommission(entity, walletConfig, principal, cardFee);
+        ledgeWalletCommission(entity, walletConfig, principal, cardFee);
     }
 
     // 用户返佣记账
-    private void ledgeUserCommission(JVpaJobEntity entity, JWalletConfigEntity walletConfig, BigDecimal principal, BigDecimal cardFee) {
+    private void ledgeWalletCommission(JVpaJobEntity entity, JWalletConfigEntity walletConfig, BigDecimal principal, BigDecimal cardFee) {
 
         JWalletEntity walletEntity = jWalletDao.selectById(entity.getWalletId());
         JWalletEntity parent = jWalletDao.selectById(walletEntity.getP1());
 
         // 开卡返佣
         ledger607WalletOpenCommission.ledgeOpenCommission1(entity, cardFee, walletEntity, walletConfig);
-        // 充值返佣
 
         // 更新统计
         jWalletDao.update(null, Wrappers.<JWalletEntity>lambdaUpdate()
@@ -248,7 +248,7 @@ public class Ledger503OpenVpaWallet {
         }
     }
 
-    // 填充交易
+    // 钱包填充交易
     private void fillTxn(JWalletTxnEntity txnEntity, JWalletEntity walletEntity) {
         txnEntity.setWalletId(walletEntity.getId());
         txnEntity.setWalletName(walletEntity.getEmail());

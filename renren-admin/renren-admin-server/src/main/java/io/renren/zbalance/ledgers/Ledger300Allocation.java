@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+// 子商户-商户  va互转
 @Service
 @Slf4j
 public class Ledger300Allocation {
@@ -25,11 +26,7 @@ public class Ledger300Allocation {
     public static final int FACT_S2M_OUT_SUB_VA = 40002;                      // 2. 商户VA
 
     @Resource
-    private JMerchantDao jMerchantDao;
-    @Resource
     private LedgerUtil ledgerUtil;
-    @Resource
-    private JCardDao jCardDao;
 
     // 商户va ---> 子商户va
     public void ledgeM2s(JAllocateEntity entity) {

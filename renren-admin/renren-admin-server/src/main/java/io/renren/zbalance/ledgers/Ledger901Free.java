@@ -9,6 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 
+/**
+ * 通联释放担保金
+ */
 @Service
 @Slf4j
 public class Ledger901Free {
@@ -16,6 +19,7 @@ public class Ledger901Free {
     public static final int ORIGIN_TYPE_FREE = 901;                // 通联释放担保金
     public static final int FACT_FREE_OUT = 90001;                 //
     public static final int FACT_FREE_IN = 90002;                  //
+
     @Resource
     private JMerchantDao jMerchantDao;
     @Resource

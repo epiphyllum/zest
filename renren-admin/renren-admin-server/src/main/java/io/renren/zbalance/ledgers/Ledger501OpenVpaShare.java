@@ -1,7 +1,5 @@
 package io.renren.zbalance.ledgers;
 
-import io.renren.zadmin.dao.JCardDao;
-import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.entity.JBalanceEntity;
 import io.renren.zadmin.entity.JVpaJobEntity;
 import io.renren.zbalance.LedgerUtil;
@@ -24,13 +22,7 @@ public class Ledger501OpenVpaShare {
     public static final int FACT_VPA_SHARE_OPEN_IN_AIP_CARD_FEE = 50104;      // 5. 通联开卡费 - 0
 
     @Resource
-    private JMerchantDao jMerchantDao;
-    @Resource
     private LedgerUtil ledgerUtil;
-    @Resource
-    private JCardDao jCardDao;
-    @Resource
-    private Ledger601PrepaidOpenCharge ledger601PrepaidOpenCharge;
 
     // 共享子卡卡费
     public void ledgeOpenVpaShareFreeze(JVpaJobEntity entity) {
@@ -68,7 +60,7 @@ public class Ledger501OpenVpaShare {
         // 子商户发卡数量增加
         JBalanceEntity cardCount = ledgerUtil.getCardCountAccount(entity.getSubId(), entity.getCurrency());
         ledgerUtil.ledgeUpdate(cardCount, Ledger500OpenCard.ORIGIN_CARD_OPEN,
-                Ledger500OpenCard.FACT_CARD_OPEN_IN_CARD_COUNT, entity.getId(), "开卡1张", new BigDecimal(entity.getNum()));
+                Ledger500OpenCard.FACT_CARD_OPEN_IN_CARD_COUNT, entity.getId(), "开卡", new BigDecimal(entity.getNum()));
 
     }
 }

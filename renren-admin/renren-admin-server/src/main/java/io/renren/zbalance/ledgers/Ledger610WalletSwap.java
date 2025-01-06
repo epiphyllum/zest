@@ -7,7 +7,6 @@ import io.renren.zbalance.LedgerUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 
 // 钱包兑换
@@ -22,10 +21,11 @@ public class Ledger610WalletSwap {
     @Resource
     private LedgerUtil ledgerUtil;
 
+    // 兑换钱包
     public void ledgeWalletSwap(JWalletTxnEntity entity) {
         JBalanceEntity walletAccount = ledgerUtil.getWalletAccount(entity.getWalletId(), entity.getToCurrency());
         if (walletAccount == null) {
-            log.error("账号不存在: {} {}", entity.getWalletId(), entity.getToCurrency());
+            log.error("账号不存在: {}{}", entity.getWalletId(), entity.getToCurrency());
             throw new RenException("账号不存在");
         }
         String factMemo = String.format("钱包充值:%s%s", entity.getToAmount(), entity.getToCurrency());

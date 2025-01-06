@@ -2,7 +2,6 @@ package io.renren.zbalance.ledgers;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.zadmin.dao.JCardDao;
-import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.entity.JBalanceEntity;
 import io.renren.zadmin.entity.JCardEntity;
 import io.renren.zadmin.entity.JVpaAdjustEntity;
@@ -13,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 
+// 其实不会有提现操作
 @Service
 @Slf4j
 public class Ledger603PrepaidWithdraw {
@@ -21,8 +21,6 @@ public class Ledger603PrepaidWithdraw {
     public static final int FACT_PREPAID_WITHDRAW_IN_PREPAID_QUOTA = 60300;              // 1: 调增主卡剩余额度
     public static final int FACT_PREPAID_WITHDRAW_OUT_PREPAID_SUM = 60301;               // 2: 发卡总额减
 
-    @Resource
-    private JMerchantDao jMerchantDao;
     @Resource
     private LedgerUtil ledgerUtil;
     @Resource

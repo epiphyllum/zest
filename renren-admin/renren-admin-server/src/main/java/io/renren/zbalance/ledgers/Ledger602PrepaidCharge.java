@@ -2,7 +2,6 @@ package io.renren.zbalance.ledgers;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.zadmin.dao.JCardDao;
-import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.entity.JBalanceEntity;
 import io.renren.zadmin.entity.JCardEntity;
 import io.renren.zadmin.entity.JVpaAdjustEntity;
@@ -23,8 +22,6 @@ public class Ledger602PrepaidCharge {
     public static final int FACT_PREPAID_CHARGE_IN_PREPAID_SUM = 60203;                  // 4. 钱包子卡发卡总额
 
     @Resource
-    private JMerchantDao jMerchantDao;
-    @Resource
     private LedgerUtil ledgerUtil;
     @Resource
     private JCardDao jCardDao;
@@ -41,7 +38,6 @@ public class Ledger602PrepaidCharge {
         // 记账
         JBalanceEntity prepaidQuota = ledgerUtil.getPrepaidQuotaAccount(cardEntity.getId(), cardEntity.getCurrency());
         ledgerUtil.freezeUpdate(prepaidQuota, ORIGIN_TYPE_PREPAID_CHARGE, FACT_PREPAID_CHARGE_FREEZE_PREPAID_QUOTA, entity.getId(), factMemo, factAmount);
-
     }
 
     // 预付费子卡 单笔充值解冻(调整主卡可用额度)
@@ -58,7 +54,7 @@ public class Ledger602PrepaidCharge {
         ledgerUtil.unFreezeUpdate(prepaidQuota, ORIGIN_TYPE_PREPAID_CHARGE, FACT_PREPAID_CHARGE_UNFREEZE_PREPAID_QUOTA, entity.getId(), factMemo, factAmount);
     }
 
-    // 预防费子卡 单笔开卡充值确认(调整主卡可用额度)
+    // 预付费子卡 单笔开卡充值确认(调整主卡可用额度)
     public void ledgePrepaidCharge(JVpaAdjustEntity entity) {
         String maincardno = entity.getMaincardno();
         JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery().eq(JCardEntity::getCardno, maincardno));

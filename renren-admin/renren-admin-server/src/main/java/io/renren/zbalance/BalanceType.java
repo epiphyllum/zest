@@ -8,7 +8,6 @@ public class BalanceType {
             "HKD", "USD", "GBP", "JPY", "CAD"
             , "AUD", "SGD", "SEK", "CHF", "DKK"
             , "NOK", "ZAR", "EUR", "NZD", "CNY",
-
             // 数字货币
             "USDT",
             "USDC",
@@ -89,20 +88,18 @@ public class BalanceType {
     public static String getPrepaidQuotaAccount(String currency) {
         return "PREPAID_QUOTA_" + currency;
     }
-
     //预付费卡主卡-发卡总额
     public static String getPrepaidSumAccount(String currency) {
         return "PREPAID_SUM_" + currency;
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////
     // 钱包主卡-发卡总额
     public static String getWalletSumAccount(String currency) {
         return "WALLET_SUM_" + currency;
     }
-
     // 钱包账户
     public static String getWalletAccount(String currency) {
         return "WALLET_" + currency;
     }
-
 }

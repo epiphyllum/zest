@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class Ledger100MoneyIn {
     // 入金充值
-    public static final int ORIGIN_TYPE_MONEY = 100;                          // 入金充值
-    public static final int FACT_MONEY_IN_VA = 10001;                         // 1. 商户VA        +94HKD
+    public static final int ORIGIN_TYPE_MONEY = 100;  // 商户入金充值
+    public static final int FACT_MONEY_IN_VA = 10001; // 1. 商户VA
 
     @Resource
     private LedgerUtil ledgerUtil;
@@ -20,7 +20,7 @@ public class Ledger100MoneyIn {
     // 原始凭证(100):  收到商户入金
     public void ledgeMoneyIn(JMoneyEntity entity) {
         JBalanceEntity vaAccount = ledgerUtil.getVaAccount(entity.getMerchantId(), entity.getCurrency());
-        String factMemo = "入金:" + entity.getAmount() + entity.getCurrency();
+        String factMemo = "商户入金" + entity.getAmount() + entity.getCurrency();
         ledgerUtil.ledgeUpdate(vaAccount, ORIGIN_TYPE_MONEY, FACT_MONEY_IN_VA, entity.getId(), factMemo, entity.getAmount());
     }
 

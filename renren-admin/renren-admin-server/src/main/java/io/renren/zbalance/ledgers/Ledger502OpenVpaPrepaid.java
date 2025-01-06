@@ -1,7 +1,5 @@
 package io.renren.zbalance.ledgers;
 
-import io.renren.zadmin.dao.JCardDao;
-import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.entity.JBalanceEntity;
 import io.renren.zadmin.entity.JVpaJobEntity;
 import io.renren.zbalance.LedgerUtil;
@@ -12,6 +10,10 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+
+/**
+ * 开通预付费卡
+ */
 @Service
 @Slf4j
 public class Ledger502OpenVpaPrepaid {
@@ -25,11 +27,7 @@ public class Ledger502OpenVpaPrepaid {
     public static final int FACT_VPA_PREPAID_OPEN_IN_AIP_CARD_FEE = 50204;    // 5. 通联开卡成本 - 0
 
     @Resource
-    private JMerchantDao jMerchantDao;
-    @Resource
     private LedgerUtil ledgerUtil;
-    @Resource
-    private JCardDao jCardDao;
     @Resource
     private Ledger601PrepaidOpenCharge ledger601PrepaidOpenCharge;
 
@@ -80,7 +78,6 @@ public class Ledger502OpenVpaPrepaid {
         JBalanceEntity cardCount = ledgerUtil.getCardCountAccount(entity.getSubId(), entity.getCurrency());
         ledgerUtil.ledgeUpdate(cardCount, Ledger500OpenCard.ORIGIN_CARD_OPEN,
                 Ledger500OpenCard.FACT_CARD_OPEN_IN_CARD_COUNT, entity.getId(), "批量开" + entity.getNum() + "张卡", new BigDecimal(entity.getNum()));
-
     }
 }
 

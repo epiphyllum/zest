@@ -16,17 +16,20 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+/**
+ * 卡提现
+ */
 @Service
 @Slf4j
 public class Ledger700CardWithdraw {
     // 卡提现
     public static final int ORIGIN_TYPE_CARD_WITHDRAW = 700;               // 卡提现
-    public static final int FACT_CARD_WITHDRAW_IN_SUB_VA = 70001;          // 3. 子商户-VA+
+    public static final int FACT_CARD_WITHDRAW_IN_SUB_VA = 70001;          // 1. 子商户-VA+
     public static final int FACT_CARD_WITHDRAW_OUT_CARD_SUM = 70002;       // 2. 子商户-卡汇总资金账户(确认成功)
-    public static final int FACT_CARD_WITHDRAW_OUT_CARD_CHARGE = 70003;    // 2. 子商户-退手续费
-    public static final int FACT_CARD_WITHDRAW_OUT_AIP_CHARGE = 70004;     // 5. 通联-退手续费
-    public static final int FACT_CARD_WITHDRAW_OUT_AIP_CARD_SUM = 70005;   // 6. 通联-卡汇总资金
-    public static final int FACT_CARD_WITHDRAW_OUT_PREPAID_QUOTA = 70006;  // 9. 如果是预防费主卡: 预付费主卡可以余额减少
+    public static final int FACT_CARD_WITHDRAW_OUT_CARD_CHARGE = 70003;    // 3. 子商户-退手续费
+    public static final int FACT_CARD_WITHDRAW_OUT_AIP_CHARGE = 70004;     // 4. 通联-退手续费
+    public static final int FACT_CARD_WITHDRAW_OUT_AIP_CARD_SUM = 70005;   // 5. 通联-卡汇总资金
+    public static final int FACT_CARD_WITHDRAW_OUT_PREPAID_QUOTA = 70006;  // 6. 如果是预防费主卡: 预付费主卡可以余额减少
 
     @Resource
     private LedgerUtil ledgerUtil;
@@ -47,14 +50,16 @@ public class Ledger700CardWithdraw {
 
         // 记账: 子商户-Va:  amount + abs(merchantfee)
         ledgerUtil.ledgeUpdate(subVa, ORIGIN_TYPE_CARD_WITHDRAW, FACT_CARD_WITHDRAW_IN_SUB_VA, entity.getId(), factMemo, factAmount.add(entity.getMerchantfee().negate()));
-        // 记账: 子商户-卡汇总资金
+
+        // 记账: 子商户汇总-卡汇总资金
         ledgerUtil.ledgeUpdate(cardSum, ORIGIN_TYPE_CARD_WITHDRAW, FACT_CARD_WITHDRAW_OUT_CARD_SUM, entity.getId(), factMemo, factAmount.negate());
-        // 记账: 通联-卡充值汇总
-        ledgerUtil.ledgeUpdate(aipCardSum, ORIGIN_TYPE_CARD_WITHDRAW, FACT_CARD_WITHDRAW_OUT_AIP_CARD_SUM, entity.getId(), factMemo, entity.getAmount().negate());
-        // 记账: 子商户-手续费汇总 merchantfee已经是负数
+        // 记账: 子商户汇总-手续费 merchantfee已经是负数
         ledgerUtil.ledgeUpdate(charge, ORIGIN_TYPE_CARD_WITHDRAW, FACT_CARD_WITHDRAW_OUT_CARD_CHARGE, entity.getId(), factMemo, entity.getMerchantfee());
-        // 记账: 通联-手续费汇总  fee已经是负数
+
+        // 记账: 通联汇总-手续费汇总  fee已经是负数
         ledgerUtil.ledgeUpdate(aipCharge, ORIGIN_TYPE_CARD_WITHDRAW, FACT_CARD_WITHDRAW_OUT_AIP_CHARGE, entity.getId(), factMemo, entity.getFee());
+        // 记账: 通联汇总-卡充值
+        ledgerUtil.ledgeUpdate(aipCardSum, ORIGIN_TYPE_CARD_WITHDRAW, FACT_CARD_WITHDRAW_OUT_AIP_CARD_SUM, entity.getId(), factMemo, entity.getAmount().negate());
 
         // 预付费主卡提现
         if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_PREPAID)) {
@@ -64,11 +69,11 @@ public class Ledger700CardWithdraw {
             JBalanceEntity ppMain = ledgerUtil.getPrepaidQuotaAccount(cardEntity.getId(), cardEntity.getCurrency());
             ledgerUtil.ledgeUpdate(ppMain, ORIGIN_TYPE_CARD_WITHDRAW, FACT_CARD_WITHDRAW_OUT_PREPAID_QUOTA, entity.getId(), factMemo, factAmount.negate());
         }
-
-        // 钱包主卡提现: 不允许!!!
+        // 钱包主卡提现: not permitted
         else if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_WALLET)) {
             log.error("钱包主卡不允许提现");
             throw new RenException("not permitted");
         }
+
     }
 }

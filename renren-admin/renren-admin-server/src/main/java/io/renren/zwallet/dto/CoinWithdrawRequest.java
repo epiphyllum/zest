@@ -4,7 +4,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 
-//
+// 数字货币提现
 @Data
 public class CoinWithdrawRequest {
     private BigDecimal amount;    // 提现金额
