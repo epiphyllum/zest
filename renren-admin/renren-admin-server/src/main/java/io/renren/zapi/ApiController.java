@@ -25,17 +25,17 @@ public class ApiController {
                              @RequestHeader("x-merchant-id") Long merchantId,
                              @RequestHeader("x-sign") String sign,
                              @RequestHeader("x-req-id") String reqId,
-                             @RequestHeader("x-api-name") String name,
+                             @RequestHeader("x-api-name") String apiName,
                              @RequestHeader(value = "x-file-suffix", required = false) String suffix
     ) {
         // 是否为文件上传
-        if (name.equals("upload")) {
+        if (apiName.equals("upload")) {
             if (StringUtils.isBlank(suffix)) {
                 throw new RenException("required header: x-file-suffix");
             }
-            return apiFileService.upload(merchantId, reqId, name, body, sign, suffix);
+            return apiFileService.upload(merchantId, reqId, body, sign, suffix);
         }
-        return apiService.invokeService(body, merchantId, sign, reqId, name);
+        return apiService.invokeService(body, merchantId, sign, reqId, apiName);
     }
 
     // 通知我们的商户
@@ -45,9 +45,9 @@ public class ApiController {
             @RequestHeader("x-merchant-id") Long merchantId,
             @RequestHeader("x-sign") String sign,
             @RequestHeader("x-req-id") String reqId,
-            @RequestHeader("x-api-name") String name
+            @RequestHeader("x-api-name") String apiName
     ) {
-        apiNotifyMock.handle(name);
+        apiNotifyMock.handle(apiName);
         return "OK";
     }
 

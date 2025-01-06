@@ -61,7 +61,6 @@ public class ZinLogger {
             }
             jChannelLogDao.insert(logEntity);
         });
-
     }
 
 }

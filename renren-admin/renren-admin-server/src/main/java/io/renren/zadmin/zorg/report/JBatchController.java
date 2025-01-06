@@ -58,6 +58,7 @@ public class JBatchController {
         return new Result<PageData<JBatchDTO>>().ok(page);
     }
 
+    // 导出
     @GetMapping("export")
     @Operation(summary = "导出")
     @LogOperation("导出")
@@ -67,6 +68,7 @@ public class JBatchController {
         ExcelUtils.exportExcelToTarget(response, null, "j_batch", list, JBatchExcel.class);
     }
 
+    // 匹处理
     @GetMapping("run")
     @Operation(summary = "运行批处理")
     @LogOperation("允许批处理")
@@ -78,6 +80,7 @@ public class JBatchController {
         return new Result<>();
     }
 
+    // 重新运行
     @GetMapping("rerun")
     @Operation(summary = "重新运行批处理")
     @LogOperation("重新运行批处理")

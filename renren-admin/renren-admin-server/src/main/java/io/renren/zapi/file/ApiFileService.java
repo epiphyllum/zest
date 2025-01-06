@@ -37,11 +37,11 @@ public class ApiFileService {
     private ZinFileService zinFileService;
 
     // 文件上传
-    public Result<UploadRes> upload(Long merchantId, String reqId, String name, String body, String sign, String suffix) {
+    public Result<UploadRes> upload(Long merchantId, String reqId, String body, String sign, String suffix) {
         JMerchantEntity merchant = jMerchantDao.selectById(merchantId);
 
-        // 验证签名
-        if (zestConfig.isDev()) {
+        // 不是开发环境, 才验证签名
+        if (!zestConfig.isDev()) {
             String bodyDigest = DigestUtil.sha256Hex(body);
             String toSign = bodyDigest + reqId + merchantId;
             Sign merchantVerifier = apiService.getMerchantVerifier(merchant);
@@ -81,7 +81,8 @@ public class ApiFileService {
         // 应答
         Result<UploadRes> result = new Result<>();
         UploadRes uploadRes = new UploadRes(filename);
-        uploadRes.setFid(filename);;
+        uploadRes.setFid(filename);
+        ;
         result.setData(uploadRes);
         return result;
     }

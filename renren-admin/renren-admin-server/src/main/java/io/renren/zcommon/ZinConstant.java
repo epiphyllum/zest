@@ -194,15 +194,13 @@ public class ZinConstant {
     }};
 
     // vpa场景类型
-    public static final String VPA_CYCLE_DEADLINE = "1";      // 期限
-    public static final String VPA_CYCLE_PERIODICAL = "2";    // 周期
-    public static final String VPA_CYCLE_ONCE = "3";          // 期限
+    public static final String VPA_CYCLE_DEADLINE = "1";     // 期限
+    public static final String VPA_CYCLE_PERIODICAL = "2";   // 周期
+    public static final String VPA_CYCLE_ONCE = "3";         // 期限
     // VPA卡场景变更结果
-    public static final String VPA_ADJUST_UNKNOWN = "00"; //
-    public static final String VPA_ADJUST_SUCCESS = "55"; //
-    public static final String VPA_ADJUST_FAIL = "99";
-
-
+    public static final String VPA_ADJUST_UNKNOWN = "00";    // 中间态
+    public static final String VPA_ADJUST_SUCCESS = "55";    // 成功
+    public static final String VPA_ADJUST_FAIL = "99";       // 失败
 
 }
 

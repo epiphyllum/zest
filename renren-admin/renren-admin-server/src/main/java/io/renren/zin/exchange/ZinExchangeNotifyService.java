@@ -28,7 +28,6 @@ public class ZinExchangeNotifyService {
 
     // 申请单状态通知: 2004
     public void handle(TExchangeStateNotify notify) {
-        String state = notify.getState();
         // 汇款充值外部资金汇入: 暂时用不到
         if (notify.getTrxcode().equals("CP201")) {
             cp201.handle(notify);

@@ -25,6 +25,7 @@ public class ZinCardTxnService {
         return requester.request(uniqueId(), "/gcpapi/card/qrytrans", query, TAuthSettledResponse.class);
     }
 
+    // 同步结算流水
     public void syncSettledAuth(String date) {
         TAuthSettledQuery request = new TAuthSettledQuery();
         request.setEntrydate(date);

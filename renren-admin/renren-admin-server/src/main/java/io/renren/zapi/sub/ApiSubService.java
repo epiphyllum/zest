@@ -25,8 +25,8 @@ public class ApiSubService {
     @Resource
     private JSubManager jSubManager;
 
+    // 创建子商户
     public Result<SubCreateRes> subCreate(SubCreate request, ApiContext context) {
-
         // 准备数据
         JMerchantEntity merchant = context.getMerchant();
         JSubEntity subEntity = ConvertUtils.sourceToTarget(request, JSubEntity.class);
@@ -47,6 +47,7 @@ public class ApiSubService {
         return result;
     }
 
+    // 查询子商户
     public Result<SubQueryRes> subQuery(SubQuery request, ApiContext context) {
         JSubEntity subEntity = jSubDao.selectById(request.getSubId());
         if (subEntity == null) {

@@ -23,6 +23,7 @@ public class CommonUtils {
     private static final String BASE62_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private static final String BASE36_CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
+    // base62编码
     public static String base62(long number) {
         StringBuilder sb = new StringBuilder();
         while (number > 0) {
@@ -32,6 +33,7 @@ public class CommonUtils {
         return sb.toString();
     }
 
+    // base36编码
     public static String base36(long number) {
         StringBuilder sb = new StringBuilder();
         while (number > 0) {
@@ -41,10 +43,12 @@ public class CommonUtils {
         return sb.toString();
     }
 
+    // 今日日期
     public static Date todayDate() {
         return DateUtils.parse(DateUtils.format(new Date(), DateUtils.DATE_PATTERN), DateUtils.DATE_PATTERN);
     }
 
+    // 日期减法
     public static Date dateSubtract(Date input, int n) {
         Calendar calendar = Calendar.getInstance(); // 获取当前日期的Calendar实例
         calendar.setTime(input);
@@ -72,6 +76,7 @@ public class CommonUtils {
         }
     }
 
+    // 域名
     public static String getDomain() {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         String hostHeader = request.getHeader("Host");
@@ -84,13 +89,14 @@ public class CommonUtils {
 
     }
 
+    // 格式化为元
     public static String yuan(Long fen) {
         DecimalFormat df = new DecimalFormat("#.00");
         return df.format(fen / 100.0);
     }
 
+    // 商户日志
     private static ConcurrentHashMap<String, Logger> loggerCache = new ConcurrentHashMap<>();
-
     public static Logger getLogger(String name) {
         Logger cache = loggerCache.get(name);
         if (cache != null) {

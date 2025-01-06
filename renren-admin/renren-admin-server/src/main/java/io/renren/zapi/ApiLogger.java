@@ -32,9 +32,6 @@ public class ApiLogger {
                 packetEntity.setSend(objectMapper.writeValueAsString(result));
                 jPacketDao.insert(packetEntity);
             } catch (Exception ex) {
-
-
-
                 ex.printStackTrace();
                 return;
             }

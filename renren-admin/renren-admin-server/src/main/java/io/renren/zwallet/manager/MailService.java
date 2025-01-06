@@ -21,8 +21,10 @@ public class MailService {
     @Resource
     private JWalletConfigDao jWalletConfigDao;
 
+    // 子商户的邮箱发送配置
     private Map<Long, Pair<JWalletConfigEntity, JavaMailSenderImpl>> mailSenderMap = new ConcurrentHashMap<>();
 
+    // 配置邮箱
     private Pair<JWalletConfigEntity, JavaMailSenderImpl> getMailSender(JWalletConfigEntity entity) {
         JavaMailSenderImpl sender = new JavaMailSenderImpl();
         sender.setHost(entity.getMailHost());

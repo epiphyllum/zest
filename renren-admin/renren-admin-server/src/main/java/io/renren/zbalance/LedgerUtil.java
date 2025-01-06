@@ -342,14 +342,6 @@ public class LedgerUtil {
         );
     }
 
-//    // 钱包主卡 额度账户
-//    public JBalanceEntity getWalletQuotaAccount(Long ownerId, String currency) {
-//        return jBalanceDao.selectOne(Wrappers.<JBalanceEntity>lambdaQuery()
-//                .eq(JBalanceEntity::getOwnerId, ownerId)
-//                .eq(JBalanceEntity::getBalanceType, BalanceType.getWalletQuotaAccount(currency))
-//        );
-//    }
-
     // 钱包发卡总额
     public JBalanceEntity getWalletSumAccount(Long ownerId, String currency) {
         return jBalanceDao.selectOne(Wrappers.<JBalanceEntity>lambdaQuery()

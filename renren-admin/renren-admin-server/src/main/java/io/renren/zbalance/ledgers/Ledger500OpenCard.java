@@ -2,8 +2,6 @@ package io.renren.zbalance.ledgers;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.tools.exception.RenException;
-import io.renren.zadmin.dao.JCardDao;
-import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.dao.JWalletConfigDao;
 import io.renren.zadmin.entity.JBalanceEntity;
 import io.renren.zadmin.entity.JCardEntity;
@@ -16,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.sql.Wrapper;
 
 @Service
 @Slf4j
@@ -31,9 +28,9 @@ public class Ledger500OpenCard {
     // 这个是多个地方共用的
     public static final int FACT_CARD_OPEN_IN_CARD_COUNT = 5005;      // 5. 开卡统计
     // 钱包记账
-    public static final int FACT_CARD_OPEN_FREEZE_WALLET = 5006;      // 6.
-    public static final int FACT_CARD_OPEN_UNFREEZE_WALLET = 5007;    // 7.
-    public static final int FACT_CARD_OPEN_CONFIRM_WALLET = 5008;     // 8.
+    public static final int FACT_CARD_OPEN_FREEZE_WALLET = 5006;      // 6.  开卡冻结钱包
+    public static final int FACT_CARD_OPEN_UNFREEZE_WALLET = 5007;    // 7.  开卡解冻钱包-取消开卡
+    public static final int FACT_CARD_OPEN_CONFIRM_WALLET = 5008;     // 8.  确认开卡
 
     @Resource
     private LedgerUtil ledgerUtil;
@@ -50,8 +47,7 @@ public class Ledger500OpenCard {
         if (entity.getCurrency().equals("USD")) {
             factMemo = "美元账户升级, 收费:" + upgradeFee + "USD";
             ledgerUtil.freezeUpdate(walletAccount, ORIGIN_CARD_OPEN, FACT_CARD_OPEN_FREEZE_WALLET, entity.getId(), factMemo, upgradeFee);
-        }
-        else if (entity.getCurrency().equals("HKD")) {
+        } else if (entity.getCurrency().equals("HKD")) {
             BigDecimal hkdRate = jWalletConfigEntity.getHkdRate();
             upgradeFee = upgradeFee.multiply(hkdRate).setScale(2, RoundingMode.HALF_UP);
             factMemo = "港币账户升级, 收费:" + factAmount + "HKD";
@@ -71,8 +67,7 @@ public class Ledger500OpenCard {
             if (entity.getCurrency().equals("USD")) {
                 factMemo = "美元账户升级, 收费:" + factAmount + "USD";
                 ledgerUtil.unFreezeUpdate(walletAccount, ORIGIN_CARD_OPEN, FACT_CARD_OPEN_UNFREEZE_WALLET, entity.getId(), factMemo, factAmount);
-            }
-            else if (entity.getCurrency().equals("HKD")) {
+            } else if (entity.getCurrency().equals("HKD")) {
                 BigDecimal hkdRate = jWalletConfigEntity.getHkdRate();
                 upgradeFee = upgradeFee.multiply(hkdRate).setScale(2, RoundingMode.HALF_UP);
                 factMemo = "港币账户升级, 收费:" + factAmount + "HKD";
@@ -90,8 +85,7 @@ public class Ledger500OpenCard {
         if (entity.getCurrency().equals("USD")) {
             factMemo = "美元账户升级, 收费:" + upgradeFee + "USD";
             ledgerUtil.confirmUpdate(walletAccount, ORIGIN_CARD_OPEN, FACT_CARD_OPEN_CONFIRM_WALLET, entity.getId(), factMemo, upgradeFee);
-        }
-        else if (entity.getCurrency().equals("HKD")) {
+        } else if (entity.getCurrency().equals("HKD")) {
             BigDecimal hkdRate = jWalletConfigEntity.getHkdRate();
             upgradeFee = upgradeFee.multiply(hkdRate).setScale(2, RoundingMode.HALF_UP);
             factMemo = "港币账户升级, 收费:" + upgradeFee + "HKD";

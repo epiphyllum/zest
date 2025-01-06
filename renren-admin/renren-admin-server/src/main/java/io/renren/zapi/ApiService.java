@@ -52,17 +52,10 @@ public class ApiService {
 
     @Resource
     private ApiLogger apiLogger;
-
-    @Resource
-    private ZestConfig zestConfig;
     @Resource
     private ObjectMapper objectMapper;
     @Resource
     private JMerchantDao jMerchantDao;
-    @Resource
-    private RestTemplate restTemplate;
-    @Resource
-    private JPacketDao jPacketDao;
 
     // 服务模块
     @Resource

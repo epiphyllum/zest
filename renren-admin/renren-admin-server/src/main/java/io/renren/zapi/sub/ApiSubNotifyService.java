@@ -12,6 +12,7 @@ public class ApiSubNotifyService {
     @Resource
     private ApiNotifyService apiNotifyService;
 
+    // 子商户创建通知
     public void subNotify(JSubEntity entity, JMerchantEntity merchant) {
         SubNotify notify = new SubNotify(entity.getId(), entity.getCusname(), entity.getState());
         apiNotifyService.notifyMerchant(notify, merchant, "subNotify");

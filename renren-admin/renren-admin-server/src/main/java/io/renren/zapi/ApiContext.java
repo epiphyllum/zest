@@ -11,6 +11,8 @@ import lombok.Data;
 @AllArgsConstructor
 public class ApiContext {
     private static final ThreadLocal<ApiContext> API_CONTEXT_THREAD_LOCAL = new TransmittableThreadLocal<>();
+
+    // 上下文
     public static void setContext(ApiContext context) {
         API_CONTEXT_THREAD_LOCAL.set(context);
     }
@@ -20,6 +22,11 @@ public class ApiContext {
     public static void clear() {
         API_CONTEXT_THREAD_LOCAL.remove();
     }
+
+    //
+    JMerchantEntity merchant;  // 哪个商户
+    Logger logger;  // 日志对象
+
     public void error(String format, Object arg) {
         logger.error(format, arg);
     }
@@ -50,7 +57,4 @@ public class ApiContext {
     public void debug(String format, Object arg) { logger.debug(format, arg); }
     public void debug(String format, Object arg1, Object arg2) { logger.debug(format, arg1, arg2); }
     public void debug(String format, Object... arguments) { logger.debug(format, arguments); }
-    JMerchantEntity merchant;
-    Logger logger;
-
 }

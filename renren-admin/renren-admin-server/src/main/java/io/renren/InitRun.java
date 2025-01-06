@@ -17,18 +17,14 @@ import java.util.Properties;
 @Component
 public class InitRun implements CommandLineRunner {
     @Resource
-    private ZestConfig zestConfig;
-    @Resource
     private JConfigDao jConfigDao;
-    @Resource
-    private JVaManager jVaManager;
 
     @Override
     public void run(String... args) throws Exception {
         initConfig();
-//        jVaManager.refresh(); // 更新余额
     }
 
+    // 平台配置
     public void initConfig() {
         System.out.println("创建平台配置....");
         List<JConfigEntity> jConfigEntities = jConfigDao.selectList(Wrappers.emptyWrapper());
@@ -41,6 +37,4 @@ public class InitRun implements CommandLineRunner {
         entity.setVccMainVirtual("0000");
         jConfigDao.insert(entity);
     }
-
-
 }

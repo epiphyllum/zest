@@ -4,13 +4,13 @@ import io.renren.commons.security.user.SecurityUser;
 
 public class ZestConstant {
     // 账户属主类型
-    public static final String USER_TYPE_OPERATION = "operation";
-    public static final String USER_TYPE_AGENT = "agent";
-    public static final String USER_TYPE_MERCHANT = "merchant";
-    public static final String USER_TYPE_SUB = "sub";
-    public static final String USER_TYPE_PREPAID = "prepaid";
-    public static final String USER_TYPE_WALLET = "wallet";
-    public static final String USER_TYPE_WCARD = "wcard";
+    public static final String USER_TYPE_OPERATION = "operation"; // 机构
+    public static final String USER_TYPE_AGENT = "agent";         // 代理
+    public static final String USER_TYPE_MERCHANT = "merchant";   // 商户
+    public static final String USER_TYPE_SUB = "sub";             // 子商户
+    public static final String USER_TYPE_PREPAID = "prepaid";     // 预付费卡
+    public static final String USER_TYPE_WCARD = "wcard";         // 钱包卡
+    public static final String USER_TYPE_WALLET = "wallet";       // 钱包账户
 
     public static boolean isOperation() {
         return USER_TYPE_OPERATION.equals(SecurityUser.getUser().getUserType());

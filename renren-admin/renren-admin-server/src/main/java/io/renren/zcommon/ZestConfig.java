@@ -25,7 +25,6 @@ public class ZestConfig {
     private String cdnUrl;                // cdn地址
     private String baseUrl;               // 接口地址
     private String uploadDir;             // 上传文件路径
-    private Map<String, String> mainMap;  // vcc产品类型-> 主卡卡号
 
     @Bean
     public RestTemplate restTemplate() {
