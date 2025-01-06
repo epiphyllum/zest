@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.zadmin.dao.JFeeConfigDao">
+
+    <resultMap type="io.renren.zadmin.entity.JFeeConfigEntity" id="jFeeConfigMap">
+        <result property="id" column="id"/>
+        <result property="merchantId" column="merchant_id"/>
+        <result property="merchantName" column="merchant_name"/>
+        <result property="marketproduct" column="marketproduct"/>
+        <result property="costDepositRate" column="cost_deposit_rate"/>
+        <result property="costChargeRate" column="cost_charge_rate"/>
+        <result property="costL50" column="cost_l50"/>
+        <result property="costGef50" column="cost_gef50"/>
+        <result property="costFailFee" column="cost_fail_fee"/>
+        <result property="costDisputeFee" column="cost_dispute_fee"/>
+        <result property="depositRate" column="deposit_rate"/>
+        <result property="chargeRate" column="charge_rate"/>
+        <result property="l50" column="l50"/>
+        <result property="gef50" column="gef50"/>
+        <result property="failFee" column="fail_fee"/>
+        <result property="disputeFee" column="dispute_fee"/>
+        <result property="creator" column="creator"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updater" column="updater"/>
+        <result property="updateDate" column="update_date"/>
+    </resultMap>
+
+</mapper>

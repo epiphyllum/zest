@@ -1,5 +1,4 @@
--- 其他主卡在通联后台录入后， 得到卡号， 作为我们系统的产品配置
--- 子卡 + vpa主卡
+-- 批处理任务
 drop table if exists j_batch;
 create table j_batch
 (

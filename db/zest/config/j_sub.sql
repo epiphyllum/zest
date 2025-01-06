@@ -1,4 +1,4 @@
--- 商户/子商户
+-- 子商户
 drop table if exists j_sub;
 create table j_sub
 (

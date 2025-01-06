@@ -1,4 +1,4 @@
--- 子商户给卡充值
+-- 卡片充值
 drop table if exists j_deposit;
 create table j_deposit
 (

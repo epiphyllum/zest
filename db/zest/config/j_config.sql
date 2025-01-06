@@ -34,7 +34,7 @@ create table j_card_fee_config
     -- 卡开收费配置
     producttype varchar(15) comment '产品类型',
     cardtype    varchar(2) comment '卡类型',
-    currency    varchar(3) comment '币种',
+    currency    varchar(4) comment '币种',
     fee         decimal(18, 2) comment '收费',
 
     -- basic

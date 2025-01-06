@@ -1,6 +1,6 @@
--- tron流水
-drop table if exists j_tron;
-create table j_tron
+-- scan 扫描区块链浏览器流水
+drop table if exists j_scan;
+create table j_scan
 (
     id            bigint         not null comment 'ID',
     agent_id      bigint         not null comment '代理ID',
@@ -30,8 +30,11 @@ create table j_tron
     primary key (id)
 ) ENGINE = InnoDB
   collate utf8mb4_bin
-  DEFAULT CHARACTER SET utf8mb4 COMMENT ='j_tron';
-create index idx_j_tron_1 on j_tron (merchant_id, create_date);
-create index idx_j_tron_2 on j_tron (sub_id, create_date);
-create index idx_j_tron_3 on j_tron (agent_id, create_date);
+  DEFAULT CHARACTER SET utf8mb4 COMMENT ='j_scan';
+create index idx_j_scan_1 on j_scan (merchant_id, create_date);
+create index idx_j_scan_2 on j_scan (sub_id, create_date);
+create index idx_j_scan_3 on j_scan (agent_id, create_date);
+create index idx_j_scan_4 on j_scan (sub_id, wallet_id, create_date);
 
+-- 唯一索引
+create unique index uidx_j_scan_1 on j_scan (txid);

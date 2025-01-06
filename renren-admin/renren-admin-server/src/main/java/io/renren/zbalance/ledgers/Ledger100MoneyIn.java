@@ -1,8 +1,7 @@
 package io.renren.zbalance.ledgers;
 
-import io.renren.zadmin.dao.JCardDao;
-import io.renren.zadmin.dao.JMerchantDao;
-import io.renren.zadmin.entity.*;
+import io.renren.zadmin.entity.JBalanceEntity;
+import io.renren.zadmin.entity.JMoneyEntity;
 import io.renren.zbalance.LedgerUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;

@@ -23,18 +23,16 @@ public class Ledger503OpenVpaWallet {
     public static int FACT_VPA_WALLET_OPEN_UNFREEZE_SUB_VA = 50301;
     public static int FACT_VPA_WALLET_OPEN_CONFIRM_SUB_VA = 50302;
     public static int FACT_VPA_WALLET_OPEN_IN_SUB_FEE = 50304;
-    //
+    // 钱包批量开
     public static int FACT_VPA_WALLET_OPEN_FREEZE_WALLET = 50305;
     public static int FACT_VPA_WALLET_OPEN_UNFREEZE_WALLET = 50306;
     public static int FACT_VPA_WALLET_OPEN_CONFIRM_WALLET = 50307;
 
-    // 开卡返佣记账
-    public static int ORIGIN_VPA_WALLET_OPEN_COMMISSION = 504;
-    public static int FACT_VPA_WALLET_OPEN_COMMISSION_IN_WALLET = 50401;
+    @Resource
+    private Ledger607WalletCommission ledger607WalletOpenCommission;
+    @Resource
+    private Ledger608WalletChargeCommission ledger608WalletChargeCommission;
 
-    // 充值返佣记账
-    public static int ORIGIN_VPA_WALLET_CHARGE_COMMISSION = 505;
-    public static int FACT_VPA_WALLET_CHARGE_COMMISSION_IN_WALLET = 50501;
 
     @Resource
     private JWalletDao jWalletDao;
@@ -188,42 +186,17 @@ public class Ledger503OpenVpaWallet {
 
     // 用户返佣记账
     private void ledgeUserCommission(JVpaJobEntity entity, JWalletConfigEntity walletConfig, BigDecimal principal, BigDecimal cardFee) {
-        BigDecimal s1OpenRate = walletConfig.getS1OpenRate();
-        BigDecimal s1ChargeRate = walletConfig.getS1ChargeRate();
-        BigDecimal s2OpenRate = walletConfig.getS2OpenRate();
-        BigDecimal s2ChargeRate = walletConfig.getS2ChargeRate();
-        BigDecimal chargeRate = walletConfig.getChargeRate();
 
         JWalletEntity walletEntity = jWalletDao.selectById(entity.getWalletId());
-
-        // 记账: 直接推荐人: 开卡返佣, 充值返佣
         JWalletEntity parent = jWalletDao.selectById(walletEntity.getP1());
-        BigDecimal s1OpenFee = s1OpenRate.multiply(cardFee).setScale(2, RoundingMode.HALF_UP);
-        BigDecimal s1ChargeFee = principal.multiply(chargeRate).multiply(s1ChargeRate).setScale(2, RoundingMode.HALF_UP);
 
-        // 开卡返佣流水
-        JWalletTxnEntity txnEntityOpen1 = new JWalletTxnEntity();
-        fillTxn(txnEntityOpen1, walletEntity);
-        txnEntityOpen1.setTxnCode(ZWalletConstant.WALLET_TXN_COMMISSION_OPEN);
-        txnEntityOpen1.setFromCurrency(entity.getProductcurrency());
-        txnEntityOpen1.setToCurrency(entity.getProductcurrency());
-        txnEntityOpen1.setFee(s1OpenFee);
-        txnEntityOpen1.setState(ZWalletConstant.WALLET_TXN_STATUS_SUCCESS);
+        // 开卡返佣
+        ledger607WalletOpenCommission.ledgeOpenCommission1(entity, cardFee, walletEntity, walletConfig);
+        // 充值返佣
 
-        // 充值返佣流水
-        JWalletTxnEntity txnEntityCharge1 = new JWalletTxnEntity();
-        fillTxn(txnEntityCharge1, walletEntity);
-        txnEntityCharge1.setTxnCode(ZWalletConstant.WALLET_TXN_COMMISSION_OPEN);
-        txnEntityCharge1.setFee(s1OpenFee);
-        txnEntityCharge1.setFromCurrency(entity.getProductcurrency());
-        txnEntityCharge1.setToCurrency(entity.getProductcurrency());
-        txnEntityCharge1.setState(ZWalletConstant.WALLET_TXN_STATUS_SUCCESS);
-
-        // 入库
-        jWalletTxnDao.insert(txnEntityCharge1);
-        jWalletTxnDao.insert(txnEntityOpen1);
+        // 更新统计
         jWalletDao.update(null, Wrappers.<JWalletEntity>lambdaUpdate()
-                .eq(JWalletEntity::getId, parent.getId())
+                .eq(JWalletEntity::getId, walletEntity.getP1())
                 .eq(JWalletEntity::getVersion, parent.getVersion())
                 .set(JWalletEntity::getVersion, parent.getVersion() + 1)
                 .set(entity.getCurrency().equals("HKD"), JWalletEntity::getS1OpenFeeHkd, s1OpenFee.add(parent.getS1OpenFeeHkd()))
@@ -231,13 +204,6 @@ public class Ledger503OpenVpaWallet {
                 .set(entity.getCurrency().equals("HKD"), JWalletEntity::getS1ChargeFeeHkd, s1ChargeFee.add(parent.getS1ChargeFeeHkd()))
                 .set(entity.getCurrency().equals("USD"), JWalletEntity::getS1ChargeFeeUsd, s1ChargeFee.add(parent.getS1ChargeFeeUsd()))
         );
-
-        JBalanceEntity parentBalance = ledgerUtil.getWalletAccount(parent.getId(), entity.getProductcurrency());
-        String factMemo = null;
-        ledgerUtil.ledgeUpdate(parentBalance, ORIGIN_VPA_WALLET_OPEN_COMMISSION, FACT_VPA_WALLET_OPEN_COMMISSION_IN_WALLET, txnEntityOpen1.getId(), factMemo, s1OpenFee);
-        factMemo = null;
-        parentBalance = ledgerUtil.getWalletAccount(parent.getId(), entity.getProductcurrency());
-        ledgerUtil.ledgeUpdate(parentBalance, ORIGIN_VPA_WALLET_CHARGE_COMMISSION, FACT_VPA_WALLET_CHARGE_COMMISSION_IN_WALLET, txnEntityCharge1.getId(), factMemo, s1ChargeFee);
 
         // 记账: 间接推荐人
         if (walletEntity.getP2() != null) {
@@ -262,8 +228,14 @@ public class Ledger503OpenVpaWallet {
             txnEntityCharge2.setToCurrency(entity.getProductcurrency());
             txnEntityCharge2.setState(ZWalletConstant.WALLET_TXN_STATUS_SUCCESS);
 
+            // 开卡返佣
             jWalletTxnDao.insert(txnEntityOpen2);
+            ledger607WalletOpenCommission.ledgeOpenCommission(txnEntityOpen2);
+
+            // 充值返佣
             jWalletTxnDao.insert(txnEntityCharge2);
+            ledger608WalletChargeCommission.ledgeChargeCommission(txnEntityCharge2);
+
             jWalletDao.update(null, Wrappers.<JWalletEntity>lambdaUpdate()
                     .eq(JWalletEntity::getId, grandParent.getId())
                     .eq(JWalletEntity::getVersion, grandParent.getVersion())
@@ -273,12 +245,6 @@ public class Ledger503OpenVpaWallet {
                     .set(entity.getCurrency().equals("HKD"), JWalletEntity::getS2ChargeFeeHkd, s2ChargeFee.add(grandParent.getS2ChargeFeeHkd()))
                     .set(entity.getCurrency().equals("USD"), JWalletEntity::getS2ChargeFeeUsd, s2ChargeFee.add(grandParent.getS2ChargeFeeUsd()))
             );
-            JBalanceEntity gBalance = ledgerUtil.getWalletAccount(parent.getId(), entity.getProductcurrency());
-            factMemo = null;
-            ledgerUtil.ledgeUpdate(gBalance, ORIGIN_VPA_WALLET_OPEN_COMMISSION, FACT_VPA_WALLET_OPEN_COMMISSION_IN_WALLET, txnEntityOpen2.getId(), factMemo, s2OpenFee);
-            factMemo = null;
-            gBalance = ledgerUtil.getWalletAccount(parent.getId(), entity.getProductcurrency());
-            ledgerUtil.ledgeUpdate(gBalance, ORIGIN_VPA_WALLET_CHARGE_COMMISSION, FACT_VPA_WALLET_CHARGE_COMMISSION_IN_WALLET, txnEntityCharge2.getId(), factMemo, s2ChargeFee);
         }
     }
 
@@ -293,5 +259,6 @@ public class Ledger503OpenVpaWallet {
         txnEntity.setSubId(walletEntity.getSubId());
         txnEntity.setSubName(walletEntity.getSubName());
     }
+
 }
 

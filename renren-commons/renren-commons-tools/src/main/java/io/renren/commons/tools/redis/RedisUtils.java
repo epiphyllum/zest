@@ -145,4 +145,9 @@ public class RedisUtils {
     public Object rightPop(String key) {
         return redisTemplate.opsForList().rightPop(key);
     }
+
+    public Long hInc(String key, String field, Long value) {
+        return redisTemplate.opsForHash().increment(key, field, value);
+    }
+
 }

@@ -3,7 +3,6 @@ drop table if exists j_allocate;
 create table j_allocate
 (
     id            bigint         not null comment 'ID',
-
     agent_id      bigint         not null comment '代理ID',
     agent_name    varchar(50)    not null comment '代理名称',
     merchant_id   bigint         not null comment '商户ID',

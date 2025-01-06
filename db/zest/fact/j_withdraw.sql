@@ -1,4 +1,4 @@
--- withdraw
+-- withdraw: 卡资金提现
 drop table if exists j_withdraw;
 create table j_withdraw
 (

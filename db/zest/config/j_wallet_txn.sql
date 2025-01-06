@@ -2,35 +2,28 @@
 drop table if exists j_wallet_txn;
 create table j_wallet_txn
 (
-    id            bigint         not null comment 'ID',
-    agent_id      bigint         not null comment '代理id',
-    agent_name    varchar(50)    not null comment '代理',
-    merchant_id   bigint         not null comment '商户ID', -- 商户ID
-    merchant_name varchar(50)    not null comment '商户',   -- 商户
-    sub_id        bigint         not null comment '子商户ID',
-    sub_name      varchar(50)    not null comment '子商户',
-    api           int            not null default 1,
+    id            bigint      not null comment 'ID',
+    agent_id      bigint      not null comment '代理id',
+    agent_name    varchar(50) not null comment '代理',
+    merchant_id   bigint      not null comment '商户ID', -- 商户ID
+    merchant_name varchar(50) not null comment '商户',   -- 商户
+    sub_id        bigint      not null comment '子商户ID',
+    sub_name      varchar(50) not null comment '子商户',
+    api           int         not null default 1,
 
     --
-    wallet_id     bigint         not null comment '钱包ID',
-    wallet_name   varchar(64)    not null comment '钱包用户',
+    wallet_id     bigint      not null comment '钱包ID',
+    wallet_name   varchar(64) not null comment '钱包用户',
 
-    channel_id    bigint         not null comment '收款渠道',
-    channel_name  varchar(16)    not null comment 'USDT渠道, OneWay渠道',
+    txn_code      varchar(16) comment '交易代码: charge, withdraw, chargeCard, withdrawCard, monthFee',
+    txn_memo      varchar(128) comment '交易备注',
+    fee           decimal(18, 2) comment '手续费: 从出金账户收',
+    from_currency varchar(4) comment '出金资产: 数字货币:USDT, 法币:USD,HKD',
+    from_amount   decimal(18, 2) comment '出金金额',
+    to_currency   varchar(4) comment '入金账户: USDT, USDC, USD, HKD',
+    to_amount     decimal(18, 2) comment '入金金额',
 
-    currency      varchar(3)     not null comment '本币币种:HKD|USD, 如果是USD就上账到USD, 如果是HKD就上账到HKD',
-    stl_amount    decimal(18, 2) not null comment '到账本币金额',
-
-    -- 依据到账金额 + 到账币种，
-    -- 计算出客户需要发起的收单交易金额， 或者如果是U的话， 计算出需要收U的钱
-
-    -- 交易信息
-    txn_code      varchar(16)    not null comment 'charge:充值|withdraw:提现',
-    pay_amount    decimal(18, 2) not null comment '交易金额${currency}',
-    pay_currency  varchar(4)     not null comment '收款币种',
-    pay_cost      decimal(18, 2) not null default 0 comment '渠道成本',
-
-    -- 状态
+    -- 交易状态
     state         varchar(2),
 
     -- basic

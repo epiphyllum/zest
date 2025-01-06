@@ -14,7 +14,7 @@ create table j_pay_channel
     channel_code  varchar(50)    not null comment '渠道代码',
     channel_name  varchar(50)    not null comment '渠道名称',
     merchant_no   varchar(32)    not null comment '商户号',
-    stl_currency  varchar(3)     not null comment '结算币种',
+    stl_currency  varchar(4)     not null comment '结算币种',
     pay_currency  varchar(4)     not null comment '交易币种',
     api_url       varchar(256)   not null comment '接口地址',
     public_key    varchar(1024) comment '我方公钥',

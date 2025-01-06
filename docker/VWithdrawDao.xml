@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.zadmin.dao.VWithdrawDao">
+
+    <resultMap type="io.renren.zadmin.entity.VWithdrawEntity" id="vWithdrawMap">
+        <result property="cardSum" column="card_sum"/>
+        <result property="aipCharge" column="aip_charge"/>
+        <result property="charge" column="charge"/>
+        <result property="agentId" column="agent_id"/>
+        <result property="agentName" column="agent_name"/>
+        <result property="merchantId" column="merchant_id"/>
+        <result property="merchantName" column="merchant_name"/>
+        <result property="subId" column="sub_id"/>
+        <result property="subName" column="sub_name"/>
+        <result property="currency" column="currency"/>
+        <result property="marketproduct" column="marketproduct"/>
+        <result property="statDate" column="stat_date"/>
+    </resultMap>
+
+</mapper>

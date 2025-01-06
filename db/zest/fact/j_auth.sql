@@ -1,4 +1,4 @@
--- j_auth: 全部是子商户的交易
+-- 授权交易
 drop table if exists j_auth;
 create table j_auth
 (

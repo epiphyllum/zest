@@ -1,4 +1,4 @@
--- j_free: 全部是子商户的: 担保金释放
+-- j_mfree: 全部是子商户的: 担保金释放
 drop table if exists j_mfree;
 create table j_mfree
 (

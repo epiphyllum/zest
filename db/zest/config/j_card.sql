@@ -115,8 +115,8 @@ create table j_card
     -- vpa子卡字段
     vpa_job              bigint comment '那个vpa的卡ID',
 
-    -- 可用授权额度:
-    prepaid_available    decimal(18, 2),
+    -- 关联ID
+    relate_id            bigint,
 
     -- basic
     stat_date            date comment '完成日期',

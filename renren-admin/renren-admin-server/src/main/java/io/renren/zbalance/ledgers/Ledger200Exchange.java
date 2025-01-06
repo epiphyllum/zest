@@ -1,7 +1,5 @@
 package io.renren.zbalance.ledgers;
 
-import io.renren.zadmin.dao.JCardDao;
-import io.renren.zadmin.dao.JMerchantDao;
 import io.renren.zadmin.entity.JBalanceEntity;
 import io.renren.zadmin.entity.JExchangeEntity;
 import io.renren.zbalance.LedgerUtil;

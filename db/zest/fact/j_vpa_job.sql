@@ -1,4 +1,4 @@
--- 共享子卡申请流水
+-- 共享子卡 开卡任务流水
 drop table if exists j_vpa_job;
 create table j_vpa_job
 (

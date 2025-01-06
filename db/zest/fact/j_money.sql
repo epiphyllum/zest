@@ -1,4 +1,4 @@
---  入金账户来账流水: 商户匹配前, 不能确定merchant_id
+-- 入金账户来账流水: 商户匹配前, 不能确定merchant_id
 drop table if exists j_money;
 create table j_money
 (

@@ -1,3 +1,4 @@
+-- 商户成本收入配置
 drop table if exists j_fee_config;
 create table j_fee_config
 (

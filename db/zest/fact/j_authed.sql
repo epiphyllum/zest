@@ -1,4 +1,4 @@
--- j_authed:  全部是子商户交易
+-- 结算交易流水
 drop table if exists j_authed;
 create table j_authed
 (

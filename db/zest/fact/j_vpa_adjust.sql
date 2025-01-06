@@ -1,4 +1,4 @@
--- 卡额度管理:
+-- 共享卡额度管理:
 drop table if exists j_vpa_adjust;
 create table j_vpa_adjust
 (

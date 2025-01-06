@@ -74,7 +74,7 @@ create table j_merchant
     vpa_card_fid       varchar(128)  not null,
     vpa_charge_fid     varchar(128)  not null,
     vpa_payeeaccount   varchar(64),
-    vpa_Procurecontent varchar(128),
+    vpa_procurecontent varchar(128),
 
     -- basic
     creator            bigint comment '创建者',

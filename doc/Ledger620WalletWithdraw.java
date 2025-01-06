@@ -32,7 +32,7 @@ public class Ledger620WalletWithdraw {
     public void ledgeWalletWithdraw(JWalletTxnEntity entity) {
         // 记账: 钱包-
         JBalanceEntity walletAccount = ledgerUtil.getWalletAccount(entity.getWalletId(), entity.getFromCurrency());
-        if (walletAccount.getBalance().compareTo(entity.getFromAmount()) < 0)  {
+        if (walletAccount.getBalance().compareTo(entity.getFromAmount()) < 0) {
             throw new RenException("余额不足");
         }
         String factMemo = String.format("提现:%s %s", entity.getFromAmount(), entity.getFromCurrency());

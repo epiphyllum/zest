@@ -1,4 +1,4 @@
--- 大吉va账户
+-- 通联va账户
 drop table if exists j_va;
 create table j_va
 (

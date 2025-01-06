@@ -1,3 +1,4 @@
+-- 每日统计
 drop table if exists j_stat;
 create table j_stat
 (
