@@ -38,7 +38,6 @@ public class LedgerUtil {
         jBalanceDao.insert(jBalanceEntity);
     }
 
-
     /**
      * 记账流水
      */
@@ -134,6 +133,7 @@ public class LedgerUtil {
 //            ex.printStackTrace();
 //            throw new RenException("重复记账");
 //        }
+
         LambdaUpdateWrapper<JBalanceEntity> wrapper = Wrappers.<JBalanceEntity>lambdaUpdate()
                 .eq(JBalanceEntity::getId, balance.getId())
                 .eq(JBalanceEntity::getVersion, balance.getVersion())

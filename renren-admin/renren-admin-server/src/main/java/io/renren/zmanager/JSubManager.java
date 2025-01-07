@@ -48,8 +48,6 @@ public class JSubManager {
     @Resource
     private SysDeptDao sysDeptDao;
     @Resource
-    private JBalanceDao jBalanceDao;
-    @Resource
     private ApiNotifyService apiNotifyService;
 
     /**

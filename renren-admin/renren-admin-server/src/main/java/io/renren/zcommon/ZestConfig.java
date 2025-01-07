@@ -8,8 +8,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Map;
-
 @Configuration
 @Data
 @ConfigurationProperties(prefix = "zest")

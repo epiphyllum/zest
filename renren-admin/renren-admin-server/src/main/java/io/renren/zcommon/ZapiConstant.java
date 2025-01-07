@@ -55,11 +55,10 @@ public class ZapiConstant {
     public static final String API_exchangeConfirm = "exchangeConfirm";      // 换汇申请单确认
     public static final String API_exchangeQuery = "exchangeQuery";          // 换汇申请单查询
     public static final String API_exchangeNotify = "exchangeNotify";        // 换汇申请单通知
-    public static final String API_exchangeRate = "exchangeRate";        // 换汇申请单通知
+    public static final String API_exchangeRate = "exchangeRate";            // 换汇申请单通知
     // 文件服务(1): 上传文件
     public static final String API_upload = "upload";                        // 上传文件
-
-
+    // 商户-子商户 资金
     public static final String ALLOCATE_TYPE_S2M = "s2m";
     public static final String ALLOCATE_TYPE_M2S = "m2s";
 }

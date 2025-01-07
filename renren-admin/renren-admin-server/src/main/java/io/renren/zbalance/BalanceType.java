@@ -5,14 +5,12 @@ import java.util.List;
 public class BalanceType {
     // 币种列表
     public static List<String> CURRENCY_LIST = List.of(
+            // 法币
             "HKD", "USD", "GBP", "JPY", "CAD"
             , "AUD", "SGD", "SEK", "CHF", "DKK"
             , "NOK", "ZAR", "EUR", "NZD", "CNY",
             // 数字货币
-            "USDT",
-            "USDC",
-            "BTC",
-            "ETH"
+            "USDT", "USDC", "BTC", "ETH"
     );
 
     // 商户VA
@@ -88,6 +86,7 @@ public class BalanceType {
     public static String getPrepaidQuotaAccount(String currency) {
         return "PREPAID_QUOTA_" + currency;
     }
+
     //预付费卡主卡-发卡总额
     public static String getPrepaidSumAccount(String currency) {
         return "PREPAID_SUM_" + currency;
@@ -98,6 +97,7 @@ public class BalanceType {
     public static String getWalletSumAccount(String currency) {
         return "WALLET_SUM_" + currency;
     }
+
     // 钱包账户
     public static String getWalletAccount(String currency) {
         return "WALLET_" + currency;

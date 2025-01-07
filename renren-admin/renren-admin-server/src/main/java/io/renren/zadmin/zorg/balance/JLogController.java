@@ -64,11 +64,9 @@ public class JLogController {
         params.put(Constant.ORDER, "desc");
         if (ZestConstant.isMerchant()) {
             params.put("merchantId", SecurityUser.getDeptId().toString());
-        }
-        else if (ZestConstant.isSub()) {
+        } else if (ZestConstant.isSub()) {
             params.put("subId", SecurityUser.getDeptId().toString());
-        }
-        else if (ZestConstant.isAgent()) {
+        } else if (ZestConstant.isAgent()) {
             params.put("agentId", SecurityUser.getDeptId().toString());
         }
         PageData<JLogDTO> page = jLogService.page(params);
