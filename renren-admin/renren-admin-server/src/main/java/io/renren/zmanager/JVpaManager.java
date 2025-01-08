@@ -422,12 +422,14 @@ public class JVpaManager {
         query.setApplyid(entity.getApplyid());
         TCardApplyResponse response = zinCardApplyService.cardApplyQuery(query);
 
-        entity.setState(response.getState());
 
         // 从非失败  -> 失败,  处理退款
         String prevState = entity.getState();
         String nextState = response.getState();
-        log.info("vpa发卡查询结果:{}, prevState:{}, nextState:{}", response, prevState, nextState);
+        log.info("vpa发卡查询结果, prevState:{}, nextState:{}", prevState, nextState);
+
+        // 注意这行代码位置！！！
+        entity.setState(response.getState());
 
         // 不成功 -> 成功
         if (!ZinConstant.isCardApplySuccess(prevState) && ZinConstant.isCardApplySuccess(nextState)) {

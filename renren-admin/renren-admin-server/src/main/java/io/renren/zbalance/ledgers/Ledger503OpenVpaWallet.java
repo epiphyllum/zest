@@ -194,6 +194,13 @@ public class Ledger503OpenVpaWallet {
         // 开卡返佣
         ledger607WalletOpenCommission.ledgeOpenCommission1(entity, cardFee, walletEntity, walletConfig);
 
+        BigDecimal s1OpenRate = walletConfig.getS1OpenRate();
+        BigDecimal s1ChargeRate = walletConfig.getS1ChargeRate();
+
+
+        BigDecimal s1OpenFee = null;
+        BigDecimal s1ChargeFee = null;
+
         // 更新统计
         jWalletDao.update(null, Wrappers.<JWalletEntity>lambdaUpdate()
                 .eq(JWalletEntity::getId, walletEntity.getP1())
@@ -205,8 +212,14 @@ public class Ledger503OpenVpaWallet {
                 .set(entity.getCurrency().equals("USD"), JWalletEntity::getS1ChargeFeeUsd, s1ChargeFee.add(parent.getS1ChargeFeeUsd()))
         );
 
+
         // 记账: 间接推荐人
         if (walletEntity.getP2() != null) {
+
+            BigDecimal s2OpenRate = walletConfig.getS2OpenRate();
+            BigDecimal s2ChargeRate = walletConfig.getS2ChargeRate();
+            BigDecimal chargeRate = walletConfig.getChargeRate();
+
             // 二级开卡返佣
             JWalletEntity grandParent = jWalletDao.selectById(walletEntity.getP2());
             BigDecimal s2OpenFee = s2OpenRate.multiply(cardFee).setScale(2, RoundingMode.HALF_UP);
@@ -230,11 +243,11 @@ public class Ledger503OpenVpaWallet {
 
             // 开卡返佣
             jWalletTxnDao.insert(txnEntityOpen2);
-            ledger607WalletOpenCommission.ledgeOpenCommission(txnEntityOpen2);
+            // ledger607WalletOpenCommission.ledgeOpenCommission(txnEntityOpen2);
 
             // 充值返佣
             jWalletTxnDao.insert(txnEntityCharge2);
-            ledger608WalletChargeCommission.ledgeChargeCommission(txnEntityCharge2);
+            // ledger608WalletChargeCommission.ledgeChargeCommission(txnEntityCharge2);
 
             jWalletDao.update(null, Wrappers.<JWalletEntity>lambdaUpdate()
                     .eq(JWalletEntity::getId, grandParent.getId())

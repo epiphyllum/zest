@@ -50,18 +50,24 @@ public class JBalanceServiceImpl extends CrudServiceImpl<JBalanceDao, JBalanceEn
 
     // 商户
     private void merchantFilter(QueryWrapper<JBalanceEntity> wrapper, UserDetail user, Map<String, Object> params) {
-        // 找出预付费主卡
+
+        // 账户不是AIP_账户
         wrapper.notLikeRight("balance_type", "AIP_");
+
+        // 找出预付费主卡账户
         List<Long> cardList = jCardDao.selectList(Wrappers.<JCardEntity>lambdaQuery()
                 .eq(JCardEntity::getMerchantId, user.getDeptId())
                 .eq(JCardEntity::getMarketproduct, ZinConstant.MP_VPA_MAIN_PREPAID)
                 .select(JCardEntity::getId)
         ).stream().map(JCardEntity::getId).toList();
+
         String ownerType = (String) params.get("ownerType");
         if (StringUtils.isNotBlank(ownerType)) {
+            // 归属类型有的情况下: 如果是预付费卡
             if (ownerType.equals(ZestConstant.USER_TYPE_PREPAID)) {
                 wrapper.in("owner_id", cardList);
             } else {
+                // 归属类型不是预付费卡, 则要作过过滤
                 commonFilter.setLogBalanceFilter(wrapper, params);
             }
         } else {
@@ -131,6 +137,12 @@ public class JBalanceServiceImpl extends CrudServiceImpl<JBalanceDao, JBalanceEn
         if (StringUtils.isNotBlank(currency)) {
             List<String> list = Arrays.stream(currency.split(",")).toList();
             wrapper.in("currency", list);
+        }
+
+        String ownerId = (String) params.get("ownerId");
+        if (StringUtils.isNotBlank(ownerId)) {
+            wrapper.eq("owner_id", Long.parseLong(ownerId));
+            return wrapper;
         }
 
         // 特殊的
