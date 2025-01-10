@@ -9,7 +9,7 @@ create table j_balance
     owner_name   varchar(50)    not null comment '属主',
     owner_type   varchar(16)    not null comment '属主类型',
 
-    balance_type varchar(16)    not null comment '余额类型',
+    balance_type varchar(20)    not null comment '余额类型',
     currency     varchar(4)     not null comment '币种',
     balance      decimal(18, 2) not null default 0 comment '余额',
     frozen       decimal(18, 2) not null default 0 comment '冻结额',
@@ -39,7 +39,7 @@ create table j_log
 
     -- 余额基本信息
     balance_id   bigint         not null comment '余额ID',
-    balance_type varchar(16)    not null comment '余额类型',
+    balance_type varchar(20)    not null comment '余额类型',
     currency     varchar(4)     not null comment '币种',
 
     -- fact info

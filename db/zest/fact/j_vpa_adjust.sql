@@ -22,6 +22,8 @@ create table j_vpa_adjust
     old_quota     decimal(18, 2) not null comment '调整前额度',
     new_quota     decimal(18, 2) not null comment '调整后额度',
     state         varchar(2)     not null default '00' comment '调整状态',
+    meraplid      varchar(32)    null comment '商户发起的meraplid, 我们用id',
+    api           int            not null default 1,
     -- basic
     stat_date     date comment '',
     creator       bigint comment '创建者',

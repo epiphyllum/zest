@@ -15,7 +15,7 @@ create table j_wallet_txn
     wallet_id     bigint      not null comment '钱包ID',
     wallet_name   varchar(64) not null comment '钱包用户',
 
-    txn_code      varchar(16) comment '交易代码: charge, withdraw, chargeCard, withdrawCard, monthFee',
+    txn_code      varchar(16) comment '交易代码: charge, withdraw, chargeCard, withdrawCard, monthFee...',
     txn_memo      varchar(128) comment '交易备注',
     fee           decimal(18, 2) comment '手续费: 从出金账户收',
     from_currency varchar(4) comment '出金资产: 数字货币:USDT, 法币:USD,HKD',
