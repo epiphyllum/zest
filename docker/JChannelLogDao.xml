@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.zadmin.dao.JChannelLogDao">
+
+    <resultMap type="io.renren.zadmin.entity.JChannelLogEntity" id="jChannelLogMap">
+        <result property="id" column="id"/>
+        <result property="reqId" column="req_id"/>
+        <result property="apiName" column="api_name"/>
+        <result property="recv" column="recv"/>
+        <result property="send" column="send"/>
+        <result property="sign" column="sign"/>
+        <result property="creator" column="creator"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updater" column="updater"/>
+        <result property="updateDate" column="update_date"/>
+    </resultMap>
+
+</mapper>
