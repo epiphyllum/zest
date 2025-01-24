@@ -308,6 +308,7 @@ public class JDashboardOperation {
         } catch (InterruptedException e) {
             throw new RenException("系统错误");
         } catch (ExecutionException e) {
+            e.printStackTrace();
             throw new RenException("系统错误");
         }
 
