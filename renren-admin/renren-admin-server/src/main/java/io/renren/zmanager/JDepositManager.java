@@ -223,27 +223,55 @@ public class JDepositManager {
                     ledger600CardCharge.ledgeCardCharge(entity, subEntity);
                     return true;
                 });
+
                 if (execute) {
                     CompletableFuture.runAsync(() -> {
                         JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery().eq(JCardEntity::getCardno, entity.getCardno()));
                         jCardManager.balanceCard(cardEntity);
                     });
                 }
+
             } catch (Exception ex) {
                 log.error("充值记账错误, 充值记录:{}", entity, subEntity);
                 ex.printStackTrace();
                 throw ex;
             }
+        }
+        // 变成失败
+        else if (ZinConstant.isCardApplyFail(newState)) {
+            Boolean execute = tx.execute(st -> {
+                int update = jDepositDao.update(null, Wrappers.<JDepositEntity>lambdaUpdate()
+                        .eq(JDepositEntity::getId, entity.getId())
+                        .eq(JDepositEntity::getState, oldState)
+                        .set(JDepositEntity::getState, newState)
+                );
+                if (update != 1) {
+                    st.setRollbackOnly();
+                    return false;
+                }
+                ledger600CardCharge.ledgeCardChargeUnFreeze(entity, subEntity);
+                return true;
+            });
+            if (!execute) {
+                throw new RenException("内部处理错误, 请重试");
+            }
+
+            CompletableFuture.runAsync(() -> {
+                JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery().eq(JCardEntity::getCardno, entity.getCardno()));
+                jCardManager.balanceCard(cardEntity);
+            });
         } else {
+
             jDepositDao.update(null, Wrappers.<JDepositEntity>lambdaUpdate()
                     .eq(JDepositEntity::getId, entity.getId())
                     .eq(JDepositEntity::getState, oldState)
                     .set(JDepositEntity::getState, newState)
             );
+
         }
 
         if (notify || entity.getApi().equals(1)) {
-            CompletableFuture.runAsync( () -> {
+            CompletableFuture.runAsync(() -> {
                 log.info("API交易, 通知商户, notify:{}", notify);
                 JMerchantEntity merchant = jMerchantDao.selectById(entity.getMerchantId());
                 JDepositEntity freshEntity = jDepositDao.selectById(entity.getId());

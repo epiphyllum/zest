@@ -119,12 +119,23 @@ public class JBatchManager {
             entity.setWalletId(cardEntity.getWalletId());
             entity.setWalletName(cardEntity.getWalletName());
 
+            entity.setSubId(cardEntity.getSubId());
+            entity.setSubName(cardEntity.getSubName());
+            entity.setMerchantId(cardEntity.getMerchantId());
+            entity.setMerchantName(cardEntity.getMerchantName());
+            entity.setAgentId(cardEntity.getAgentId());
+            entity.setAgentName(cardEntity.getAgentName());
+
+            entity.setMarketproduct(cardEntity.getMarketproduct());
+            entity.setMaincardno(cardEntity.getMaincardno());
+
             curBatch.add(entity);
             if (curBatch.size() == batchSize) {
                 batchList.add(curBatch);
                 curBatch = new ArrayList<>(1000);
             }
         }
+
         while (downloaded < total) {
             request.setPageindex(request.getPageindex() + 1);
             response = zinCardTxnService.settledQuery(request);
@@ -153,6 +164,7 @@ public class JBatchManager {
                     } catch (Exception ex) {
                         for (JAuthedEntity jAuthedEntity : batch) {
                             try {
+                                log.info("insert -> {}", jAuthedEntity);
                                 jAuthedDao.insert(jAuthedEntity);
                             } catch (DuplicateKeyException e) {
                             }

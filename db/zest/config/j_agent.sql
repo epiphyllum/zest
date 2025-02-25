@@ -8,7 +8,7 @@ create table j_agent
     agent_name   varchar(50)    not null,
     charge_rate  decimal(10, 3) not null comment '充值费率',
 
-    -- 代理分佣收款账户 todo: other info
+    -- 代理分佣收款账户
     account_no   varchar(128) comment '账号',
     account_user varchar(128) comment '账户名',
     account_bank varchar(128) comment '银行名',

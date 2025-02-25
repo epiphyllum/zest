@@ -75,7 +75,7 @@ public class Ledger502OpenVpaPrepaid {
         ledger601PrepaidOpenCharge.ledgePrepaidOpenCharge(entity);
 
         // 子商户发卡数量增加
-        JBalanceEntity cardCount = ledgerUtil.getCardCountAccount(entity.getSubId(), entity.getCurrency());
+        JBalanceEntity cardCount = ledgerUtil.getCardCountAccount(entity.getSubId(), entity.getProductcurrency());
         ledgerUtil.ledgeUpdate(cardCount, Ledger500OpenCard.ORIGIN_CARD_OPEN,
                 Ledger500OpenCard.FACT_CARD_OPEN_IN_CARD_COUNT, entity.getId(), "批量开" + entity.getNum() + "张卡", new BigDecimal(entity.getNum()));
     }

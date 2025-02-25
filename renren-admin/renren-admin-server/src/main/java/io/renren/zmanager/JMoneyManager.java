@@ -48,6 +48,7 @@ public class JMoneyManager {
 
     // 保存
     public void saveAndSubmit(JMoneyEntity entity, JMerchantEntity merchant, String cardno) {
+
         // 填充商户代理信息
         entity.setMerchantName(merchant.getCusname());
         entity.setAgentName(merchant.getAgentName());

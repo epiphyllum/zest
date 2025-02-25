@@ -81,7 +81,6 @@ public class BalanceType {
         return "AIP_TXN_" + currency;
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////
     //预付费卡主卡-额度
     public static String getPrepaidQuotaAccount(String currency) {
         return "PREPAID_QUOTA_" + currency;
@@ -92,7 +91,6 @@ public class BalanceType {
         return "PREPAID_SUM_" + currency;
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////
     // 钱包主卡-发卡总额
     public static String getWalletSumAccount(String currency) {
         return "WALLET_SUM_" + currency;

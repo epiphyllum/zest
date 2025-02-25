@@ -148,14 +148,19 @@ public class JCardManager {
                 entity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_PREPAID) ||
                 entity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_WALLET)
         ) {
-            // 开卡协议
+
+            // 开卡协议: 采用商户默认的
+            /*
             entity.setPayeeaccount(merchant.getVpaPayeeaccount());
             entity.setProcurecontent(merchant.getVpaProcurecontent());
             entity.setAgmfid(merchant.getVpaCardFid());
+            */
 
             if (entity.getProcurecontent() == null || entity.getPayeeaccount() == null || entity.getAgmfid() == null) {
                 throw new RenException("交易对手, 采购合同, 采购内容必填");
             }
+
+
             entity.setCusid(merchant.getCusid());
             this.saveVpaMain(entity);
             return;

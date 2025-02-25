@@ -1,6 +1,5 @@
 package io.renren.zmanager;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.warrenstrange.googleauth.GoogleAuthenticator;
@@ -8,7 +7,6 @@ import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.ConvertUtils;
-import io.renren.commons.tools.utils.Result;
 import io.renren.dao.SysDeptDao;
 import io.renren.entity.SysDeptEntity;
 import io.renren.zadmin.dao.JMerchantDao;

@@ -82,6 +82,9 @@ public class JDashboardOperation {
                 item.setAipCardFee(balanceEntity.getBalance());
             }
         }
+        if (va == null || subVa == null) {
+            throw new RenException("va sub_va not found");
+        }
         item.setBalance(va.add(subVa));
         return item;
     }

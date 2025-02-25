@@ -8,8 +8,6 @@ import cn.hutool.crypto.digest.DigestUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.renren.commons.tools.exception.RenException;
-import io.renren.zadmin.dao.JMerchantDao;
-import io.renren.zadmin.dao.JPacketDao;
 import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zadmin.entity.JPacketEntity;
 import io.renren.zcommon.CommonUtils;

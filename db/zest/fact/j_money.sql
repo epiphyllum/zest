@@ -1,4 +1,4 @@
--- 入金账户来账流水: 商户匹配前, 不能确定merchant_id
+-- 入金账户来账流水
 drop table if exists j_money;
 create table j_money
 (
@@ -17,8 +17,8 @@ create table j_money
     referencecode       varchar(20),
 
     -- 要求的来账信息
-    cardno              varchar(30),                          -- 账户号码
-    cardname            varchar(120),                          -- 账户名称
+    cardno              varchar(30) comment '账户号码',
+    cardname            varchar(120) comment '账户名称',
 
     -- 确认时提供: 申请金额, 转账凭证
     apply_amount        decimal(18, 2),
@@ -47,7 +47,7 @@ create table j_money
     notify_status       int         not null default 0 comment '',
     notify_count        int         not null default 0,
 
-    stat_date        date comment '完成日期',
+    stat_date           date comment '完成日期',
     creator             bigint comment '创建者',
     create_date         datetime comment '创建时间',
     updater             bigint comment '更新者',

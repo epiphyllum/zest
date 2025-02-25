@@ -41,7 +41,7 @@ public class JAuthedEntity extends BaseEntity {
     private String maincardno;
     // info
     private String cardno;
-    private String trxtype;
+    private String trxcode;
     private String trxdir;
     private String state;
     private BigDecimal amount;

@@ -19,6 +19,9 @@ public class InitRun implements CommandLineRunner {
     @Resource
     private JConfigDao jConfigDao;
 
+    @Resource
+    private ZestConfig zestConfig;
+
     @Override
     public void run(String... args) throws Exception {
         initConfig();
@@ -29,12 +32,19 @@ public class InitRun implements CommandLineRunner {
         System.out.println("创建平台配置....");
         List<JConfigEntity> jConfigEntities = jConfigDao.selectList(Wrappers.emptyWrapper());
         if (jConfigEntities.size() > 0) {
+            // 已经有配置
             return;
         }
+
+        //
         JConfigEntity entity = new JConfigEntity();
+        String vccMainReal = zestConfig.getVccMainReal() == null ? "0000" : zestConfig.getVccMainReal();
+        String vccMainVirtual = zestConfig.getVccMainVirtual() == null ? "0000" : zestConfig.getVccMainVirtual();
+
         entity.setQuotaLimit(100);
-        entity.setVccMainReal("0000");
-        entity.setVccMainVirtual("0000");
+        entity.setVccMainReal(vccMainReal);        // 实体卡主卡
+        entity.setVccMainVirtual(vccMainVirtual);  // 虚拟卡主卡
         jConfigDao.insert(entity);
     }
+
 }

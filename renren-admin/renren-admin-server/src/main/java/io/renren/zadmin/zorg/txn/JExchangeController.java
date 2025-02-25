@@ -102,8 +102,10 @@ public class JExchangeController {
         // 填充字段
         Long merchantId = null;
         if (user.getUserType().equals("merchant")) {
+            // 商户登录的话, merchantId就是用户的部门id
             merchantId = user.getDeptId();
         } else {
+            // 不然, 则必须是传递了merchantId
             merchantId = dto.getMerchantId();
         }
         JMerchantEntity merchant = jMerchantDao.selectById(merchantId);

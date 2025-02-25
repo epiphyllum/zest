@@ -150,7 +150,7 @@ public class JVpaManager {
         entity.setSubName(sub.getCusname());
 
         // 商户成本收入配置
-        JFeeConfigEntity feeConfig = jCommon.getFeeConfig(sub.getMerchantId(), entity.getMarketproduct(), entity.getCurrency());
+        JFeeConfigEntity feeConfig = jCommon.getFeeConfig(sub.getMerchantId(), entity.getMarketproduct(), mainCard.getCurrency());
         entity.setProductcurrency(feeConfig.getCurrency());
 
         // 计算批次发卡手续费
@@ -218,7 +218,7 @@ public class JVpaManager {
 
     // 填充卡列表, 初始额度调整列表
     public void vpaInitFill(JVpaJobEntity entity, List<JCardEntity> cards, List<JVpaAdjustEntity> adjusts, JCardEntity mainCard, Date statDate) {
-        JFeeConfigEntity feeConfig = jCommon.getFeeConfig(entity.getMerchantId(), entity.getMarketproduct(), entity.getCurrency());
+        JFeeConfigEntity feeConfig = jCommon.getFeeConfig(entity.getMerchantId(), entity.getMarketproduct(), mainCard.getCurrency());
 
         BigDecimal merchantFee = entity.getMerchantfee().divide(new BigDecimal(entity.getNum()), 2, RoundingMode.HALF_UP);
         for (JCardEntity jCardEntity : cards) {

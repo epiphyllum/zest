@@ -70,11 +70,11 @@ create table j_merchant
     permissions        varchar(256)  not null default '{"payInfo":1,"cardWithdraw":1}',
     currency_list      varchar(128)  not null default '["HKD", "USD"]',
 
-    --
-    vpa_card_fid       varchar(128)  not null,
-    vpa_charge_fid     varchar(128)  not null,
-    vpa_payeeaccount   varchar(64),
-    vpa_procurecontent varchar(128),
+    -- 不需要
+    vpa_card_fid       varchar(128) comment '开卡协议',
+    vpa_charge_fid     varchar(128) comment '充值协议',
+    vpa_payeeaccount   varchar(64) comment '交易对手方',
+    vpa_procurecontent varchar(128) comment '采购内容',
 
     -- basic
     creator            bigint comment '创建者',

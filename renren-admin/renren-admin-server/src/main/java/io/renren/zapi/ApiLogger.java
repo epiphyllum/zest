@@ -59,11 +59,10 @@ public class ApiLogger {
             try {
                 String errorStackTrace = ExceptionUtils.getErrorStackTrace(failEx);
                 packetEntity.setSend(errorStackTrace);
+                jPacketDao.insert(packetEntity);
             } catch (Exception ex) {
                 ex.printStackTrace();
-                return;
             }
-            jPacketDao.insert(packetEntity);
         });
 
     }

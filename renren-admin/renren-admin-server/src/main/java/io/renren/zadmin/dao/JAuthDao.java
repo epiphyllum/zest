@@ -28,7 +28,7 @@ public interface JAuthDao extends BaseDao<JAuthEntity> {
             trxtime, mcc, trxaddr, authcode, create_date)
             values (
             #{id}, #{agentId}, #{agentName}, #{merchantId}, #{merchantName}, #{subId}, #{subName}, 
-            #{cardno}, #{marketproduct}, #{walletId}, #{walletName}
+            #{cardno}, #{marketproduct}, #{walletId}, #{walletName},
             #{logkv}, #{trxcode}, #{trxdir}, #{state}, 
             #{amount}, #{settleamount}, #{currency}, #{settlecurrency},
             #{trxtime}, #{mcc}, #{trxaddr}, #{authcode}, #{createDate})

@@ -5,7 +5,6 @@ import com.auth0.jwt.algorithms.Algorithm;
 import io.renren.zadmin.entity.JWalletEntity;
 
 import java.util.Date;
-import java.util.Map;
 
 public class JwtUtil {
     private static final String KEY = "wingo@977100";

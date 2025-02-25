@@ -34,7 +34,7 @@ public class JAuthedDTO implements Serializable {
 
     private String maincardno;
     private String cardno;
-    private String trxtype;
+    private String trxcode;
     private String trxdir;
     private String state;
     private BigDecimal amount;

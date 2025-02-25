@@ -146,7 +146,7 @@ public class JMoneyController {
     public Result confirm(
             @RequestParam("id") Long id,
             @RequestParam("transferfid") String transferfid,
-            @RequestParam("otherfid") String otherfid,
+            @RequestParam(value = "otherfid", required = false) String otherfid,
             @RequestParam("applyAmount") String applyAmount
     ) {
         // 查询出来

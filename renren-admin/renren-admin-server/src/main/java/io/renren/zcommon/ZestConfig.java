@@ -24,6 +24,9 @@ public class ZestConfig {
     private String baseUrl;               // 接口地址
     private String uploadDir;             // 上传文件路径
 
+    private String vccMainReal;           // 平台实体主卡
+    private String vccMainVirtual;        // 平台虚拟主卡
+
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();

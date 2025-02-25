@@ -5,9 +5,11 @@ import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.zadmin.dao.JExchangeDao;
 import io.renren.zadmin.dao.JMerchantDao;
+import io.renren.zadmin.entity.JBalanceEntity;
 import io.renren.zadmin.entity.JExchangeEntity;
 import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zapi.ApiNotify;
+import io.renren.zbalance.LedgerUtil;
 import io.renren.zbalance.ledgers.Ledger200Exchange;
 import io.renren.zcommon.ZinConstant;
 import io.renren.zin.exchange.ZinExchangeService;
@@ -35,6 +37,8 @@ public class JExchangeManager {
     private Ledger200Exchange ledger200Exchange;
     @Resource
     private ApiNotify apiNotify;
+    @Resource
+    private LedgerUtil ledgerUtil;
 
     /**
      * 保存
@@ -42,6 +46,12 @@ public class JExchangeManager {
     public void save(JExchangeEntity entity) {
         entity.setState(ZinConstant.PAY_APPLY_NEW_DJ);  // 内部状态新建
         tx.executeWithoutResult(status -> {
+            BigDecimal sellAmount = entity.getAmount();
+            JBalanceEntity vaAccount = ledgerUtil.getVaAccount(entity.getMerchantId(), entity.getPayerccy());
+            BigDecimal sellBalance = vaAccount.getBalance();
+            if (sellBalance.compareTo(sellAmount) < 0) {
+                throw new RenException("卖出账户余额不足:" + sellAmount);
+            }
             jExchangeDao.insert(entity);
             ledger200Exchange.ledgeExchangeFreeze(entity);
         });
