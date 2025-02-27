@@ -122,10 +122,10 @@ public class JAllocateController {
     /**
      * 单独放权限
      */
-    @PostMapping("转入子商户")
+    @PostMapping("m2s")
     @Operation(summary = "转入子商户")
     @LogOperation("转入子商户")
-    @PreAuthorize("hasAuthority('zorg:jallocate:save')")
+    @PreAuthorize("hasAuthority('zorg:jallocate:m2s')")
     public Result m2s(@RequestBody JAllocateDTO dto) {
         dto.setType("m2s");
         jAllocateManager.handleAllocation(dto);
@@ -135,10 +135,10 @@ public class JAllocateController {
     /**
      * 单独放权限
      */
-    @PostMapping("转出子商户")
+    @PostMapping("s2m")
     @Operation(summary = "转出子商户")
     @LogOperation("转出子商户")
-    @PreAuthorize("hasAuthority('zorg:jallocate:save')")
+    @PreAuthorize("hasAuthority('zorg:jallocate:s2m')")
     public Result s2m(@RequestBody JAllocateDTO dto) {
         dto.setType("s2m");
         jAllocateManager.handleAllocation(dto);
