@@ -818,7 +818,7 @@ public class JCardManager {
             // 查询下实时余额
             this.balanceCard(cardEntity);
             BigDecimal balance = cardEntity.getBalance();
-            if (balance.subtract(adjustEntity.getAdjustAmount()).compareTo(new BigDecimal("0.01")) < 0) {
+            if (balance.subtract(adjustAmount).compareTo(new BigDecimal("0.01")) < 0) {
                 throw new RenException("卡片余额不足:" + balance);
             }
             log.info("预付费卡提现, 卡片余额:{}, 提现额:{}", balance, adjustAmount);
