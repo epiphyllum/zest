@@ -1,6 +1,7 @@
 package io.renren.zbalance.ledgers;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import io.renren.commons.tools.exception.RenException;
 import io.renren.zadmin.dao.JCardDao;
 import io.renren.zadmin.entity.JBalanceEntity;
 import io.renren.zadmin.entity.JCardEntity;
@@ -35,8 +36,12 @@ public class Ledger602PrepaidCharge {
         BigDecimal factAmount = entity.getAdjustAmount();
         String factMemo = String.format("冻结-单笔充值:%s", factAmount);
 
-        // 记账
         JBalanceEntity prepaidQuota = ledgerUtil.getPrepaidQuotaAccount(cardEntity.getId(), cardEntity.getCurrency());
+        if (factAmount.compareTo(prepaidQuota.getBalance()) < 0) {
+            throw  new RenException("余额不足");
+        }
+
+        // 记账
         ledgerUtil.freezeUpdate(prepaidQuota, ORIGIN_TYPE_PREPAID_CHARGE, FACT_PREPAID_CHARGE_FREEZE_PREPAID_QUOTA, entity.getId(), factMemo, factAmount);
     }
 
