@@ -827,6 +827,8 @@ public class JCardManager {
                 if (update != 1) {
                     throw new RenException("更新调整失败");
                 }
+
+
                 // 更新卡的当前额度
                 jCardDao.update(null, Wrappers.<JCardEntity>lambdaUpdate()
                         .eq(JCardEntity::getId, cardEntity.getId())
@@ -834,6 +836,11 @@ public class JCardManager {
                 );
                 // confirm记账
                 if (marketproduct.equals(ZinConstant.MP_VPA_PREPAID)) {
+                    BigDecimal authmaxamount = cardEntity.getAuthmaxamount();
+                    if (authmaxamount.subtract(adjustEntity.getAdjustAmount()).compareTo(new BigDecimal("0.01")) < 0) {
+                        throw new RenException("卡片余额不足:" + authmaxamount);
+                    }
+
                     ledger603PrepaidWithdraw.ledgePrepaidWithdraw(adjustEntity);
                 } else {
                     ledger606WalletCardWithdraw.ledgeWalletCardWithdraw(adjustEntity);
