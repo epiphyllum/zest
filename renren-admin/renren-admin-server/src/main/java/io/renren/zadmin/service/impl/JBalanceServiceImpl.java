@@ -145,6 +145,8 @@ public class JBalanceServiceImpl extends CrudServiceImpl<JBalanceDao, JBalanceEn
             return wrapper;
         }
 
+        wrapper.notLikeRight("balance_type", "CARD_COUNT_");
+
         // 特殊的
         UserDetail user = SecurityUser.getUser();
         if (ZestConstant.USER_TYPE_MERCHANT.equals(user.getUserType())) {
@@ -158,6 +160,7 @@ public class JBalanceServiceImpl extends CrudServiceImpl<JBalanceDao, JBalanceEn
             commonFilter.setLogBalanceFilter(wrapper, params);
         }
         return wrapper;
+
     }
 
 }

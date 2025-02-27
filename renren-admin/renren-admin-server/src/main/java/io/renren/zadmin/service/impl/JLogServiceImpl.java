@@ -52,6 +52,8 @@ public class JLogServiceImpl extends CrudServiceImpl<JLogDao, JLogEntity, JLogDT
     private void merchantFilter(QueryWrapper<JLogEntity> wrapper, UserDetail user, Map<String, Object> params) {
         // 找出预付费主卡
         wrapper.notLikeRight("balance_type", "AIP_");
+        wrapper.notLikeRight("balance_type", "CARD_COUNT_");
+
         List<Long> cardList = jCardDao.selectList(Wrappers.<JCardEntity>lambdaQuery()
                 .eq(JCardEntity::getMerchantId, user.getDeptId())
                 .eq(JCardEntity::getMarketproduct, ZinConstant.MP_VPA_MAIN_PREPAID)
@@ -73,6 +75,7 @@ public class JLogServiceImpl extends CrudServiceImpl<JLogDao, JLogEntity, JLogDT
     // 子商户
     private void subFilter(QueryWrapper<JLogEntity> wrapper, UserDetail user, Map<String, Object> params) {
         wrapper.notLikeRight("balance_type", "AIP_");
+        wrapper.notLikeRight("balance_type", "CARD_COUNT_");
         // 找出预付费主卡
         List<Long> cardList = jCardDao.selectList(Wrappers.<JCardEntity>lambdaQuery()
                 .eq(JCardEntity::getSubId, user.getDeptId())
