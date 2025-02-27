@@ -817,11 +817,11 @@ public class JCardManager {
         if (marketproduct.equals(ZinConstant.MP_VPA_PREPAID)) {
             // 查询下实时余额
             this.balanceCard(cardEntity);
-            BigDecimal authmaxamount = cardEntity.getAuthmaxamount();
-            if (authmaxamount.subtract(adjustEntity.getAdjustAmount()).compareTo(new BigDecimal("0.01")) < 0) {
-                throw new RenException("卡片余额不足:" + authmaxamount);
+            BigDecimal balance = cardEntity.getBalance();
+            if (balance.subtract(adjustEntity.getAdjustAmount()).compareTo(new BigDecimal("0.01")) < 0) {
+                throw new RenException("卡片余额不足:" + balance);
             }
-            log.info("预付费卡提现, 卡片余额:{}, 提现额:{}", authmaxamount, adjustAmount);
+            log.info("预付费卡提现, 卡片余额:{}, 提现额:{}", balance, adjustAmount);
         }
 
         // 入库
@@ -852,8 +852,6 @@ public class JCardManager {
                 );
                 // confirm记账
                 if (marketproduct.equals(ZinConstant.MP_VPA_PREPAID)) {
-
-
                     ledger603PrepaidWithdraw.ledgePrepaidWithdraw(adjustEntity);
                 } else {
                     ledger606WalletCardWithdraw.ledgeWalletCardWithdraw(adjustEntity);
