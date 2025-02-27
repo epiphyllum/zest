@@ -828,7 +828,6 @@ public class JCardManager {
                     throw new RenException("更新调整失败");
                 }
 
-
                 // 更新卡的当前额度
                 jCardDao.update(null, Wrappers.<JCardEntity>lambdaUpdate()
                         .eq(JCardEntity::getId, cardEntity.getId())
