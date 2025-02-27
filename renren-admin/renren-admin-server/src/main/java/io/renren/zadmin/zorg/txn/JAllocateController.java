@@ -128,6 +128,8 @@ public class JAllocateController {
     @PreAuthorize("hasAuthority('zorg:jallocate:m2s')")
     public Result m2s(@RequestBody JAllocateDTO dto) {
         dto.setType("m2s");
+        dto.setApi(0);
+        dto.setMeraplid(CommonUtils.uniqueId());
         jAllocateManager.handleAllocation(dto);
         return new Result();
     }
@@ -141,6 +143,8 @@ public class JAllocateController {
     @PreAuthorize("hasAuthority('zorg:jallocate:s2m')")
     public Result s2m(@RequestBody JAllocateDTO dto) {
         dto.setType("s2m");
+        dto.setApi(0);
+        dto.setMeraplid(CommonUtils.uniqueId());
         jAllocateManager.handleAllocation(dto);
         return new Result();
     }
