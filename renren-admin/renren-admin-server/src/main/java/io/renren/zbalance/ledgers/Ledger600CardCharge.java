@@ -1,6 +1,7 @@
 package io.renren.zbalance.ledgers;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import io.renren.commons.tools.exception.RenException;
 import io.renren.zadmin.dao.JCardDao;
 import io.renren.zadmin.entity.JBalanceEntity;
 import io.renren.zadmin.entity.JCardEntity;
@@ -48,6 +49,10 @@ public class Ledger600CardCharge {
                 entity.getAmount(), entity.getMerchantDeposit(), entity.getMerchantCharge());
 
         JBalanceEntity subVa = ledgerUtil.getSubVaAccount(sub.getId(), entity.getCurrency());
+
+        if (subVa.getBalance().compareTo(factAmount) < 0) {
+            throw new RenException("余额不足");
+        }
 
         // 子商户VA冻结
         ledgerUtil.freezeUpdate(subVa, ORIGIN_TYPE_CARD_CHARGE, FACT_CARD_CHARGE_FREEZE_SUB_VA, entity.getId(), factMemo, factAmount);
