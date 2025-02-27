@@ -1,5 +1,6 @@
 package io.renren.zbalance.ledgers;
 
+import io.renren.commons.tools.exception.RenException;
 import io.renren.zadmin.entity.JBalanceEntity;
 import io.renren.zadmin.entity.JVpaJobEntity;
 import io.renren.zbalance.LedgerUtil;
@@ -31,12 +32,17 @@ public class Ledger502OpenVpaPrepaid {
     @Resource
     private Ledger601PrepaidOpenCharge ledger601PrepaidOpenCharge;
 
-    // 共享子卡卡费
+    // 预付费子卡开卡费
     public void ledgeOpenVpaPrepaidFreeze(JVpaJobEntity entity) {
         // 子商户va扣除费用冻结
         JBalanceEntity subVa = ledgerUtil.getSubVaAccount(entity.getSubId(), entity.getProductcurrency());
         String factMemo = "冻结-批量预付费卡费用:" + BigDecimal.ZERO.add(entity.getMerchantfee()).setScale(2, RoundingMode.HALF_UP);
         BigDecimal factAmount = entity.getMerchantfee();
+
+        if (subVa.getBalance().compareTo(factAmount) < 0) {
+            throw new RenException("VA账户余额不足");
+        }
+
         ledgerUtil.freezeUpdate(subVa, ORIGIN_VPA_PREPAID_OPEN, FACT_VPA_PREPAID_FREEZE_SUB_VA, entity.getId(), factMemo, factAmount);
 
         // 如果发行的是预付费子卡, 需要冻结预付费主卡总授权额度
