@@ -812,13 +812,27 @@ public class JCardManager {
         adjustEntity.setNewQuota(newAuth);
         adjustEntity.setState(ZinConstant.VPA_ADJUST_UNKNOWN);
         adjustEntity.setMaincardno(cardEntity.getMaincardno());
+
+        // 如果是预付费卡
+        if (marketproduct.equals(ZinConstant.MP_VPA_PREPAID)) {
+            BigDecimal authmaxamount = cardEntity.getAuthmaxamount();
+            if (authmaxamount.subtract(adjustEntity.getAdjustAmount()).compareTo(new BigDecimal("0.01")) < 0) {
+                throw new RenException("卡片余额不足:" + authmaxamount);
+            }
+            log.info("预付费卡提现, 卡片余额:{}, 提现额:{}", authmaxamount, adjustAmount);
+        }
+
+        // 入库
         jVpaAdjustDao.insert(adjustEntity);
+
 
         // 发起变更
         TCardUpdateScene request = new TCardUpdateScene(cardEntity.getCurrency(), cardEntity.getCardno(), newAuth, null);
         try {
             TCardUpdateSceneResponse response = zinCardApplyService.cardUpdateScene(request);
             tx.executeWithoutResult(st -> {
+
+                // 更新
                 int update = jVpaAdjustDao.update(null, Wrappers.<JVpaAdjustEntity>lambdaUpdate()
                         .eq(JVpaAdjustEntity::getId, adjustEntity.getId())
                         .eq(JVpaAdjustEntity::getState, ZinConstant.VPA_ADJUST_UNKNOWN)
@@ -836,10 +850,7 @@ public class JCardManager {
                 );
                 // confirm记账
                 if (marketproduct.equals(ZinConstant.MP_VPA_PREPAID)) {
-                    BigDecimal authmaxamount = cardEntity.getAuthmaxamount();
-                    if (authmaxamount.subtract(adjustEntity.getAdjustAmount()).compareTo(new BigDecimal("0.01")) < 0) {
-                        throw new RenException("卡片余额不足:" + authmaxamount);
-                    }
+
 
                     ledger603PrepaidWithdraw.ledgePrepaidWithdraw(adjustEntity);
                 } else {
