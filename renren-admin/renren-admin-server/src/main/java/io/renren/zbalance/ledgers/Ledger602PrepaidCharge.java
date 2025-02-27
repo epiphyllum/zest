@@ -27,7 +27,7 @@ public class Ledger602PrepaidCharge {
     @Resource
     private JCardDao jCardDao;
 
-    // 预付费子卡-单笔充值(调整主卡可以额度)
+    // 预付费子卡-单笔充值(调整主卡可用额度)
     public void ledgePrepaidChargeFreeze(JVpaAdjustEntity entity) {
         String maincardno = entity.getMaincardno();
         JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
@@ -38,7 +38,7 @@ public class Ledger602PrepaidCharge {
 
         JBalanceEntity prepaidQuota = ledgerUtil.getPrepaidQuotaAccount(cardEntity.getId(), cardEntity.getCurrency());
         if (factAmount.compareTo(prepaidQuota.getBalance()) < 0) {
-            throw  new RenException("余额不足");
+            throw  new RenException("发卡额度不足:" + prepaidQuota.getBalance());
         }
 
         // 记账
