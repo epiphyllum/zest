@@ -38,7 +38,7 @@ public class Ledger602PrepaidCharge {
 
         JBalanceEntity prepaidQuota = ledgerUtil.getPrepaidQuotaAccount(cardEntity.getId(), cardEntity.getCurrency());
         if (factAmount.compareTo(prepaidQuota.getBalance()) > 0) {
-            throw  new RenException("发卡额度不足:" + prepaidQuota.getBalance());
+            throw new RenException("发卡额度不足:" + prepaidQuota.getBalance());
         }
 
         // 记账
