@@ -37,11 +37,10 @@ public class Ledger602PrepaidCharge {
         String factMemo = String.format("冻结-单笔充值:%s", factAmount);
 
         JBalanceEntity prepaidQuota = ledgerUtil.getPrepaidQuotaAccount(cardEntity.getId(), cardEntity.getCurrency());
-        if (factAmount.compareTo(prepaidQuota.getBalance()) < 0) {
+
+        if (factAmount.compareTo(prepaidQuota.getBalance()) > 0) {
             throw  new RenException("发卡额度不足:" + prepaidQuota.getBalance());
         }
-
-        log.info("主卡可用额度:{}, 充值金额:{}", prepaidQuota.getBalance(), factAmount);
 
         // 记账
         ledgerUtil.freezeUpdate(prepaidQuota, ORIGIN_TYPE_PREPAID_CHARGE, FACT_PREPAID_CHARGE_FREEZE_PREPAID_QUOTA, entity.getId(), factMemo, factAmount);
