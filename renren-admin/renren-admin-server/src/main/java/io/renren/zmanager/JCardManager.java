@@ -815,6 +815,8 @@ public class JCardManager {
 
         // 如果是预付费卡
         if (marketproduct.equals(ZinConstant.MP_VPA_PREPAID)) {
+            // 查询下实时余额
+            this.balanceCard(cardEntity);
             BigDecimal authmaxamount = cardEntity.getAuthmaxamount();
             if (authmaxamount.subtract(adjustEntity.getAdjustAmount()).compareTo(new BigDecimal("0.01")) < 0) {
                 throw new RenException("卡片余额不足:" + authmaxamount);
