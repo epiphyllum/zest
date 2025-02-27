@@ -694,10 +694,11 @@ public class JCardManager {
         adjustEntity.setWalletId(cardEntity.getWalletId());
         adjustEntity.setWalletName(cardEntity.getWalletName());
 
-        jVpaAdjustDao.insert(adjustEntity);
 
         // 冻结
         tx.executeWithoutResult(st -> {
+            jVpaAdjustDao.insert(adjustEntity);
+
             // 预付费子卡
             if (marketproduct.equals(ZinConstant.MP_VPA_PREPAID)) {
                 ledger602PrepaidCharge.ledgePrepaidChargeFreeze(adjustEntity);
