@@ -203,7 +203,7 @@ public class JCardController {
     @GetMapping("submit")
     @Operation(summary = "开卡提交通联")
     @LogOperation("开卡提交通联")
-    @PreAuthorize("hasAuthority('zorg:jcard:update')")
+    @PreAuthorize("hasAuthority('zorg:jcard:submit')")
     public Result submit(@RequestParam("id") Long id) {
         JCardEntity jCardEntity = jCardDao.selectById(id);
         jCardManager.submit(jCardEntity);
