@@ -198,7 +198,11 @@ public class JMerchantController {
     }
 
     @GetMapping("setConfig")
-    public Result setConfig(@RequestParam("key") String key, @RequestParam("value") String value, @RequestParam("otp") int otp) {
+    public Result setConfig(
+            @RequestParam("key") String key,
+            @RequestParam("value") String value,
+            @RequestParam(value = "otp", required = false) Integer otp
+    ) {
         jMerchantManager.setConfig(key, value, otp);
         return new Result();
     }

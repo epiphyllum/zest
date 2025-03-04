@@ -250,14 +250,16 @@ public class JMerchantManager {
         return config;
     }
 
-    public void setConfig(String key, String value, int otp) {
+    public void setConfig(String key, String value, Integer otp) {
         UserDetail user = SecurityUser.getUser();
-        GoogleAuthenticator gAuth = new GoogleAuthenticator();
-        boolean authorized = gAuth.authorize(user.getTotpKey(), otp);
-        if (!authorized) {
-            throw new RenException("谷歌验证码错误");
-        }
-        LambdaUpdateWrapper<JMerchantEntity> wrapper = Wrappers.<JMerchantEntity>lambdaUpdate().eq(JMerchantEntity::getId, user.getId());
+
+//        GoogleAuthenticator gAuth = new GoogleAuthenticator();
+//        boolean authorized = gAuth.authorize(user.getTotpKey(), otp);
+//        if (!authorized) {
+//            throw new RenException("谷歌验证码错误");
+//        }
+
+        LambdaUpdateWrapper<JMerchantEntity> wrapper = Wrappers.<JMerchantEntity>lambdaUpdate().eq(JMerchantEntity::getId, user.getDeptId());
         if (key.equals("webhook")) {
             wrapper.set(JMerchantEntity::getWebhook, value);
         } else if (key.equals("whiteIp")) {
