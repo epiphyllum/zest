@@ -102,6 +102,9 @@ public class ApiNotifyService {
         try {
             ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
             String result = responseEntity.getBody();
+            if (result == null) {
+                result = "No Response";
+            }
             packetEntity.setRecv(result);
             apiLogger.logPacketSuccess(packetEntity);
             return result;
