@@ -182,12 +182,12 @@ public class ZinRequester {
         logEntity.setApiName(uri);
         logEntity.setSign(headerInfo.sign);
         logEntity.setReqId(reqId);
-        logEntity.setSend(body);
+        logEntity.setSend(body.substring(0,2047));
 
         try {
             ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
             String bodyResp = responseEntity.getBody();
-            logEntity.setRecv(bodyResp);
+            logEntity.setRecv(bodyResp.substring(0,2047));
             zinLogger.logPacketSuccess(logEntity);
             T ttResult = objectMapper.readValue(bodyResp, clazz);
             if (ttResult.getRspcode().equals("0000")) {
