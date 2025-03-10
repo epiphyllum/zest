@@ -169,6 +169,7 @@ public class JCardController {
         dto.setApplyid("");
         dto.setTxnid(CommonUtils.uniqueId());
         dto.setState(ZinConstant.CARD_APPLY_NEW_DJ);
+        log.info("update card, id: {} state -> {}", dto.getId(), dto.getState());
         jCardService.update(dto);
         return new Result();
     }

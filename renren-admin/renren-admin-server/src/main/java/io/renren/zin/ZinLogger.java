@@ -25,7 +25,8 @@ public class ZinLogger {
     public void logPacketSuccess(JChannelLogEntity logEntity, Result<?> result) {
         CompletableFuture.runAsync(() -> {
             try {
-                logEntity.setSend(objectMapper.writeValueAsString(result).substring(0,2047));
+                String jsonStr = objectMapper.writeValueAsString(result);
+                logEntity.setSend(jsonStr.length() >= 2047 ? jsonStr.substring(0,2047) : jsonStr);
                 jChannelLogDao.insert(logEntity);
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -53,8 +54,9 @@ public class ZinLogger {
         // 记录日志
         CompletableFuture.runAsync(() -> {
             try {
-                String errorStackTrace = ExceptionUtils.getErrorStackTrace(failEx).substring(0,2047);
-                logEntity.setSend(errorStackTrace);
+                String errorStackTrace = ExceptionUtils.getErrorStackTrace(failEx);
+                String send = errorStackTrace.length() >= 2047 ? errorStackTrace.substring(0,2047) : errorStackTrace;
+                logEntity.setSend(send);
             } catch (Exception ex) {
                 ex.printStackTrace();
                 return;
