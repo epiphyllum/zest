@@ -32,6 +32,7 @@ public class ZapiConstant {
     public static final String API_cardChangeNotify = "cardChangeNotify";    // 卡状态通知
     public static final String API_cardBalance = "cardBalance";              // 卡余额查询
     public static final String API_cardPayInfo = "cardPayInfo";              // 卡支付信息: cvv2,expiredate, 目前不外提供
+    public static final String API_cardInfo = "cardInfo";                    // 卡基本信息
     // 卡资金管理与卡交易(8)
     public static final String API_cardCharge = "cardCharge";                // 卡充值
     public static final String API_cardChargeQuery = "cardChargeQuery";      // 卡充值查询

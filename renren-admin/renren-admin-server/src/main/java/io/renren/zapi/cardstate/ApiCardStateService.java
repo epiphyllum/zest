@@ -8,15 +8,10 @@ import io.renren.zadmin.dao.JCardDao;
 import io.renren.zadmin.entity.JCardEntity;
 import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zapi.ApiContext;
-import io.renren.zapi.ApiNotify;
-import io.renren.zapi.cardmoney.ApiCardMoneyService;
 import io.renren.zapi.cardstate.dto.*;
 import io.renren.zcommon.CommonUtils;
 import io.renren.zcommon.ZestConfig;
-import io.renren.zin.TResult;
 import io.renren.zin.cardapply.ZinCardApplyService;
-import io.renren.zin.cardapply.dto.TCardPayInfoRequest;
-import io.renren.zin.cardapply.dto.TCardPayInfoResponse;
 import io.renren.zin.cardmoney.ZinCardMoneyService;
 import io.renren.zin.cardmoney.dto.TCardBalanceRequest;
 import io.renren.zin.cardmoney.dto.TCardBalanceResponse;
@@ -63,6 +58,16 @@ public class ApiCardStateService {
 
     // 卡状态变更申请
     public Result<CardChangeRes> cardChange(CardChangeReq request, ApiContext context) {
+        if (request.getChangetype() == null) {
+            throw new RenException("missing field changetype");
+        }
+        if (request.getMeraplid() == null) {
+            throw new RenException("missing field meraplid");
+        }
+        if (request.getCardno() == null) {
+            throw new RenException("missing field cardno");
+        }
+
         switch (request.getChangetype()) {
             case CardStateChangeType.CARD_LOSS:
                 TCardLossRequest tCardLossRequest = ConvertUtils.sourceToTarget(request, TCardLossRequest.class);
@@ -150,6 +155,17 @@ public class ApiCardStateService {
 
         Result<CardPayInfoRes> result = new Result<>();
         result.setData(res);
+        return result;
+    }
+
+    public Result<CardInfoRes> cardInfo(CardInfoReq request, ApiContext context) {
+        JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
+                .eq(JCardEntity::getCardno, request.getCardno())
+        );
+        jCardManager.balanceCard(cardEntity);
+        CardInfoRes cardInfoRes = ConvertUtils.sourceToTarget(cardEntity, CardInfoRes.class);
+        Result<CardInfoRes> result = new Result<>();
+        result.setData(cardInfoRes);
         return result;
     }
 

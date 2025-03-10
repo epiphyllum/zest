@@ -81,7 +81,6 @@ public class JCardDTO implements Serializable {
     private String nationality;
     @Schema(description = "公司职位")
     private String companyposition;
-
     // 3
     @Schema(description = "姓氏")
     private String surname;
@@ -173,6 +172,7 @@ public class JCardDTO implements Serializable {
     private String feecurrency;       // 申请费用币种
     @Schema(description = "cardno")
     private String cardno;            // 卡号
+
     @Schema(description = "state")
     private String state;             // 卡申请状态
     @Schema(description = "stateexplain")
