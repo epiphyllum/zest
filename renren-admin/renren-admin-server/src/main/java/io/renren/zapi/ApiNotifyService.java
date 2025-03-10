@@ -92,9 +92,9 @@ public class ApiNotifyService {
         packetEntity.setMerchantName(merchant.getCusname());
         packetEntity.setAgentId(merchant.getAgentId());
         packetEntity.setAgentName(merchant.getAgentName());
-        packetEntity.setSend(body);
+        packetEntity.setSend(body.substring(0,2047));
         packetEntity.setApiName(apiName);
-        packetEntity.setSend(sign);
+        packetEntity.setSign(sign);
         packetEntity.setReqId(reqId);
 
         // 商户webhook地址

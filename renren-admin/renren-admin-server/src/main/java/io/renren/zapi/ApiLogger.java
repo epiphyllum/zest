@@ -29,7 +29,8 @@ public class ApiLogger {
     public void logPacketSuccess(JPacketEntity packetEntity, Result<?> result) {
         CompletableFuture.runAsync(() -> {
             try {
-                packetEntity.setSend(objectMapper.writeValueAsString(result));
+                String send = objectMapper.writeValueAsString(result).substring(0, 2047);
+                packetEntity.setSend(send);
                 jPacketDao.insert(packetEntity);
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -58,7 +59,8 @@ public class ApiLogger {
         CompletableFuture.runAsync(() -> {
             try {
                 String errorStackTrace = ExceptionUtils.getErrorStackTrace(failEx);
-                packetEntity.setSend(errorStackTrace);
+                String send = errorStackTrace.substring(0, 2048);
+                packetEntity.setSend(send);
                 jPacketDao.insert(packetEntity);
             } catch (Exception ex) {
                 ex.printStackTrace();
