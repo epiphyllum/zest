@@ -11,6 +11,7 @@ import io.renren.zapi.ApiContext;
 import io.renren.zapi.cardstate.dto.*;
 import io.renren.zcommon.CommonUtils;
 import io.renren.zcommon.ZestConfig;
+import io.renren.zcommon.ZinConstant;
 import io.renren.zin.cardapply.ZinCardApplyService;
 import io.renren.zin.cardmoney.ZinCardMoneyService;
 import io.renren.zin.cardmoney.dto.TCardBalanceRequest;
@@ -111,8 +112,12 @@ public class ApiCardStateService {
         // 查询卡信息
         JCardEntity entity = getCardEntity(request.getCardno(), context);
 
-        // 查询卡状态
-        jCardManager.queryCard(entity);
+        if ( ZinConstant.isCardApplyFail(entity.getState()) || ZinConstant.isCardApplySuccess(entity.getState())) {
+            // 终态情况下, 不需要查询通联
+        } else {
+            // 查询卡状态
+            jCardManager.queryCard(entity);
+        }
 
         // 应答
         Result<CardChangeQueryRes> result = new Result<>();

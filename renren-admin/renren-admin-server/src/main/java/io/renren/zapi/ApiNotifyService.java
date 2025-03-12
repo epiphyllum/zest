@@ -92,7 +92,7 @@ public class ApiNotifyService {
         packetEntity.setMerchantName(merchant.getCusname());
         packetEntity.setAgentId(merchant.getAgentId());
         packetEntity.setAgentName(merchant.getAgentName());
-        packetEntity.setSend(body.substring(0,2047));
+        packetEntity.setSend(body.length() > 2047 ? body.substring(0,2047) : body);
         packetEntity.setApiName(apiName);
         packetEntity.setSign(sign);
         packetEntity.setReqId(reqId);
