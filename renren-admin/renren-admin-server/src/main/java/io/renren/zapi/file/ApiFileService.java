@@ -3,11 +3,17 @@ package io.renren.zapi.file;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.crypto.asymmetric.Sign;
 import cn.hutool.crypto.digest.DigestUtil;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.Result;
+import io.renren.zadmin.dao.JAuthedDao;
 import io.renren.zadmin.dao.JMerchantDao;
+import io.renren.zadmin.entity.JAuthedEntity;
 import io.renren.zadmin.entity.JMerchantEntity;
+import io.renren.zapi.ApiContext;
 import io.renren.zapi.ApiService;
+import io.renren.zapi.file.dto.DownloadSettleReq;
+import io.renren.zapi.file.dto.DownloadSettleRes;
 import io.renren.zapi.file.dto.UploadRes;
 import io.renren.zcommon.ZestConfig;
 import io.renren.zin.file.ZinFileService;
@@ -22,6 +28,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -35,6 +42,8 @@ public class ApiFileService {
     private JMerchantDao jMerchantDao;
     @Resource
     private ZinFileService zinFileService;
+    @Resource
+    private JAuthedDao jAuthedDao;
 
     // 文件上传
     public Result<UploadRes> upload(Long merchantId, String reqId, String body, String sign, String suffix) {
@@ -85,5 +94,16 @@ public class ApiFileService {
         ;
         result.setData(uploadRes);
         return result;
+    }
+
+    // 下载结算文件
+    public Result<DownloadSettleRes> downloadSettle(DownloadSettleReq request, ApiContext context) {
+        String entrydate = request.getEntrydate();
+        List<JAuthedEntity> jAuthedEntities = jAuthedDao.selectList(Wrappers.<JAuthedEntity>lambdaQuery()
+                .eq(JAuthedEntity::getMerchantId, context.getMerchant().getId())
+                .eq(JAuthedEntity::getEntrydate, entrydate)
+        );
+
+        return null;
     }
 }

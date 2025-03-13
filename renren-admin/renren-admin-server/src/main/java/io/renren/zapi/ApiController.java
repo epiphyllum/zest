@@ -35,6 +35,7 @@ public class ApiController {
             }
             return apiFileService.upload(merchantId, reqId, body, sign, suffix);
         }
+
         return apiService.invokeService(body, merchantId, sign, reqId, apiName);
     }
 

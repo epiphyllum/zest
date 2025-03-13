@@ -84,7 +84,7 @@ public class JDashboardMerchant {
                 .forEach((currency, items) -> {
                     BalanceItem item = getBalanceItem(items, currency);
                     map.put(currency, item);
-                    log.info("balanceMap: {} -> {}", currency, item);
+                    log.debug("balanceMap: {} -> {}", currency, item);
                 });
         return map;
     }
@@ -121,14 +121,14 @@ public class JDashboardMerchant {
 
         Map<String, StatItem> map = new HashMap<>();
         for (String currency : currencySet) {
-            log.info("todayMap-准备币种: {}", currency);
+            log.debug("todayMap-准备币种: {}", currency);
             StatItem item = StatItem.zero(currency, today);
 
             // 充值
             List<VDepositEntity> vDepositEntities = depositMap.get(currency);
             if (vDepositEntities != null && vDepositEntities.size() > 0) {
                 VDepositEntity depositEntity = vDepositEntities.get(0);
-                log.info("充值记录: {}", depositEntity);
+                log.debug("充值记录: {}", depositEntity);
                 item.setCardSum(depositEntity.getCardSum());
                 item.setCharge(depositEntity.getCharge());
                 item.setDeposit(depositEntity.getDeposit());
@@ -138,7 +138,7 @@ public class JDashboardMerchant {
             List<VWithdrawEntity> vWithdrawEntities = withdrawMap.get(currency);
             if (vWithdrawEntities != null && vWithdrawEntities.size() > 0) {
                 VWithdrawEntity withdrawEntity = vWithdrawEntities.get(0);
-                log.info("提现记录: {}", withdrawEntity);
+                log.debug("提现记录: {}", withdrawEntity);
                 item.setWithdraw(withdrawEntity.getCardSum());
                 item.setWithdrawCharge(withdrawEntity.getCharge());
             }
@@ -147,7 +147,7 @@ public class JDashboardMerchant {
             List<VCardEntity> vCardEntities = cardMap.get(currency);
             if (vCardEntities != null && vCardEntities.size() > 0) {
                 VCardEntity vCardEntity = vCardEntities.get(0);
-                log.info("开卡记录: {}", vCardEntity);
+                log.debug("开卡记录: {}", vCardEntity);
                 item.setTotalCard(vCardEntity.getTotalCard());
                 item.setCardFee(vCardEntity.getMerchantfee());
             }
@@ -156,7 +156,7 @@ public class JDashboardMerchant {
             List<JAuthEntity> authEntities = authMap.get(currency);
             if (authEntities != null && authEntities.size() > 0) {
                 JAuthEntity jAuthEntity = authEntities.get(0);
-                log.info("消费记录: {}", jAuthEntity);
+                log.debug("消费记录: {}", jAuthEntity);
                 item.setSettlecount(jAuthEntity.getId());
                 item.setSettleamount(jAuthEntity.getSettleamount());
             }

@@ -43,8 +43,9 @@ public class ZestConstant {
         return USER_TYPE_MERCHANT.equals(userType) || USER_TYPE_SUB.equals(userType);
     }
 
-    public static final String BATCH_TYPE_STAT = "stat";     // 合并统计
-    public static final String BATCH_TYPE_AUTHED = "authed"; // 结算流水
+    public static final String BATCH_TYPE_STAT = "stat";            // 合并统计
+    public static final String BATCH_TYPE_AUTHED = "authed";        // 结算流水
+    public static final String BATCH_TYPE_GEN_AUTHED = "genAuthed"; // 结算流水
 
     // 批处理任务状态
     public static final String BATCH_STATUS_NEW = "00";

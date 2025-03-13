@@ -9,22 +9,31 @@ import io.renren.zadmin.dao.*;
 import io.renren.zadmin.entity.*;
 import io.renren.zadmin.service.JAuthedService;
 import io.renren.zadmin.service.JStatService;
+import io.renren.zcommon.ZestConfig;
 import io.renren.zcommon.ZestConstant;
 import io.renren.zin.cardtxn.ZinCardTxnService;
 import io.renren.zin.cardtxn.dto.TAuthSettledQuery;
 import io.renren.zin.cardtxn.dto.TAuthSettledResponse;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Service
 @Slf4j
 public class JBatchManager {
+    @Resource
+    private ZestConfig zestConfig;
+    @Resource
+    private JMerchantDao jMerchantDao;
     @Resource
     private TransactionTemplate tx;
     @Resource
@@ -385,7 +394,7 @@ public class JBatchManager {
             VWithdrawEntity withdrawEntity = withdrawMap.get(key);
             VCardEntity cardEntity = cardMap.get(key);
             VDepositEntity depositEntity = depositMap.get(key);
-            JAuthedEntity authedEntity =authedMap.get(key);
+            JAuthedEntity authedEntity = authedMap.get(key);
 
             JStatEntity statEntity = new JStatEntity();
 
@@ -496,6 +505,34 @@ public class JBatchManager {
 
     }
 
+    // 生成某个商户的文件
+    private void genAuthedFile(Long merchantId, String entrydate) throws IOException {
+        List<JAuthedEntity> jAuthedEntities = jAuthedDao.selectList(Wrappers.<JAuthedEntity>lambdaQuery()
+                .eq(JAuthedEntity::getMerchantId, merchantId)
+                .eq(JAuthedEntity::getEntrydate, entrydate)
+        );
+
+        StringBuilder sb = new StringBuilder();
+        jAuthedEntities.forEach(jAuthedEntity -> {
+            sb.append("");
+        });
+
+        String filename = zestConfig.getUploadDir() + "/settle/" + merchantId + "/" + entrydate + ".txt";
+        File file = new File(filename);
+        FileUtils.writeStringToFile(file, sb.toString(), StandardCharsets.UTF_8);
+    }
+
+    // 按商户生成结算流水文件
+    public void genAuthedBatch(String date) {
+        String entrydate = date;
+        List<Long> ids = jMerchantDao.selectList(Wrappers.<JMerchantEntity>lambdaQuery()
+                .select(JMerchantEntity::getId)
+        ).stream().map(JMerchantEntity::getId).toList();
+        for (Long id : ids) {
+            genAuthedFile(id, entrydate);
+        }
+    }
+
     /**
      * 批处理任务
      */
@@ -507,6 +544,9 @@ public class JBatchManager {
         if (batchType.equals(ZestConstant.BATCH_TYPE_AUTHED)) {
             this.authedBatch(date);
             return;
+        }
+        if (batchType.equals(ZestConstant.BATCH_TYPE_GEN_AUTHED)) {
+            this.genAuthedBatch(date);
         }
     }
 

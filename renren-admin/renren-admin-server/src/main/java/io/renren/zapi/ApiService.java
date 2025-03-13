@@ -21,6 +21,7 @@ import io.renren.zapi.cardapply.ApiCardApplyService;
 import io.renren.zapi.cardmoney.ApiCardMoneyService;
 import io.renren.zapi.cardstate.ApiCardStateService;
 import io.renren.zapi.exchange.ApiExchangeService;
+import io.renren.zapi.file.ApiFileService;
 import io.renren.zapi.sub.ApiSubService;
 import io.renren.zapi.vpa.ApiVpaService;
 import io.renren.zcommon.CommonUtils;
@@ -74,6 +75,8 @@ public class ApiService {
     private ApiCardApplyService apiCardApplyService;
     @Resource
     private ApiVpaService apiVpaService;
+    @Resource
+    private ApiFileService apiFileService;
 
     public static Map<String, ApiMeta> metaMap = new HashMap<>();
 
@@ -103,6 +106,7 @@ public class ApiService {
         initService(apiCardMoneyService);
         initService(apiCardStateService);
         initService(apiVpaService);
+        initService(apiFileService);
     }
 
     /**

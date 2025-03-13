@@ -38,4 +38,9 @@ public class CardNewReq {
     private String deliveryprovince; //	邮寄省份	邮寄国家/地区为CHN时必填，见附件【地区代码】
     private String deliverycity;     //	邮寄城市	邮寄国家/地区为CHN时必填，见附件【地区代码】
     private String deliveryaddress;  //	邮寄城市	卡片类型为虚实同发时必填
+
+    // 共享卡要求字段
+    private String payeeaccount;
+    private String procurecontent;
+    private String agmfid;
 }

@@ -4,7 +4,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 
-//钱包子卡开卡任务
+//预防费子卡开卡任务
 @Data
 public class NewPrepaidJobReq {
     private String meraplid;

@@ -29,7 +29,8 @@ public class ApiLogger {
     public void logPacketSuccess(JPacketEntity packetEntity, Result<?> result) {
         CompletableFuture.runAsync(() -> {
             try {
-                String send = objectMapper.writeValueAsString(result).substring(0, 2047);
+                String send = objectMapper.writeValueAsString(result);
+                send = send.length() >= 2047 ? send.substring(0, 2047) : send;
                 packetEntity.setSend(send);
                 jPacketDao.insert(packetEntity);
             } catch (Exception ex) {
