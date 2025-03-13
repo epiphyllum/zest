@@ -28,7 +28,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -99,9 +98,8 @@ public class ApiFileService {
     // 下载结算文件
     public Result<DownloadSettleRes> downloadSettle(DownloadSettleReq request, ApiContext context) {
         String entrydate = request.getEntrydate();
-        List<JAuthedEntity> jAuthedEntities = jAuthedDao.selectList(Wrappers.<JAuthedEntity>lambdaQuery()
+        jAuthedDao.selectList(Wrappers.<JAuthedEntity>lambdaQuery()
                 .eq(JAuthedEntity::getMerchantId, context.getMerchant().getId())
-                .eq(JAuthedEntity::getEntrydate, entrydate)
         );
 
         return null;

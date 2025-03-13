@@ -75,8 +75,6 @@ public class ApiService {
     private ApiCardApplyService apiCardApplyService;
     @Resource
     private ApiVpaService apiVpaService;
-    @Resource
-    private ApiFileService apiFileService;
 
     public static Map<String, ApiMeta> metaMap = new HashMap<>();
 
@@ -106,7 +104,6 @@ public class ApiService {
         initService(apiCardMoneyService);
         initService(apiCardStateService);
         initService(apiVpaService);
-        initService(apiFileService);
     }
 
     /**

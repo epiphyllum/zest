@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.rmi.RemoteException;
 import java.util.*;
 
 @Service
@@ -506,7 +507,7 @@ public class JBatchManager {
     }
 
     // 生成某个商户的文件
-    private void genAuthedFile(Long merchantId, String entrydate) throws IOException {
+    private void genAuthedFile(Long merchantId, String entrydate) {
         List<JAuthedEntity> jAuthedEntities = jAuthedDao.selectList(Wrappers.<JAuthedEntity>lambdaQuery()
                 .eq(JAuthedEntity::getMerchantId, merchantId)
                 .eq(JAuthedEntity::getEntrydate, entrydate)
@@ -517,9 +518,13 @@ public class JBatchManager {
             sb.append("");
         });
 
-        String filename = zestConfig.getUploadDir() + "/settle/" + merchantId + "/" + entrydate + ".txt";
-        File file = new File(filename);
-        FileUtils.writeStringToFile(file, sb.toString(), StandardCharsets.UTF_8);
+        try {
+            String filename = zestConfig.getUploadDir() + "/settle/" + merchantId + "/" + entrydate + ".txt";
+            File file = new File(filename);
+            FileUtils.writeStringToFile(file, sb.toString(), StandardCharsets.UTF_8);
+        } catch (Exception ex) {
+            throw new RenException("can not save");
+        }
     }
 
     // 按商户生成结算流水文件
