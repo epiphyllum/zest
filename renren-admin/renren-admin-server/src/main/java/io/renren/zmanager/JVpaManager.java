@@ -163,6 +163,7 @@ public class JVpaManager {
             BigDecimal totalAuth = entity.getAuthmaxamount().multiply(new BigDecimal(entity.getNum()));
             JBalanceEntity prepaidQuotaAccount = ledgerUtil.getPrepaidQuotaAccount(mainCard.getId(), mainCard.getCurrency());
             if (prepaidQuotaAccount.getBalance().compareTo(totalAuth) < 0) {
+                log.error("总授权: {}, 可发卡额: {}", totalAuth, prepaidQuotaAccount.getBalance());
                 throw new RenException("余额不足");
             }
         }

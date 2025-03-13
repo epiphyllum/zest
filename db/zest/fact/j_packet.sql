@@ -9,9 +9,9 @@ create table j_packet
     merchant_name  varchar(32)    not null comment '商户名',
     req_id         varchar(64)   not null comment '请求ID',
     api_name       varchar(32)   not null comment '接口名称',
-    recv           varchar(2048) not null comment '报文内容',
-    send           varchar(2048) not null comment '报文内容',
-    sign           varchar(1024) not null comment '签名',
+    recv           varchar(2048) null comment '报文内容',
+    send           varchar(2048) null comment '报文内容',
+    sign           varchar(1024) null comment '签名',
     ip             varchar(15)  comment 'IP',
 
     -- basic(4)

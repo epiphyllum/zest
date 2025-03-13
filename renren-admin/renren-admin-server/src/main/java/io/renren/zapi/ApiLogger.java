@@ -60,7 +60,7 @@ public class ApiLogger {
         CompletableFuture.runAsync(() -> {
             try {
                 String errorStackTrace = ExceptionUtils.getErrorStackTrace(failEx);
-                String send = errorStackTrace.substring(0, 2048);
+                String send = errorStackTrace.length() >= 2047 ? errorStackTrace.substring(0, 2048) : errorStackTrace;
                 packetEntity.setSend(send);
                 jPacketDao.insert(packetEntity);
             } catch (Exception ex) {
