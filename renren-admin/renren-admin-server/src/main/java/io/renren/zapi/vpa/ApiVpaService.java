@@ -109,6 +109,8 @@ public class ApiVpaService {
         Result<VpaJobQueryRes> result = new Result<>();
         VpaJobQueryRes res = new VpaJobQueryRes();
         res.setState(job.getState());
+        res.setApplyid(job.getApplyid());
+        res.setMeraplid(job.getMeraplid());
 
         // 发卡成功
         if (!job.getState().equals(ZinConstant.CARD_APPLY_SUCCESS)) {

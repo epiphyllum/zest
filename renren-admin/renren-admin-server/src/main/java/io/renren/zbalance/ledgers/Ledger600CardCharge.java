@@ -51,7 +51,7 @@ public class Ledger600CardCharge {
         JBalanceEntity subVa = ledgerUtil.getSubVaAccount(sub.getId(), entity.getCurrency());
 
         if (subVa.getBalance().compareTo(factAmount) < 0) {
-            throw new RenException("余额不足");
+            throw new RenException("子商户余额不足");
         }
 
         // 子商户VA冻结

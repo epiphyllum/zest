@@ -164,7 +164,7 @@ public class JVpaManager {
             JBalanceEntity prepaidQuotaAccount = ledgerUtil.getPrepaidQuotaAccount(mainCard.getId(), mainCard.getCurrency());
             if (prepaidQuotaAccount.getBalance().compareTo(totalAuth) < 0) {
                 log.error("总授权: {}, 可发卡额: {}", totalAuth, prepaidQuotaAccount.getBalance());
-                throw new RenException("余额不足");
+                throw new RenException("子卡发卡失败, 余额不足");
             }
         }
         // 发行钱包子卡, 不需要判断钱包主卡的额度

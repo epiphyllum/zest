@@ -6,4 +6,7 @@ import lombok.Data;
 public class VpaJobQueryRes {
     private String state;
     private String encrypted;  // 加密信息
+
+    private String applyid;
+    private String meraplid;
 }
