@@ -8,9 +8,11 @@ import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.commons.tools.utils.Result;
 import io.renren.zadmin.dao.JCardDao;
 import io.renren.zadmin.dao.JMerchantDao;
+import io.renren.zadmin.dao.JVpaAdjustDao;
 import io.renren.zadmin.dao.JVpaJobDao;
 import io.renren.zadmin.entity.JCardEntity;
 import io.renren.zadmin.entity.JMerchantEntity;
+import io.renren.zadmin.entity.JVpaAdjustEntity;
 import io.renren.zadmin.entity.JVpaJobEntity;
 import io.renren.zapi.ApiContext;
 import io.renren.zapi.vpa.dto.*;
@@ -41,6 +43,8 @@ public class ApiVpaService {
     private JCardDao jCardDao;
     @Resource
     private ZestConfig zestConfig;
+    @Resource
+    private JVpaAdjustDao jVpaAdjustDao;
 
     // 发行预付费子卡
     public Result<NewPrepaidJobRes> newPrepaidJob(NewPrepaidJobReq request, ApiContext context) {
@@ -82,6 +86,34 @@ public class ApiVpaService {
     public Result<PrepaidChargeRes> prepaidCharge(PrepaidChargeReq request, ApiContext context) {
         Result<PrepaidChargeRes> result = new Result<>();
         jCardManager.prepaidCharge(getCard(request.getCardno()), request.getAmount(), 1);
+        return result;
+    }
+
+    // 预防费卡充值
+    public Result<PrepaidChargeQueryRes> prepaidChargeQuery(PrepaidChargeQuery request, ApiContext context) {
+        Result<PrepaidChargeQueryRes> result = new Result<>();
+        JVpaAdjustEntity adjustEntity = jVpaAdjustDao.selectOne(Wrappers.<JVpaAdjustEntity>lambdaQuery()
+                .eq(JVpaAdjustEntity::getMeraplid, request.getMeraplid())
+        );
+        PrepaidChargeQueryRes res = new PrepaidChargeQueryRes();
+        res.setMeraplid(request.getMeraplid());
+        res.setState(adjustEntity.getState());
+        res.setQuota(adjustEntity.getNewQuota());
+        result.setData(res);
+        return result;
+    }
+
+    // 预防费卡充值
+    public Result<PrepaidWithdrawQueryRes> prepaidWithdrawQuery(PrepaidChargeQuery request, ApiContext context) {
+        Result<PrepaidWithdrawQueryRes> result = new Result<>();
+        JVpaAdjustEntity adjustEntity = jVpaAdjustDao.selectOne(Wrappers.<JVpaAdjustEntity>lambdaQuery()
+                .eq(JVpaAdjustEntity::getMeraplid, request.getMeraplid())
+        );
+        PrepaidWithdrawQueryRes res = new PrepaidWithdrawQueryRes();
+        res.setMeraplid(request.getMeraplid());
+        res.setState(adjustEntity.getState());
+        res.setQuota(adjustEntity.getNewQuota());
+        result.setData(res);
         return result;
     }
 
