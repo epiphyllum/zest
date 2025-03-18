@@ -762,16 +762,16 @@ public class JCardManager {
 
     public void walletCardWithdraw(Long id, BigDecimal adjustAmount) {
         JCardEntity cardEntity = jCardDao.selectById(id);
-        vpaWithdraw(cardEntity, adjustAmount, 0, ZinConstant.MP_VPA_WALLET);
+        vpaWithdraw(cardEntity, adjustAmount, null, 0, ZinConstant.MP_VPA_WALLET);
     }
 
     public void walletCardWithdraw(JCardEntity cardEntity, BigDecimal adjustAmount) {
-        vpaWithdraw(cardEntity, adjustAmount, 0, ZinConstant.MP_VPA_WALLET);
+        vpaWithdraw(cardEntity, adjustAmount, null, 0, ZinConstant.MP_VPA_WALLET);
     }
 
     public void prepaidWithdraw(Long id, BigDecimal adjustAmount, int api) {
         JCardEntity cardEntity = jCardDao.selectById(id);
-        vpaWithdraw(cardEntity, adjustAmount, api, ZinConstant.MP_VPA_PREPAID);
+        vpaWithdraw(cardEntity, adjustAmount, null, api, ZinConstant.MP_VPA_PREPAID);
     }
 
     public void prepaidWithdraw(JCardEntity cardEntity, BigDecimal adjustAmount, String merchantOrderId, int api) {
