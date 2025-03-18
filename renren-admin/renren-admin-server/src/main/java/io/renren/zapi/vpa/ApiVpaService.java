@@ -85,7 +85,8 @@ public class ApiVpaService {
     // 预防费卡充值
     public Result<PrepaidChargeRes> prepaidCharge(PrepaidChargeReq request, ApiContext context) {
         Result<PrepaidChargeRes> result = new Result<>();
-        jCardManager.prepaidCharge(getCard(request.getCardno()), request.getAmount(), 1);
+        JCardEntity card = getCard(request.getCardno());
+        jCardManager.prepaidCharge(card, request.getAmount(), request.getMeraplid(), 1);
         return result;
     }
 
@@ -97,7 +98,7 @@ public class ApiVpaService {
         );
 
         if (adjustEntity == null) {
-            throw new RenException("订单不存在");
+            throw new RenException("订单不存在:" + request.getMeraplid());
         }
 
         PrepaidChargeQueryRes res = new PrepaidChargeQueryRes();
@@ -115,7 +116,7 @@ public class ApiVpaService {
                 .eq(JVpaAdjustEntity::getMeraplid, request.getMeraplid())
         );
         if (adjustEntity == null) {
-            throw new RenException("订单不存在");
+            throw new RenException("订单不存在:" + request.getMeraplid());
         }
         PrepaidWithdrawQueryRes res = new PrepaidWithdrawQueryRes();
         res.setMeraplid(request.getMeraplid());
@@ -128,7 +129,7 @@ public class ApiVpaService {
     // 预防费卡提现
     public Result<PrepaidWithdrawRes> prepaidWithdraw(PrepaidWithdrawReq request, ApiContext context) {
         Result<PrepaidWithdrawRes> result = new Result<>();
-        jCardManager.prepaidWithdraw(getCard(request.getCardno()), request.getAmount(), 1);
+        jCardManager.prepaidWithdraw(getCard(request.getCardno()), request.getAmount(), request.getMeraplid(), 1);
         return result;
     }
 

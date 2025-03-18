@@ -607,21 +607,21 @@ public class JCardManager {
     // 钱包卡
     public boolean walletCardCharge(Long id, BigDecimal adjustAmount) {
         JCardEntity cardEntity = jCardDao.selectById(id);
-        return this.vpaCharge(cardEntity, adjustAmount, 0, ZinConstant.MP_VPA_WALLET);
+        return this.vpaCharge(cardEntity, adjustAmount, null, 0, ZinConstant.MP_VPA_WALLET);
     }
 
     public boolean walletCardCharge(JCardEntity cardEntity, BigDecimal adjustAmount) {
-        return this.vpaCharge(cardEntity, adjustAmount, 0, ZinConstant.MP_VPA_WALLET);
+        return this.vpaCharge(cardEntity, adjustAmount, null, 0, ZinConstant.MP_VPA_WALLET);
     }
 
     // 预付费卡
     public void prepaidCharge(Long id, BigDecimal adjustAmount, int api) {
         JCardEntity cardEntity = jCardDao.selectById(id);
-        this.vpaCharge(cardEntity, adjustAmount, api, ZinConstant.MP_VPA_PREPAID);
+        this.vpaCharge(cardEntity, adjustAmount, null, api, ZinConstant.MP_VPA_PREPAID);
     }
 
-    public void prepaidCharge(JCardEntity cardEntity, BigDecimal adjustAmount, int api) {
-        vpaCharge(cardEntity, adjustAmount, api, ZinConstant.MP_VPA_PREPAID);
+    public void prepaidCharge(JCardEntity cardEntity, BigDecimal adjustAmount, String merchantOrderId, int api) {
+        vpaCharge(cardEntity, adjustAmount, merchantOrderId, api, ZinConstant.MP_VPA_PREPAID);
     }
 
     private void vpaChargeSuccess(JVpaAdjustEntity adjustEntity, JCardEntity cardEntity, BigDecimal newAuth) {
@@ -658,7 +658,7 @@ public class JCardManager {
     }
 
     //钱包子卡-充值
-    public boolean vpaCharge(JCardEntity cardEntity, BigDecimal adjustAmount, int api, String marketproduct) {
+    public boolean vpaCharge(JCardEntity cardEntity, BigDecimal adjustAmount, String merchantOrderId, int api, String marketproduct) {
         if (!marketproduct.equals(ZinConstant.MP_VPA_PREPAID) && !marketproduct.equals(ZinConstant.MP_VPA_WALLET)) {
             throw new RenException("卡产品非法");
         }
@@ -678,6 +678,7 @@ public class JCardManager {
         BigDecimal oldAuth = cardEntity.getAuthmaxamount();
         BigDecimal newAuth = cardEntity.getAuthmaxamount().add(adjustAmount);
         JVpaAdjustEntity adjustEntity = ConvertUtils.sourceToTarget(cardEntity, JVpaAdjustEntity.class);
+        adjustEntity.setMeraplid(merchantOrderId);
         adjustEntity.setApi(api);
         adjustEntity.setId(null);
         adjustEntity.setCreateDate(null);
@@ -773,12 +774,12 @@ public class JCardManager {
         vpaWithdraw(cardEntity, adjustAmount, api, ZinConstant.MP_VPA_PREPAID);
     }
 
-    public void prepaidWithdraw(JCardEntity cardEntity, BigDecimal adjustAmount, int api) {
-        vpaWithdraw(cardEntity, adjustAmount, api, ZinConstant.MP_VPA_PREPAID);
+    public void prepaidWithdraw(JCardEntity cardEntity, BigDecimal adjustAmount, String merchantOrderId, int api) {
+        vpaWithdraw(cardEntity, adjustAmount, merchantOrderId, api, ZinConstant.MP_VPA_PREPAID);
     }
 
     //钱包子卡-提现
-    public void vpaWithdraw(JCardEntity cardEntity, BigDecimal adjustAmount, int api, String marketproduct) {
+    public void vpaWithdraw(JCardEntity cardEntity, BigDecimal adjustAmount, String merchantOrderId, int api, String marketproduct) {
         if (!marketproduct.equals(ZinConstant.MP_VPA_PREPAID) && !marketproduct.equals(ZinConstant.MP_VPA_WALLET)) {
             throw new RenException("卡产品非法");
         }
@@ -800,6 +801,7 @@ public class JCardManager {
         BigDecimal newAuth = cardEntity.getAuthmaxamount().subtract(adjustAmount);
 
         JVpaAdjustEntity adjustEntity = ConvertUtils.sourceToTarget(cardEntity, JVpaAdjustEntity.class);
+        adjustEntity.setMeraplid(merchantOrderId);
         adjustEntity.setApi(api);
         adjustEntity.setId(null);
         adjustEntity.setCreateDate(null);
