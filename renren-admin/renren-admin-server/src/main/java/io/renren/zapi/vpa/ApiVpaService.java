@@ -95,6 +95,11 @@ public class ApiVpaService {
         JVpaAdjustEntity adjustEntity = jVpaAdjustDao.selectOne(Wrappers.<JVpaAdjustEntity>lambdaQuery()
                 .eq(JVpaAdjustEntity::getMeraplid, request.getMeraplid())
         );
+
+        if (adjustEntity == null) {
+            throw new RenException("订单不存在");
+        }
+
         PrepaidChargeQueryRes res = new PrepaidChargeQueryRes();
         res.setMeraplid(request.getMeraplid());
         res.setState(adjustEntity.getState());
@@ -109,6 +114,9 @@ public class ApiVpaService {
         JVpaAdjustEntity adjustEntity = jVpaAdjustDao.selectOne(Wrappers.<JVpaAdjustEntity>lambdaQuery()
                 .eq(JVpaAdjustEntity::getMeraplid, request.getMeraplid())
         );
+        if (adjustEntity == null) {
+            throw new RenException("订单不存在");
+        }
         PrepaidWithdrawQueryRes res = new PrepaidWithdrawQueryRes();
         res.setMeraplid(request.getMeraplid());
         res.setState(adjustEntity.getState());
