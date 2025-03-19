@@ -9,6 +9,7 @@ import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.zadmin.dao.*;
 import io.renren.zadmin.entity.*;
 import io.renren.zapi.ApiNotify;
+import io.renren.zapi.cardapply.dto.CardNewActivateReq;
 import io.renren.zbalance.BalanceType;
 import io.renren.zbalance.LedgerUtil;
 import io.renren.zbalance.ledgers.*;
@@ -463,6 +464,15 @@ public class JCardManager {
     public void activateCard(JCardEntity jCardEntity) {
         TCardActivateRequest request = new TCardActivateRequest();
         request.setCardno(jCardEntity.getCardno());
+        request.setCvv(jCardEntity.getCvv());
+        request.setBirthday(jCardEntity.getBirthday());
+        request.setIdnumber(jCardEntity.getIdnumber());
+        TCardActivateResponse response = zinCardStateService.cardActivate(request);
+        queryCard(jCardEntity);
+    }
+
+    public void activateCardApi(JCardEntity jCardEntity, CardNewActivateReq req) {
+        TCardActivateRequest request = ConvertUtils.sourceToTarget(req, TCardActivateRequest.class);
         TCardActivateResponse response = zinCardStateService.cardActivate(request);
         queryCard(jCardEntity);
     }

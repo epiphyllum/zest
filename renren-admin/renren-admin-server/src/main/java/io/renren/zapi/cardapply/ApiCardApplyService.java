@@ -110,7 +110,7 @@ public class ApiCardApplyService {
         }
 
         // 激活卡
-        jCardManager.activateCard(entity);
+        jCardManager.activateCardApi(entity, request);
 
         // 返回空对象
         CardNewActivateRes res = new CardNewActivateRes();

@@ -96,13 +96,13 @@ public class JDashboardOperation {
                 .stream()
                 .collect(Collectors.groupingBy(JBalanceEntity::getCurrency))
                 .forEach((currency, items) -> {
-                    log.info("currency: {}", currency);
+                    log.debug("currency: {}", currency);
                     for (JBalanceEntity item : items) {
-                        log.info("item: {}", item);
+                        log.debug("item: {}", item);
                     }
                     BalanceItem item = balanceStatItem(items, currency);
                     map.put(currency, item);
-                    log.info("balanceMap: {} -> {}", currency, item);
+                    log.debug("balanceMap: {} -> {}", currency, item);
                 });
         return map;
     }
