@@ -71,7 +71,8 @@ public class ApiNotifyService {
         String reqId = CommonUtils.uniqueId();
         String bodyDigest = DigestUtil.sha256Hex(body);
         String toSign = bodyDigest + reqId + merchant.getId().toString() + apiName;
-        String sign = this.signer.signHex(toSign);
+        byte[] bytes = DigestUtil.sha256(toSign);
+        String sign = this.signer.signHex(bytes);
 
         headers.add("x-api-name", apiName);
         headers.add("x-merchant-id", merchant.getId().toString());
