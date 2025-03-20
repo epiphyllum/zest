@@ -126,7 +126,7 @@ public class ApiService {
         Sign merchantVerifier = getMerchantVerifier(merchant);
         byte[] bytes = DigestUtil.sha256(toSign);
         if (!merchantVerifier.verify(bytes, sign.getBytes())) {
-            log.error("验证签名失败, 代签名串[{}]\nsign=[{}]\n,key=[{}]reqId={}", toSign, sign, merchantVerifier.getPublicKey(), reqId);
+            log.error("验证签名失败, 代签名串[{}]\nsign=[{}]\n,key=[{}]reqId={}", toSign, sign, merchant.getPublicKey(), reqId);
             throw new RenException("签名验证失败");
         }
     }
