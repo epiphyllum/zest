@@ -53,7 +53,7 @@ public class ApiFileService {
         String toSign = bodyDigest + reqId + merchantId + "upload";
         Sign merchantVerifier = apiService.getMerchantVerifier(merchant);
         byte[] bytes = DigestUtil.sha256(toSign);
-        if (merchantVerifier.verify(bytes, ByteUtil.hextobyte(sign))) {
+        if (!merchantVerifier.verify(bytes, ByteUtil.hextobyte(sign))) {
             throw new RenException("signature verification failed");
         }
 
