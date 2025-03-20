@@ -49,15 +49,12 @@ public class ApiFileService {
     public Result<UploadRes> upload(Long merchantId, String reqId, String body, String sign, String suffix) {
         JMerchantEntity merchant = jMerchantDao.selectById(merchantId);
 
-        // 不是开发环境, 才验证签名
-        if (!zestConfig.isDev()) {
-            String bodyDigest = DigestUtil.sha256Hex(body);
-            String toSign = bodyDigest + reqId + merchantId + "upload";
-            Sign merchantVerifier = apiService.getMerchantVerifier(merchant);
-            byte[] bytes = DigestUtil.sha256(toSign);
-            if (merchantVerifier.verify(bytes, ByteUtil.hextobyte(sign))) {
-                throw new RenException("signature verification failed");
-            }
+        String bodyDigest = DigestUtil.sha256Hex(body);
+        String toSign = bodyDigest + reqId + merchantId + "upload";
+        Sign merchantVerifier = apiService.getMerchantVerifier(merchant);
+        byte[] bytes = DigestUtil.sha256(toSign);
+        if (merchantVerifier.verify(bytes, ByteUtil.hextobyte(sign))) {
+            throw new RenException("signature verification failed");
         }
 
         // 文件内容
