@@ -22,15 +22,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.File;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.rmi.RemoteException;
 import java.util.*;
 
-@Service
-@Slf4j
-public class JBatchManager {
+public class JBatchBase {
     @Resource
     private ZestConfig zestConfig;
     @Resource
@@ -40,41 +36,46 @@ public class JBatchManager {
     @Resource
     private JBatchDao jBatchDao;
     @Resource
-    private JBatchAuthed jBatchAuthed;
+    private JMoneyDao jMoneyDao;
     @Resource
-    private JBatchAuthedFile jBatchAuthedFile;
+    private JStatDao jStatDao;
     @Resource
-    private JBatchStat jBatchStat;
-
+    private JStatService jStatService;
+    @Resource
+    private VWithdrawDao vWithdrawDao;
+    @Resource
+    private VDepositDao vDepositDao;
+    @Resource
+    private VCardDao vCardDao;
+    @Resource
+    private JDepositDao jDepositDao;
+    @Resource
+    private JWithdrawDao jWithdrawDao;
+    @Resource
+    private JCardDao jCardDao;
+    @Resource
+    private JAuthedDao jAuthedDao;
+    @Resource
+    private JAuthedService jAuthedService;
+    @Resource
+    private ZinCardTxnService zinCardTxnService;
 
     /**
-     * 批处理任务
+     * 插入任务
      */
-    public void run(String batchType, String date) {
-        if (batchType.equals(ZestConstant.BATCH_TYPE_STAT)) {
-            jBatchStat.statBatch(date);
-            return;
+    protected JBatchEntity newBatchItem(Date date, String batchType) {
+        JBatchEntity batchEntity = jBatchDao.selectOne(Wrappers.<JBatchEntity>lambdaQuery()
+                .eq(JBatchEntity::getBatchDate, date)
+                .eq(JBatchEntity::getBatchType, batchType)
+        );
+        if (batchEntity == null) {
+            batchEntity = new JBatchEntity();
+            batchEntity.setState(ZestConstant.BATCH_STATUS_NEW);
+            batchEntity.setBatchDate(date);
+            batchEntity.setBatchType(batchType);
+            jBatchDao.insert(batchEntity);
         }
-        if (batchType.equals(ZestConstant.BATCH_TYPE_AUTHED)) {
-            jBatchAuthed.authedBatch(date);
-            return;
-        }
-        if (batchType.equals(ZestConstant.BATCH_TYPE_AUTHED_FILE)) {
-            jBatchAuthedFile.authedFileBatch(date);
-        }
+        return batchEntity;
     }
 
-    /**
-     * 重新运行批处理
-     */
-    public void rerun(Long id) {
-        try {
-            JBatchEntity batchEntity = jBatchDao.selectById(id);
-            String dateStr = DateUtils.format(batchEntity.getBatchDate(), DateUtils.DATE_PATTERN);
-            run(batchEntity.getBatchType(), dateStr);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            throw ex;
-        }
-    }
 }

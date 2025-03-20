@@ -125,7 +125,7 @@ public class ApiService {
         String toSign = bodyDigest + reqId + merchant.getId();
         Sign merchantVerifier = getMerchantVerifier(merchant);
         byte[] bytes = DigestUtil.sha256(toSign);
-        if (merchantVerifier.verify(bytes, sign.getBytes())) {
+        if (!merchantVerifier.verify(bytes, sign.getBytes())) {
             throw new RenException("signature verification failed");
         }
     }
@@ -147,6 +147,8 @@ public class ApiService {
         if (apiMeta == null) {
             throw new RenException("接口名称错误:" + name);
         }
+
+        // 查询商户信息
         JMerchantEntity merchant = jMerchantDao.selectById(merchantId);
         if (merchant == null) {
             throw new RenException("非法商户号:" + merchantId);
@@ -156,6 +158,10 @@ public class ApiService {
         if (merchant.getDebug().equals(1)) {
             log.debug("开发环境, 不校验签名: 不检查IP");
         } else {
+            if (merchant.getWhiteIp() == null) {
+                log.error("{}尚未配置IP白名单", merchant.getCusname());
+                throw new RenException("商户尚未配置IP白名单");
+            }
             if (merchant.getWhiteIp().indexOf(ip) == -1) {
                 log.error("{}不允许从{}访问", merchant.getCusname(), ip);
                 throw new RenException("forbidden ip: " + ip);
