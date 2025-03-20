@@ -15,6 +15,7 @@ import io.renren.zapi.ApiService;
 import io.renren.zapi.file.dto.DownloadSettleReq;
 import io.renren.zapi.file.dto.DownloadSettleRes;
 import io.renren.zapi.file.dto.UploadRes;
+import io.renren.zcommon.ByteUtil;
 import io.renren.zcommon.ZestConfig;
 import io.renren.zin.file.ZinFileService;
 import jakarta.annotation.Resource;
@@ -51,10 +52,10 @@ public class ApiFileService {
         // 不是开发环境, 才验证签名
         if (!zestConfig.isDev()) {
             String bodyDigest = DigestUtil.sha256Hex(body);
-            String toSign = bodyDigest + reqId + merchantId;
+            String toSign = bodyDigest + reqId + merchantId + "upload";
             Sign merchantVerifier = apiService.getMerchantVerifier(merchant);
             byte[] bytes = DigestUtil.sha256(toSign);
-            if (merchantVerifier.verify(bytes, sign.getBytes())) {
+            if (merchantVerifier.verify(bytes, ByteUtil.hextobyte(sign))) {
                 throw new RenException("signature verification failed");
             }
         }
