@@ -119,18 +119,17 @@ public class ApiService {
         return verifier;
     }
 
-
+    // 验证签名
     public void verify(String body, String reqId, JMerchantEntity merchant, String name, String sign) {
         String bodyDigest = DigestUtil.sha256Hex(body);
         String toSign = bodyDigest + reqId + merchant.getId() + name;
         Sign merchantVerifier = getMerchantVerifier(merchant);
         byte[] bytes = DigestUtil.sha256(toSign);
         if (!merchantVerifier.verify(bytes, sign.getBytes())) {
-            log.error("验证签名失败, 代签名串[{}], sign=[{}], reqId={}", toSign, sign, reqId);
-            throw new RenException("signature verification failed");
+            log.error("验证签名失败, 代签名串[{}]\nsign=[{}]\n,key=[{}]reqId={}", toSign, sign, merchantVerifier.getPublicKey(), reqId);
+            throw new RenException("签名验证失败");
         }
     }
-
 
     /**
      * 调用服务
