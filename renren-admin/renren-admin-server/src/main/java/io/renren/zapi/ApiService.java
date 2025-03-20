@@ -24,6 +24,7 @@ import io.renren.zapi.exchange.ApiExchangeService;
 import io.renren.zapi.file.ApiFileService;
 import io.renren.zapi.sub.ApiSubService;
 import io.renren.zapi.vpa.ApiVpaService;
+import io.renren.zcommon.ByteUtil;
 import io.renren.zcommon.CommonUtils;
 import io.renren.zcommon.ZestConfig;
 import jakarta.annotation.PostConstruct;
@@ -121,14 +122,16 @@ public class ApiService {
 
     // 验证签名
     public void verify(String body, String reqId, JMerchantEntity merchant, String name, String sign) {
+
         String bodyDigest = DigestUtil.sha256Hex(body);
         String toSign = bodyDigest + reqId + merchant.getId() + name;
-        Sign merchantVerifier = getMerchantVerifier(merchant);
         byte[] bytes = DigestUtil.sha256(toSign);
-        if (!merchantVerifier.verify(bytes, sign.getBytes())) {
-            log.error("验证签名失败, 代签名串[{}]\nsign=[{}]\n,key=[{}]reqId={}", toSign, sign, merchant.getPublicKey(), reqId);
+        Sign merchantVerifier = getMerchantVerifier(merchant);
+        if (!merchantVerifier.verify(bytes, ByteUtil.hextobyte(sign))) {
+            log.error("验证签名失败, 代签名串[{}]\nsign=[{}]\nkey=[{}]\nreqId=[{}]", toSign, sign, merchant.getPublicKey(), reqId);
             throw new RenException("签名验证失败");
         }
+
     }
 
     /**
