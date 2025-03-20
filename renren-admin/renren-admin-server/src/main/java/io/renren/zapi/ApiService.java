@@ -120,9 +120,9 @@ public class ApiService {
     }
 
 
-    public void verify(String body, String reqId, JMerchantEntity merchant, String sign) {
+    public void verify(String body, String reqId, JMerchantEntity merchant, String name, String sign) {
         String bodyDigest = DigestUtil.sha256Hex(body);
-        String toSign = bodyDigest + reqId + merchant.getId();
+        String toSign = bodyDigest + reqId + merchant.getId() + name;
         Sign merchantVerifier = getMerchantVerifier(merchant);
         byte[] bytes = DigestUtil.sha256(toSign);
         if (!merchantVerifier.verify(bytes, sign.getBytes())) {
@@ -167,7 +167,7 @@ public class ApiService {
                 log.error("{}不允许从{}访问", merchant.getCusname(), ip);
                 throw new RenException("forbidden ip: " + ip);
             }
-            verify(body, reqId, merchant, sign);
+            verify(body, reqId, merchant, name, sign);
         }
 
         // 记录日志准备
