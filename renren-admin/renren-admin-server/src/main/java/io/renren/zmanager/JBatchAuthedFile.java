@@ -71,7 +71,7 @@ public class JBatchAuthedFile extends JBatchBase {
         });
 
         String filename = zestConfig.getUploadDir() + "/settle/" + merchantId + "/" + entrydate + ".txt";
-        log.info("生成结算文件: {}, {} -> ", merchantId, entrydate, filename);
+        log.info("生成结算文件: {}, {} -> {}", merchantId, entrydate, filename);
 
         File file = new File(filename);
         FileUtils.forceMkdirParent(file); // 创建父目录
