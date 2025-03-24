@@ -88,7 +88,6 @@ public class ApiFileService {
         Result<UploadRes> result = new Result<>();
         UploadRes uploadRes = new UploadRes(filename);
         uploadRes.setFid(filename);
-        ;
         result.setData(uploadRes);
         return result;
     }
