@@ -26,6 +26,7 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+@Slf4j
 public class JBatchBase {
     @Resource
     private ZestConfig zestConfig;
@@ -69,6 +70,7 @@ public class JBatchBase {
                 .eq(JBatchEntity::getBatchType, batchType)
         );
         if (batchEntity == null) {
+            log.info("no batch entity, create new one... {}, {}", batchType, date);
             batchEntity = new JBatchEntity();
             batchEntity.setState(ZestConstant.BATCH_STATUS_NEW);
             batchEntity.setBatchDate(date);
