@@ -44,9 +44,6 @@ public class JBatchAuthed extends JBatchBase {
 
     // 结算流水下载
     public void authedBatch(String dateStr) {
-
-//        Date date = DateUtils.parse(dateStr, DateUtils.DATE_PATTERN);
-
         // 创建任务记录
         log.info("创建任务: {}, {}", dateStr, ZestConstant.BATCH_TYPE_AUTHED);
         JBatchEntity batchEntity = newBatchItem(dateStr, ZestConstant.BATCH_TYPE_AUTHED);
@@ -58,8 +55,15 @@ public class JBatchAuthed extends JBatchBase {
         request.setPageindex(1);
         request.setEntrydate(entryDate);
         TAuthSettledResponse response = zinCardTxnService.settledQuery(request);
-        int downloaded = response.getDatalist().size();
         int total = response.getTotal();
+        if (total == 0) {
+            jBatchDao.update(null, Wrappers.<JBatchEntity>lambdaUpdate()
+                    .eq(JBatchEntity::getId, batchEntity.getId())
+                    .set(JBatchEntity::getState, ZestConstant.BATCH_STATUS_SUCCESS)
+                    .set(JBatchEntity::getMemo, "记录:" + total));
+            return;
+        }
+        int downloaded = response.getDatalist().size();
         int batchSize = 1000;
         int batchCount = total / 1000 + 1;
         if (total == 0) {
@@ -140,11 +144,13 @@ public class JBatchAuthed extends JBatchBase {
         }
 
         String state = success ? ZestConstant.BATCH_STATUS_SUCCESS : ZestConstant.BATCH_STATUS_FAIL;
+
         jBatchDao.update(null, Wrappers.<JBatchEntity>lambdaUpdate()
                 .eq(JBatchEntity::getId, batchEntity.getId())
                 .eq(JBatchEntity::getState, batchEntity.getState())
                 .set(JBatchEntity::getState, state)
                 .set(JBatchEntity::getMemo, "记录:" + total));
+
 
     }
 }
