@@ -47,6 +47,7 @@ public class JBatchAuthed extends JBatchBase {
 
         Date date = DateUtils.parse(dateStr, DateUtils.DATE_PATTERN);
         // 创建任务记录
+        log.info("创建任务: {}, {}", date, ZestConstant.BATCH_TYPE_AUTHED);
         JBatchEntity batchEntity = newBatchItem(date, ZestConstant.BATCH_TYPE_AUTHED);
 
         // 第一次下载
