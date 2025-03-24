@@ -37,7 +37,6 @@ public class JBatchAuthedFile extends JBatchBase {
 
     // 生成某个商户的文件
     private void genAuthedFile(Long merchantId, String entrydate) throws IOException {
-        log.info("生成结算文件: {}, {}", merchantId, entrydate);
         List<JAuthedEntity> jAuthedEntities = jAuthedDao.selectList(Wrappers.<JAuthedEntity>lambdaQuery()
                 .eq(JAuthedEntity::getMerchantId, merchantId)
                 .eq(JAuthedEntity::getEntrydate, entrydate)
@@ -72,10 +71,11 @@ public class JBatchAuthedFile extends JBatchBase {
         });
 
         String filename = zestConfig.getUploadDir() + "/settle/" + merchantId + "/" + entrydate + ".txt";
+        log.info("生成结算文件: {}, {} -> ", merchantId, entrydate, filename);
+
         File file = new File(filename);
         FileUtils.forceMkdirParent(file); // 创建父目录
         FileUtils.writeLines(file, lines);
-
     }
 
     // 按商户生成结算流水文件
