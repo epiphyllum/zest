@@ -74,6 +74,7 @@ public class JBatchBase {
             batchEntity.setState(ZestConstant.BATCH_STATUS_NEW);
             batchEntity.setBatchDate(dateStr);
             batchEntity.setBatchType(batchType);
+            log.info("插入任务:{}-{}", dateStr, batchType);
             jBatchDao.insert(batchEntity);
         }
         return batchEntity;

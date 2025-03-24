@@ -80,6 +80,13 @@ public class JBatchAuthedFile extends JBatchBase {
 
     // 按商户生成结算流水文件
     public void authedFileBatch(String dateStr) {
+        JBatchEntity authedFetched = jBatchDao.selectOne(Wrappers.<JBatchEntity>lambdaQuery()
+                .eq(JBatchEntity::getBatchDate, dateStr)
+                .eq(JBatchEntity::getBatchType, ZestConstant.BATCH_TYPE_AUTHED)
+        );
+        if (authedFetched == null) {
+            throw new RenException(dateStr + ",结算文件尚未下载");
+        }
         // 创建任务记录
         log.info("创建任务: {}, {}", dateStr, ZestConstant.BATCH_TYPE_AUTHED_FILE);
         JBatchEntity batchEntity = newBatchItem(dateStr, ZestConstant.BATCH_TYPE_AUTHED);
