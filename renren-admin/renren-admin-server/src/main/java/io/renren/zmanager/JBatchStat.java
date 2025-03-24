@@ -293,7 +293,7 @@ public class JBatchStat extends JBatchBase {
         String entryDate = dateStr.replaceAll("-", "");
 
         // 拿到任务
-        JBatchEntity batchEntity = newBatchItem(date, ZestConstant.BATCH_TYPE_STAT);
+        JBatchEntity batchEntity = newBatchItem(dateStr, ZestConstant.BATCH_TYPE_STAT);
         if (batchEntity.getState().equals(ZestConstant.BATCH_STATUS_SUCCESS)) {
             throw new RenException("重复执行");
         }

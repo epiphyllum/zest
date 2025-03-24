@@ -29,7 +29,7 @@ private static final long serialVersionUID = 1L;
 			/**
 			* 任务日期
 			*/
-		private Date batchDate;
+		private String batchDate;
 			/**
 			* 备注
 			*/

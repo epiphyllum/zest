@@ -64,16 +64,15 @@ public class JBatchBase {
     /**
      * 插入任务
      */
-    protected JBatchEntity newBatchItem(Date date, String batchType) {
+    protected JBatchEntity newBatchItem(String dateStr, String batchType) {
         JBatchEntity batchEntity = jBatchDao.selectOne(Wrappers.<JBatchEntity>lambdaQuery()
-                .eq(JBatchEntity::getBatchDate, date)
+                .eq(JBatchEntity::getBatchDate, dateStr)
                 .eq(JBatchEntity::getBatchType, batchType)
         );
         if (batchEntity == null) {
-            log.info("no batch entity, create new one... {}, {}", batchType, date);
             batchEntity = new JBatchEntity();
             batchEntity.setState(ZestConstant.BATCH_STATUS_NEW);
-            batchEntity.setBatchDate(date);
+            batchEntity.setBatchDate(dateStr);
             batchEntity.setBatchType(batchType);
             jBatchDao.insert(batchEntity);
         }

@@ -70,7 +70,7 @@ public class JBatchManager {
     public void rerun(Long id) {
         try {
             JBatchEntity batchEntity = jBatchDao.selectById(id);
-            String dateStr = DateUtils.format(batchEntity.getBatchDate(), DateUtils.DATE_PATTERN);
+            String dateStr = batchEntity.getBatchDate();
             run(batchEntity.getBatchType(), dateStr);
         } catch (Exception ex) {
             ex.printStackTrace();

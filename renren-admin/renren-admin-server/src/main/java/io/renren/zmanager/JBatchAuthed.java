@@ -45,10 +45,11 @@ public class JBatchAuthed extends JBatchBase {
     // 结算流水下载
     public void authedBatch(String dateStr) {
 
-        Date date = DateUtils.parse(dateStr, DateUtils.DATE_PATTERN);
+//        Date date = DateUtils.parse(dateStr, DateUtils.DATE_PATTERN);
+
         // 创建任务记录
-        log.info("创建任务: {}, {}", date, ZestConstant.BATCH_TYPE_AUTHED);
-        JBatchEntity batchEntity = newBatchItem(date, ZestConstant.BATCH_TYPE_AUTHED);
+        log.info("创建任务: {}, {}", dateStr, ZestConstant.BATCH_TYPE_AUTHED);
+        JBatchEntity batchEntity = newBatchItem(dateStr, ZestConstant.BATCH_TYPE_AUTHED);
 
         // 第一次下载
         String entryDate = dateStr.replaceAll("-", "");

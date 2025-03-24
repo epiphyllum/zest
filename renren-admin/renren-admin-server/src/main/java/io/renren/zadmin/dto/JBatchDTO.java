@@ -26,7 +26,7 @@ public class JBatchDTO implements Serializable {
     @Schema(description = "任务状态")
     private String state;
     @Schema(description = "任务日期")
-    private Date batchDate;
+    private String batchDate;
     @Schema(description = "备注")
     private String memo;
     @Schema(description = "创建者")

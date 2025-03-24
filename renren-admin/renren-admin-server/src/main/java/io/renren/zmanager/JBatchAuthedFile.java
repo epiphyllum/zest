@@ -55,7 +55,7 @@ public class JBatchAuthedFile extends JBatchBase {
     public void authedFileBatch(String dateStr) {
         Date date = DateUtils.parse(dateStr, DateUtils.DATE_PATTERN);
         // 创建任务记录
-        JBatchEntity batchEntity = newBatchItem(date, ZestConstant.BATCH_TYPE_AUTHED);
+        JBatchEntity batchEntity = newBatchItem(dateStr, ZestConstant.BATCH_TYPE_AUTHED);
 
         List<Long> ids = jMerchantDao.selectList(Wrappers.<JMerchantEntity>lambdaQuery()
                 .select(JMerchantEntity::getId)

@@ -5,7 +5,7 @@ create table j_batch
     id          bigint       not null comment 'ID',
     batch_type  varchar(64)  not null comment '任务名称',
     state       varchar(2)   not null comment '任务状态',
-    batch_date  date         not null comment '任务日期',
+    batch_date  varchar(10)  not null comment '任务日期',
     memo        varchar(200) comment '备注',
 
     -- basic

@@ -95,7 +95,7 @@ public class JBatchManager2 {
         Date date = DateUtils.parse(dateStr, DateUtils.DATE_PATTERN);
 
         // 创建任务记录
-        JBatchEntity batchEntity = newBatchItem(date, ZestConstant.BATCH_TYPE_AUTHED);
+        JBatchEntity batchEntity = newBatchItem(dateStr, ZestConstant.BATCH_TYPE_AUTHED);
 
         // 第一次下载
         String entryDate = dateStr.replaceAll("-", "");
@@ -197,15 +197,15 @@ public class JBatchManager2 {
     /**
      * 插入任务
      */
-    private JBatchEntity newBatchItem(Date date, String batchType) {
+    private JBatchEntity newBatchItem(String dateStr, String batchType) {
         JBatchEntity batchEntity = jBatchDao.selectOne(Wrappers.<JBatchEntity>lambdaQuery()
-                .eq(JBatchEntity::getBatchDate, date)
+                .eq(JBatchEntity::getBatchDate, dateStr)
                 .eq(JBatchEntity::getBatchType, batchType)
         );
         if (batchEntity == null) {
             batchEntity = new JBatchEntity();
             batchEntity.setState(ZestConstant.BATCH_STATUS_NEW);
-            batchEntity.setBatchDate(date);
+            batchEntity.setBatchDate(dateStr);
             batchEntity.setBatchType(batchType);
             jBatchDao.insert(batchEntity);
         }
@@ -424,7 +424,7 @@ public class JBatchManager2 {
         String entryDate = dateStr.replaceAll("-", "");
 
         // 拿到任务
-        JBatchEntity batchEntity = newBatchItem(date, ZestConstant.BATCH_TYPE_STAT);
+        JBatchEntity batchEntity = newBatchItem(dateStr, ZestConstant.BATCH_TYPE_STAT);
         if (batchEntity.getState().equals(ZestConstant.BATCH_STATUS_SUCCESS)) {
             throw new RenException("重复执行");
         }
@@ -558,7 +558,7 @@ public class JBatchManager2 {
     public void rerun(Long id) {
         try {
             JBatchEntity batchEntity = jBatchDao.selectById(id);
-            String dateStr = DateUtils.format(batchEntity.getBatchDate(), DateUtils.DATE_PATTERN);
+            String dateStr = batchEntity.getBatchDate();
             run(batchEntity.getBatchType(), dateStr);
         } catch (Exception ex) {
             ex.printStackTrace();
