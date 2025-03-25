@@ -46,7 +46,7 @@ public class JBatchAuthedFile extends JBatchBase {
         StringBuilder sb = new StringBuilder();
 
         // 表头
-        sb.append("子商户号,子商户名,卡产品类型,主卡卡号,子卡卡号,交易类型,交易方向,交易状态,交易金额,交易币种,入账金额,入账币种,交易时间,入账日期,入账流水号,受理机构地址,授权码,流水号,商户类别\n");
+        sb.append("子商户号,子商户名,卡产品类型,主卡卡号,子卡卡号,交易类型,交易方向,交易状态,交易金额,交易币种,入账金额,入账币种,交易时间,入账日期,入账流水号,受理机构地址,授权码,流水号,商户类别");
         lines.add(sb.toString());
 
         // 文件体
@@ -70,8 +70,7 @@ public class JBatchAuthedFile extends JBatchBase {
                     .append(jAuthedEntity.getTrxaddr()).append(",")
                     .append(jAuthedEntity.getAuthcode()).append(",")
                     .append(jAuthedEntity.getLogkv()).append(",")
-                    .append(jAuthedEntity.getMcc())
-                    .append("\n");
+                    .append(jAuthedEntity.getMcc());
             String line = lineSB.toString();
             lines.add(line);
         });
