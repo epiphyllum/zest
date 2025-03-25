@@ -13,7 +13,6 @@ import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zapi.ApiContext;
 import io.renren.zapi.ApiService;
 import io.renren.zapi.file.dto.DownloadSettleReq;
-import io.renren.zapi.file.dto.DownloadSettleRes;
 import io.renren.zapi.file.dto.UploadRes;
 import io.renren.zcommon.ByteUtil;
 import io.renren.zcommon.ZestConfig;
@@ -93,12 +92,21 @@ public class ApiFileService {
     }
 
     // 下载结算文件
-    public Result<DownloadSettleRes> downloadSettle(DownloadSettleReq request, ApiContext context) {
+    public Result<String> downloadSettle(DownloadSettleReq request, ApiContext context) {
         String entrydate = request.getEntrydate();
-        jAuthedDao.selectList(Wrappers.<JAuthedEntity>lambdaQuery()
-                .eq(JAuthedEntity::getMerchantId, context.getMerchant().getId())
-        );
-
-        return null;
+        String filename = zestConfig.getUploadDir() + "/settle/" + context.getMerchant().getId() + "/" + entrydate + ".txt";
+        File file = new File(filename);
+        if(!file.exists()) {
+            throw new RenException("结算文件不能存在:" + entrydate);
+        }
+        try {
+            String content = FileUtils.readFileToString(file);
+            Result<String> result = new Result<>();
+            result.setData(content);
+            return result;
+        } catch (IOException e) {
+            throw new RenException("结算文件不能存在:" + entrydate);
+        }
     }
+
 }
