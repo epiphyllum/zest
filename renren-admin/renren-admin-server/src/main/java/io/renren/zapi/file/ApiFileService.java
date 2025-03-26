@@ -3,12 +3,10 @@ package io.renren.zapi.file;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.crypto.asymmetric.Sign;
 import cn.hutool.crypto.digest.DigestUtil;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.Result;
 import io.renren.zadmin.dao.JAuthedDao;
 import io.renren.zadmin.dao.JMerchantDao;
-import io.renren.zadmin.entity.JAuthedEntity;
 import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zapi.ApiContext;
 import io.renren.zapi.ApiService;
@@ -89,24 +87,6 @@ public class ApiFileService {
         uploadRes.setFid(filename);
         result.setData(uploadRes);
         return result;
-    }
-
-    // 下载结算文件
-    public Result<String> downloadSettle(DownloadSettleReq request, ApiContext context) {
-        String entrydate = request.getEntrydate();
-        String filename = zestConfig.getUploadDir() + "/settle/" + context.getMerchant().getId() + "/" + entrydate + ".txt";
-        File file = new File(filename);
-        if(!file.exists()) {
-            throw new RenException("结算文件不能存在:" + entrydate);
-        }
-        try {
-            String content = FileUtils.readFileToString(file);
-            Result<String> result = new Result<>();
-            result.setData(content);
-            return result;
-        } catch (IOException e) {
-            throw new RenException("结算文件不能存在:" + entrydate);
-        }
     }
 
 }

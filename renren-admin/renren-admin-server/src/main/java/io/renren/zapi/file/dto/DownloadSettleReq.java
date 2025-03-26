@@ -4,5 +4,5 @@ import lombok.Data;
 
 @Data
 public class DownloadSettleReq {
-    private String entrydate;
+    private String entrydate;  // 2025-3-19
 }

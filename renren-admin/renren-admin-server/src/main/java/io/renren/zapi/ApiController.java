@@ -3,6 +3,7 @@ package io.renren.zapi;
 import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.Result;
 import io.renren.zapi.file.ApiFileService;
+import io.renren.zapi.file.dto.DownloadSettleReq;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

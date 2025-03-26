@@ -21,6 +21,7 @@ import io.renren.zapi.cardapply.ApiCardApplyService;
 import io.renren.zapi.cardmoney.ApiCardMoneyService;
 import io.renren.zapi.cardstate.ApiCardStateService;
 import io.renren.zapi.exchange.ApiExchangeService;
+import io.renren.zapi.file.ApiDownloadService;
 import io.renren.zapi.file.ApiFileService;
 import io.renren.zapi.sub.ApiSubService;
 import io.renren.zapi.vpa.ApiVpaService;
@@ -32,6 +33,7 @@ import jakarta.annotation.Resource;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -43,6 +45,11 @@ import java.util.Map;
 @Service
 @Slf4j
 public class ApiService {
+
+    @Autowired
+    private ApiFileService apiFileService;
+    @Autowired
+    private ApiDownloadService apiDownloadService;
 
     @Data
     @AllArgsConstructor
@@ -105,6 +112,7 @@ public class ApiService {
         initService(apiCardMoneyService);
         initService(apiCardStateService);
         initService(apiVpaService);
+        initService(apiDownloadService);
     }
 
     /**
