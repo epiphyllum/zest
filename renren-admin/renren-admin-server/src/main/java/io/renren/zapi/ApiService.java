@@ -47,8 +47,6 @@ import java.util.Map;
 public class ApiService {
 
     @Autowired
-    private ApiFileService apiFileService;
-    @Autowired
     private ApiDownloadService apiDownloadService;
 
     @Data
