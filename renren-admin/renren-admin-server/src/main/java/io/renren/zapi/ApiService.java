@@ -46,9 +46,6 @@ import java.util.Map;
 @Slf4j
 public class ApiService {
 
-    @Autowired
-    private ApiDownloadService apiDownloadService;
-
     @Data
     @AllArgsConstructor
     public static class ApiMeta {
@@ -57,6 +54,8 @@ public class ApiService {
         Class<?> reqClass;
     }
 
+    @Resource
+    private ApiDownloadService apiDownloadService;
     @Resource
     private ApiLogger apiLogger;
     @Resource
