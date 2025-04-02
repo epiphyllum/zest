@@ -40,7 +40,8 @@ public class ApiDownloadService {
         String filename = zestConfig.getUploadDir() + "/settle/" + context.getMerchant().getId() + "/" + entrydate + ".txt";
         File file = new File(filename);
         if (!file.exists()) {
-            throw new RenException("结算文件不能存在:" + entrydate);
+            log.error("结算文件不存在:{}", filename);
+            throw new RenException("结算文件不存在:" + entrydate);
         }
         try {
             String content = FileUtils.readFileToString(file);
@@ -48,7 +49,7 @@ public class ApiDownloadService {
             result.setData(content);
             return result;
         } catch (IOException e) {
-            throw new RenException("结算文件不能存在:" + entrydate);
+            throw new RenException("结算文件不存在:" + entrydate);
         }
     }
 
