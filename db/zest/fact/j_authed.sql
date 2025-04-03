@@ -16,6 +16,7 @@ create table j_authed
     maincardno    varchar(50) comment '主卡',
 
     -- info
+    -- cardapplyid   varchar(30),
     cardno        varchar(16)    not null, -- 卡号	cardno	String	16	Y
     trxcode       varchar(25)    not null, -- 交易类型	trxtype	String	25	Y	见附录【授权交易类型】
     trxdir        varchar(6),              -- 交易方向	trxdir	String	6	O	付款：101014 收款：101013

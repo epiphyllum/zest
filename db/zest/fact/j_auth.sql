@@ -17,6 +17,7 @@ create table j_auth
     --
     maincardno    varchar(50) comment '主卡',
 
+    -- cardapplyid    varchar(30),
     cardno         varchar(16) not null comment '卡号',
     logkv          varchar(50) comment '流水号',
     trxcode        varchar(25) comment '交易代码',
