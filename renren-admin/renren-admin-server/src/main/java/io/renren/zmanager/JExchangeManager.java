@@ -12,6 +12,7 @@ import io.renren.zapi.ApiNotify;
 import io.renren.zbalance.LedgerUtil;
 import io.renren.zbalance.ledgers.Ledger200Exchange;
 import io.renren.zcommon.ZinConstant;
+import io.renren.zin.BankException;
 import io.renren.zin.exchange.ZinExchangeService;
 import io.renren.zin.exchange.dto.*;
 import jakarta.annotation.Resource;
@@ -62,12 +63,17 @@ public class JExchangeManager {
      */
     public void submit(JExchangeEntity entity) {
         TExchangeRequest request = ConvertUtils.sourceToTarget(entity, TExchangeRequest.class);
-        TExchangeResponse exchange = zinExchangeService.exchange(request);
-        jExchangeDao.update(null, Wrappers.<JExchangeEntity>lambdaUpdate()
-                .eq(JExchangeEntity::getId, entity.getId())
-                .set(JExchangeEntity::getApplyid, exchange.getApplyid())
-        );
-        entity.setApplyid(exchange.getApplyid());
+        try {
+            TExchangeResponse exchange = zinExchangeService.exchange(request);
+            jExchangeDao.update(null, Wrappers.<JExchangeEntity>lambdaUpdate()
+                    .eq(JExchangeEntity::getId, entity.getId())
+                    .set(JExchangeEntity::getApplyid, exchange.getApplyid())
+            );
+            entity.setApplyid(exchange.getApplyid());
+        } catch ( BankException be) {
+            this.cancel(entity);
+            throw new RenException(be.getMessage());
+        }
         this.query(entity, false);
     }
 

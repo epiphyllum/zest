@@ -9,6 +9,7 @@ import io.renren.zapi.ApiNotify;
 import io.renren.zbalance.LedgerUtil;
 import io.renren.zbalance.ledgers.Ledger700CardWithdraw;
 import io.renren.zcommon.ZinConstant;
+import io.renren.zin.BankException;
 import io.renren.zin.cardapply.ZinCardApplyService;
 import io.renren.zin.cardapply.dto.TCardApplyQuery;
 import io.renren.zin.cardapply.dto.TCardApplyResponse;
@@ -205,7 +206,14 @@ public class JWithdrawManager {
      */
     public void submit(JWithdrawEntity entity) {
         TWithdrawRequest request = ConvertUtils.sourceToTarget(entity, TWithdrawRequest.class);
-        TWithdrawResponse response = zinCardMoneyService.withdraw(request);
+        TWithdrawResponse response = null;
+        try {
+            response = zinCardMoneyService.withdraw(request);
+        } catch (BankException be) {
+            this.cancel(entity);
+            throw new RenException(be.getMessage());
+        }
+
         JWithdrawEntity update = new JWithdrawEntity();
         update.setId(entity.getId());
         update.setApplyid(response.getApplyid());

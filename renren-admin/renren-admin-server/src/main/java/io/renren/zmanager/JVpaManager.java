@@ -13,6 +13,7 @@ import io.renren.zbalance.ledgers.Ledger503OpenVpaWallet;
 import io.renren.zcommon.CommonUtils;
 import io.renren.zcommon.ZestConfig;
 import io.renren.zcommon.ZinConstant;
+import io.renren.zin.BankException;
 import io.renren.zin.cardapply.ZinCardApplyService;
 import io.renren.zin.cardapply.dto.*;
 import io.renren.zin.file.ZinFileService;
@@ -207,7 +208,14 @@ public class JVpaManager {
     // 提交通联
     public void submit(JVpaJobEntity entity) {
         TCardVpaApply request = ConvertUtils.sourceToTarget(entity, TCardVpaApply.class);
-        TCardVpaApplyResponse response = zinCardApplyService.cardVpaApply(request);
+        TCardVpaApplyResponse response = null;
+        try {
+            response = zinCardApplyService.cardVpaApply(request);
+        } catch (BankException be) {
+            // 取消
+            this.cancel(entity);
+            throw new RenException(be.getMessage());
+        }
 
         String applyid = response.getApplyid();
         JVpaJobEntity update = new JVpaJobEntity();

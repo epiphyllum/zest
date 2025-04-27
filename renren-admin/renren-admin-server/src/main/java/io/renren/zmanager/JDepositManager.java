@@ -10,6 +10,7 @@ import io.renren.zadmin.service.JDepositService;
 import io.renren.zapi.ApiNotify;
 import io.renren.zbalance.ledgers.Ledger600CardCharge;
 import io.renren.zcommon.ZinConstant;
+import io.renren.zin.BankException;
 import io.renren.zin.cardapply.ZinCardApplyService;
 import io.renren.zin.cardapply.dto.TCardApplyQuery;
 import io.renren.zin.cardapply.dto.TCardApplyResponse;
@@ -284,17 +285,21 @@ public class JDepositManager {
      * 提交充值到通联
      */
     public void submit(JDepositEntity entity) {
-        TDepositRequest request = ConvertUtils.sourceToTarget(entity, TDepositRequest.class);
-        request.setAmount(entity.getTxnAmount());
-        TDepositResponse response = zinCardMoneyService.deposit(request);
-        String applyid = response.getApplyid();
-        JDepositEntity update = new JDepositEntity();
-        update.setId(entity.getId());
-        update.setApplyid(applyid);
-        jDepositDao.updateById(update);
-
-        // 立即发起查询
-        entity.setApplyid(applyid);
+        try {
+            TDepositRequest request = ConvertUtils.sourceToTarget(entity, TDepositRequest.class);
+            request.setAmount(entity.getTxnAmount());
+            TDepositResponse response = zinCardMoneyService.deposit(request);
+            String applyid = response.getApplyid();
+            JDepositEntity update = new JDepositEntity();
+            update.setId(entity.getId());
+            update.setApplyid(applyid);
+            jDepositDao.updateById(update);
+            // 立即发起查询
+            entity.setApplyid(applyid);
+        } catch (BankException be) {
+            this.cancel(entity);
+            throw new RenException(be.getMessage());
+        }
         this.query(entity, false);
     }
 

@@ -312,25 +312,7 @@ public class JCardManager {
             }
         } catch (BankException be) {
             log.error("发卡行错误， 已经失败了，需要释放手续费");
-            tx.executeWithoutResult(status -> {
-                jCardDao.update(Wrappers.<JCardEntity>lambdaUpdate()
-                        .eq(JCardEntity::getId, entity.getId())
-                        .set(JCardEntity::getState, ZinConstant.CARD_APPLY_FAIL)
-                );
-                ledger500OpenCard.ledgeOpenCardUnFreeze(entity);
-                // 钱包主卡
-                if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_WALLET)) {
-                    // 属于账户升级
-                    if (entity.getWalletId() != null) {
-                        // 钱包账户upgrade交易状态更新
-                        jWalletTxnDao.update(null, Wrappers.<JWalletTxnEntity>lambdaUpdate()
-                                .eq(JWalletTxnEntity::getId, entity.getRelateId())
-                                .eq(JWalletTxnEntity::getState, ZWalletConstant.WALLET_TXN_STATUS_NEW)
-                                .set(JWalletTxnEntity::getState, ZWalletConstant.WALLET_TXN_STATUS_FAIL)
-                        );
-                    }
-                }
-            });
+            this.cancel(entity.getId());
             throw new RenException(be.getMessage());
         }
 
