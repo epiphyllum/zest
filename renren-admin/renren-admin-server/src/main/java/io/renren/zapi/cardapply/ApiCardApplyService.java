@@ -4,17 +4,21 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.bstek.ureport.console.cache.ObjectMap;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wechat.pay.java.service.payments.model.Transaction;
 import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.ConvertUtils;
 import io.renren.commons.tools.utils.Result;
 import io.renren.zadmin.dao.JCardDao;
 import io.renren.zadmin.dao.JVpaJobDao;
+import io.renren.zadmin.dao.JWalletTxnDao;
 import io.renren.zadmin.entity.JCardEntity;
 import io.renren.zadmin.entity.JMerchantEntity;
 import io.renren.zadmin.entity.JVpaJobEntity;
+import io.renren.zadmin.entity.JWalletTxnEntity;
 import io.renren.zapi.ApiContext;
 import io.renren.zapi.cardapply.dto.*;
 
+import io.renren.zbalance.ledgers.Ledger500OpenCard;
 import io.renren.zcommon.CommonUtils;
 import io.renren.zcommon.ZestConfig;
 import io.renren.zcommon.ZinConstant;
@@ -28,9 +32,11 @@ import io.renren.zin.cardstate.dto.TCardActivateRequest;
 import io.renren.zin.cardstate.dto.TCardActivateResponse;
 import io.renren.zin.cardapply.ZinCardApplyService;
 import io.renren.zmanager.JCardManager;
+import io.renren.zwallet.ZWalletConstant;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +56,12 @@ public class ApiCardApplyService {
     private ZestConfig zestConfig;
     @Resource
     private ObjectMapper objectMapper;
+    @Resource
+    private Ledger500OpenCard ledger500OpenCard;
+    @Resource
+    private TransactionTemplate tx;
+    @Resource
+    private JWalletTxnDao jWalletTxnDao;
 
     // 开卡
     public Result<CardNewRes> cardNew(CardNewReq request, ApiContext context) {
@@ -66,11 +78,27 @@ public class ApiCardApplyService {
         try {
             jCardManager.submit(entity);
         } catch (BankException be) {
-            jCardDao.update(Wrappers.<JCardEntity>lambdaUpdate()
-                    .eq(JCardEntity::getId, entity.getId())
-                    .set(JCardEntity::getState, ZinConstant.CARD_APPLY_FAIL)
-            );
-            new RenException(be.getMessage());
+            log.error("发卡行错误， 已经失败了，需要释放手续费");
+            tx.executeWithoutResult(status -> {
+                jCardDao.update(Wrappers.<JCardEntity>lambdaUpdate()
+                        .eq(JCardEntity::getId, entity.getId())
+                        .set(JCardEntity::getState, ZinConstant.CARD_APPLY_FAIL)
+                );
+                ledger500OpenCard.ledgeOpenCardUnFreeze(entity);
+                // 钱包主卡
+                if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_WALLET)) {
+                    // 属于账户升级
+                    if (entity.getWalletId() != null) {
+                        // 钱包账户upgrade交易状态更新
+                        jWalletTxnDao.update(null, Wrappers.<JWalletTxnEntity>lambdaUpdate()
+                                .eq(JWalletTxnEntity::getId, entity.getRelateId())
+                                .eq(JWalletTxnEntity::getState, ZWalletConstant.WALLET_TXN_STATUS_NEW)
+                                .set(JWalletTxnEntity::getState, ZWalletConstant.WALLET_TXN_STATUS_FAIL)
+                        );
+                    }
+                }
+            });
+            throw new RenException(be.getMessage());
         }
 
         // 应答商户
@@ -78,6 +106,7 @@ public class ApiCardApplyService {
         CardNewRes cardNewRes = new CardNewRes(entity.getApplyid());
         result.setData(cardNewRes);
         return result;
+
     }
 
     // 开卡查询
