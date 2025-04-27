@@ -2,7 +2,6 @@ package io.renren.zmanager;
 
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.warrenstrange.googleauth.GoogleAuthenticator;
 import io.renren.commons.security.user.SecurityUser;
 import io.renren.commons.security.user.UserDetail;
 import io.renren.commons.tools.exception.RenException;
@@ -161,7 +160,7 @@ public class JMerchantManager {
             if (update != 1) {
                 throw new RenException("开户失败");
             }
-            // 状态又变化， 且新状态是成功
+            // 状态又变化，且新状态是成功
             if (newState.equals(ZinConstant.MERCHANT_STATE_VERIFIED) || newState.equals(ZinConstant.MERCHANT_STATE_REGISTER)) {
                 this.openVa(entity);
                 // 新增加默认子商户
@@ -176,7 +175,6 @@ public class JMerchantManager {
             }
         });
     }
-
 
     public void update(JMerchantDTO dto) {
         JMerchantEntity merchant = jMerchantDao.selectById(dto.getId());

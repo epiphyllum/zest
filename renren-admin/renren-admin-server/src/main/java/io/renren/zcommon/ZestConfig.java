@@ -14,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 @EnableScheduling
 public class ZestConfig {
     private AccessConfig accessConfig;    // 通联接入配置
+    private AccessConfig b2bConfig;       // b2b资金
     private String publicKey;             // 平台公钥
     private String privateKey;            // 平台私钥
     private Long deptId;                  // 大吉的机构ID

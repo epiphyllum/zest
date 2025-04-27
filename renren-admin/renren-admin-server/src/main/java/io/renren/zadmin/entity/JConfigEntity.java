@@ -1,5 +1,6 @@
 package io.renren.zadmin.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import com.baomidou.mybatisplus.annotation.*;
@@ -24,7 +25,6 @@ public class JConfigEntity extends BaseEntity {
     private Long updater;
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date updateDate;
-
 
     private Integer quotaLimit;     //
     private String vccMainReal ;    //

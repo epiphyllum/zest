@@ -18,6 +18,7 @@ import io.renren.zapi.cardapply.dto.*;
 import io.renren.zcommon.CommonUtils;
 import io.renren.zcommon.ZestConfig;
 import io.renren.zcommon.ZinConstant;
+import io.renren.zin.BankException;
 import io.renren.zin.cardapply.dto.TCardApplyQuery;
 import io.renren.zin.cardapply.dto.TCardApplyResponse;
 import io.renren.zin.cardapply.dto.TCardSubApplyRequest;
@@ -28,6 +29,7 @@ import io.renren.zin.cardstate.dto.TCardActivateResponse;
 import io.renren.zin.cardapply.ZinCardApplyService;
 import io.renren.zmanager.JCardManager;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -35,6 +37,7 @@ import java.util.List;
 
 
 @Service
+@Slf4j
 public class ApiCardApplyService {
 
     @Resource
@@ -60,7 +63,15 @@ public class ApiCardApplyService {
         jCardManager.save(entity);
 
         // 提交通联
-        jCardManager.submit(entity);
+        try {
+            jCardManager.submit(entity);
+        } catch (BankException be) {
+            jCardDao.update(Wrappers.<JCardEntity>lambdaUpdate()
+                    .eq(JCardEntity::getId, entity.getId())
+                    .set(JCardEntity::getState, ZinConstant.CARD_APPLY_FAIL)
+            );
+            new RenException(be.getMessage());
+        }
 
         // 应答商户
         Result<CardNewRes> result = new Result<>();
@@ -84,8 +95,15 @@ public class ApiCardApplyService {
             throw new RenException("记录不存在");
         }
 
-        // 查询通联
-        jCardManager.query(entity, false);
+        // 如果卡申请已经是终态了
+        if (ZinConstant.isCardApplySuccess(entity.getState()) ||
+                ZinConstant.isCardApplyFail(entity.getState())
+        ) {
+            log.info("发卡已经是终态");
+        } else {
+            // 查询通联
+            jCardManager.query(entity, false);
+        }
 
         // 应答
         entity = jCardDao.selectById(entity.getId());

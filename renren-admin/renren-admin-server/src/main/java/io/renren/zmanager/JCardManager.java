@@ -27,6 +27,7 @@ import io.renren.zin.cardstate.dto.*;
 import io.renren.zwallet.ZWalletConstant;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -222,7 +223,11 @@ public class JCardManager {
 
         // 入库 + 冻结记账
         tx.executeWithoutResult(status -> {
-            jCardDao.insert(entity);
+            try {
+                jCardDao.insert(entity);
+            } catch (DuplicateKeyException e) {
+                throw new RenException("流水号重复");
+            }
             ledger500OpenCard.ledgeOpenCardFreeze(entity);
         });
     }
@@ -230,7 +235,13 @@ public class JCardManager {
     // 共享主卡 | 预付费主卡 | 钱包主卡
     public void saveVpaMain(JCardEntity entity) {
         tx.executeWithoutResult(status -> {
-            jCardDao.insert(entity);
+
+            try {
+                jCardDao.insert(entity);
+            } catch (DuplicateKeyException e) {
+                throw new RenException("流水号重复");
+            }
+
             ledger500OpenCard.ledgeOpenCardFreeze(entity);
         });
     }

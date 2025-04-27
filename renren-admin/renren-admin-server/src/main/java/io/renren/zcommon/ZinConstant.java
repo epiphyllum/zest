@@ -202,6 +202,11 @@ public class ZinConstant {
     public static final String VPA_ADJUST_SUCCESS = "55";    // 成功
     public static final String VPA_ADJUST_FAIL = "99";       // 失败
 
+    // b2b独立入金状态
+    public static final String B2B_MONEY_NEW = "00";         // 收到入金通知
+    public static final String B2B_MONEY_ECO = "01";         // 已发起生态圈转账
+    public static final String B2B_MONEY_MERGE = "02";       // 已发起同名转账到发卡VA
+    public static final String B2B_MONEY_SUCCESS = "03";     // 成功
 }
 
 

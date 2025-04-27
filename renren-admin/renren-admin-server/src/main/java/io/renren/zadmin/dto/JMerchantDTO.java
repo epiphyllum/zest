@@ -108,6 +108,8 @@ public class JMerchantDTO implements Serializable {
     private Integer enabled;
     @Schema(description = "调试模式")
     private Integer debug;
+    @Schema(description = "b2bva")
+    private String b2bva;
 
 
     // 接入参数

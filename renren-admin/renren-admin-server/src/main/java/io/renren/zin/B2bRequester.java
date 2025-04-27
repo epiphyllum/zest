@@ -1,28 +1,22 @@
 package io.renren.zin;
 
-import cn.hutool.core.lang.Pair;
 import cn.hutool.core.util.HexUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.asymmetric.RSA;
 import cn.hutool.crypto.asymmetric.Sign;
 import cn.hutool.crypto.asymmetric.SignAlgorithm;
 import cn.hutool.crypto.digest.DigestUtil;
-import com.alibaba.excel.metadata.Head;
-import com.alibaba.nacos.api.naming.pojo.healthcheck.impl.Http;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.renren.commons.tools.exception.RenException;
 import io.renren.zadmin.entity.JChannelLogEntity;
 import io.renren.zcommon.AccessConfig;
 import io.renren.zcommon.ZestConfig;
-import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.logging.LoggersEndpoint;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
@@ -47,20 +41,13 @@ import java.util.Map;
 
 @Service
 @Slf4j
-public class ZinRequester {
-    @Resource
-    private ZestConfig zestConfig;
+public class B2bRequester {
     @Resource
     private RestTemplate restTemplate;
     @Resource
     private ObjectMapper objectMapper;
     @Resource
     private ZinLogger zinLogger;
-
-    // init 设置
-    private String commonQueryParams;
-    private Sign signer;
-    private Sign verifier;
 
     @Data
     @AllArgsConstructor
@@ -70,28 +57,28 @@ public class ZinRequester {
         private String sign;
     }
 
+    private Sign getSigner(AccessConfig b2bConfig) {
+        RSA rsaSigner = new RSA(b2bConfig.getPrivateKey(), null);
+        Sign signer = SecureUtil.sign(SignAlgorithm.SHA512withRSA);
+        signer.setPrivateKey(rsaSigner.getPrivateKey());
+        return signer;
+    }
 
-    @PostConstruct
-    public void init() {
-        AccessConfig accessConfig = zestConfig.getAccessConfig();
-        commonQueryParams = "authcus=" + accessConfig.getAuthcus() + "&merid=" + accessConfig.getMerid();
-
-        RSA rsaSigner = new RSA(accessConfig.getPrivateKey(), null);
-        this.signer = SecureUtil.sign(SignAlgorithm.SHA512withRSA);
-        this.signer.setPrivateKey(rsaSigner.getPrivateKey());
-
-        RSA rsaVerifier = new RSA(null, accessConfig.getPlatformKey());
-        this.verifier = SecureUtil.sign(SignAlgorithm.SHA512withRSA);
-        this.verifier.setPublicKey(rsaVerifier.getPublicKey());
+    private Sign getVerifier(AccessConfig b2bConfig) {
+        RSA rsaVerifier = new RSA(null, b2bConfig.getPlatformKey());
+        Sign verifier = SecureUtil.sign(SignAlgorithm.SHA512withRSA);
+        verifier.setPublicKey(rsaVerifier.getPublicKey());
+        return verifier;
     }
 
     //  HTTP请求头设置
-    private HeaderInfo getHeaders(String reqId, Object body, String uri, String params) {
+    private HeaderInfo getHeaders(AccessConfig b2bConfig, String reqId, Object body, String uri, String params) {
         ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
         String agcpDate = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         String today = now.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        String agcpCrdt = zestConfig.getAccessConfig().getKeyId() + ":" + today + ":gcpservice";
+        String agcpCrdt = b2bConfig.getKeyId() + ":" + today + ":gcpservice";
         String agcpSend = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
+        String commonQueryParams = "authcus=" + b2bConfig.getAuthcus() + "&merid=" + b2bConfig.getMerid();
 
         StringBuilder sb = new StringBuilder();
         String toSign = null;
@@ -111,7 +98,8 @@ public class ZinRequester {
                     .append(sha256Hex).toString();
         }
 
-        String sign = this.signer.signHex(toSign);
+        Sign signer = this.getSigner(b2bConfig);
+        String sign = signer.signHex(toSign);
         String agcpAuth = "GCP1-RSA-SHA512:" + sign;
 
         // prepare request headers
@@ -130,14 +118,16 @@ public class ZinRequester {
     }
 
     // 下载文件
-    public byte[] download(String reqId, String uri, Object object) {
+    public byte[] download(AccessConfig b2bConfig, String reqId, String uri, Object object) {
         String body = null;
         try {
             body = this.objectMapper.writeValueAsString(object);
         } catch (JsonProcessingException e) {
             throw new RenException("invalid request, can not convert to json");
         }
-        HeaderInfo headerInfo = getHeaders(reqId, body, uri, null);
+        String commonQueryParams = "authcus=" + b2bConfig.getAuthcus() + "&merid=" + b2bConfig.getMerid();
+
+        HeaderInfo headerInfo = getHeaders(b2bConfig, reqId, body, uri, null);
         HttpHeaders headers = headerInfo.getHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         RequestEntity requestEntity = RequestEntity.post("")
@@ -146,7 +136,7 @@ public class ZinRequester {
                 .acceptCharset(StandardCharsets.UTF_8)
                 .headers(headers)
                 .body(body);
-        String url = zestConfig.getAccessConfig().getBaseUrl() + uri + "?" + commonQueryParams + "&" + "reqid=" + reqId;
+        String url = b2bConfig.getBaseUrl() + uri + "?" + commonQueryParams + "&" + "reqid=" + reqId;
 
         try {
             ResponseEntity<byte[]> responseEntity = restTemplate.postForEntity(url, requestEntity, byte[].class);
@@ -158,16 +148,17 @@ public class ZinRequester {
         }
     }
 
-    // 传对象过来
-    public <T extends TResult> T request(String reqId, String uri, Object map, Class<T> clazz) {
-
+    // 传对象
+    public <T extends TResult> T request(AccessConfig b2bConfig, String reqId, String uri, Object map, Class<T> clazz) {
         String body = null;
         try {
             body = this.objectMapper.writeValueAsString(map);
         } catch (JsonProcessingException e) {
             throw new RenException("invalid request, can not convert to json");
         }
-        HeaderInfo headerInfo = getHeaders(reqId, body, uri, null);
+
+        String commonQueryParams = "authcus=" + b2bConfig.getAuthcus() + "&merid=" + b2bConfig.getMerid();
+        HeaderInfo headerInfo = getHeaders(b2bConfig, reqId, body, uri, null);
         HttpHeaders headers = headerInfo.getHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         RequestEntity requestEntity = RequestEntity.post("")
@@ -176,25 +167,28 @@ public class ZinRequester {
                 .acceptCharset(StandardCharsets.UTF_8)
                 .headers(headers)
                 .body(body);
-        String url = zestConfig.getAccessConfig().getBaseUrl() + uri + "?" + commonQueryParams + "&" + "reqid=" + reqId;
+        String url = b2bConfig.getBaseUrl() + uri + "?" + commonQueryParams + "&" + "reqid=" + reqId;
 
         JChannelLogEntity logEntity = new JChannelLogEntity();
         logEntity.setApiName(uri);
         logEntity.setSign(headerInfo.sign);
         logEntity.setReqId(reqId);
-        logEntity.setSend(body.length() >= 2047 ? body.substring(0,2047) : body);
+        logEntity.setSend(body.length() >= 2047 ? body.substring(0, 2047) : body);
 
         try {
             ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
             String bodyResp = responseEntity.getBody();
-            logEntity.setRecv(bodyResp.length() >= 2047 ? bodyResp.substring(0,2047) : bodyResp);
+            logEntity.setRecv(bodyResp.length() >= 2047 ? bodyResp.substring(0, 2047) : bodyResp);
             zinLogger.logPacketSuccess(logEntity);
             T ttResult = objectMapper.readValue(bodyResp, clazz);
-            if (ttResult.getRspcode().equals("0000")) {
+            if (
+                    ttResult.getRspcode().equals("0000") ||
+                            ttResult.getRspcode().equals("1030")
+            ) {
                 return ttResult;
             }
             log.error("通联失败:{}, toSign: [{}]", headerInfo.getToSign(), ttResult);
-            throw new BankException("发卡行错误:" + ttResult.getRspinfo());
+            throw new RenException("发卡行错误:" + ttResult.getRspinfo());
         } catch (Exception ex) {
             ex.printStackTrace();
             zinLogger.logPacketException(logEntity, ex);
@@ -202,10 +196,13 @@ public class ZinRequester {
         }
     }
 
-    // 传map过来的
-    public <T extends TResult> T request(String reqId, String uri, Map<String, Object> map, Class<T> clazz) throws JsonProcessingException {
+    // 传map
+    public <T extends TResult> T request(AccessConfig b2bConfig, String reqId, String uri, Map<String, Object> map, Class<T> clazz) throws JsonProcessingException {
         String body = this.objectMapper.writeValueAsString(map);
-        HeaderInfo headerInfo = getHeaders(reqId, body, uri, null);
+
+        String commonQueryParams = "authcus=" + b2bConfig.getAuthcus() + "&merid=" + b2bConfig.getMerid();
+
+        HeaderInfo headerInfo = getHeaders(b2bConfig, reqId, body, uri, null);
         HttpHeaders headers = headerInfo.getHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         RequestEntity requestEntity = RequestEntity.post("")
@@ -214,7 +211,7 @@ public class ZinRequester {
                 .acceptCharset(StandardCharsets.UTF_8)
                 .headers(headers)
                 .body(body);
-        String url = zestConfig.getAccessConfig().getBaseUrl() + uri + "?" + commonQueryParams + "&" + "reqid=" + reqId;
+        String url = b2bConfig.getBaseUrl() + uri + "?" + commonQueryParams + "&" + "reqid=" + reqId;
         ResponseEntity<String> response = restTemplate.postForEntity(url, requestEntity, String.class);
         String bodyResp = response.getBody();
         log.info("req:[{}][{}][{}]", url, body, bodyResp);
@@ -230,17 +227,16 @@ public class ZinRequester {
     }
 
     // 上传文件
-    public void upload(String reqId, byte[] bodyBytes, String fileId) {
-        AccessConfig accessConfig = zestConfig.getAccessConfig();
-        String params = "authcus=" + accessConfig.getAuthcus() +
+    public void upload(AccessConfig b2bConfig, String reqId, byte[] bodyBytes, String fileId) {
+        String params = "authcus=" + b2bConfig.getAuthcus() +
                 "&fid=" + fileId +
-                "&merid=" + accessConfig.getMerid() +
+                "&merid=" + b2bConfig.getMerid() +
                 "&reqid=" + reqId +
                 "&spos=0" +
                 "&zip=0";
         String body = Base64.getUrlEncoder().encodeToString(bodyBytes);
         String uri = "/gcpapi/file/upload";
-        HeaderInfo headerInfo = getHeaders(reqId, bodyBytes, uri, params);
+        HeaderInfo headerInfo = getHeaders(b2bConfig, reqId, bodyBytes, uri, params);
         HttpHeaders headers = headerInfo.getHeaders();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
 
@@ -250,7 +246,7 @@ public class ZinRequester {
                 .headers(headers)
                 .body(body);
 
-        String url = zestConfig.getAccessConfig().getBaseUrl() + uri + "?" + params;
+        String url = b2bConfig.getBaseUrl() + uri + "?" + params;
 
         try {
             ResponseEntity<String> response = restTemplate.postForEntity(url, requestEntity, String.class);
@@ -285,7 +281,9 @@ public class ZinRequester {
     }
 
     // 验证通联回调
-    public <T> T verify(HttpServletRequest request, String body, String auth, String date, Class<T> clazz) {
+    public <T> T verify(AccessConfig b2bConfig, HttpServletRequest request, String body, String auth, String date, Class<T> clazz) {
+        Sign verifier = this.getVerifier(b2bConfig);
+
         String uri = request.getRequestURI();
         String params = request.getQueryString();
         StringBuilder sb = new StringBuilder();
@@ -297,7 +295,7 @@ public class ZinRequester {
                 .append(sha256Hex).toString();
         String signature = auth.split(":")[1];
         byte[] sign = HexUtil.decodeHex(signature);
-        boolean verify = this.verifier.verify(toSign.getBytes(StandardCharsets.UTF_8), sign);
+        boolean verify = verifier.verify(toSign.getBytes(StandardCharsets.UTF_8), sign);
         if (!verify) {
             log.error("验证签名失败, 签名串:{}", toSign);
             log.error("收到应答[{}]\n应答体:[{}]\nauth:[{}]\ndate:[{}]", request.getRequestURI(), body, auth, date);

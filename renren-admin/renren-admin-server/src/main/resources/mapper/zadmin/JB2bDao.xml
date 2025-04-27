@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.zadmin.dao.JB2bDao">
+
+    <resultMap type="io.renren.zadmin.entity.JB2bEntity" id="jB2bMap">
+        <result property="id" column="id"/>
+        <result property="agentId" column="agent_id"/>
+        <result property="agentName" column="agent_name"/>
+        <result property="merchantId" column="merchant_id"/>
+        <result property="merchantName" column="merchant_name"/>
+        <result property="merchantB2bva" column="merchant_b2bva"/>
+        <result property="state" column="state"/>
+        <result property="nid" column="nid"/>
+        <result property="bid" column="bid"/>
+        <result property="acctno" column="acctno"/>
+        <result property="trxcod" column="trxcod"/>
+        <result property="amount" column="amount"/>
+        <result property="time" column="time"/>
+        <result property="payeraccountname" column="payeraccountname"/>
+        <result property="payeraccountno" column="payeraccountno"/>
+        <result property="payeraccountbank" column="payeraccountbank"/>
+        <result property="payeraccountcountry" column="payeraccountcountry"/>
+        <result property="ps" column="ps"/>
+        <result property="creator" column="creator"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updater" column="updater"/>
+        <result property="updateDate" column="update_date"/>
+    </resultMap>
+
+</mapper>

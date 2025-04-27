@@ -1,5 +1,6 @@
 package io.renren.zadmin.entity;
 
+import io.renren.zcommon.AccessConfig;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -84,6 +85,7 @@ public class JMerchantEntity extends BaseEntity {
     // (1)管理
     private Integer enabled;
     private Integer debug;
+    private String b2bva;
 
 
     // (7)商户接入参数, 只有商户有， 子商户没有
@@ -100,4 +102,8 @@ public class JMerchantEntity extends BaseEntity {
     private String vpaChargeFid;
     private String vpaPayeeaccount;
     private String vpaProcurecontent;
+
+    /////////////
+    @TableField(exist = false)
+    private AccessConfig b2bConfig;
 }
