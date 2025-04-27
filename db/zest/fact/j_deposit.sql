@@ -55,10 +55,12 @@ create table j_deposit
 ) ENGINE = InnoDB
   collate utf8mb4_bin
   DEFAULT CHARACTER SET utf8mb4 COMMENT ='j_deposit';
+
 -- 普通索引
 create index idx_j_deposit_1 on j_deposit (agent_id, create_date);
 create index idx_j_deposit_2 on j_deposit (merchant_id, create_date);
 create index idx_j_deposit_3 on j_deposit (sub_id, create_date);
 create index idx_j_deposit_4 on j_deposit (merchant_id, meraplid);
+
 -- 唯一索引
 create unique index uidx_j_deposit_1 on j_deposit (applyid);

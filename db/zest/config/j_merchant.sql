@@ -58,6 +58,9 @@ create table j_merchant
     enabled            int           not null default 1 comment '启用',
     debug              int           not null default 0 comment '调试模式',
 
+    -- b2b va
+    b2bva              varchar(2048) null,
+
     -- 商户接入参数
     mcc                varchar(6)    not null comment '商户类型',                           -- dict
 

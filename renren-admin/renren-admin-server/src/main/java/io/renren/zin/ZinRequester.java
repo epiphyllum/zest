@@ -195,7 +195,13 @@ public class ZinRequester {
             }
             log.error("通联失败:{}, toSign: [{}]", headerInfo.getToSign(), ttResult);
             throw new BankException("发卡行错误:" + ttResult.getRspinfo());
-        } catch (Exception ex) {
+        }
+        // 银行异常了
+        catch (BankException ex) {
+            throw ex;
+        }
+        // 其他异常
+        catch (Exception ex) {
             ex.printStackTrace();
             zinLogger.logPacketException(logEntity, ex);
             throw new RenException("请求发卡行失败");
