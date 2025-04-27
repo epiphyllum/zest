@@ -17,6 +17,7 @@ import io.renren.zcommon.CommonUtils;
 import io.renren.zcommon.ZestConfig;
 import io.renren.zcommon.ZestConstant;
 import io.renren.zcommon.ZinConstant;
+import io.renren.zin.BankException;
 import io.renren.zin.cardapply.ZinCardApplyService;
 import io.renren.zin.cardapply.dto.*;
 import io.renren.zin.cardmoney.ZinCardMoneyService;
@@ -289,24 +290,48 @@ public class JCardManager {
     public void submit(JCardEntity entity) {
         String applyid = null;
 
-        // 虚拟主卡, 实体主卡, vpa共享主卡, vpa预付费主卡, vpa钱包主卡
-        if (entity.getMarketproduct().equals(ZinConstant.MP_VCC_MAIN_VIRTUAL) ||
-                entity.getMarketproduct().equals(ZinConstant.MP_VCC_MAIN_REAL) ||
-                entity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN) ||
-                entity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_WALLET) ||
-                entity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_PREPAID)
-        ) {
-            // 主卡申请
-            TCardMainApplyRequest request = ConvertUtils.sourceToTarget(entity, TCardMainApplyRequest.class);
-            request.setMeraplid(entity.getTxnid());  // 需要换成我们的ID!!!
-            TCardMainApplyResponse response = zinCardApplyService.cardMainApply(request);
-            applyid = response.getApplyid();
-        } else {
-            // 子卡申请
-            TCardSubApplyRequest request = ConvertUtils.sourceToTarget(entity, TCardSubApplyRequest.class);
-            request.setMeraplid(entity.getTxnid());  // 需要换成我们的ID!!!
-            TCardSubApplyResponse response = zinCardApplyService.cardSubApply(request);
-            applyid = response.getApplyid();
+        try {
+            // 虚拟主卡, 实体主卡, vpa共享主卡, vpa预付费主卡, vpa钱包主卡
+            if (entity.getMarketproduct().equals(ZinConstant.MP_VCC_MAIN_VIRTUAL) ||
+                    entity.getMarketproduct().equals(ZinConstant.MP_VCC_MAIN_REAL) ||
+                    entity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN) ||
+                    entity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_WALLET) ||
+                    entity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_PREPAID)
+            ) {
+                // 主卡申请
+                TCardMainApplyRequest request = ConvertUtils.sourceToTarget(entity, TCardMainApplyRequest.class);
+                request.setMeraplid(entity.getTxnid());  // 需要换成我们的ID!!!
+                TCardMainApplyResponse response = zinCardApplyService.cardMainApply(request);
+                applyid = response.getApplyid();
+            } else {
+                // 子卡申请
+                TCardSubApplyRequest request = ConvertUtils.sourceToTarget(entity, TCardSubApplyRequest.class);
+                request.setMeraplid(entity.getTxnid());  // 需要换成我们的ID!!!
+                TCardSubApplyResponse response = zinCardApplyService.cardSubApply(request);
+                applyid = response.getApplyid();
+            }
+        } catch (BankException be) {
+            log.error("发卡行错误， 已经失败了，需要释放手续费");
+            tx.executeWithoutResult(status -> {
+                jCardDao.update(Wrappers.<JCardEntity>lambdaUpdate()
+                        .eq(JCardEntity::getId, entity.getId())
+                        .set(JCardEntity::getState, ZinConstant.CARD_APPLY_FAIL)
+                );
+                ledger500OpenCard.ledgeOpenCardUnFreeze(entity);
+                // 钱包主卡
+                if (entity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_WALLET)) {
+                    // 属于账户升级
+                    if (entity.getWalletId() != null) {
+                        // 钱包账户upgrade交易状态更新
+                        jWalletTxnDao.update(null, Wrappers.<JWalletTxnEntity>lambdaUpdate()
+                                .eq(JWalletTxnEntity::getId, entity.getRelateId())
+                                .eq(JWalletTxnEntity::getState, ZWalletConstant.WALLET_TXN_STATUS_NEW)
+                                .set(JWalletTxnEntity::getState, ZWalletConstant.WALLET_TXN_STATUS_FAIL)
+                        );
+                    }
+                }
+            });
+            throw new RenException(be.getMessage());
         }
 
         // 更新applyid
