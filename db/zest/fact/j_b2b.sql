@@ -9,6 +9,7 @@ create table j_b2b
     merchant_name       varchar(50)    not null comment '商户名',
 
     state               varchar(2)     not null default '00',
+    error               varchar(128)   null,
 
     nid                 varchar(32)    not null comment '通知ID',
     bid                 varchar(18)    not null comment '业务关联ID',

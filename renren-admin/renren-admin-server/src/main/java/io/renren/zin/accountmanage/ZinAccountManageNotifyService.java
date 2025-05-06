@@ -3,8 +3,10 @@ package io.renren.zin.accountmanage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.ConvertUtils;
+import io.renren.zadmin.dao.JB2bDao;
 import io.renren.zadmin.dao.JMaccountDao;
 import io.renren.zadmin.dao.JMoneyDao;
+import io.renren.zadmin.entity.JB2bEntity;
 import io.renren.zadmin.entity.JMaccountEntity;
 import io.renren.zadmin.entity.JMoneyEntity;
 import io.renren.zapi.ApiNotify;
@@ -32,6 +34,8 @@ public class ZinAccountManageNotifyService {
     private Ledger100MoneyIn ledger100MoneyIn;
     @Resource
     private ApiNotify apiNotify;
+    @Resource
+    private JB2bDao jb2bDao;
 
     // 有申请单的情况
     // body:[{"acctno":"80000000369966","amount":100000,"applyid":"461809","bid":"2024110903652310","currency":"USD","nid":"20241109000000489344","payeraccountname":"自营商户","payeraccountno":"12312113","time":"2024-11-09T11:07:10Z","trxcod":"CP213"}]
@@ -96,6 +100,25 @@ public class ZinAccountManageNotifyService {
 
     // 入账通知: 6003:
     public void handle(TMoneyInNotify notify) {
+
+        // 独立入金处理
+        if (notify.getTrxcod().equals(ZinConstant.CP309)) {
+            log.info("独立入金: {}", notify);
+            String applyid = notify.getApplyid();
+            JB2bEntity jb2bEntity = jb2bDao.selectOne(Wrappers.<JB2bEntity>lambdaQuery()
+                    .eq(JB2bEntity::getFunApplyid, applyid)
+            );
+
+            tx.executeWithoutResult(status -> {
+                jb2bDao.update(null, Wrappers.<JB2bEntity>lambdaUpdate()
+                        .eq(JB2bEntity::getId, jb2bEntity.getId())
+                        .set(JB2bEntity::getState, ZinConstant.B2B_MONEY_SUCCESS)
+                );
+                ledger100MoneyIn.ledgeMoneyInB2b(jb2bEntity);
+            });
+            return;
+        }
+
         // CP213
         if (notify.getTrxcod().equals(ZinConstant.CP213)) {
             // 没有申请单号

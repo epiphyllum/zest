@@ -12,9 +12,11 @@ import io.renren.zcommon.ZestConfig;
 import io.renren.zcommon.ZinConstant;
 import io.renren.zin.b2b.dto.TVaMoneyNotify;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class B2bNotifyService {
 
     @Resource
@@ -28,13 +30,16 @@ public class B2bNotifyService {
 
     // 商户的入账通知
     public void merchantB2bNotified(JMerchantEntity merchant, TVaMoneyNotify tVaMoneyNotify) {
-
+        log.info("商户收到b2b入金通知:{}", tVaMoneyNotify);
         JB2bEntity jb2bEntity = ConvertUtils.sourceToTarget(tVaMoneyNotify, JB2bEntity.class);
 
+        // ID+name设置
         jb2bEntity.setAgentId(merchant.getAgentId());
         jb2bEntity.setAgentName(merchant.getAgentName());
         jb2bEntity.setMerchantId(merchant.getId());
         jb2bEntity.setMerchantName(merchant.getCusname());
+
+        // 初始状态
         jb2bEntity.setState(ZinConstant.B2B_MONEY_NEW);  // 初始状态
 
         // 入库
@@ -46,23 +51,11 @@ public class B2bNotifyService {
 
     // 大吉自身的入账通知处理
     public void myB2bNotified(TVaMoneyNotify notifyDto) {
-        String bid = notifyDto.getBid();
+        log.info("大吉收到b2b入金通知:{}", notifyDto);
         JB2bEntity jb2bEntity = jb2bDao.selectOne(Wrappers.<JB2bEntity>lambdaQuery()
-                .eq(JB2bEntity::getBid, bid)
+                .eq(JB2bEntity::getEcoApplyid, notifyDto.getApplyid())
         );
-
-        String funMeraplid = CommonUtils.uniqueId();
-        jb2bDao.update(Wrappers.<JB2bEntity>lambdaUpdate()
-                .eq(JB2bEntity::getId, jb2bEntity.getId())
-                .set(JB2bEntity::getState, ZinConstant.B2B_MONEY_MERGE)
-                .set(JB2bEntity::getFunMeraplid, funMeraplid)
-        );
-        jb2bEntity.setFunMeraplid(funMeraplid);
-
         // 发起同名转账
         b2bService.fundMerge(jb2bEntity);
     }
-
-
-
 }

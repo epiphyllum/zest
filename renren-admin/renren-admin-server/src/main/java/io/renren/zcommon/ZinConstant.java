@@ -126,6 +126,7 @@ public class ZinConstant {
     public static final String CP109 = "CP109";                    // 岸下发	资金提现
     public static final String CP211 = "CP211";                    // 岸换汇	充值其他币种的资金，可以兑换成HKD
     public static final String CP462 = "CP462";                    // 释放担保金
+    public static final String CP309 = "CP309";                    // 独立入金
     // 卡申请交易类型
     public static final String CP450 = "CP450";                    // 申请开卡
     public static final String CP453 = "CP453";                    // 卡的注销/撤回注销
@@ -205,7 +206,9 @@ public class ZinConstant {
     // b2b独立入金状态
     public static final String B2B_MONEY_NEW = "00";         // 收到入金通知
     public static final String B2B_MONEY_ECO = "01";         // 已发起生态圈转账
+    public static final Object B2B_MONEY_ECO_VERIFIED = "11";
     public static final String B2B_MONEY_MERGE = "02";       // 已发起同名转账到发卡VA
+    public static final String B2B_MONEY_MERGE_VERIFIED = "12";       // 已发起同名转账到发卡VA
     public static final String B2B_MONEY_SUCCESS = "03";     // 成功
 }
 

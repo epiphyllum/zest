@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 @Data
 public class TVaMoneyNotify {
     private Long merchantId;
+    private String applyid;
     private String nid;
     private String bid;
     private String acctno;

@@ -28,6 +28,8 @@ public class JB2bEntity extends BaseEntity {
     private String merchantName;
 
     private String state;
+    private String error;
+
     private String nid;
     private String bid;
     private String acctno;

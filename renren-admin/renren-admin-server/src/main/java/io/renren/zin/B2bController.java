@@ -35,29 +35,8 @@ public class B2bController {
     @Resource
     private B2bNotifyService b2BNotifyService;
 
-    @PostMapping("test")
-    public void testNotify() throws Exception {
-        String body = "{\"merchantId\":null,\"nid\":\"8STY4SAFTJ\",\"bid\":\"2025042704463017\",\"acctno\":\"80000000370806\",\"currency\":\"HKD\",\"trxcod\":\"CP213\",\"amount\":100000,\"time\":\"2025-04-27T15:15:20Z\",\"payeraccountname\":null,\"payeraccountno\":null,\"payeraccountbank\":null,\"payeraccountcountry\":null,\"ps\":null}";
-        TVaMoneyNotify notify = objectMapper.readValue(body, TVaMoneyNotify.class);
-        Long merchantId = 1893860763197771778L;
-        notify.setMerchantId(merchantId);
-        // 大吉商户b2b收到钱
-        JMerchantEntity merchant = jMerchantDao.selectById(merchantId);
-        AccessConfig b2bConfig = null;
-        try {
-            b2bConfig = objectMapper.readValue(merchant.getB2bva(), AccessConfig.class);
-        } catch (JsonProcessingException e) {
-            log.error("商户配置错误: {}", merchant.getB2bConfig());
-            throw new RenException("商户配置错误");
-        }
-        merchant.setB2bConfig(b2bConfig);
-
-        // 处理收到的通知
-        b2BNotifyService.merchantB2bNotified(merchant, notify);
-    }
-
-
     /**
+     * 大吉商户b2b收到钱
      * {
      * "acctno":"80000000370806",
      * "currency":"HKD",
@@ -78,8 +57,7 @@ public class B2bController {
             TVaMoneyNotify notifyDto = requester.verify(b2bConfig, request, body, auth, date, TVaMoneyNotify.class);
             b2BNotifyService.myB2bNotified(notifyDto);
         } else {
-
-            // 大吉商户b2b收到钱
+            // 商户收到钱
             JMerchantEntity merchant = jMerchantDao.selectById(merchantId);
             try {
                 b2bConfig = objectMapper.readValue(merchant.getB2bva(), AccessConfig.class);
@@ -87,23 +65,28 @@ public class B2bController {
                 log.error("商户配置错误: {}", merchant.getB2bConfig());
                 throw new RenException("商户配置错误");
             }
+            // 商户接入配置
             merchant.setB2bConfig(b2bConfig);
 
-            log.info("验证请求...");
+            // 验证请求
             TVaMoneyNotify notifyDto = requester.verify(b2bConfig, request, body, auth, date, TVaMoneyNotify.class);
-
-            try {
-                log.info("记录请求通知");
-                log.info(objectMapper.writeValueAsString(notifyDto));
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
-
             notifyDto.setMerchantId(merchantId);
+
             // 处理收到的通知
             b2BNotifyService.merchantB2bNotified(merchant, notifyDto);
-
         }
+        return "OK";
+    }
+
+    // 申请单通知
+    @PostMapping("{merchantId}/applynotify")
+    public String applynotify(HttpServletRequest request, @PathVariable("merchantId") Long merchantId, @RequestBody String body, @RequestHeader("X-AGCP-Auth") String auth, @RequestHeader("X-AGCP-Date") String date) {
+        return "OK";
+    }
+
+    //
+    @PostMapping("{merchantId}/cusauditrst")
+    public String cusauditrst(HttpServletRequest request, @PathVariable("merchantId") Long merchantId, @RequestBody String body, @RequestHeader("X-AGCP-Auth") String auth, @RequestHeader("X-AGCP-Date") String date) {
         return "OK";
     }
 

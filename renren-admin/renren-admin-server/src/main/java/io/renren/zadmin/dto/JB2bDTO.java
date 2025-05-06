@@ -31,7 +31,11 @@ public class JB2bDTO implements Serializable {
     @Schema(description = "商户名")
     private String merchantName;
 
+    @Schema(description = "state")
     private String state;
+    @Schema(description = "error")
+    private String error;
+
     @Schema(description = "通知ID")
     private String nid;
     @Schema(description = "业务关联ID")

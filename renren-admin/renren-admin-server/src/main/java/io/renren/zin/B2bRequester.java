@@ -187,8 +187,10 @@ public class B2bRequester {
             ) {
                 return ttResult;
             }
-            log.error("通联失败:{}, toSign: [{}]", headerInfo.getToSign(), ttResult);
-            throw new RenException("发卡行错误:" + ttResult.getRspinfo());
+            log.error("通联失败:{},{}, toSign: [{}]", ttResult.getRspinfo(), headerInfo.getToSign(), ttResult);
+            throw new BankException("发卡行错误:" + ttResult.getRspinfo());
+        } catch (BankException ex) {
+            throw ex;
         } catch (Exception ex) {
             ex.printStackTrace();
             zinLogger.logPacketException(logEntity, ex);
