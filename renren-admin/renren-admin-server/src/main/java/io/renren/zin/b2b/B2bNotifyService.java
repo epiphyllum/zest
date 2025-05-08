@@ -13,6 +13,7 @@ import io.renren.zcommon.ZinConstant;
 import io.renren.zin.b2b.dto.TVaMoneyNotify;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -43,7 +44,12 @@ public class B2bNotifyService {
         jb2bEntity.setState(ZinConstant.B2B_MONEY_NEW);  // 初始状态
 
         // 入库
-        jb2bDao.insert(jb2bEntity);
+        try {
+            jb2bDao.insert(jb2bEntity);
+        } catch (DuplicateKeyException e) {
+            log.warn("重复通知: {}", e.getMessage());
+            return;
+        }
 
         // 发起生态圈转账
         b2bService.ecoTransfer(merchant, jb2bEntity);

@@ -93,6 +93,7 @@ public class B2bController {
     // 异常处理:
     @ExceptionHandler(Throwable.class)
     public ResponseEntity<String> handleRuntimeException(Throwable ex) {
+        log.error("通知处理异常: {}, 返回500", ex.getMessage());
         ex.printStackTrace();
         return new ResponseEntity<>("Internal Server Error: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
