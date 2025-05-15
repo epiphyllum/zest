@@ -13,4 +13,5 @@ public class CardBalanceRes {
     private String cardno;       // 卡号
     private String currency;     // 币种
     private BigDecimal balance;  // 余额
+    private BigDecimal authamount; // 额度
 }

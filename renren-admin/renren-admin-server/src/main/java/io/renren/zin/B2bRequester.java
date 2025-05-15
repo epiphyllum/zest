@@ -169,7 +169,6 @@ public class B2bRequester {
                 .body(body);
         String url = b2bConfig.getBaseUrl() + uri + "?" + commonQueryParams + "&" + "reqid=" + reqId;
         log.info("请求地址: {}", url);
-        log.info("b2bConfig: {}", b2bConfig);
 
         JChannelLogEntity logEntity = new JChannelLogEntity();
         logEntity.setApiName(uri);
