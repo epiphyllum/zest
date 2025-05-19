@@ -34,8 +34,12 @@ public class CardNewReq {
 
     private String mobilecountry;    //	手机号码所属地区, 见附录国别信息中的PHONE_CODE
     private String mobilenumber;     //	手机号码
+
     private String photofront;       //	证件正面照片	文件fid
     private String photoback;        //	证件反面照片	文件fid
+
+    private String photofront2;       //	证件正面照片	文件fid
+    private String photoback2;        //	证件反面照片	文件fid
 
     private String deliverypostcode; //	邮政编码
     private String deliverycountry;  //	邮寄国家/地区	卡片类型为虚实同发时必填，见附录【国别信息】中的CODE
