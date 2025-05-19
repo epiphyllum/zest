@@ -20,8 +20,12 @@ public class CardNewReq {
     private String gender;           //	性别	1：男, 0：女
 
     private String birthday;         //	出生日期	YYYYMMDD
+
     private String idtype;           //	证件类型	01：居民身份证, 02：军人或武警身份证, 03：港澳台通行证, 04：护照, 05：其他有效旅行证件, 06：其他类个人有效证件
     private String idnumber;         //	证件号码
+
+    private String idtype2;          //	证件类型	01：居民身份证, 02：军人或武警身份证, 03：港澳台通行证, 04：护照, 05：其他有效旅行证件, 06：其他类个人有效证件
+    private String idnumber2;        //	证件号码
 
     private String nationality;      //	国籍	见附录 国别信息中的CODE,如中国：CHN
     private String country;          //	国家/地区 国别信息中的CODE,如中国：CHN
