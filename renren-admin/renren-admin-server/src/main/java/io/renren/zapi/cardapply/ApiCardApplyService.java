@@ -57,10 +57,11 @@ public class ApiCardApplyService {
         entity.setMerchantId(merchant.getId());
         entity.setTxnid(CommonUtils.uniqueId());
         jCardManager.save(entity);
+        log.info("收到 请求: {}", request);
+        log.info("保存 card: {}", entity);
 
         // 提交通联
-            jCardManager.submit(entity);
-
+        jCardManager.submit(entity);
 
         // 应答商户
         Result<CardNewRes> result = new Result<>();
