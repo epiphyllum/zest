@@ -305,8 +305,14 @@ public class ZinRequester {
         byte[] sign = HexUtil.decodeHex(signature);
         boolean verify = this.verifier.verify(toSign.getBytes(StandardCharsets.UTF_8), sign);
         if (!verify) {
-            log.error("验证签名失败, 签名串:{}", toSign);
-            log.error("收到应答[{}]\n应答体:[{}]\nauth:[{}]\ndate:[{}]", request.getRequestURI(), body, auth, date);
+            log.error("验证签名失败>>>>>>>>>>>>>>>>>>>>>>>>");
+            log.error("验证秘钥:\n{}\n", this.verifier.getPublicKey());
+            log.error("sha256:\n{}\n", sha256Hex);
+            log.error("签名串\n:{}\n", toSign);
+            log.error("body:\n{}\n",  body);
+            log.error("auth:\n{}\n", auth);
+            log.error("date:\n{}\n", date);
+            log.error("验证签名失败<<<<<<<<<<<<<<<<<<<<<<<<");
             throw new RenException("验证签名失败");
         }
         String reqid = request.getParameter("reqid");
