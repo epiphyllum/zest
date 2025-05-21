@@ -308,18 +308,21 @@ public class ZinRequester {
         String signature = auth.split(":")[1];
         byte[] sign = HexUtil.decodeHex(signature);
         boolean verify = this.verifier.verify(toSign.getBytes(StandardCharsets.UTF_8), sign);
+
         if (!verify) {
             log.error("验证签名失败>>>>>>>>>>>>>>>>>>>>>>>>");
             log.error("请求URI:\n{}\n", request.getRequestURI());
-            log.error("验证秘钥:\n{}\n", this.verifierKey);
-            log.error("sha256:\n{}\n", sha256Hex);
-            log.error("签名串:\n{}\n", toSign);
             log.error("body:\n{}\n",  body);
             log.error("auth:\n{}\n", auth);
             log.error("date:\n{}\n", date);
+            log.error("收到签名:\n{}\n", signature);
+            log.error("验证秘钥:\n{}\n", this.verifierKey);
+            log.error("sha256:\n{}\n", sha256Hex);
+            log.error("签名串:\n{}\n", toSign);
             log.error("验证签名失败<<<<<<<<<<<<<<<<<<<<<<<<");
             throw new RenException("验证签名失败");
         }
+
         String reqid = request.getParameter("reqid");
         JChannelLogEntity logEntity = new JChannelLogEntity();
         logEntity.setApiName(uri);
@@ -328,6 +331,7 @@ public class ZinRequester {
         logEntity.setRecv(body);
         logEntity.setReqId(reqid);
         zinLogger.logPacketSuccess(logEntity);
+
         try {
             return objectMapper.readValue(body, clazz);
         } catch (JsonProcessingException e) {
