@@ -60,7 +60,9 @@ public class ZinRequester {
     // init 设置
     private String commonQueryParams;
     private Sign signer;
+    private String signerKey;
     private Sign verifier;
+    private String verifierKey;
 
     @Data
     @AllArgsConstructor
@@ -79,10 +81,12 @@ public class ZinRequester {
         RSA rsaSigner = new RSA(accessConfig.getPrivateKey(), null);
         this.signer = SecureUtil.sign(SignAlgorithm.SHA512withRSA);
         this.signer.setPrivateKey(rsaSigner.getPrivateKey());
+        this.signerKey = accessConfig.getPrivateKey();
 
         RSA rsaVerifier = new RSA(null, accessConfig.getPlatformKey());
         this.verifier = SecureUtil.sign(SignAlgorithm.SHA512withRSA);
         this.verifier.setPublicKey(rsaVerifier.getPublicKey());
+        this.verifierKey = accessConfig.getPlatformKey();
     }
 
     //  HTTP请求头设置
@@ -306,9 +310,10 @@ public class ZinRequester {
         boolean verify = this.verifier.verify(toSign.getBytes(StandardCharsets.UTF_8), sign);
         if (!verify) {
             log.error("验证签名失败>>>>>>>>>>>>>>>>>>>>>>>>");
-            log.error("验证秘钥:\n{}\n", this.verifier.getPublicKey());
+            log.error("请求URI:\n{}\n", request.getRequestURI());
+            log.error("验证秘钥:\n{}\n", this.verifierKey);
             log.error("sha256:\n{}\n", sha256Hex);
-            log.error("签名串\n:{}\n", toSign);
+            log.error("签名串:\n{}\n", toSign);
             log.error("body:\n{}\n",  body);
             log.error("auth:\n{}\n", auth);
             log.error("date:\n{}\n", date);
