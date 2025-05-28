@@ -72,17 +72,24 @@ public class ZinCardApplyNotifyService {
         // VPA卡开卡
         else if (trxcode.equals(ZinConstant.CP460)) {
             handleCP460(notify);
-        }
-        else {
+        } else {
             log.error("未知的交易类型: {}", notify);
         }
     }
 
     // CP450 开卡申请开卡
     public void handleCP450(TCardApplyNotify notify) {
-        JCardEntity jCardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
-                .eq(JCardEntity::getCardno, notify.getCardno())
-        );
+        JCardEntity jCardEntity;
+        if (notify.getCardno() == null) {
+            jCardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
+                    .eq(JCardEntity::getApplyid, notify.getApplyid())
+            );
+        } else {
+            jCardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
+                    .eq(JCardEntity::getCardno, notify.getCardno())
+            );
+        }
+
         if (jCardEntity == null) {
             log.error("找不到卡申请单: {}, notify:{}", notify.getCardno(), notify);
             throw new RenException("找不到卡申请单:" + notify.getCardno());
