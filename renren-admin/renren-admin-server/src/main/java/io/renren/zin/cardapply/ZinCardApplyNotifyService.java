@@ -81,10 +81,12 @@ public class ZinCardApplyNotifyService {
     public void handleCP450(TCardApplyNotify notify) {
         JCardEntity jCardEntity;
         if (notify.getCardno() == null) {
+            log.info("申请单查询卡...");
             jCardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
                     .eq(JCardEntity::getApplyid, notify.getApplyid())
             );
         } else {
+            log.info("卡号查询卡...");
             jCardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
                     .eq(JCardEntity::getCardno, notify.getCardno())
             );
@@ -92,7 +94,7 @@ public class ZinCardApplyNotifyService {
 
         if (jCardEntity == null) {
             log.error("找不到卡申请单: {}, notify:{}", notify.getCardno(), notify);
-            throw new RenException("找不到卡申请单:" + notify.getCardno());
+            throw new RenException("找不到卡申请单:" + notify.getCardno() + ":" + notify.getApplyid());
         }
 
         // 状态一样: 不需要处理
