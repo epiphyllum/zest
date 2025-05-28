@@ -1,6 +1,7 @@
 package io.renren.zin.cardapply;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import io.renren.commons.tools.exception.RenException;
 import io.renren.zadmin.dao.JVpaJobDao;
 import io.renren.zadmin.entity.JVpaJobEntity;
 import io.renren.zmanager.JCardManager;
@@ -82,6 +83,10 @@ public class ZinCardApplyNotifyService {
         JCardEntity jCardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
                 .eq(JCardEntity::getApplyid, notify.getApplyid())
         );
+        if (jCardEntity == null) {
+            log.error("找不到卡申请单: {}" + notify.getApplyid());
+            throw new RenException("找不到卡申请单:" + notify.getApplyid());
+        }
         // 状态一样: 不需要处理
         if (jCardEntity.getState().equals(notify.getState())) {
             return;

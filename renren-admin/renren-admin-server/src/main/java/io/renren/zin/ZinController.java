@@ -107,4 +107,10 @@ public class ZinController {
         ex.printStackTrace();
         return new ResponseEntity<>("Internal Server Error: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @PostMapping("/test")
+    public String testJson(HttpServletRequest request, @RequestBody String body) {
+        return body;
+    }
+
 }

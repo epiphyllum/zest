@@ -311,14 +311,14 @@ public class ZinRequester {
 
         if (!verify) {
             log.error("验证签名失败>>>>>>>>>>>>>>>>>>>>>>>>");
-            log.error("请求URI:\n{}\n", request.getRequestURI());
-            log.error("body:\n{}\n",  body);
-            log.error("auth:\n{}\n", auth);
-            log.error("date:\n{}\n", date);
-            log.error("收到签名:\n{}\n", signature);
-            log.error("验证秘钥:\n{}\n", this.verifierKey);
-            log.error("sha256:\n{}\n", sha256Hex);
-            log.error("签名串:\n{}\n", toSign);
+            log.error("请求URI:\n[{}]\n", request.getRequestURI());
+            log.error("body:\n[{}]\n",  body);
+            log.error("auth:\n[{}]\n", auth);
+            log.error("date:\n[{}]\n", date);
+            log.error("收到签名:\n[{}]\n", signature);
+            log.error("验证秘钥:\n[{}]\n", this.verifierKey);
+            log.error("sha256:\n[{}]\n", sha256Hex);
+            log.error("签名串:\n[{}]\n", toSign);
             log.error("验证签名失败<<<<<<<<<<<<<<<<<<<<<<<<");
             throw new RenException("验证签名失败");
         }
