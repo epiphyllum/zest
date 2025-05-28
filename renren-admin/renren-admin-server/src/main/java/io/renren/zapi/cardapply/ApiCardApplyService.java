@@ -98,7 +98,7 @@ public class ApiCardApplyService {
 
         // 应答
         entity = jCardDao.selectById(entity.getId());
-        context.info("entity: {}", entity);
+        // context.info("entity: {}", entity);
 
         CardNewQueryRes cardNewQueryRes = ConvertUtils.sourceToTarget(entity, CardNewQueryRes.class);
         return new Result<CardNewQueryRes>().ok(cardNewQueryRes);

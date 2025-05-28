@@ -35,28 +35,28 @@ public class JAuthExcel {
     private Long subName;
 
     // todo
-    @ExcelProperty(value = "卡号", index = 2)
+    @ExcelProperty(value = "卡号", index = 6)
     private String cardno;
-    @ExcelProperty(value = "流水号", index = 3)
+    @ExcelProperty(value = "流水号", index = 7)
     private String logkv;
-    @ExcelProperty(value = "交易类型", index = 4)
+    @ExcelProperty(value = "交易类型", index = 8)
     private String trxtype;
-    @ExcelProperty(value = "交易方向", index = 5)
+    @ExcelProperty(value = "交易方向", index = 9)
     private String trxdir;
-    @ExcelProperty(value = "交易状态", index = 6)
+    @ExcelProperty(value = "交易状态", index = 10)
     private String state;
-    @ExcelProperty(value = "交易金额", index = 7)
+    @ExcelProperty(value = "交易金额", index = 11)
     private BigDecimal amount;
-    @ExcelProperty(value = "币种", index = 8)
+    @ExcelProperty(value = "币种", index = 12)
     private String currency;
-    @ExcelProperty(value = "交易时间", index = 9)
+    @ExcelProperty(value = "交易时间", index = 13)
     private String trxtime;
-    @ExcelProperty(value = "商户类别代码", index = 10)
+    @ExcelProperty(value = "商户类别代码", index = 14)
     private String mcc;
-    @ExcelProperty(value = "交易地点", index = 11)
+    @ExcelProperty(value = "交易地点", index = 15)
     private String trxaddr;
-    @ExcelProperty(value = "授权码", index = 12)
+    @ExcelProperty(value = "授权码", index = 16)
     private String authcode;
-    @ExcelProperty(value = "创建时间", index = 13)
+    @ExcelProperty(value = "创建时间", index = 17)
     private Date createDate;
 }
