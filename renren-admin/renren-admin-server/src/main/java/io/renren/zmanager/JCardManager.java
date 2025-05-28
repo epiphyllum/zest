@@ -928,9 +928,9 @@ public class JCardManager {
 
         TCardUpdateScene request = null;
         if (oldAuth.compareTo(newAuth) == 0) {
-            request = new TCardUpdateScene(cardEntity.getCurrency(), cardEntity.getCardno(), null, authmaxcount);
+            request = new TCardUpdateScene(null, cardEntity.getCardno(), null, authmaxcount);
         } else {
-            request = new TCardUpdateScene(cardEntity.getCurrency(), cardEntity.getCardno(), authmaxamount, authmaxcount);
+            request = new TCardUpdateScene(null, cardEntity.getCardno(), authmaxamount, authmaxcount);
         }
         try {
             TCardUpdateSceneResponse response = zinCardApplyService.cardUpdateScene(request);

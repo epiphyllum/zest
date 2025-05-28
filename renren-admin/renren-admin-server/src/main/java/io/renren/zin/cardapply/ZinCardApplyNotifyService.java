@@ -84,7 +84,7 @@ public class ZinCardApplyNotifyService {
                 .eq(JCardEntity::getApplyid, notify.getApplyid())
         );
         if (jCardEntity == null) {
-            log.error("找不到卡申请单: {}" + notify.getApplyid());
+            log.error("找不到卡申请单: {}", notify.getApplyid());
             throw new RenException("找不到卡申请单:" + notify.getApplyid());
         }
         // 状态一样: 不需要处理
