@@ -55,6 +55,7 @@ public class ApiNotifyService {
         String body = null;
         try {
             body = this.objectMapper.writeValueAsString(object);
+            log.info("通知商户: api:{}, body:{}", apiName, body);
         } catch (JsonProcessingException e) {
             throw new RenException("invalid request, can not convert to json");
         }
