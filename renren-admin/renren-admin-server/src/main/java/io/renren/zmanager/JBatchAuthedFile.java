@@ -34,10 +34,13 @@ public class JBatchAuthedFile extends JBatchBase {
 
     // 生成某个商户的文件
     private void genAuthedFile(Long merchantId, String entrydate) throws IOException {
+        String dbEntryDate = entrydate.replaceAll("-", "");
         List<JAuthedEntity> jAuthedEntities = jAuthedDao.selectList(Wrappers.<JAuthedEntity>lambdaQuery()
                 .eq(JAuthedEntity::getMerchantId, merchantId)
-                .eq(JAuthedEntity::getEntrydate, entrydate)
+                .eq(JAuthedEntity::getEntrydate, dbEntryDate)
         );
+
+
         log.info("商户:{}, 入账日期:{}, 记录数: {}", merchantId, entrydate, jAuthedEntities.size());
 
         List<String> lines = new ArrayList<>(jAuthedEntities.size());
