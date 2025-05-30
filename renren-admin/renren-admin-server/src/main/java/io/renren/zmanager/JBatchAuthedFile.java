@@ -38,6 +38,7 @@ public class JBatchAuthedFile extends JBatchBase {
                 .eq(JAuthedEntity::getMerchantId, merchantId)
                 .eq(JAuthedEntity::getEntrydate, entrydate)
         );
+        log.info("商户:{}, 入账日期:{}, 记录数: {}", merchantId, entrydate, jAuthedEntities.size());
 
         List<String> lines = new ArrayList<>(jAuthedEntities.size());
         StringBuilder sb = new StringBuilder();
@@ -97,7 +98,6 @@ public class JBatchAuthedFile extends JBatchBase {
         List<Long> ids = jMerchantDao.selectList(Wrappers.<JMerchantEntity>lambdaQuery()
                 .select(JMerchantEntity::getId)
         ).stream().map(JMerchantEntity::getId).toList();
-
 
         for (Long id : ids) {
             try {
