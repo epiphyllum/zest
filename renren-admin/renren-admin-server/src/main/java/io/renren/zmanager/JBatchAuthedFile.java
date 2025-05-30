@@ -2,7 +2,6 @@ package io.renren.zmanager;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.renren.commons.tools.exception.RenException;
-import io.renren.commons.tools.utils.DateUtils;
 import io.renren.zadmin.dao.JAuthedDao;
 import io.renren.zadmin.dao.JBatchDao;
 import io.renren.zadmin.dao.JMerchantDao;
@@ -18,9 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -85,6 +82,7 @@ public class JBatchAuthedFile extends JBatchBase {
 
     // 按商户生成结算流水文件
     public void authedFileBatch(String dateStr) {
+        // 结算文件下载任务是否完成
         JBatchEntity authedFetched = jBatchDao.selectOne(Wrappers.<JBatchEntity>lambdaQuery()
                 .eq(JBatchEntity::getBatchDate, dateStr)
                 .eq(JBatchEntity::getBatchType, ZestConstant.BATCH_TYPE_AUTHED)
@@ -94,17 +92,18 @@ public class JBatchAuthedFile extends JBatchBase {
         }
         // 创建任务记录
         log.info("创建任务: {}, {}", dateStr, ZestConstant.BATCH_TYPE_AUTHED_FILE);
-        JBatchEntity batchEntity = newBatchItem(dateStr, ZestConstant.BATCH_TYPE_AUTHED);
+        JBatchEntity batchEntity = newBatchItem(dateStr, ZestConstant.BATCH_TYPE_AUTHED_FILE);
 
         List<Long> ids = jMerchantDao.selectList(Wrappers.<JMerchantEntity>lambdaQuery()
                 .select(JMerchantEntity::getId)
         ).stream().map(JMerchantEntity::getId).toList();
 
+
         for (Long id : ids) {
             try {
                 genAuthedFile(id, dateStr);
             } catch (IOException e) {
-                log.error("上传文件失败 - 商户ID: {}", id);
+                log.error("生成文件失败 - 商户ID: {}", id);
                 jBatchDao.update(null, Wrappers.<JBatchEntity>lambdaUpdate()
                         .eq(JBatchEntity::getId, batchEntity.getId())
                         .eq(JBatchEntity::getState, batchEntity.getState())
