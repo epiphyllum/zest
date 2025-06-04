@@ -80,6 +80,19 @@ public class JBatchController {
         return new Result<>();
     }
 
+    // 匹处理
+    @GetMapping("cron")
+    @Operation(summary = "运行批处理")
+    @LogOperation("允许批处理")
+    @PreAuthorize("hasAuthority('zorg:jbatch:run')")
+    public Result cron(@RequestParam("batchType") String batchType, @RequestParam("batchDate") String batchDate) throws Exception {
+        CompletableFuture.runAsync(() -> {
+            jBatchManager.run(batchType, batchDate);
+        });
+        return new Result<>();
+    }
+
+
     // 重新运行
     @GetMapping("rerun")
     @Operation(summary = "重新运行批处理")

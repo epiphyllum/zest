@@ -15,6 +15,7 @@ ignore_urls:
   - /zupload/files/**
   - /zin/webhook/**
   - /b2b/webhook/**
+  - /zorg/jbatch/cron
   - /zapi/**
   - /zwallet/**
   - /health
