@@ -10,9 +10,11 @@ import io.renren.zapi.cardmoney.dto.CardChargeNotify;
 import io.renren.zapi.cardmoney.dto.CardTxnNotify;
 import io.renren.zapi.cardmoney.dto.CardWithdrawNotify;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class ApiCardMoneyNotifyService {
     @Resource
     private ApiNotifyService apiNotifyService;
@@ -24,6 +26,7 @@ public class ApiCardMoneyNotifyService {
      */
     public void cardTxnNotify(JAuthEntity entity, JMerchantEntity merchant) {
         CardTxnNotify notify = ConvertUtils.sourceToTarget(entity, CardTxnNotify.class);
+        log.info("cardTxnNotify: {}", notify);
         apiNotifyService.notifyMerchant(notify, merchant, "cardTxnNotify");
     }
 
