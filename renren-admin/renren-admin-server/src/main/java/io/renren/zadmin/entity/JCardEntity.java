@@ -117,6 +117,7 @@ public class JCardEntity extends BaseEntity {
     private BigDecimal fee;       // 申请费用
     private String feecurrency;   // 申请费用币种
     private String cardno;        // 卡号
+    private String cardid;        // 卡号:脱敏
     private String cardstate;     //            varchar(2)  comment '卡申请状态',        --
     private String state;         // 卡申请状态
     private String stateexplain;  // 卡申请状态

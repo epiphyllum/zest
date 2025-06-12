@@ -18,6 +18,7 @@ public class TCardApplyResponse extends TResult {
     String feecurrency;        // 申请费用币种	feecurrency	String	3	O		String	3	O
 
     String cardno;             // 卡号	cardno	String	30	O	申请成功后返回 //	String	30	O	申请成功后返回
+    String cardid;
     BigDecimal amount;         //
     String currency;           // 币种	currency	String	3	O	申请成功后返回 //	String	3	O	申请成功后返回
 

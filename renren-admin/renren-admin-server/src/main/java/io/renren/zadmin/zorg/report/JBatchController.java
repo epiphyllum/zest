@@ -84,7 +84,6 @@ public class JBatchController {
     @GetMapping("cron")
     @Operation(summary = "运行批处理")
     @LogOperation("允许批处理")
-    @PreAuthorize("hasAuthority('zorg:jbatch:run')")
     public Result cron(@RequestParam("batchType") String batchType, @RequestParam("batchDate") String batchDate) throws Exception {
         CompletableFuture.runAsync(() -> {
             jBatchManager.run(batchType, batchDate);

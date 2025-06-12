@@ -172,6 +172,8 @@ public class JCardDTO implements Serializable {
     private String feecurrency;       // 申请费用币种
     @Schema(description = "cardno")
     private String cardno;            // 卡号
+    @Schema(description = "cardid")
+    private String cardid;            // 卡号
 
     @Schema(description = "state")
     private String state;             // 卡申请状态

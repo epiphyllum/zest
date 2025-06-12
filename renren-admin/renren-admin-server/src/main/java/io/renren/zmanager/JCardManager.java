@@ -437,6 +437,8 @@ public class JCardManager {
                 .set(response.getFeecurrency() != null, JCardEntity::getFeecurrency, response.getFeecurrency())
                 .set(response.getFee() != null, JCardEntity::getFee, response.getFee())
                 .set(response.getCardno() != null, JCardEntity::getCardno, response.getCardno())
+                .set(response.getCardid() != null, JCardEntity::getCardid, response.getCardid())
+
                 .set(response.getState() != null, JCardEntity::getStateexplain, response.getStateexplain());
 
         // 不成功 -> 成功
