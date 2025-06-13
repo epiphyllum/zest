@@ -93,8 +93,8 @@ public class ZinCardApplyNotifyService {
         }
 
         if (jCardEntity == null) {
-            log.error("找不到卡申请单: notify:{}", notify.getCardno(), notify);
-            throw new RenException("找不到卡申请单:" + notify.getCardno() + ":" + notify.getApplyid());
+            log.error("找不到卡申请单: notify:{}", notify);
+            return;
         }
 
         // 状态一样: 不需要处理

@@ -90,9 +90,9 @@ public class ApiCardApplyService {
         if (ZinConstant.isCardApplySuccess(entity.getState()) ||
                 ZinConstant.isCardApplyFail(entity.getState())
         ) {
-            log.info("发卡已经是终态");
+            // log.info("发卡已经是终态");
         } else {
-            // 查询通联
+            // 查询通联: 更新下卡信息
             jCardManager.query(entity, false);
         }
 
