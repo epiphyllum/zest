@@ -191,7 +191,6 @@ public class LoginController {
             UserTokenDTO token = sysUserTokenService.refreshToken(refreshToken);
             return new Result<UserTokenDTO>().ok(token);
         } catch (Exception ex) {
-            ex.printStackTrace();
             throw ex;
         }
     }
