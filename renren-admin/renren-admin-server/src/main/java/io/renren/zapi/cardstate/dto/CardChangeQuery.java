@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CardChangeQuery {
     String cardno;
+    String cardid;
 }

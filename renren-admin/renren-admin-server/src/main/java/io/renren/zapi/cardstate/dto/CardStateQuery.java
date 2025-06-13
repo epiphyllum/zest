@@ -9,4 +9,5 @@ import lombok.Data;
 @AllArgsConstructor
 public class CardStateQuery {
     private String cardno;  // 卡号
+    private String cardid;
 }

@@ -11,4 +11,5 @@ public class VpaInfoItem {
     String cardno;
     String expiredate;
     String cvv;
+    String cardid;
 }

@@ -42,10 +42,11 @@ public class ApiCardStateService {
     @Resource
     private JCardManager jCardManager;
 
-    private JCardEntity getCardEntity(String cardno, ApiContext context) {
+    private JCardEntity getCardEntity(String cardid, String cardno, ApiContext context) {
         // 查询卡
         JCardEntity entity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
-                .eq(JCardEntity::getCardno, cardno)
+                .eq(cardno != null, JCardEntity::getCardno, cardno)
+                .eq(cardid != null, JCardEntity::getCardid, cardid)
         );
         if (entity == null) {
             throw new RenException("no record");
@@ -98,7 +99,7 @@ public class ApiCardStateService {
                 throw new RenException("unsupported change type");
         }
 
-        JCardEntity cardEntity = getCardEntity(request.getCardno(), context);
+        JCardEntity cardEntity = getCardEntity(request.getCardid(), request.getCardno(), context);
         jCardManager.queryCard(cardEntity);
 
         Result<CardChangeRes> result = new Result<>();
@@ -110,7 +111,7 @@ public class ApiCardStateService {
     public Result<CardChangeQueryRes> cardChangeQuery(CardChangeQuery request, ApiContext context) {
 
         // 查询卡信息
-        JCardEntity entity = getCardEntity(request.getCardno(), context);
+        JCardEntity entity = getCardEntity(request.getCardid(), request.getCardno(), context);
 
         if ( ZinConstant.isCardApplyFail(entity.getState()) || ZinConstant.isCardApplySuccess(entity.getState())) {
             // 终态情况下, 不需要查询通联
@@ -129,7 +130,7 @@ public class ApiCardStateService {
     // 卡余额查询
     public Result<CardBalanceRes> cardBalance(CardBalanceReq request, ApiContext context) {
         // 查询卡信息: 确保卡是这个商户的
-        JCardEntity entity = getCardEntity(request.getCardno(), context);
+        JCardEntity entity = getCardEntity(request.getCardid(), request.getCardno(), context);
 
         // 调用通联
         TCardBalanceRequest tCardBalanceRequest = ConvertUtils.sourceToTarget(request, TCardBalanceRequest.class);
@@ -145,7 +146,8 @@ public class ApiCardStateService {
     // 卡支付信息: cvv2 | expiredate
     public Result<CardPayInfoRes> cardPayInfo(CardPayInfoReq request, ApiContext context) {
         JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
-                .eq(JCardEntity::getCardno, request.getCardno())
+                .eq(request.getCardno() != null, JCardEntity::getCardno, request.getCardno())
+                .eq(request.getCardid() != null, JCardEntity::getCardid, request.getCardid())
         );
 
         JMerchantEntity merchant = context.getMerchant();
@@ -165,7 +167,8 @@ public class ApiCardStateService {
 
     public Result<CardInfoRes> cardInfo(CardInfoReq request, ApiContext context) {
         JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
-                .eq(JCardEntity::getCardno, request.getCardno())
+                .eq(request.getCardno() != null, JCardEntity::getCardno, request.getCardno())
+                .eq(request.getCardid() != null, JCardEntity::getCardid, request.getCardid())
         );
         jCardManager.balanceCard(cardEntity);
         CardInfoRes cardInfoRes = ConvertUtils.sourceToTarget(cardEntity, CardInfoRes.class);

@@ -11,4 +11,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CardInfoReq {
     private String cardno;        // 卡号
+    private String cardid;
 }

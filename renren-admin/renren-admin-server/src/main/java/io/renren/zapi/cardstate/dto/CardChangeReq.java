@@ -8,5 +8,6 @@ import lombok.Data;
 public class CardChangeReq {
     private String meraplid;     //
     private String cardno;       //
+    private String cardid;
     private String changetype;   //
 }

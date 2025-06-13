@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CardBalanceReq {
     private String cardno;
+    private String cardid;
 }

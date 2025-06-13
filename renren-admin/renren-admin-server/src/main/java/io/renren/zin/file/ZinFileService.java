@@ -73,7 +73,7 @@ public class ZinFileService {
      * 7005-VPA子卡信息下载(加密文件)
      */
     public List<VpaInfoItem> downloadVapInfoAes(DownloadVpaRequest request) {
-        byte[] download = requester.download(uniqueId(), "/gcpapi/file/downvapinfoaes", request);
+        byte[] download = requester.download(uniqueId(), "/gcpapi/file/v2/downvapinfoaes", request);
         String raw = CommonUtils.decryptSensitiveBytes(download, zestConfig.getAccessConfig().getSensitiveKey());
         log.info("vpa子卡信息下载数据: {}", raw);
         String[] split = raw.split("\n");
@@ -82,7 +82,7 @@ public class ZinFileService {
 
             String line = split[i].replaceAll("\"", "");
             String[] fields = line.split(",");
-            VpaInfoItem item = new VpaInfoItem(fields[0], fields[1], fields[2]);
+            VpaInfoItem item = new VpaInfoItem(fields[0], fields[1], fields[2], fields[3]);
             log.info("vpa item: {}", item);
             items.add(item);
         }
