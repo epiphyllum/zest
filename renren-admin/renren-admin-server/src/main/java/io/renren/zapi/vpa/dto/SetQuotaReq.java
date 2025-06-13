@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 public class SetQuotaReq {
     String meraplid;
     String cardno;
+    String cardid;
     BigDecimal authmaxamount;
     Integer authmaxcount;
 }

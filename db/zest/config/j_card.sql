@@ -136,3 +136,4 @@ create index idx_j_card_4 on j_card (applyid);
 -- 唯一索引
 create unique index uidx_j_card_0 on j_card (txnid);
 create unique index uidx_j_card_1 on j_card (merchant_id, meraplid);
+create unique index uidx_j_card_2 on j_card(cardid);

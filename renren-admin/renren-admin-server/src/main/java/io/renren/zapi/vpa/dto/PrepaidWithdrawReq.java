@@ -8,5 +8,6 @@ import java.math.BigDecimal;
 public class PrepaidWithdrawReq {
     private String meraplid;
     private String cardno;
+    private String cardid;
     private BigDecimal amount;
 }

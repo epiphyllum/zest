@@ -7,4 +7,5 @@ public class JobItem {
     private String cardno;
     private String cvv;
     private String expiredate;
+    private String cardid;
 }

@@ -77,7 +77,7 @@ public class ApiVpaService {
     //  设置共享子卡额度
     public Result<SetQuotaRes> setQuota(SetQuotaReq request, ApiContext context) {
         Result<SetQuotaRes> result = new Result<>();
-        JCardEntity card = getCard(request.getCardno());
+        JCardEntity card = getCard(request.getCardid(), request.getCardno());
         jCardManager.setQuota(card, request.getAuthmaxamount(), request.getAuthmaxcount(), 1);
         return result;
     }
@@ -85,7 +85,7 @@ public class ApiVpaService {
     // 预防费卡充值
     public Result<PrepaidChargeRes> prepaidCharge(PrepaidChargeReq request, ApiContext context) {
         Result<PrepaidChargeRes> result = new Result<>();
-        JCardEntity card = getCard(request.getCardno());
+        JCardEntity card = getCard(request.getCardid(), request.getCardno());
         jCardManager.prepaidCharge(card, request.getAmount(), request.getMeraplid(), 1);
         return result;
     }
@@ -129,7 +129,7 @@ public class ApiVpaService {
     // 预防费卡提现
     public Result<PrepaidWithdrawRes> prepaidWithdraw(PrepaidWithdrawReq request, ApiContext context) {
         Result<PrepaidWithdrawRes> result = new Result<>();
-        jCardManager.prepaidWithdraw(getCard(request.getCardno()), request.getAmount(), request.getMeraplid(), 1);
+        jCardManager.prepaidWithdraw(getCard(request.getCardid(), request.getCardno()), request.getAmount(), request.getMeraplid(), 1);
         return result;
     }
 
@@ -179,7 +179,8 @@ public class ApiVpaService {
                 .select(
                         JCardEntity::getCardno,
                         JCardEntity::getCvv,
-                        JCardEntity::getExpiredate
+                        JCardEntity::getExpiredate,
+                        JCardEntity::getCardid
                 )
         ).parallelStream().map(e -> {
             String plainCvv = CommonUtils.decryptSensitiveString(e.getCvv(), zestConfig.getAccessConfig().getSensitiveKey(), "utf-8");
@@ -188,6 +189,7 @@ public class ApiVpaService {
             jobItem.setCardno(e.getCardno());
             jobItem.setCvv(plainCvv);
             jobItem.setExpiredate(plainDate);
+            jobItem.setCardid(e.getCardid());
             return jobItem;
         }).toList();
         String sensitiveInfo = null;
@@ -201,9 +203,10 @@ public class ApiVpaService {
     }
 
     // 获取卡
-    private JCardEntity getCard(String cardno) {
+    private JCardEntity getCard(String cardid, String cardno) {
         JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
-                .eq(JCardEntity::getCardno, cardno)
+                .eq(cardid != null, JCardEntity::getCardid, cardid)
+                .eq(cardno != null, JCardEntity::getCardno, cardno)
         );
         if (cardEntity == null) {
             throw new RenException("卡号错误:" + cardno);
