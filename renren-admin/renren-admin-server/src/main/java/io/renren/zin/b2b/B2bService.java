@@ -74,7 +74,7 @@ public class B2bService {
         request.setAmount(jb2bEntity.getAmount());
         request.setPayeeaccountno(zestConfig.getB2bConfig().getB2bVa());
 
-        log.info("发起生态圈转账: {}", request);
+        log.info("发起生态圈转账: {}, b2bConfig: {}", request, zestConfig.getB2bConfig());
         boolean success = false;
         try {
             TEcoTransferResponse response = requester.request(merchant.getB2bConfig(), CommonUtils.uniqueId(), "/gcpapi/ecosphereTransfer/apply", request, TEcoTransferResponse.class);
