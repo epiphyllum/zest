@@ -17,6 +17,7 @@ import io.renren.zadmin.entity.JCardEntity;
 import io.renren.zadmin.entity.JSubEntity;
 import io.renren.zin.cardtxn.dto.TAuthTxnNotify;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +25,7 @@ import java.util.Date;
 import java.util.concurrent.CompletableFuture;
 
 @Service
+@Slf4j
 public class ZinCardTxnNotifyService {
 
     @Resource
@@ -77,8 +79,15 @@ public class ZinCardTxnNotifyService {
             jCardManager.balanceCard(card);
         });
 
-        // 通知商户
+        // 重新查回来流水
         entity = jAuthDao.selectById(id);
+        if (entity == null) {
+            // 说明是更新流水:
+            log.info("更新Auth通知: {}", notify);
+            return;
+        }
+
+        // 通知商户
         JMerchantEntity merchant = jMerchantDao.selectById(subEntity.getMerchantId());
 
         // 通知商户

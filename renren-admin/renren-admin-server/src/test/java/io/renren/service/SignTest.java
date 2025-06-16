@@ -7,6 +7,12 @@ import cn.hutool.crypto.asymmetric.SignAlgorithm;
 import cn.hutool.crypto.digest.DigestUtil;
 import io.renren.commons.tools.exception.RenException;
 import io.renren.zcommon.ByteUtil;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
+
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 public class SignTest {
 
@@ -51,14 +57,33 @@ public class SignTest {
     }
 
     public static void main(String[] args) {
-        String body = "123";
-        String reqId = "123";
-        String id = "123";
-        String apiName = "123";
+        System.out.println("-------------------------");
+        String access_token = "CthjyX9iPrDIf2ds/qabsTSqfXmp5aNiIGT2UiSVtT1JONofp7+uVhz3JTGyjaNn";
+        String product_token = "0145bc2c03344e70bfc1c17fb32ecd1d";
+        String p16 = product_token.substring(0,16);
+        String outKey = aesDecrypt(access_token, p16);
+        System.out.println("access_token = " + access_token);
+        System.out.println("product_16   = " + p16 + ", length = " + p16.length());
+        System.out.println("decrypt      = " + outKey);
+    }
 
-        SignTest signTest = new SignTest();
-        String sign = signTest.sign(body, reqId, id, apiName);
-        System.out.println("签名:" + sign);
-        signTest.verify(body, reqId, id, apiName, sign);
+    public static String VECTOR = "qe4vnvirwsm0gawz";
+    public static String aesDecrypt(String plainStr,String key){
+        if (StringUtils.isEmpty(plainStr)){
+            return plainStr;
+        }
+        try {
+            SecretKeySpec secretKeySpec = new SecretKeySpec(key.getBytes("utf-8"), "AES");
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            IvParameterSpec ivParameterSpec = new IvParameterSpec(VECTOR.getBytes("utf-8"));
+            cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, ivParameterSpec);
+            Base64 base64 = new Base64();
+            byte[] bytes = base64.decodeBase64(plainStr.getBytes());
+            bytes = cipher.doFinal(bytes);
+            return new String(bytes, "utf-8");
+        }catch (Exception e){
+            System.out.println("AES解密异常,解密字符串:" + plainStr);
+        }
+        return null;
     }
 }
