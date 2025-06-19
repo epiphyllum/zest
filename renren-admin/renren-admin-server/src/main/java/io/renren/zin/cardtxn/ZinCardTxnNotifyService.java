@@ -92,7 +92,11 @@ public class ZinCardTxnNotifyService {
 
         // 通知商户
         if (StringUtils.isNotBlank(merchant.getWebhook())) {
-            apiNotify.cardTxnNotify(entity, merchant);
+            try {
+                apiNotify.cardTxnNotify(entity, merchant);
+            } catch (Exception ex ) {
+                log.error("通知商户失败: {}", ex.getMessage());
+            }
         }
     }
 }

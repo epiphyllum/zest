@@ -429,6 +429,13 @@ public class JCardManager {
         String prevState = jCardEntity.getState();
         String nextState = response.getState();
 
+        log.info("开卡查询: {},{} 状态变化: {} -> {}", jCardEntity.getApplyid(), jCardEntity.getMeraplid(), prevState, nextState);
+
+        // 状态没有变化
+        if (prevState.equals(nextState)) {
+            return;
+        }
+
         // 更新状态， 以及发卡成本， 卡号等
         LambdaUpdateWrapper<JCardEntity> updateWrapper = Wrappers.<JCardEntity>lambdaUpdate()
                 .eq(JCardEntity::getId, jCardEntity.getId())
@@ -438,7 +445,6 @@ public class JCardManager {
                 .set(response.getFee() != null, JCardEntity::getFee, response.getFee())
                 .set(response.getCardno() != null, JCardEntity::getCardno, response.getCardno())
                 .set(response.getCardid() != null, JCardEntity::getCardid, response.getCardid())
-
                 .set(response.getState() != null, JCardEntity::getStateexplain, response.getStateexplain());
 
         // 不成功 -> 成功
@@ -451,6 +457,7 @@ public class JCardManager {
         if (!ZinConstant.isCardApplyFail(prevState) && ZinConstant.isCardApplyFail(nextState)) {
             // 解冻释放
             tx.executeWithoutResult(status -> {
+                updateWrapper.set(JCardEntity::getState, ZinConstant.CARD_APPLY_CLOSE);
                 jCardDao.update(null, updateWrapper);
                 ledger500OpenCard.ledgeOpenCardUnFreeze(jCardEntity);
                 // 钱包主卡
