@@ -77,7 +77,6 @@ public class ApiNotify {
 
     // 商户卡交易通知
     public void cardTxnNotify(JAuthEntity entity, JMerchantEntity merchant) {
-        log.info("通知商户|cardTxnNotify: {}", entity);
         apiCardMoneyNotifyService.cardTxnNotify(entity, merchant);
     }
 
