@@ -395,7 +395,12 @@ public class JCardManager {
 
                     }
                 }
-                jCardDao.update(null, updateWrapper);
+
+                //
+                int rtn = jCardDao.update(null, updateWrapper);
+                if (rtn != 1) {
+                    throw new RenException("更新卡状态失败, 稍后请再查询");
+                }
                 ledger500OpenCard.ledgeOpenCard(jCardEntity);
             } else {
                 // 其他卡没有收费处理
