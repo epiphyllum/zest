@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.core.incrementer.DefaultIdentifierGenerator;
 import io.renren.commons.tools.exception.RenException;
 import io.renren.commons.tools.utils.DateUtils;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -19,6 +20,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Slf4j
 public class CommonUtils {
     private static final String BASE62_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private static final String BASE36_CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -138,6 +140,9 @@ public class CommonUtils {
         } catch (GeneralSecurityException e) {
             throw new RenException("解密敏感数据失败");
         } catch (UnsupportedEncodingException e) {
+            throw new RenException("解密敏感数据失败");
+        } catch (Exception ex) {
+            log.error("无法解密数据: data = {}, key = {}, charset = {}", sensitiveData, key, charset);
             throw new RenException("解密敏感数据失败");
         }
     }
