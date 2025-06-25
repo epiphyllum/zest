@@ -124,6 +124,10 @@ public class ZinCardApplyNotifyService {
         // 查询下申请单
         String applyid = notify.getApplyid();
         JDepositEntity entity = jDepositDao.selectOne(Wrappers.<JDepositEntity>lambdaQuery().eq(JDepositEntity::getApplyid, applyid));
+        if (entity == null) {
+            log.error("CP451:保证金缴纳, 无法找到申请单: {}", applyid);
+            throw new RenException("无法找到保证缴纳申请单: " + applyid);
+        }
 
         // 查询通联并通知商户
         boolean notifyFlag = false;
