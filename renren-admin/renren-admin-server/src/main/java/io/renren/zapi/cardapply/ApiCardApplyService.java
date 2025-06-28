@@ -93,7 +93,12 @@ public class ApiCardApplyService {
             // log.info("发卡已经是终态");
         } else {
             // 查询通联: 更新下卡信息
-            jCardManager.query(entity, false);
+            try {
+                jCardManager.query(entity, false);
+            } catch (Exception ex) {
+                log.error("查询发卡失败: request:{}, entity:{}", request, entity);
+                throw  ex;
+            }
         }
 
         // 应答
