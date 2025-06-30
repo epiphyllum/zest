@@ -71,6 +71,12 @@ public class JCardServiceImpl extends CrudServiceImpl<JCardDao, JCardEntity, JCa
             wrapper.eq("cardno", cardno);
         }
 
+        // 卡id
+        String cardid = (String) params.get("cardid");
+        if (StringUtils.isNotBlank(cardid)) {
+            wrapper.eq("cardid", cardid);
+        }
+
         // 产品
         String marketproduct = (String) params.get("marketproduct");
         if (StringUtils.isNotBlank(marketproduct)) {
