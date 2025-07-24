@@ -460,23 +460,28 @@ public class JCardManager {
 
         // 非失败 -> 失败
         if (!ZinConstant.isCardApplyFail(prevState) && ZinConstant.isCardApplyFail(nextState)) {
+
+            log.info("发卡失败: {} -> {}", prevState, nextState);
             // 解冻释放
             tx.executeWithoutResult(status -> {
                 updateWrapper.set(JCardEntity::getState, ZinConstant.CARD_APPLY_CLOSE);
                 jCardDao.update(null, updateWrapper);
                 ledger500OpenCard.ledgeOpenCardUnFreeze(jCardEntity);
-                // 钱包主卡
-                if (jCardEntity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_WALLET)) {
-                    // 属于账户升级
-                    if (jCardEntity.getWalletId() != null) {
-                        // 钱包账户upgrade交易状态更新
-                        jWalletTxnDao.update(null, Wrappers.<JWalletTxnEntity>lambdaUpdate()
-                                .eq(JWalletTxnEntity::getId, jCardEntity.getRelateId())
-                                .eq(JWalletTxnEntity::getState, ZWalletConstant.WALLET_TXN_STATUS_NEW)
-                                .set(JWalletTxnEntity::getState, ZWalletConstant.WALLET_TXN_STATUS_FAIL)
-                        );
-                    }
-                }
+
+                // 没有钱包主卡了
+//                // 钱包主卡
+//                if (jCardEntity.getMarketproduct().equals(ZinConstant.MP_VPA_MAIN_WALLET)) {
+//                    // 属于账户升级
+//                    if (jCardEntity.getWalletId() != null) {
+//                        // 钱包账户upgrade交易状态更新
+//                        jWalletTxnDao.update(null, Wrappers.<JWalletTxnEntity>lambdaUpdate()
+//                                .eq(JWalletTxnEntity::getId, jCardEntity.getRelateId())
+//                                .eq(JWalletTxnEntity::getState, ZWalletConstant.WALLET_TXN_STATUS_NEW)
+//                                .set(JWalletTxnEntity::getState, ZWalletConstant.WALLET_TXN_STATUS_FAIL)
+//                        );
+//                    }
+//                }
+
             });
             // 通知商户
             if (notify) {

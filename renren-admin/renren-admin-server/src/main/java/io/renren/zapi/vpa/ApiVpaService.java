@@ -22,10 +22,12 @@ import io.renren.zcommon.ZinConstant;
 import io.renren.zmanager.JCardManager;
 import io.renren.zmanager.JVpaManager;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 public class ApiVpaService {
 
@@ -76,8 +78,10 @@ public class ApiVpaService {
 
     //  设置共享子卡额度
     public Result<SetQuotaRes> setQuota(SetQuotaReq request, ApiContext context) {
+        log.info("setQuota: {}", request);
         Result<SetQuotaRes> result = new Result<>();
         JCardEntity card = getCard(request.getCardid(), request.getCardno());
+        log.info("find card: {}", card);
         jCardManager.setQuota(card, request.getAuthmaxamount(), request.getAuthmaxcount(), 1);
         return result;
     }

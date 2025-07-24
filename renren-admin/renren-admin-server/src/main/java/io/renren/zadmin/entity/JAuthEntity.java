@@ -46,6 +46,7 @@ public class JAuthEntity extends BaseEntity {
     private String cardno;
     private String state;
     private String stateexplain;
+    private String respmsg;
 
     private BigDecimal amount;
     private String currency;

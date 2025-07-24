@@ -82,11 +82,11 @@ public class ZinRequester {
         this.signer = SecureUtil.sign(SignAlgorithm.SHA512withRSA);
         this.signer.setPrivateKey(rsaSigner.getPrivateKey());
         this.signerKey = accessConfig.getPrivateKey();
-
         RSA rsaVerifier = new RSA(null, accessConfig.getPlatformKey());
         this.verifier = SecureUtil.sign(SignAlgorithm.SHA512withRSA);
         this.verifier.setPublicKey(rsaVerifier.getPublicKey());
         this.verifierKey = accessConfig.getPlatformKey();
+
     }
 
     //  HTTP请求头设置
@@ -126,6 +126,7 @@ public class ZinRequester {
                 ((StringHttpMessageConverter) messageConverter).setDefaultCharset(Charset.forName("UTF8"));
             }
         }
+
         headers.add("X-AGCP-Crdt", agcpCrdt);
         headers.add("X-AGCP-Date", agcpDate);
         headers.add("X-AGCP-Send", agcpSend);
@@ -135,12 +136,14 @@ public class ZinRequester {
 
     // 下载文件
     public byte[] download(String reqId, String uri, Object object) {
+
         String body = null;
         try {
             body = this.objectMapper.writeValueAsString(object);
         } catch (JsonProcessingException e) {
             throw new RenException("invalid request, can not convert to json");
         }
+
         HeaderInfo headerInfo = getHeaders(reqId, body, uri, null);
         HttpHeaders headers = headerInfo.getHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -150,6 +153,7 @@ public class ZinRequester {
                 .acceptCharset(StandardCharsets.UTF_8)
                 .headers(headers)
                 .body(body);
+
         String url = zestConfig.getAccessConfig().getBaseUrl() + uri + "?" + commonQueryParams + "&" + "reqid=" + reqId;
 
         try {

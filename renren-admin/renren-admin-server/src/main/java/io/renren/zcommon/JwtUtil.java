@@ -8,7 +8,6 @@ import java.util.Date;
 
 public class JwtUtil {
     private static final String KEY = "wingo@977100";
-
     //接收业务数据,生成token并返回
     // withClaim 配置有效载荷
     // withExpiresAt 配置过期时间
@@ -29,5 +28,4 @@ public class JwtUtil {
                 .asLong();
         return userId;
     }
-
 }

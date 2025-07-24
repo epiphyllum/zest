@@ -45,6 +45,11 @@ public class JDepositServiceImpl extends CrudServiceImpl<JDepositDao, JDepositEn
             wrapper.eq("cardno", cardno);
         }
 
+//        String cardid = (String) params.get("cardid");
+//        if (StringUtils.isNotBlank(cardid)) {
+//            wrapper.eq("cardid", cardid);
+//        }
+
         return wrapper;
     }
 
