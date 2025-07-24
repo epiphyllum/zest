@@ -18,6 +18,7 @@ create table j_deposit
     marketproduct     varchar(16)    not null,
     wallet_id         bigint         null comment '钱包ID',
     cardno            varchar(30)    not null,
+    -- cardid         varchar(30)
     payerid           varchar(30)    not null,
     amount            decimal(18, 2) not null comment '要求到账金额',
     payeeaccount      varchar(30) comment '交易对手',

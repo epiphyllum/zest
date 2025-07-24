@@ -22,4 +22,10 @@ public class ModuleConfigImpl implements ModuleConfig {
     public String getName() {
         return "new";
     }
+
+    public static void main(String[] args) {
+        System.out.println(Integer.toBinaryString(3));
+        System.out.println(Integer.toBinaryString(5));
+        System.out.println(Integer.toBinaryString(-3));
+    }
 }

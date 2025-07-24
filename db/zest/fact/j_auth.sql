@@ -23,6 +23,7 @@ create table j_auth
     trxcode        varchar(25) comment '交易代码',
     trxdir         varchar(6) comment '交易方向',
     state          varchar(10) comment '交易状态',
+    respmsg        varchar(256) comment '应答消息',
     amount         decimal(18, 2) comment '交易金额',
     currency       varchar(3) comment '币种',
     settleamount   decimal(18, 2),

@@ -170,6 +170,10 @@ public class ApiCardStateService {
                 .eq(request.getCardno() != null, JCardEntity::getCardno, request.getCardno())
                 .eq(request.getCardid() != null, JCardEntity::getCardid, request.getCardid())
         );
+        if (cardEntity == null) {
+            log.error("can not find card by cardid:{}, cardno:{}", request.getCardid(), request.getCardno());
+            throw new RenException("cardid or cardno is wrong");
+        }
         jCardManager.balanceCard(cardEntity);
         CardInfoRes cardInfoRes = ConvertUtils.sourceToTarget(cardEntity, CardInfoRes.class);
         Result<CardInfoRes> result = new Result<>();
