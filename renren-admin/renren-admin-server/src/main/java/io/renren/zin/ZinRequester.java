@@ -15,6 +15,10 @@ import io.renren.commons.tools.exception.RenException;
 import io.renren.zadmin.entity.JChannelLogEntity;
 import io.renren.zcommon.AccessConfig;
 import io.renren.zcommon.ZestConfig;
+import io.renren.zin.accountmanage.dto.TBalanceQuery;
+import io.renren.zin.accountmanage.dto.TBalanceResponse;
+import io.renren.zin.accountmanage.dto.TVaListResponse;
+import io.renren.zin.cardapply.dto.TCardPayInfoResponse;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -196,7 +200,14 @@ public class ZinRequester {
             ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
             String bodyResp = responseEntity.getBody();
             logEntity.setRecv(bodyResp.length() >= 2047 ? bodyResp.substring(0,2047) : bodyResp);
-            zinLogger.logPacketSuccess(logEntity);
+
+            // 余额查询的成功日志不计日志
+            if ( !(
+                    clazz == TBalanceResponse.class ||
+                            clazz == TCardPayInfoResponse.class
+            )) {
+                zinLogger.logPacketSuccess(logEntity);
+            }
             T ttResult = objectMapper.readValue(bodyResp, clazz);
             if (ttResult.getRspcode().equals("0000")) {
                 return ttResult;

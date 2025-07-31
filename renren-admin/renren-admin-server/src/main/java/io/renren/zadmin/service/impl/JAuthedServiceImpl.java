@@ -35,8 +35,11 @@ public class JAuthedServiceImpl extends CrudServiceImpl<JAuthedDao, JAuthedEntit
 
         String cardno = (String)params.get("cardno");
         wrapper.eq(StringUtils.isNotBlank(cardno), "cardno", cardno);
+
         String authcode = (String)params.get("authcode");
         wrapper.eq(StringUtils.isNotBlank(authcode), "authcode", authcode);
+
+        wrapper.orderByDesc("trxtime");
 
         return wrapper;
     }

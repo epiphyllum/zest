@@ -27,6 +27,7 @@ import io.renren.zapi.sub.ApiSubService;
 import io.renren.zapi.vpa.ApiVpaService;
 import io.renren.zcommon.ByteUtil;
 import io.renren.zcommon.CommonUtils;
+import io.renren.zcommon.ZapiConstant;
 import io.renren.zcommon.ZestConfig;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
@@ -194,7 +195,12 @@ public class ApiService {
             Logger logger = CommonUtils.getLogger(merchant.getCusname());
             ApiContext context = new ApiContext(merchant, logger);
             Result<?> result = (Result) apiMeta.getMethod().invoke(apiMeta.getInstance(), req, context);
-            apiLogger.logPacketSuccess(packetEntity, result);
+            if (!(name.equals(ZapiConstant.API_cardInfo) ||
+                    name.equals(ZapiConstant.API_cardPayInfo) ||
+                    name.equals(ZapiConstant.API_cardBalance)
+            )) {
+                apiLogger.logPacketSuccess(packetEntity, result);
+            }
             return result;
         } catch (JsonProcessingException e) {
             apiLogger.logPacketException(packetEntity, e);

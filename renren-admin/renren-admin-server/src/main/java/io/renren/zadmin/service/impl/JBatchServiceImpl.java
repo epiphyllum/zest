@@ -26,8 +26,11 @@ public class JBatchServiceImpl extends CrudServiceImpl<JBatchDao, JBatchEntity, 
 
         String batchType = (String)params.get("batchType");
         wrapper.eq(StringUtils.isNotBlank(batchType), "batch_type", batchType);
+
         String batchDate = (String)params.get("batchDate");
         wrapper.eq(StringUtils.isNotBlank(batchDate), "batch_date", batchDate);
+
+        wrapper.orderByDesc("batch_date", "batch_type");
 
         return wrapper;
     }

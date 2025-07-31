@@ -1,5 +1,6 @@
 package io.renren.zadmin.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import com.baomidou.mybatisplus.annotation.*;
@@ -37,6 +38,7 @@ public class JAuthEntity extends BaseEntity {
     private Long walletId;
     private Long walletName;
 
+
     // 主卡
     private String maincardno;
 
@@ -47,6 +49,7 @@ public class JAuthEntity extends BaseEntity {
     private String state;
     private String stateexplain;
     private String respmsg;
+    private String respcode;
 
     private BigDecimal amount;
     private String currency;

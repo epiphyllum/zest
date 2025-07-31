@@ -49,10 +49,19 @@ public class JAuthServiceImpl extends CrudServiceImpl<JAuthDao, JAuthEntity, JAu
 
         String cardno = (String) params.get("cardno");
         wrapper.eq(StringUtils.isNotBlank(cardno), "cardno", cardno);
-        String trxtype = (String) params.get("trxtype");
-        wrapper.eq(StringUtils.isNotBlank(trxtype), "trxtype", trxtype);
+
+        String logkv = (String) params.get("logkv");
+        wrapper.eq(StringUtils.isNotBlank(logkv), "logkv", logkv);
+
+        String trxcode = (String) params.get("trxcode");
+        wrapper.eq(StringUtils.isNotBlank(trxcode), "trxcode", trxcode);
+
+        String trxdir = (String) params.get("trxdir");
+        wrapper.eq(StringUtils.isNotBlank(trxdir), "trxdir", trxdir);
+
         String authcode = (String) params.get("authcode");
         wrapper.eq(StringUtils.isNotBlank(authcode), "authcode", authcode);
+
         return wrapper;
     }
 

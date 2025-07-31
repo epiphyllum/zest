@@ -65,6 +65,9 @@ public class JAuthDTO implements Serializable {
     private String state;
     @Schema(description = "交易状态说明")
     private String stateexplain;
+
+    @Schema(description = "应答")
+    private String respcode;
     @Schema(description = "应答")
     private String respmsg;
 
