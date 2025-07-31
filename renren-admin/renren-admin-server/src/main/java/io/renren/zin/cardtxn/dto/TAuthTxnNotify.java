@@ -14,6 +14,9 @@ public class TAuthTxnNotify {
     private String state;        //	状态
     private String stateexplain; //	状态说明
 
+    private String respcode;
+    private String respmsg;
+
     private BigDecimal amount;   //	金额
     private BigDecimal settleamount;   //	金额
     private String currency;     //	币种
