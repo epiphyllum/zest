@@ -76,3 +76,15 @@ public: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA71gHMd4bsiYxhgEDEyi57qoyv+Dh
 "sensitiveKey":"",
 "sensitiveKeyId":""
 }
+
+
+
+
+
+
+cimbQris toSign: POST:/api-manager-external/alpha/v1.0/qr/qr-mpm-generate:AAIgM2UxMGQ5ZGYyOTEwNWMyYWMzYmNiMGRhZTc2NmZlNzAohG1WGDqhNyEMJjV2pPcFBYdqANx1wTdDHQ3ZqzDmjBsJrWc4YzW-vRKMJ-45rBS7FJ8lzgzf8IW-r43WhDwqgYrSA59smc_GntStCCdKfDne3ZR8dI22QTDAfUEbQjM:6f886f8c056c3d7a303d59ce7bb8997680529ccc36fc9503a6d59b024b6f262a:2025-07-28T17:29:56+07:00
+[2025-07-28 18:29:56 INFO http-nio-7099-exec-1 com.lcsf.oversea.channel.cimb.util.CimbQrisAlgo:151]  :  signature：433Fgccxsfz35mVgaMyrybgg6YrgcHbEtVZvFPzoXEXW8vmToUmLWkJbawoCpQ2NBlYTQZy9u8FjPzpE9HIB3g==
+[2025-07-28 18:29:56 INFO http-nio-7099-exec-1 com.lcsf.oversea.channel.cimb.util.qris.CimbQrisPrePay:138]  :  request headers: {"Content-Type":"application/json","Authorization":"Bearer AAIgM2UxMGQ5ZGYyOTEwNWMyYWMzYmNiMGRhZTc2NmZlNzAohG1WGDqhNyEMJjV2pPcFBYdqANx1wTdDHQ3ZqzDmjBsJrWc4YzW-vRKMJ-45rBS7FJ8lzgzf8IW-r43WhDwqgYrSA59smc_GntStCCdKfDne3ZR8dI22QTDAfUEbQjM","ORIGIN":"https://cahayatech.com","X-TIMESTAMP":"2025-07-28T17:29:56+07:00","X-SIGNATURE":"433Fgccxsfz35mVgaMyrybgg6YrgcHbEtVZvFPzoXEXW8vmToUmLWkJbawoCpQ2NBlYTQZy9u8FjPzpE9HIB3g==","X-PARTNER-ID":"3e10d9df29105c2ac3bcb0dae766fe70","X-EXTERNAL-ID":"35edca3d-db1c-45af-a818-65af1e36e017","CHANNEL-ID":"95211"}
+[2025-07-28 18:29:56 INFO http-nio-7099-exec-1 com.lcsf.oversea.channel.cimb.util.qris.CimbQrisPrePay:139]  :  request body: {"partnerReferenceNo":"250728000030","merchantId":"000008000002543","terminalId":"61039601","amount":{"value":"1000.00","currency":"IDR"},"feeAmount":{"value":"0.00","currency":"IDR"},"additionalInfo":{"phoneNum":"13554113502","qrType":"1","invoiceNo":"123456","minute":"60"}}
+[2025-07-28 18:30:00 INFO scheduling-1 com.lcsf.oversea.common.util.CommonUtil:143]  :  定时任务开关处于关闭状态
+

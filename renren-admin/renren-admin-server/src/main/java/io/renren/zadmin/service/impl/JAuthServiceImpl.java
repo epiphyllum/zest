@@ -59,6 +59,9 @@ public class JAuthServiceImpl extends CrudServiceImpl<JAuthDao, JAuthEntity, JAu
         String trxdir = (String) params.get("trxdir");
         wrapper.eq(StringUtils.isNotBlank(trxdir), "trxdir", trxdir);
 
+        String state = (String) params.get("state");
+        wrapper.eq(StringUtils.isNotBlank(state), "state", state);
+
         String authcode = (String) params.get("authcode");
         wrapper.eq(StringUtils.isNotBlank(authcode), "authcode", authcode);
 
