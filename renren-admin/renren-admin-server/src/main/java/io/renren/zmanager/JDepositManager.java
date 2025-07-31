@@ -96,8 +96,15 @@ public class JDepositManager {
 
     //  发起金额 到账金额 填充:
     private void fixAmount(JDepositEntity entity, JFeeConfigEntity feeConfig) {
-        BigDecimal txnAmount = calcTxnAmount(entity.getAmount(), feeConfig);
-        entity.setTxnAmount(txnAmount);
+        // 反算通联发起金额
+        if (false) {
+            // 取消反算
+            BigDecimal txnAmount = calcTxnAmount(entity.getAmount(), feeConfig);
+            entity.setTxnAmount(txnAmount);
+        }
+        // 通联也采取外扣
+        entity.setTxnAmount(entity.getAmount());
+
         // 成本与收入扣率
         entity.setDepositRate(feeConfig.getDepositRate());
         entity.setChargeRate(feeConfig.getChargeRate());
@@ -286,7 +293,8 @@ public class JDepositManager {
     public void submit(JDepositEntity entity) {
         try {
             TDepositRequest request = ConvertUtils.sourceToTarget(entity, TDepositRequest.class);
-            request.setAmount(entity.getTxnAmount());
+            request.setAmount(entity.getTxnAmount());  // 发起金额=卡实到金额
+            request.setFullpaymentmode("F");  // 保证金全额到账
             TDepositResponse response = zinCardMoneyService.deposit(request);
             String applyid = response.getApplyid();
             JDepositEntity update = new JDepositEntity();

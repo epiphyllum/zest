@@ -14,6 +14,7 @@ public class TDepositRequest {
     String payeeaccount;    //交易对手
     String procurecontent;  //采购内容
     String agmfid;          //保证金对应合同协议
+    String fullpaymentmode; // F: 卡保证全额到账
 }
 
 
