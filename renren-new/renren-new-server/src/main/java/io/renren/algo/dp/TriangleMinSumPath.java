@@ -1,2 +1,4 @@
-package io.renren.algo.dp;public class TriangleMinSumPath {
+package io.renren.algo.dp;
+
+public class TriangleMinSumPath {
 }

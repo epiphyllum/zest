@@ -1,4 +1,4 @@
-package io.renren.algo;
+package io.renren.algo.stack;
 
 
 import java.util.*;

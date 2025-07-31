@@ -1,4 +1,4 @@
-package io.renren.algo;
+package io.renren.algo.array;
 
 import lombok.extern.slf4j.Slf4j;
 

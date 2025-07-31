@@ -1,4 +1,4 @@
-package io.renren.algo;
+package io.renren.algo.dfs;
 
 import java.util.ArrayList;
 import java.util.HashSet;
