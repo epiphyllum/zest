@@ -9,6 +9,9 @@ public class CardTxnNotify {
     private Long merchantId;
     private Long subId;
 
+    private String respcode;
+    private String respmsg;
+
     // 业务字段
     private String logkv;
     private String trxcode;
