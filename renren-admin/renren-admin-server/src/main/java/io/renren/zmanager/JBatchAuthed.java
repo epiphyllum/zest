@@ -84,14 +84,12 @@ public class JBatchAuthed extends JBatchBase {
             );
             entity.setWalletId(cardEntity.getWalletId());
             entity.setWalletName(cardEntity.getWalletName());
-
             entity.setSubId(cardEntity.getSubId());
             entity.setSubName(cardEntity.getSubName());
             entity.setMerchantId(cardEntity.getMerchantId());
             entity.setMerchantName(cardEntity.getMerchantName());
             entity.setAgentId(cardEntity.getAgentId());
             entity.setAgentName(cardEntity.getAgentName());
-
             entity.setMarketproduct(cardEntity.getMarketproduct());
             entity.setMaincardno(cardEntity.getMaincardno());
 
@@ -108,6 +106,20 @@ public class JBatchAuthed extends JBatchBase {
             downloaded += response.getDatalist().size();
             for (TAuthSettledResponse.Item item : response.getDatalist()) {
                 JAuthedEntity entity = ConvertUtils.sourceToTarget(item, JAuthedEntity.class);
+                // 补充卡信息
+                JCardEntity cardEntity = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
+                        .eq(JCardEntity::getCardno, entity.getCardno())
+                );
+                entity.setWalletId(cardEntity.getWalletId());
+                entity.setWalletName(cardEntity.getWalletName());
+                entity.setSubId(cardEntity.getSubId());
+                entity.setSubName(cardEntity.getSubName());
+                entity.setMerchantId(cardEntity.getMerchantId());
+                entity.setMerchantName(cardEntity.getMerchantName());
+                entity.setAgentId(cardEntity.getAgentId());
+                entity.setAgentName(cardEntity.getAgentName());
+                entity.setMarketproduct(cardEntity.getMarketproduct());
+                entity.setMaincardno(cardEntity.getMaincardno());
                 curBatch.add(entity);
                 if (curBatch.size() == batchSize) {
                     batchList.add(curBatch);
