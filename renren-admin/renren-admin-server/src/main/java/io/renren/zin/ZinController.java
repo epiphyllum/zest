@@ -80,6 +80,7 @@ public class ZinController {
     // 授权交易通知
     @PostMapping("cardtrxrst")
     public String cardtrxrst(HttpServletRequest request, @RequestBody String body, @RequestHeader("X-AGCP-Auth") String auth, @RequestHeader("X-AGCP-Date") String date) {
+        log.info("收到通联授权通知: {}", body);
         TAuthTxnNotify tAuthTxnNotify = requester.<TAuthTxnNotify>verify(request, body, auth, date, TAuthTxnNotify.class);
         zinCardTxnNotifyService.handle(tAuthTxnNotify);
         return "OK";
