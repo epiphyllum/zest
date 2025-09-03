@@ -48,6 +48,8 @@ public class ZinCardTxnNotifyService {
     public void handle(TAuthTxnNotify notify) {
         // copy
         JAuthEntity entity = ConvertUtils.sourceToTarget(notify, JAuthEntity.class);
+        entity.setRespcode(notify.getRespcode());
+        entity.setRespmsg(notify.getRespmsg());
 
         JCardEntity card = jCardDao.selectOne(Wrappers.<JCardEntity>lambdaQuery()
                 .eq(JCardEntity::getCardno, notify.getCardno())

@@ -25,13 +25,15 @@ public interface JAuthDao extends BaseDao<JAuthEntity> {
             cardno, marketproduct, wallet_id, wallet_name,
             logkv, trxcode, trxdir, state, 
             amount, settleamount,currency, settlecurrency, 
-            trxtime, mcc, trxaddr, authcode, create_date)
+            trxtime, mcc, trxaddr, authcode, create_date, respcode, respmsg)
             values (
             #{id}, #{agentId}, #{agentName}, #{merchantId}, #{merchantName}, #{subId}, #{subName}, 
             #{cardno}, #{marketproduct}, #{walletId}, #{walletName},
             #{logkv}, #{trxcode}, #{trxdir}, #{state}, 
             #{amount}, #{settleamount}, #{currency}, #{settlecurrency},
-            #{trxtime}, #{mcc}, #{trxaddr}, #{authcode}, #{createDate})
+            #{trxtime}, #{mcc}, #{trxaddr}, #{authcode}, #{createDate},
+            #{respcode}, #{respmsg}
+            )
             on duplicate key update
             logkv = #{logkv},
             trxcode = #{trxcode},
@@ -44,7 +46,9 @@ public interface JAuthDao extends BaseDao<JAuthEntity> {
             trxtime = #{trxtime},
             mcc = #{mcc},
             trxaddr = #{trxaddr},
-            authcode = #{authcode}
+            authcode = #{authcode},
+            respcode = #{respcode},
+            respmsg = #{respmsg}
              """)
     void saveOrUpdate(JAuthEntity entity);
 
