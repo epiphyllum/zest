@@ -20,6 +20,8 @@ public class CardTxnNotify {
     private String stateexplain;
     private BigDecimal amount;
     private String currency;
+    private BigDecimal settleamount;
+    private String settlecurrency;
     private String trxtime;
     private String trxdir;
     private String trxaddr;
