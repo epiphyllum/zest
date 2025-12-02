@@ -68,7 +68,7 @@ public class JBatchAuthedFile extends JBatchBase {
                     .append(jAuthedEntity.getTrxtime()).append(",")
                     .append(jAuthedEntity.getEntrydate()).append(",")
                     .append(jAuthedEntity.getChnltrxseq()).append(",")
-                    .append(jAuthedEntity.getTrxaddr()).append(",")
+                    .append(jAuthedEntity.getTrxaddr().replace(',', ' ')).append(",")
                     .append(jAuthedEntity.getAuthcode()).append(",")
                     .append(jAuthedEntity.getLogkv()).append(",")
                     .append(jAuthedEntity.getMcc());
