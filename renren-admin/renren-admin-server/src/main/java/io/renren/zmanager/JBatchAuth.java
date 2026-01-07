@@ -127,6 +127,7 @@ public class JBatchAuth extends  JBatchBase {
         if (curBatch.size() < batchSize) {
             batchList.add(curBatch);
         }
+        log.info("total auth: {}", total);
         boolean success = true;
 
         // 开始插入批次
