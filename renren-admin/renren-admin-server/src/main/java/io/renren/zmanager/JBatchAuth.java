@@ -141,15 +141,17 @@ public class JBatchAuth extends  JBatchBase {
                         log.info("insert batch success");
                     } catch (Exception ex) {
                         int newAdd = 0;
+                        int duplicate = 0;
                         for (JAuthEntity entity : batch) {
                             try {
                                 jAuthDao.insert(entity);
                                 newAdd++;
                             } catch (DuplicateKeyException e) {
                                 // 插入有重复: 说明是已经同步过的
+                                duplicate++;
                             }
                         }
-                        log.info("newly add: {}", newAdd);
+                        log.info("newly add: {}, duplicate: {}", newAdd, duplicate);
                         return;
                     }
                 });
