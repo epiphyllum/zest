@@ -150,8 +150,10 @@ public class JBatchAuth extends  JBatchBase {
                             }
                         }
                         log.info("newly add: {}", newAdd);
+                        return;
                     }
                 });
+                log.info("process batch-{} complete", i);
                 i++;
             }
         } catch (Exception ex) {
