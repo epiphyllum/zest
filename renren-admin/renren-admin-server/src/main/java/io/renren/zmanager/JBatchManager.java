@@ -53,6 +53,7 @@ public class JBatchManager {
             jBatchAuth.authBatch(date);
         }
 
+        // 授权流水文件生产
         if (batchType.equals(ZestConstant.BATCH_TYPE_AUTH_FILE)) {
             jBatchAuthFile.authFileBatch(date);
         }

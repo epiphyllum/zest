@@ -137,15 +137,10 @@ public class JBatchAuthed extends JBatchBase {
         try {
             for (List<JAuthedEntity> batch : batchList) {
                 tx.executeWithoutResult(st -> {
-                    try {
-                        jAuthedService.insertBatch(batch);
-                    } catch (Exception ex) {
-                        for (JAuthedEntity jAuthedEntity : batch) {
-                            try {
-                                log.info("insert -> {}", jAuthedEntity);
-                                jAuthedDao.insert(jAuthedEntity);
-                            } catch (DuplicateKeyException e) {
-                            }
+                    for (JAuthedEntity jAuthedEntity : batch) {
+                        try {
+                            jAuthedDao.insert(jAuthedEntity);
+                        } catch (DuplicateKeyException ignored) {
                         }
                     }
                 });

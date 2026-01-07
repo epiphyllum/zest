@@ -133,7 +133,7 @@ public class JBatchAuthFile extends JBatchBase {
         // 结算文件下载任务是否完成
         JBatchEntity authedFetched = jBatchDao.selectOne(Wrappers.<JBatchEntity>lambdaQuery()
                 .eq(JBatchEntity::getBatchDate, dateStr)
-                .eq(JBatchEntity::getBatchType, ZestConstant.BATCH_TYPE_AUTHED)
+                .eq(JBatchEntity::getBatchType, ZestConstant.BATCH_TYPE_AUTH)
         );
         if (authedFetched == null) {
             throw new RenException(dateStr + ",授权流水尚未从通联下载");
