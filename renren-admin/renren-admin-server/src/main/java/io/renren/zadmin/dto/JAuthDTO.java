@@ -58,6 +58,8 @@ public class JAuthDTO implements Serializable {
     private String logkv;
     @Schema(description = "交易代码")
     private String trxcode;
+    @Schema(description = "卡ID")
+    private String cardid;
     @Schema(description = "卡号")
     private String cardno;
 
@@ -93,4 +95,10 @@ public class JAuthDTO implements Serializable {
     private String mcc;
     @Schema(description = "通知时间")
     private String time;
+
+    @Schema(description = "收单国家")
+    private String acqcountry;// todo 3
+    @Schema(description = "3ds标志")
+    private String dsflag;  // todo  1
+
 }

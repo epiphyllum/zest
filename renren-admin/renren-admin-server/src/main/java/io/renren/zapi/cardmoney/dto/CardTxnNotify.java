@@ -9,12 +9,10 @@ public class CardTxnNotify {
     private Long merchantId;
     private Long subId;
 
-    private String respcode;
-    private String respmsg;
-
     // 业务字段
     private String logkv;
     private String trxcode;
+    private String cardid;
     private String cardno;
     private String state;
     private String stateexplain;
@@ -27,4 +25,9 @@ public class CardTxnNotify {
     private String trxaddr;
     private String authcode;
     private String mcc;
+
+    private String acqcountry;// todo 3
+    private String respcode;// todo  4
+    private String respmsg;// todo  80
+    private String dsflag;  // todo  1
 }

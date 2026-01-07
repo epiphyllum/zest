@@ -32,8 +32,10 @@ public class ZinCardTxnService {
         request.setPagesize(100);
         int pageIndex = 1;
         request.setPageindex(pageIndex);
-        while(true) {
-            TAuthSettledResponse response = this.settledQuery(request);
-        }
+
+//        while(true) {
+//            TAuthSettledResponse response = this.settledQuery(request);
+//        }
+
     }
 }

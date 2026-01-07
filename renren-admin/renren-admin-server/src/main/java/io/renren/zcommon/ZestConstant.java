@@ -46,6 +46,8 @@ public class ZestConstant {
     public static final String BATCH_TYPE_STAT = "stat";              // 合并统计
     public static final String BATCH_TYPE_AUTHED = "authed";          // 结算流水
     public static final String BATCH_TYPE_AUTHED_FILE = "authedFile"; // 结算流水
+    public static final String BATCH_TYPE_AUTH = "auth";              // 授权流水
+    public static final String BATCH_TYPE_AUTH_FILE = "authFile";     // 授权流水文件
 
     // 批处理任务状态
     public static final String BATCH_STATUS_NEW = "00";
