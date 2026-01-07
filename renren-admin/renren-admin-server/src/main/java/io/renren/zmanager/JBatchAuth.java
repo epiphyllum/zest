@@ -24,7 +24,7 @@ import java.util.List;
 
 @Service
 @Slf4j
-public class JBatchAuth extends  JBatchBase {
+public class JBatchAuth extends JBatchBase {
 
     @Resource
     private ZinCardTxnService zinCardTxnService;
@@ -136,24 +136,18 @@ public class JBatchAuth extends  JBatchBase {
             for (List<JAuthEntity> batch : batchList) {
                 log.info("process batch-{}: {}", i, batch.size());
                 tx.executeWithoutResult(st -> {
-                    try {
-                        jAuthService.insertBatch(batch);
-                        log.info("insert batch success");
-                    } catch (Exception ex) {
-                        int newAdd = 0;
-                        int duplicate = 0;
-                        for (JAuthEntity entity : batch) {
-                            try {
-                                jAuthDao.insert(entity);
-                                newAdd++;
-                            } catch (DuplicateKeyException e) {
-                                // 插入有重复: 说明是已经同步过的
-                                duplicate++;
-                            }
+                    int newAdd = 0;
+                    int duplicate = 0;
+                    for (JAuthEntity entity : batch) {
+                        try {
+                            jAuthDao.insert(entity);
+                            newAdd++;
+                        } catch (DuplicateKeyException e) {
+                            // 插入有重复: 说明是已经同步过的
+                            duplicate++;
                         }
-                        log.info("newly add: {}, duplicate: {}", newAdd, duplicate);
-                        return;
                     }
+                    log.info("newly add: {}, duplicate: {}", newAdd, duplicate);
                 });
                 log.info("process batch-{} complete", i);
                 i++;
