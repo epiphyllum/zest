@@ -131,23 +131,30 @@ public class JBatchAuth extends  JBatchBase {
 
         // 开始插入批次
         try {
+            int i = 0;
             for (List<JAuthEntity> batch : batchList) {
+                log.info("process batch-{}: {}", i, batch.size());
                 tx.executeWithoutResult(st -> {
                     try {
                         jAuthService.insertBatch(batch);
+                        log.info("insert batch success");
                     } catch (Exception ex) {
+                        int newAdd = 0;
                         for (JAuthEntity jAuthedEntity : batch) {
                             try {
-                                log.info("insert -> {}", jAuthedEntity);
                                 jAuthDao.insert(jAuthedEntity);
+                                newAdd++;
                             } catch (DuplicateKeyException e) {
                                 // 插入有重复: 说明是已经同步过的
                             }
                         }
+                        log.info("newly add: {}", newAdd);
                     }
                 });
+                i++;
             }
         } catch (Exception ex) {
+            log.error("process failed, ex = {}", ex.getMessage());
             ex.printStackTrace();
             success = false;
         }
